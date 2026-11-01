@@ -1,20 +1,19 @@
 ---
 name: todo-report
 description: Generate an interactive HTML status page for the project at docs/status.html from TODO.md, CHANGELOG.md, git and the plan doc. Use for /todo-report. Shows KPIs, lanes with progress, the filterable task tree with Done when, links, state and blockers, release history, claims, test command and the plan. Self-contained single file, no network. Writes only docs/status.html.
-argument-hint: (none)
 ---
 
 # /todo-report
 
 First load the `todo` core skill (tree format, lanes, git mode). If it is not a skill, read `../todo/SKILL.md`.
 
-Writes exactly one file, `docs/status.html` (create `docs/` if missing), from the template `template.html` in this skill's folder. Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
+Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder. Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
 
 ## Steps
 
 1. Run the invariant check and read the result. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
 2. Read `template.html`. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
-3. Write `docs/status.html` as the template with each placeholder replaced by raw text (no escaping needed, but a literal `</script` in the text becomes `<\/script`):
+3. Write `docs/status.html` as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.

@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `/todo-report` encodes `&` and `<` in the embedded text and the page sets a Content-Security-Policy, so hostile `TODO.md`/`CHANGELOG.md` text cannot run script; CRLF input and odd lane names render correctly.
+- The forced `git branch -D` of a lost claim runs only when the branch holds exactly the claim commit. `Blocked:` text is redacted of secrets. A red baseline now stops without writing anything.
+- Lint I10 also rejects `eval`, `sh -c`/`bash -c`, `python -c` and `node -e`; the stop hook marks lint output as data and emits valid JSON for tabs and CR. `/todo-release` is manual-only.
+- Plan drafts are written only after confirmation; `Lane:` can be edited with `/todo-update`; ID numbering also counts `docs/plans/`.
+- Open-source files: LICENSE (MIT), CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, issue and PR templates, CI workflow, `docs/GETTING-STARTED.md`, `docs/REFERENCE.md`, and a shorter README.
 - A tree claim that fails only because the base moved is rebased once and fast-forwarded again; a base without `TODO.md` means no claim.
 - Lane coordinator drains and merges each root; lane agents stop before the drain.
 - `docs/COMPARISON.md` re-scored: 75 (solo/lean) and 71 (team/spec-first).

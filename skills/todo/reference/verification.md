@@ -6,7 +6,7 @@ Loaded by `/todo-continue` and `/todo-add`. Part of the `todo` core skill.
 
 A node closes only through this protocol.
 
-1. **Baseline.** Before work starts, the regression command must be green. Note the passing count in `State:` as `baseline <n> passing`. A red baseline blocks the node ("baseline red"); fix it first with a `FIX` root. A project with no tests records `baseline none`, and its first node creates the test harness.
+1. **Baseline.** Before work starts, the regression command must be green. Note the passing count in `State:` as `baseline <n> passing`. A red baseline stops the node before any branch or file change; fix it first with a `FIX` root. A project with no tests records `baseline none`, and its first node creates the test harness.
 2. **Red.** Write the tests first. `FIX` and `FEAT` leaves must fail for the expected reason: an assertion about the new behavior, or a missing-symbol error for the new thing under test. `TASK` refactors get characterization tests that pass before and after.
 3. **Green.** Implement only what the task line says.
 4. **Refactor** with the tests green.

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <title>Project status</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--ink:#1c2230;--mute:#5d6676;--line:#dde1e8;--acc:#2f6fed;--ok:#1f9d55;--act:#2f6fed;--blk:#d64545;--open:#8a93a3}
@@ -49,7 +50,7 @@ pre{white-space:pre-wrap;margin:0;font:13px/1.5 ui-monospace,monospace}.empty{co
 <script type="text/plain" id="d-changelog">__CHANGELOG__</script>
 <script type="text/plain" id="d-plan">__PLAN__</script>
 <script>
-const $=id=>document.getElementById(id),raw=id=>$(id).textContent.replace(/^\n/,'');
+const $=id=>document.getElementById(id),raw=id=>$(id).textContent.replace(/^\n/,'').replace(/&lt;/g,'<').replace(/&amp;/g,'&').replace(/\r/g,'');
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const meta={},metaList=[];
 raw('d-meta').split('\n').forEach(l=>{const m=l.match(/^([\w ]+): (.*)$/);if(m){meta[m[1].trim()]=m[2];metaList.push([m[1].trim(),m[2]])}});
@@ -86,7 +87,7 @@ const leaves=all.filter(n=>!n.kids.length),doneL=leaves.filter(n=>n.mk==='x').le
 [['Roots',roots.length],['Nodes',all.length],['In progress',cnt('active')],['Blocked',cnt('blocked')],['Done in tree',cnt('done')],['Drained',hist.reduce((a,h)=>a+h.items.length,0)]]
  .forEach(([k,v])=>{const d=el('div','kpi');d.append(el('b','',v),el('span','',k));$('kpis').append(d)});
 let laneSel='';
-const lanes={};roots.forEach(r=>(lanes[r.lane]=lanes[r.lane]||[]).push(r));
+const lanes=Object.create(null);roots.forEach(r=>(lanes[r.lane]=lanes[r.lane]||[]).push(r));
 function drawLanes(){$('lanes').textContent='';
   if(!roots.length){$('lanes').append(el('div','empty','No tasks in the tree.'));return}
   Object.keys(lanes).sort().forEach(name=>{const rs=lanes[name],ds=rs.flatMap(r=>[r,...desc(r)]),dn=ds.filter(n=>n.mk==='x').length;

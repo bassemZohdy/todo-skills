@@ -57,7 +57,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
       fail("I3", "line " NR ": " lab ": backticks must hold a runnable shell command, not code or prose: " c)
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
-    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|twine|gem) +(publish|push)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
+    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /(^|[ ;&|])(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-c/ || c ~ /python[0-9.]* +-c/ || c ~ /node +(-e|--eval)/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|twine|gem) +(publish|push)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first }

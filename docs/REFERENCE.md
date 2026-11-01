@@ -55,7 +55,7 @@ Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `
 
 ## Optional enforcement
 
-The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk, grep, sed and tr, and are installed with the `todo` skill.
 
 ```bash
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
@@ -87,7 +87,7 @@ A **lane** is a named track of root trees that one agent context works alone. Pu
 
 ## Review
 
-Between build and verify, `/todo-continue` reads the whole diff against the task line and its `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). With a subagent tool a fresh-context reviewer does this; otherwise it is a self-review. Only then do the tests and the regression run.
+Between build and verify, `/todo-continue` reads the whole diff against the task line and its `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). With a subagent tool a fresh-context reviewer does this; otherwise it is a self-review. Only then do `Done when` and the regression run.
 
 ## Status page
 

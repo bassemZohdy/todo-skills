@@ -61,7 +61,7 @@ Skills load when their description matches, so add this to `AGENTS.md` or `CLAUD
 
 ```markdown
 ## Backlog
-Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status, /todo-report). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
+Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status, /todo-report, /todo-release). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
 ```
 
 ## How it works
@@ -78,13 +78,13 @@ The lifecycle of every node is: ready check → branch → claim `[/]` → red, 
 
 ## Optional checks
 
-`bash skills/todo/scripts/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. Both are read-only and need only bash, awk and grep. `bash tests/run.sh` runs the fixture and hook tests.
+`bash skills/todo/scripts/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. Both are read-only and need only bash, awk, grep, sed and tr. `bash tests/run.sh` runs the fixture and hook tests.
 
 ## Status
 
 Version 0.1.0 is early. What exists: the specification, a lint with fixtures, and fresh-agent trials of nine scenarios in scratch projects (interrupted merge, refresh from base, claims and races, release, monorepo, lanes through the sequential fallback, replan). What does not: use on real projects or teams, a tested parallel `--all-lanes` run, and any agent besides Claude Code. "Done" is enforced by the agent following the rules and by the optional lint, not by a sandbox, so read a task before you let an agent run its command. [docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against eight similar tools (75 and 71 under two weightings, by an independent reviewer; read the caveats there).
 
-Known limits: planning is shallow (a short plan doc and the tree), the 120-line cap holds about 28 tasks (big trees are decomposed lazily), sharing claims between clones is left to git, and the review step is a self-review when no subagent tool exists.
+Known limits: planning is shallow (a short plan doc and the tree), the 120-line cap holds about 30 tasks (big trees are decomposed lazily), sharing claims between clones is left to git, and the review step is a self-review when no subagent tool exists.
 
 ## Contributing and support
 

@@ -33,7 +33,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 | 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name |
 | 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
 | 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
-| 5 | **Review** | `[/]` | Before any test run: read the whole diff against the task line and `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). A fresh-context reviewer subagent does this when one exists |
+| 5 | **Review** | `[/]` | After build, before the verify run: read the whole diff against the task line and `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). A fresh-context reviewer subagent does this when one exists |
 | 5b | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
 | 6 | **Complete** | `[/]` → `[x]` | Set the marker, delete `State:`, lint, then commit the node's files |
 | 7 | **Merge** | `[x]` | `git merge --no-ff` into the parent's branch, then `git branch -d` the child branch |

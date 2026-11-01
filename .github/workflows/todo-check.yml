@@ -1,0 +1,14 @@
+name: todo-check
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backlog lint
+        run: bash .todo/todo-lint.sh TODO.md CHANGELOG.md

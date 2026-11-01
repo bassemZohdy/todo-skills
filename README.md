@@ -82,6 +82,8 @@ The lifecycle of every node is: ready check → branch → claim `[/]` → red, 
 
 `bash skills/todo/scripts/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. Both are read-only and need only bash, awk, grep, sed and tr. `bash tests/run.sh` runs the fixture and hook tests.
 
+Tests: `bash tests/run.sh`
+
 ## Status
 
 Version 0.2.0 is early. What exists: the specification, a lint with fixtures, and fresh-agent trials of eleven scenarios in scratch projects (interrupted merge, refresh from base, claims and races, release, monorepo, lanes, replan, CI setup with and without a remote). `--all-lanes` has run once with two lane subagents truly in parallel. What does not: use on real projects or teams, and any agent besides Claude Code. "Done" is enforced by the agent following the rules, by the optional lint, and, with `/todo-init --ci`, by `.todo/check.sh` in CI or a pre-push hook; none of that is a sandbox, so read a task before you let an agent run its command. [docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against eight similar tools (75 and 71 under two weightings, by an independent reviewer; read the caveats there).

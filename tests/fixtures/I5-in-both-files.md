@@ -1,13 +1,6 @@
 # Active Backlog
 
-## 🏗️ In Progress (Max 1)
+## 🌳 Task Tree
 
-## 📋 Ready (Prioritized Queue)
-
-- [ ] **TASK-001** · P1 · Already drained into the changelog
-  - Scope: s.
-  - Out of Scope: o.
-  - Ref: none
-  - Validation: `npm test`
-
-## ⛔ Blocked
+- [ ] **TASK-001** · P1 · S · Already in the changelog
+  - Done when: `make test`

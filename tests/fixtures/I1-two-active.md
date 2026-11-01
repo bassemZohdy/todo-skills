@@ -1,19 +1,8 @@
 # Active Backlog
 
-## 🏗️ In Progress (Max 1)
+## 🌳 Task Tree
 
-- [/] **FEAT-002** · P1 · First
-  - Scope: s.
-  - Out of Scope: o.
-  - Ref: none
-  - Validation: `npm test`
-
-- [/] **FEAT-003** · P1 · Second
-  - Scope: s.
-  - Out of Scope: o.
-  - Ref: none
-  - Validation: `npm test`
-
-## 📋 Ready (Prioritized Queue)
-
-## ⛔ Blocked
+- [/] **TASK-010** · P1 · S · First
+  - Done when: `make test`
+- [/] **TASK-011** · P1 · S · Second
+  - Done when: `make test`

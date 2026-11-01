@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:".
 # Usage: bash tests/run.sh      Needs only bash, awk and grep. Creates no files.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,9 +22,13 @@ for f in "$fx"/*.md; do
   if [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then ok "$name"; else bad "$name: expected OK, got: $out"; fi
   else
-    if [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL $expect"; then ok "$name"; else bad "$name: expected FAIL $expect, got rc=$rc: $out"; fi
+    if [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL $expect:"; then ok "$name"; else bad "$name: expected FAIL $expect, got rc=$rc: $out"; fi
   fi
 done
+
+# The repository's own backlog must follow its own rules.
+out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
+if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi
 
 # Stop hook: valid backlog allows the stop (no output).
 out="$(printf '{"stop_hook_active": false}' | TODO_FILE="$fx/ok-valid.md" CHANGELOG_FILE="$changelog" bash "$hook")"

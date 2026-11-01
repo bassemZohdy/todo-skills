@@ -44,6 +44,29 @@ claimed-elsewhere)
   chk "no [/] on main" '! at main TODO.md | grep -q "^ *- \[/\]"'
   chk "claim commit touched only backlog files" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD | head -1)~0 main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e README.md -e calc.py -e tests -e .gitignore)" ]'
   ;;
+race-claim-conflict)
+  chk "the rival's claim is on main" 'at main TODO.md | grep -q "State: branch todo/FEAT-001-rival"'
+  chk "main's tip is still the rival's claim (not overwritten)" '[ "$(git log -1 --format=%s main)" = "chore(backlog): claim FEAT-001 on todo/FEAT-001-rival" ]'
+  chk "the agent deleted its own root branch" '! git branch --list "todo/FEAT-001-*" | grep -v rival | grep -q .'
+  chk "no subtract anywhere" '! git grep -q "def subtract" $(git for-each-ref --format="%(refname)" refs/heads)'
+  chk "rival branch untouched" '[ "$(git log --oneline main..todo/FEAT-001-rival | wc -l)" = 0 ]'
+  ;;
+race-claim-benign)
+  chk "the rival docs commit is kept on main" 'git log --format=%s main | grep -q "docs: touch readme (race)"'
+  chk "main shows FEAT-001 claimed with the agent's branch" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-"'
+  chk "agent's branch exists" 'git branch --list "todo/FEAT-001-*" | grep -q .'
+  chk "main is an ancestor of the agent's branch" 'git merge-base --is-ancestor main $(git branch --list "todo/FEAT-001-*" | head -1 | tr -d "* ")'
+  chk "claim is the only extra commit on main" '[ "$(git log --oneline $(git log --format=%H --grep="docs: touch readme" -1)..main | wc -l)" = 1 ]'
+  ;;
+release)
+  chk "[Unreleased] is now empty (no entries)" '! at HEAD CHANGELOG.md | sed -n "/^## \[Unreleased\]/,/^## \[/p" | grep -q "^- "'
+  chk "new version section exists with a date" 'at HEAD CHANGELOG.md | grep -Eq "^## \[0\.2\.0\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$"'
+  chk "released entries moved under 0.2.0" 'at HEAD CHANGELOG.md | sed -n "/^## \[0\.2\.0\]/,/^## \[0\.1\.0\]/p" | grep -q "FEAT-002" && at HEAD CHANGELOG.md | sed -n "/^## \[0\.2\.0\]/,/^## \[0\.1\.0\]/p" | grep -q "FIX-001"'
+  chk "0.1.0 section untouched" 'at HEAD CHANGELOG.md | sed -n "/^## \[0\.1\.0\]/,/^\[Unreleased\]/p" | grep -q "Initial calculator with add"'
+  chk "compare links updated" 'at HEAD CHANGELOG.md | grep -q "^\[Unreleased\]: .*compare/v0.2.0...HEAD" && at HEAD CHANGELOG.md | grep -q "^\[0.2.0\]:"'
+  chk "release commit touches only CHANGELOG.md" '[ "$(git diff --name-only HEAD~1 HEAD)" = "CHANGELOG.md" ] && [ "$(git log -1 --format=%s)" = "chore(release): 0.2.0" ]'
+  chk "no tag created" '[ "$(git tag | tr "\n" " ")" = "v0.1.0 " ]'
+  ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

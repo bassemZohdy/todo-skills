@@ -45,7 +45,18 @@ mkdir -p ~/.claude/skills
 cp -r todo-skills/skills/* ~/.claude/skills/
 ```
 
-Copying (or symlinking) keeps the short command names. Installing them as a namespaced plugin would prefix them, which is not tested here.
+Copying (or symlinking) keeps the short command names.
+
+**As a Claude Code plugin** (commands are namespaced, for example `/todo-skills:todo-add`):
+
+```text
+/plugin marketplace add bassemZohdy/todo-skills
+/plugin install todo-skills@todo-skills
+```
+
+`claude plugin validate` passes, and a local marketplace install copies all seven skills with their `reference/` and `scripts/` folders (tested). The lint script and stop hook are not registered automatically; point your hook settings at `skills/todo/scripts/todo-stop-hook.sh` if you want it.
+
+**Other agents** (Codex, Cursor, and so on): the skills are plain Markdown. Copy `skills/` wherever your agent reads skills, or paste the "Backlog" paragraph below into its `AGENTS.md` and point it at `skills/todo/SKILL.md`. Only the git and bash commands are required; nothing here is Claude-specific, but only Claude Code has been tested.
 
 Skills only load when their description matches, so add this to `AGENTS.md` or `CLAUDE.md` for reliable use:
 

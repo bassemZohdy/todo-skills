@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a scratch project in a NEW, empty directory and puts it into the starting state of a trial scenario.
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
-# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere
+# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -94,6 +94,65 @@ claimed-elsewhere)
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with one claimed root"
   g branch todo/FEAT-001-subtract
+  ;;
+race-claim-conflict|race-claim-benign)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add a subtract function to calc.py with a test
+  - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  g add -A && g commit -q -m "init with one free root"
+  # A hook plays the second session: the first time a todo/FEAT-001* branch is checked out, it moves main
+  # underneath the agent, exactly between "branch created" and "base fast-forwarded".
+  hook=.git/hooks/post-checkout
+  cat > "$hook" <<HOOK
+#!/bin/sh
+gd=\$(git rev-parse --git-dir)
+[ -e "\$gd/race-done" ] && exit 0
+case "\$(git symbolic-ref -q --short HEAD)" in todo/FEAT-001*) ;; *) exit 0 ;; esac
+: > "\$gd/race-done"
+export GIT_INDEX_FILE="\$gd/race-index" GIT_AUTHOR_NAME=rival GIT_AUTHOR_EMAIL=r@r GIT_COMMITTER_NAME=rival GIT_COMMITTER_EMAIL=r@r
+git read-tree main
+if [ "$scenario" = race-claim-conflict ]; then
+  blob=\$(git show main:TODO.md | awk '{print} /Done when:/ && !d {print "  - State: branch todo/FEAT-001-rival from main; next: start FEAT-001"; d=1}' | git hash-object -w --stdin)
+  git update-index --cacheinfo 100644,\$blob,TODO.md
+  c=\$(git commit-tree \$(git write-tree) -p main -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-rival")
+  git update-ref refs/heads/todo/FEAT-001-rival "\$c"
+else
+  blob=\$( (git show main:README.md; echo "Race note.") | git hash-object -w --stdin)
+  git update-index --cacheinfo 100644,\$blob,README.md
+  c=\$(git commit-tree \$(git write-tree) -p main -m "docs: touch readme (race)")
+fi
+git update-ref refs/heads/main "\$c"
+rm -f "\$gd/race-index"
+HOOK
+  chmod +x "$hook"
+  ;;
+release)
+  printf '%s\n' "$head" > TODO.md
+  cat > CHANGELOG.md <<'CL'
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### Added
+
+- **FEAT-002** (feat): Add multiply to calc.py. Validated: `python3 -m unittest tests.test_calc`.
+
+### Fixed
+
+- **FIX-001** (fix): Handle float inputs in add. Validated: `python3 -m unittest tests.test_calc`.
+
+## [0.1.0] - 2026-10-01
+
+### Added
+
+- **FEAT-001** (feat): Initial calculator with add. Validated: `python3 -m unittest tests.test_calc`.
+
+[Unreleased]: https://github.com/example/minical/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/example/minical/releases/tag/v0.1.0
+CL
+  g add -A && g commit -q -m "init with a released 0.1.0 and unreleased work"
+  g tag v0.1.0
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac

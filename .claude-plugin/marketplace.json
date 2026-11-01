@@ -1,0 +1,11 @@
+{
+  "name": "todo-skills",
+  "owner": { "name": "Bassem Zohdy" },
+  "plugins": [
+    {
+      "name": "todo-skills",
+      "source": "./",
+      "description": "A lean, file-native backlog for coding agents: task tree in TODO.md, a branch per task, tests plus regression before merge, append-only CHANGELOG.md."
+    }
+  ]
+}

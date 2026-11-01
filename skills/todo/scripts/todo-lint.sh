@@ -143,7 +143,12 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
       if (p ~ /^Ref:/) continue
       else if (p ~ /^Depends:/) { sub(/^Depends: */, "", p); addrefs(cur, "D", p) }
       else if (p ~ /^From:/) { sub(/^From: */, "", p); addrefs(cur, "F", p) }
-      else fail("I3", "line " NR ": " id ": Links accepts only Ref, Depends and From (found: " p ")")
+      else if (p ~ /^Lane:/) {
+        sub(/^Lane: */, "", p)
+        if (nlvl[cur] != 0) fail("I3", "line " NR ": " id ": Lane is allowed on root tasks only")
+        else if (p !~ /^[a-z][a-z0-9-]*$/) fail("I3", "line " NR ": " id ": lane name must be lowercase letters, digits and dashes (found: " p ")")
+      }
+      else fail("I3", "line " NR ": " id ": Links accepts only Ref, Depends, From and Lane (found: " p ")")
     }
   }
   else if (key == "State") {

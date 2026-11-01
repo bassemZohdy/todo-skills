@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `/todo-plan`: turns a goal into a plan doc (`docs/plans/PROJECT.md`) and a proposed tree with lanes; `--revise` re-plans at any time, changes only open `[ ]` nodes, shows the diff, keeps IDs and logs the revision in the plan doc.
+- `/todo-init --plan`: up to 3 pre-planning questions and an optional plan doc.
+- Lanes: `Lane: <name>` on a root (default `main`) puts its tree in a track for one agent context. `/todo-continue --lane <name>` works one lane; `--all-lanes [--seq]` runs one subagent per lane in its own worktree while the main thread claims, re-verifies and merges. The lint accepts `Lane:` on roots only.
+- `/todo-report`: writes `docs/status.html`, a self-contained interactive page (KPIs, lanes, filterable task tree with Done when, links, state and blockers, release history, claims, test command, plan).
+- Review step between build and verify, done by a fresh-context reviewer when a subagent tool exists.
+- Trial scenarios `lanes` and `replan`.
+
+### Removed
+
+- `/todo-continue --isolated`, replaced by lanes and the review step.
+
 ## [0.1.0] - 2026-11-01
 
 ### Added

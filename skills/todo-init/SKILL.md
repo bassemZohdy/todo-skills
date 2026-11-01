@@ -1,6 +1,7 @@
 ---
 name: todo-init
-description: Bootstrap and report on the todo backlog workspace. Use for /todo-init or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects git, runtime, package manager and test command, offers to migrate the old three-section format to the task tree, and reports the tree. Idempotent.
+description: Bootstrap and report on the todo backlog workspace. Use for /todo-init [--plan] or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects git, runtime, package manager and test command, offers to migrate the old three-section format to the task tree, and reports the tree. Optionally asks pre-planning questions. Idempotent.
+argument-hint: [--plan]
 ---
 
 # /todo-init
@@ -54,5 +55,7 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
 5. In a git repo, report the base branch (`main`, `master`, `trunk` or `develop`) and whether the tree is clean.
 6. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
 7. Run the invariant check (the lint script when present). Report concisely: what was created, git or no-git mode, base branch, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, the tree summary (roots with `children done/total`, active node, blocked IDs) and any invariant violations.
+
+8. **Pre-planning** (only when the tree is empty and the user gave a goal, or `/todo-init --plan` is used). Ask once, at most 3 short questions the repo does not answer: the goal and done-state, what is out of scope, and which parts could run as parallel lanes. Offer to save the answers as `docs/plans/PROJECT.md`; write it only on the user's yes. Then point to `/todo-plan` for the tree.
 
 Do not add, start or modify tasks. For a read-only view without bootstrapping, use `/todo-status`.

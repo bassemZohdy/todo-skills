@@ -19,19 +19,21 @@ Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, a
 | Command | Skill folder | What it does |
 |---|---|---|
 | `/todo` | `skills/todo` | Core rules: tree format, sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
-| `/todo-init` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git and the test runner, migrates the old format, reports status |
+| `/todo-init [--plan]` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git and the test runner, migrates the old format, reports status. `--plan` adds up to 3 pre-planning questions and an optional `docs/plans/PROJECT.md` |
+| `/todo-plan [<goal>] [--revise [<reason>]]` | `skills/todo-plan` | Plans the work into lanes and a proposed tree. `--revise` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept |
 | `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--clarify]` | `skills/todo-add` | Sizes the request and adds a task, or a whole tree, until every leaf is S or M. Asks up to 3 questions when unclear |
-| `/todo-continue [--plan] [--isolated] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, verify plus regression, merge into the parent, drain a finished root |
+| `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root. Lane flags run one subagent per lane |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `skills/todo-update` | Manual state changes (dotted IDs allowed) and in-place field edits |
-| `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree, recent history and search |
+| `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree by lane, recent history and search |
+| `/todo-report` | `skills/todo-report` | Writes `docs/status.html`: an interactive, self-contained page with KPIs, lanes, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan |
 | `/todo-release [--version X.Y.Z]` | `skills/todo-release` | Proposes a semantic version from the `[Unreleased]` entries and, after you confirm, writes the dated section. Prints the tag and push commands; never runs them |
 
-The command skills load `todo` first, so keep the seven folders side by side. The core skill keeps two reference files in `skills/todo/reference/` (`git-flow.md`, `verification.md`) that only the commands needing them read, which keeps the always-loaded part small.
+The command skills load `todo` first, so keep the nine folders side by side. The core skill keeps two reference files in `skills/todo/reference/` (`git-flow.md`, `verification.md`) that only the commands needing them read, which keeps the always-loaded part small.
 
 ### `/todo-continue` flags
 
 - `--plan` stops after reading the docs and prints a short plan. The next `/todo-continue` counts as approval.
-- `--isolated` runs the implement-and-verify steps in a fresh-context subagent. The main thread re-runs the commands and reviews the diff itself.
+- `--lane <name>` only takes roots of that lane. `--all-lanes` starts one subagent per lane in its own worktree, in parallel (`--seq`: one after another); the main thread claims, re-verifies and merges. A lane is a track of roots for one agent context, set with `Lane: <name>` on a root (default `main`); it can hold one task or many.
 - `--worktree` builds the node in its own worktree (`../<repo>.todo/<ID>`) instead of switching branches.
 - `--merge` also merges a finished root into the base branch. Without it the exact `git merge --no-ff` commands are printed and the merge is yours to run.
 
@@ -54,7 +56,7 @@ Copying (or symlinking) keeps the short command names.
 /plugin install todo-skills@todo-skills
 ```
 
-`claude plugin validate` passes, and a local marketplace install copies all seven skills with their `reference/` and `scripts/` folders (tested). The lint script and stop hook are not registered automatically; point your hook settings at `skills/todo/scripts/todo-stop-hook.sh` if you want it.
+`claude plugin validate` passes, and a local marketplace install copies all nine skills with their `reference/` and `scripts/` folders (tested). The lint script and stop hook are not registered automatically; point your hook settings at `skills/todo/scripts/todo-stop-hook.sh` if you want it.
 
 **Other agents** (Codex, Cursor, and so on): the skills are plain Markdown. Copy `skills/` wherever your agent reads skills, or paste the "Backlog" paragraph below into its `AGENTS.md` and point it at `skills/todo/SKILL.md`. Only the git and bash commands are required; nothing here is Claude-specific, but only Claude Code has been tested.
 
@@ -62,7 +64,7 @@ Skills only load when their description matches, so add this to `AGENTS.md` or `
 
 ```markdown
 ## Backlog
-Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-add, /todo-continue, /todo-update, /todo-status). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
+Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
 ```
 
 ## Typical session
@@ -174,7 +176,7 @@ The version lives in `.claude-plugin/plugin.json` and must equal the newest `## 
 - Planning is shallow: the tree breakdown, `--plan` and `--clarify`. Requirements and long plans are expected to live in `docs/`.
 - There is no Out of Scope field any more. Boundaries live in the task sentence or in the linked doc.
 - The 120-line cap holds roughly 28 tasks, so big trees are decomposed lazily.
-- The only independent review is `--isolated`, and it needs a subagent tool.
+- The independent review step needs a subagent tool; without one it is a self-review.
 - One agent per working tree. Use `--worktree` for parallel work.
 - Skill triggering depends on the agent runtime. The `AGENTS.md` pointer above reduces misses.
 - Fresh agent sessions have run the skills in scratch projects (`tests/trials`: interrupted merges, refresh, claims and races, release, a monorepo), but no team has used them in a real project yet. The lint, gate script and stop hook have automated tests (`tests/run.sh`).

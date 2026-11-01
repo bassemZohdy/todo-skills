@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a scratch project in a NEW, empty directory and puts it into the starting state of a trial scenario.
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
-# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo
+# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo | lanes | replan
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -177,6 +177,29 @@ monorepo)
 - Calculator add function.
 CL
   g add -A && g commit -q -m "initial monorepo"
+  ;;
+lanes)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - Links: Lane: math
+- [ ] **FEAT-002** · P1 · S · Add shout to text.py
+  - Done when: shout("hi") returns HI!; `python3 -m unittest tests.test_text.TextTest.test_shout`
+  - Links: Lane: text' > TODO.md
+  g add -A && g commit -q -m "init with two lanes"
+  ;;
+replan)
+  mkdir -p docs/plans
+  printf '# Plan\n\n## Goal\nA calculator with more operations.\n\n## Lanes\nmain: all work\n\n## Revisions\n' > docs/plans/PROJECT.md
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - Links: Ref: docs/plans/PROJECT.md
+- [ ] **FEAT-002** · P1 · S · Add a command line interface to the calculator
+  - Done when: cli prints the sum; `python3 -m unittest tests.test_cli`
+  - Links: Ref: docs/plans/PROJECT.md
+- [ ] **FEAT-003** · P2 · S · Add a web dashboard for the calculator
+  - Done when: dashboard renders; `python3 -m unittest tests.test_web`
+  - Links: Ref: docs/plans/PROJECT.md' > TODO.md
+  g add -A && g commit -q -m "init with a plan"
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac

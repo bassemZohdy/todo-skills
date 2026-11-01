@@ -1,6 +1,6 @@
 ---
 name: todo
-description: Core rules for the todo-* skills (todo-init, todo-add, todo-continue, todo-update, todo-status, todo-release) - the task tree in TODO.md, compact task format, sizes, IDs, git flow with a no-git fallback, invariants, Definition of Done and hard guardrails. Load this before running any todo-* command or when editing TODO.md. Invoked directly as /todo it only prints the command list and a read-only invariant check.
+description: Core rules for the todo-* skills (todo-init, todo-plan, todo-add, todo-continue, todo-update, todo-status, todo-report, todo-release) - the task tree in TODO.md, compact task format, sizes, IDs, git flow with a no-git fallback, invariants, Definition of Done and hard guardrails. Load this before running any todo-* command or when editing TODO.md. Invoked directly as /todo it only prints the command list and a read-only invariant check.
 ---
 
 # todo (core)
@@ -23,11 +23,13 @@ Use native file tools (Read/Edit/Write) for Markdown edits. Use the shell only f
 
 | Command | Purpose |
 |---|---|
-| `/todo-init` | Bootstrap files, detect test command and git, report status, migrate the old format |
+| `/todo-init` | Bootstrap files, detect test command and git, optional pre-planning, migrate the old format |
+| `/todo-plan` | Plan the work into lanes and a tree; revise the plan at any time |
 | `/todo-add` | Add a task, or break a request into a tree |
 | `/todo-continue` | Execute the next task node, verify it, merge it into its parent |
 | `/todo-update` | Manual state and field changes |
-| `/todo-status` | Read-only tree, history and search |
+| `/todo-status` | Read-only tree, lanes, history and search |
+| `/todo-report` | Write an interactive HTML status page to `docs/status.html` |
 | `/todo-release` | Turn `[Unreleased]` into a version after the user confirms it |
 
 Each skill runs only its own command and never chains into another unprompted.
@@ -68,7 +70,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, optional links and 
 |---|---|
 | Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
 | `Done when:` | **Required.** Criteria, then at least one exact command in backticks. Optional `regression: \`cmd\``; without it the regression is the project's full suite |
-| `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, separated by ` · ` |
+| `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` · ` |
 | `State:` | Optional, written by todo-continue, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`), `hyp: <one line>`, `branch todo/<ID>-<slug> [from <base>]`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. A later claim **replaces** the whole line. In no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State: `reason → \`command\` error (max 5 lines) → action required`. A manual block writes `n/a (manual)` in the middle |
 
@@ -108,7 +110,11 @@ A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:`
 
 **Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch> --list 'todo/<ID>-*'`). A node that is `[x]` there stopped before its merge: finish the merge and nothing else. A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
 
-Order: roots P0 → P1 → P2, then by ID; within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
+### Lanes
+
+A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (lowercase, digits, dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main`. Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lane names are listed in the plan doc `docs/plans/PROJECT.md` when one exists.
+
+Order: roots P0 → P1 → P2, then by ID (with `--lane` only that lane's roots); within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
 
 ## Lifecycle by status
 

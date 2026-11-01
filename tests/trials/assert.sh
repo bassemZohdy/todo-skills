@@ -74,6 +74,23 @@ monorepo)
   chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'
   chk "nothing outside packages/api and backlog files changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e packages/api/)" ]'
   ;;
+lanes)
+  chk "both roots drained into the changelog on main" 'at main CHANGELOG.md | grep -q "FEAT-001" && at main CHANGELOG.md | grep -q "FEAT-002"'
+  chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
+  chk "subtract and shout both on main" 'at main calc.py | grep -q subtract && at main text.py | grep -q shout'
+  chk "tests for both exist on main" 'at main tests/test_calc.py | grep -q test_subtract && at main tests/test_text.py | grep -q test_shout'
+  chk "no todo branches left" '[ -z "$(git branch --list "todo/*")" ]'
+  chk "no extra worktrees left registered or only prunable" '[ "$(git worktree list | grep -vc "prunable")" -le 1 ] || true'
+  chk "main checked out and tests pass" '[ "$(git branch --show-current)" = main ] && python3 -m unittest discover -s tests'
+  ;;
+replan)
+  chk "FEAT-003 is gone from the tree" '! grep -q "FEAT-003" TODO.md'
+  chk "FEAT-003 id is not reused" '[ "$(grep -o "FEAT-003" TODO.md | wc -l)" = 0 ]'
+  chk "FEAT-001 untouched" 'grep -q "\*\*FEAT-001\*\* · P1 · S · Add subtract to calc.py" TODO.md'
+  chk "plan doc has a revision line" 'sed -n "/^## Revisions/,\$p" docs/plans/PROJECT.md | grep -q "[A-Za-z]"'
+  chk "no code or tests changed" '[ -z "$(git diff --name-only HEAD -- calc.py tests)" ]'
+  chk "no node started" '! grep -q "^ *- \[/\]" TODO.md'
+  ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

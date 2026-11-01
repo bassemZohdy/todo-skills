@@ -1,16 +1,17 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--isolated] [--worktree] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation.
-argument-hint: [--plan] [--isolated] [--worktree] [--merge]
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works its lane's trees.
+argument-hint: [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--merge]
 ---
 
 # /todo-continue
 
 First load the `todo` core skill (tree format, sizes, git mode, invariants, guardrails) and read `reference/git-flow.md` and `reference/verification.md` from its folder. If the core is not a skill, read `../todo/SKILL.md` and `../todo/reference/*.md`.
 
-Complete at most one node per invocation. Flags (all optional):
+Complete at most one node per invocation (lane runs excepted, see "Lanes"). Flags (all optional):
 - `--plan`: stop for approval after reading, before writing code (step 6).
-- `--isolated`: run steps 6-7 in a fresh-context subagent (see below).
+- `--lane <name>`: only take roots of that lane (core, "Lanes"); one agent, in order.
+- `--all-lanes [--seq]`: one subagent per lane with workable work, in parallel; `--seq` runs the lanes one after another (see "Lanes").
 - `--worktree`: put the node in its own worktree (`../<repo>.todo/<ID>`).
 - `--merge`: when a **root** finishes, also merge it into the base branch. Without it the exact commands are printed.
 
@@ -57,9 +58,19 @@ Lifecycle: ready check → branch → claim → build → review → verify → 
 - A failure outside the node (flaky test, red baseline, a regression that cannot be fixed within the task line) is not fixed here. Block the node: `[!]`, replace `State:` with `Blocked: <reason> → \`<command>\` <last ≤5 error lines> → <action required>`, commit it in git mode (`chore(backlog): block <ID>`), stop. After the third failed cycle, block the same way listing each hypothesis tried.
 - Run commands only under the safety rules in `reference/verification.md`.
 
-## Isolated mode (`--isolated`)
+## Lanes
 
-Only when a subagent tool exists; otherwise say so and run normally. The main thread does steps 1-5 and 8-11 and is the only one that edits `TODO.md`. A fresh-context subagent does steps 6-7, given only the task lines, the Ref paths, the branch name and the rules: stay inside the task line, never edit `TODO.md` or `CHANGELOG.md`, never change `Done when`, return a diff summary and command output. Do not trust it: the main thread re-runs Done when and the regression and applies the gates.
+A lane is a track of roots handled by one agent context (core, "Lanes"). Without a lane flag all lanes are one queue and you work alone.
+
+- `--lane <name>`: select only roots whose `Lane:` is `<name>`; everything else is unchanged. Nothing workable in that lane: say so and stop.
+- `--all-lanes`: needs a subagent tool, otherwise say so and run the lanes one after another in this thread (as `--seq`). The main thread is the **coordinator**:
+  1. Run steps 1-3 for the first workable root of every lane that has one. Stop if a lane's baseline is red.
+  2. Do each tree claim in turn on the base branch (`reference/git-flow.md`), then create each root's worktree `../<repo>.todo/<ROOT-ID>` on its claimed branch.
+  3. Start one subagent per lane, all at once (with `--seq`, one at a time). Each gets only: its root ID and worktree path, the `Ref` paths, the rules below. It works only inside its worktree, runs steps 1-11 for each node of that root depth-first, then takes the lane's next workable root, and stops when none is left or a node blocks. Rules: stay inside the task lines; never edit another lane's nodes, `Done when`, or the base branch; never merge to base; never push; return a summary per node (ID, commands and results, commit).
+  4. Do not trust the summaries. For each finished root, in order: refresh from the base in its worktree (`reference/git-flow.md`), re-run `Done when` and the regression there, then with `--merge` merge it into the base (otherwise print the commands). A conflict or red result stops the coordinator and is reported with the branch name.
+  5. Report per lane: finished, blocked (with `Blocked:`), still open, and the merge commands.
+- Work that `Depends:` on another lane's open node is not workable; the lane stops there and reports what it waits for.
+- Lanes only work if their trees touch different files. If a rebase conflict shows they do not, say so and suggest putting them in one lane.
 
 ## Documentation drift
 

@@ -1,5 +1,7 @@
 # todo-skills compared with similar tools
 
+> **Note:** the todo-skills rows below score v0.2, before the task tree, git flow and no-git mode were added. They have not been re-scored.
+
 Scored on 2026-11-01. Scores are the author's judgment from the public documentation read for this comparison. They are not benchmarks. Sources are listed at the end.
 
 ## Method

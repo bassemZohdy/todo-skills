@@ -1,17 +1,23 @@
 ---
 name: todo-init
-description: Bootstrap and report on the todo backlog workspace. Use for /todo-init or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects runtime, package manager and test command, and reports pending items. Idempotent.
+description: Bootstrap and report on the todo backlog workspace. Use for /todo-init or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects git, runtime, package manager and test command, offers to migrate the old three-section format to the task tree, and reports the tree. Idempotent.
 ---
 
 # /todo-init
 
-First load the `todo` core skill (schemas, invariants, guardrails). If it is not available as a skill, read `../todo/SKILL.md`.
+First load the `todo` core skill (tree format, invariants, guardrails). If it is not available as a skill, read `../todo/SKILL.md`.
 
 ## Steps
 
-1. Look for `README.md`, `docs/`, `TODO.md`, `CHANGELOG.md`.
-2. Bootstrap only what is missing:
-   - `TODO.md` with the core schema and three empty sections.
+1. Check git (`git rev-parse --is-inside-work-tree`). If this is not a repository, print the one-time warning from the core skill and say the skills will run in no-git mode. Do not run `git init` unless the user asks.
+2. Look for `README.md`, `docs/`, `TODO.md`, `CHANGELOG.md`.
+3. Bootstrap only what is missing:
+   - `TODO.md`:
+     ```markdown
+     # Active Backlog
+
+     ## 🌳 Task Tree
+     ```
    - `CHANGELOG.md`:
      ```markdown
      # Changelog
@@ -24,9 +30,10 @@ First load the `todo` core skill (schemas, invariants, guardrails). If it is not
      ## [Unreleased]
      ```
    - If CHANGELOG.md exists without `## [Unreleased]`, add that heading and change nothing else.
-   - If TODO.md exists with a different structure, do not overwrite it. Report the mismatch and offer a migration.
+   - If TODO.md exists in the **old format** (sections `In Progress`, `Ready`, `Blocked`; fields Scope, Out of Scope, Validation, Progress), do not overwrite it. Report that and offer a migration. On the user's yes, convert each task to a root: Scope becomes the header sentence, Validation becomes `Done when:` (criteria plus the command), Ref/Depends/From become `Links:`, Progress becomes `State:`, the three blocker fields become one `Blocked:` line, `[/]`/`[ ]`/`[!]` markers are kept. Size each as S or M and ask when unsure. **Out of Scope has no place in the new format:** ask whether to move each one into a `docs/` note or drop it, and never drop it silently. Re-run lint afterwards.
+   - If TODO.md has any other structure, do not overwrite it. Report the mismatch.
    - Never create README.md or docs/. Report them as missing.
-3. Detect runtime, package manager and test command by marker file (in a monorepo list one per package):
+4. Detect runtime, package manager and test command by marker file (in a monorepo list one per package):
 
    | Marker | Test command |
    |---|---|
@@ -40,8 +47,9 @@ First load the `todo` core skill (schemas, invariants, guardrails). If it is not
    | `Gemfile` | `bundle exec rspec` or `bundle exec rake test` |
    | `Makefile` with a `test` target | `make test` |
 
-   Do not run the suite and do not persist the detected command anywhere. It is reported, and reused when `todo-add` proposes Validation lines.
-4. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
-5. Run the invariant check (the lint script when present). Report concisely: what was created, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, counts for In Progress / Ready / Blocked with their IDs, and any invariant violations.
+   Do not run the suite and do not persist the detected command anywhere. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
+5. In a git repo, report the base branch (`main`, `master`, `trunk` or `develop`) and whether the tree is clean.
+6. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
+7. Run the invariant check (the lint script when present). Report concisely: what was created, git or no-git mode, base branch, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, the tree summary (roots with `children done/total`, active node, blocked IDs) and any invariant violations.
 
 Do not add, start or modify tasks. For a read-only view without bootstrapping, use `/todo-status`.

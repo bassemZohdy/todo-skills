@@ -2,36 +2,37 @@
 
 Agent skills for tracking software work in two Markdown files, `TODO.md` and `CHANGELOG.md`. There is no issue tracker, no database and no framework. The repository is the state machine.
 
-A task is one atomic unit with a Scope, an Out of Scope list, a Ref to the governing doc and an exact Validation command. It lives in `TODO.md` until its Validation passes. Then it is written to `CHANGELOG.md` and deleted from `TODO.md`, so the active queue stays small enough for an agent's context window.
+Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, and how it is validated, with the exact test command. Big work is broken into children (`FEAT-002.1`, `FEAT-002.1.2`) until every leaf is small. Each node is built on its own git branch or worktree, verified with its tests and a regression run, and merged into its parent. Only a finished root is drained to `CHANGELOG.md`, as a single entry, so the active queue stays small enough for an agent's context window. Without git the skills still work, just without branches and commits.
 
 ## The four layers
 
 | Layer | File | Role |
 |---|---|---|
 | Requirements | `README.md`, `docs/*.md` | Ground truth. Read-mostly |
-| Active queue | `TODO.md` | Atomic work items, capped at ~120 lines |
+| Active queue | `TODO.md` | One task tree of 2-4 line work items, capped at 120 lines |
 | Validation | Source and tests | What decides "done" |
+| Version store | git | A branch or worktree per task. Nothing reaches the base branch unverified |
 | Archive | `CHANGELOG.md` | Append-only, Keep a Changelog + Conventional Commits |
 
 ## Skills
 
 | Command | Skill folder | What it does |
 |---|---|---|
-| `/todo` | `skills/todo` | Core rules: schemas, IDs, invariants, Definition of Done, git-conflict handling, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
-| `/todo-init` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects the test runner, reports status |
-| `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--clarify]` | `skills/todo-add` | Adds one atomic task to Ready. Asks up to 3 questions when the request is unclear |
-| `/todo-continue [--plan] [--isolated]` | `skills/todo-continue` | Executes one task: read refs, implement, validate, drain to `CHANGELOG.md` |
-| `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop] [--note "..."]` | `skills/todo-update` | Manual state changes and in-place field edits |
-| `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only status, recent history and search |
+| `/todo` | `skills/todo` | Core rules: tree format, sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
+| `/todo-init` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git and the test runner, migrates the old format, reports status |
+| `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--clarify]` | `skills/todo-add` | Sizes the request and adds a task, or a whole tree, until every leaf is S or M. Asks up to 3 questions when unclear |
+| `/todo-continue [--plan] [--isolated] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, verify plus regression, merge into the parent, drain a finished root |
+| `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `skills/todo-update` | Manual state changes (dotted IDs allowed) and in-place field edits |
+| `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree, recent history and search |
 
 The command skills load `todo` first, so keep the six folders side by side.
 
 ### `/todo-continue` flags
 
 - `--plan` stops after reading the docs and prints a short plan. The next `/todo-continue` counts as approval.
-- `--isolated` runs the implement-and-validate steps in a fresh-context subagent. The main thread re-runs Validation and reviews the diff itself.
-
-On `main`, `master` or `trunk` it first creates a local branch `todo/<ID>-<slug>`. It never pushes.
+- `--isolated` runs the implement-and-verify steps in a fresh-context subagent. The main thread re-runs the commands and reviews the diff itself.
+- `--worktree` builds the node in its own worktree (`../<repo>.todo/<ID>`) instead of switching branches.
+- `--merge` also merges a finished root into the base branch. Without it the exact `git merge --no-ff` commands are printed and the merge is yours to run. It never pushes.
 
 ## Install
 
@@ -62,20 +63,40 @@ Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, 
 /todo-continue        # next task, fresh context
 ```
 
-## Task format
+## Task tree
 
 ```markdown
-- [ ] **FIX-004** · P0 · Reject expired JWTs in the auth middleware
-  - Scope: Add an expiry check in `auth/middleware.ts` before the role lookup.
-  - Out of Scope: Refresh-token flow, session storage, changes to the token format.
-  - Ref: docs/auth.md#tokens
-  - Depends: TASK-003            (optional: must be in CHANGELOG.md first)
-  - From: FIX-002                (optional: the task during which this was found)
-  - Validation: `npm test -- auth/middleware`
-  - Progress: attempts 1/3; done: ...; next: ...   (written by /todo-continue)
+# Active Backlog
+
+## 🌳 Task Tree
+
+- [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
+  - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
+  - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
+  - [ ] **FEAT-002.1** · L · Refresh endpoint
+    - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
+    - [x] **FEAT-002.1.1** · S · Token store interface
+      - Done when: store round-trips a token; `npm test -- auth/store`
+    - [/] **FEAT-002.1.2** · M · Rotate refresh tokens
+      - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
+      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate from todo/FEAT-002.1-refresh; next: add reuse test
 ```
 
-`Progress:` is the only state that survives a context reset. It carries the fix-attempt counter so the 3-attempt limit holds across sessions.
+- **2 to 4 lines per task.** The header says what to do. `Done when:` gives the criteria and at least one exact command. Longer planning goes into `docs/` (for example `docs/plans/FEAT-002-refresh.md`) and is linked with `Ref:`. TODO.md only tracks work.
+- **Markers:** `[ ]` open, `[/]` active (only one), `[!]` blocked, `[x]` verified and merged into its parent, waiting for the root to drain.
+- **Sizes:** leaves are `S` (at most 2 files) or `M` (one context window, at most 5 files). Parents are `L` (children are leaves) or `XL` (has grandchildren). At most 3 levels. The lint script enforces this.
+- **Order:** roots by priority P0 to P2, then by ID. Inside a root, depth first. A parent becomes workable again when all its children are `[x]`; that is its integration step.
+- **Closing:** a child is merged into its parent's branch when verified. A parent closes only when all children are done, and the whole tree is written to `CHANGELOG.md` as one entry ending in `Includes: FEAT-002.1, FEAT-002.1.1, ...`.
+- **Blocked** tasks replace `State:` with `Blocked: reason → \`command\` error → action required`.
+
+## Verification
+
+Each node: write the tests first, run `Done when` in full, then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests and runs that execute zero tests do not count. Three failed fix cycles block the node.
+
+## Git flow and no-git mode
+
+- One branch per node, `todo/<ID>-<slug>`. A root starts from the base branch, a child from its parent's branch. Verified children are merged `--no-ff` into the parent's branch. Nothing is merged into `main` or `develop` until the root is verified, and then only with `--merge`.
+- **No git repository?** Every command warns once and carries on without branches, worktrees, commits or merges. Progress and touched files are recorded in `State:`, and markers and the CHANGELOG drain work as usual. Run `git init` to get isolation and history.
 
 ## Definition of Done
 
@@ -83,13 +104,13 @@ Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `
 
 ## Optional enforcement
 
-The invariants (one active task, unique IDs, required fields, 120-line cap, no ID in both files, exact headings, no dangling references) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
 
 ```bash
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
 ```
 
-Exit code 0 means I1-I7 hold. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
+Exit code 0 means I1-I10 hold. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [
@@ -104,22 +125,25 @@ Run the tests for both scripts with `bash tests/run.sh`. They use static fixture
 ## Design rules
 
 - One active task at a time, enforced by file state.
-- A task closes only when its Validation command runs and passes. A run that executes zero tests does not count.
+- A node closes only when its `Done when` command and the regression run pass. A run that executes zero tests does not count.
+- Nothing reaches the base branch before its root is verified.
 - Backlog changes come only from a user command or a completed code transition. The agent never invents tasks. Adjacent findings are returned as ready-to-run `/todo-add ... --from <ID>` commands.
-- Validation commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
-- Nothing is required beyond Markdown and git. The agent never pushes, tags or cuts a release.
+- `Done when` commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
+- Nothing is required beyond Markdown. Git is used when present. The agent never pushes, tags or cuts a release.
 
 ## Comparison
 
-[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings. In short, it is competitive for lean solo work and weak on planning depth, team work and maturity.
+[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings (scored before the task tree and git flow were added, so the numbers are stale). In short, it is competitive for lean solo work and weak on planning depth, team work and maturity.
 
 ## Known limits
 
-- Planning is shallow: `--plan` and `--clarify` only. Requirements are expected to exist in `docs/`.
+- Planning is shallow: the tree breakdown, `--plan` and `--clarify`. Requirements and long plans are expected to live in `docs/`.
+- There is no Out of Scope field any more. Boundaries live in the task sentence or in the linked doc.
+- The 120-line cap holds roughly 28 tasks, so big trees are decomposed lazily.
 - The only independent review is `--isolated`, and it needs a subagent tool.
-- One agent per working tree. Use one git worktree per agent for parallel work.
+- One agent per working tree. Use `--worktree` for parallel work.
 - Skill triggering depends on the agent runtime. The `AGENTS.md` pointer above reduces misses.
-- The skills have not been run in live agent sessions yet. Only the lint script and stop hook have automated tests.
+- The skills have not been run in live agent sessions yet. Only the lint script and stop hook have automated tests (`tests/run.sh`).
 
 ## This repo's own backlog
 

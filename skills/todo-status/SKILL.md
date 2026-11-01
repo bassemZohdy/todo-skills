@@ -1,26 +1,26 @@
 ---
 name: todo-status
-description: Read-only view of the backlog. Use for /todo-status [--search <text>] [--last <N>]. Shows what is in progress, the next eligible task, blocked items with their reasons, and recently drained work from CHANGELOG.md. Searches TODO.md and CHANGELOG.md. Never changes any file.
+description: Read-only view of the TODO.md task tree. Use for /todo-status [--search <text>] [--last <N>]. Shows the tree with markers and sizes, children done/total per root, the active node, the next workable node, blocked nodes with their reasons, and recently drained work from CHANGELOG.md. Searches TODO.md and CHANGELOG.md. Never changes any file.
 argument-hint: [--search <text>] [--last <N>]
 ---
 
 # /todo-status
 
-First load the `todo` core skill (schemas, IDs, invariants). If it is not available as a skill, read `../todo/SKILL.md`.
+First load the `todo` core skill (tree format, IDs, invariants). If it is not available as a skill, read `../todo/SKILL.md`.
 
-This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`.
+This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`. In a non-git folder print the one-time warning from the core skill.
 
 ## Default report
 
 1. Run the invariant check and give the result in one line.
-2. **In Progress**: ID, title, `Progress:` line, and whether `git status` shows changes.
-3. **Next eligible**: the task `/todo-continue` would pick (ID, title, Validation), applying the same eligibility rule (`Depends:` satisfied only by an ID in CHANGELOG.md). If none, say what blocks the queue.
-4. **Ready**: count, with a one-line list of IDs by priority.
-5. **Blocked**: each ID with its Blocker Reason and Action Required.
+2. **Tree**: each root with marker, size, title, `children done/total` and its priority; children indented beneath it as `marker ID size title`. Collapse fully `[x]` subtrees to the count.
+3. **Active**: the `[/]` node, its `State:` line, and in git mode whether `git status` shows changes and which branch is checked out.
+4. **Next workable**: the node `/todo-continue` would pick (ID, title, Done when command), applying the same rule. If none, say what blocks the tree.
+5. **Blocked**: each `[!]` node with its `Blocked:` reason and action required.
 6. **Recently drained**: the newest `--last <N>` entries of `## [Unreleased]` (default 5).
 
 ## Search
 
-`--search <text>`: case-insensitive search of TODO.md and CHANGELOG.md. Return matching task blocks and changelog entries with their IDs. No match is an acceptable answer. Do not search the rest of the repository.
+`--search <text>`: case-insensitive search of TODO.md and CHANGELOG.md. Return matching task lines and changelog entries with their IDs. No match is an acceptable answer. Do not search the rest of the repository.
 
 Keep the output short. Do not add suggestions beyond pointing to the command that would act on what you found.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a scratch project in a NEW, empty directory and puts it into the starting state of a trial scenario.
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
-# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release
+# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -153,6 +153,30 @@ All notable changes to this project will be documented in this file.
 CL
   g add -A && g commit -q -m "init with a released 0.1.0 and unreleased work"
   g tag v0.1.0
+  ;;
+monorepo)
+  # Two packages, a Makefile as the only documented test entry, a hand-written CHANGELOG without task IDs, no TODO.md.
+  mkdir -p packages/api packages/web/tests
+  mv calc.py packages/api/calc.py
+  mv tests packages/api/tests
+  printf 'def greet(name):\n    return "hello " + name\n' > packages/web/greet.py
+  printf 'import unittest, sys, os\nsys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))\nimport greet\nclass GreetTest(unittest.TestCase):\n    def test_greet(self):\n        self.assertEqual(greet.greet("a"), "hello a")\nif __name__ == "__main__":\n    unittest.main()\n' > packages/web/tests/test_greet.py
+  printf 'test:\n\tcd packages/api && python3 -m unittest discover -s tests\n\tcd packages/web && python3 -m unittest discover -s tests\n' > Makefile
+  printf '# minical monorepo\n\nPackages: `packages/api` (calculator) and `packages/web` (greeting).\n\n## Development\n\nRun `make test` to run every package test suite.\n' > README.md
+  cat > CHANGELOG.md <<'CL'
+# Changelog
+
+## [Unreleased]
+
+### Added
+- Greeting helper in the web package.
+
+## [1.2.0] - 2026-09-15
+
+### Added
+- Calculator add function.
+CL
+  g add -A && g commit -q -m "initial monorepo"
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac

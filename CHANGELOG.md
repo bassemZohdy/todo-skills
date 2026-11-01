@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/todo-release`: proposes a semantic version from the `[Unreleased]` entries and, after confirmation, writes the dated section. Prints the tag and push commands without running them.
 - `.claude-plugin/plugin.json` and `marketplace.json`: installable as a plugin (`claude plugin validate` passes and a local install copies all skills with their references and scripts; commands are namespaced). README install notes for plugin and other agents.
 - Trial scenarios `race-claim-conflict`, `race-claim-benign` and `release`, run by fresh agents and passing.
+- `scripts/todo-gate.sh`: runs Done when and regression, fails on zero-test runs and on counts below the baseline, so the verification gate is executed by a script and not only followed by the model.
 - `TODO_LINT_STRICT=1` turns the unfamiliar-runner warning W3 into a failure.
 - Layout rules for `TODO.md`, monorepo `regression:` guidance, and the rule that plan files stay after a drain.
 - Hotfix path in `docs/LIFECYCLE.md`.

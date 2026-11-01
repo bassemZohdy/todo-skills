@@ -67,6 +67,13 @@ release)
   chk "release commit touches only CHANGELOG.md" '[ "$(git diff --name-only HEAD~1 HEAD)" = "CHANGELOG.md" ] && [ "$(git log -1 --format=%s)" = "chore(release): 0.2.0" ]'
   chk "no tag created" '[ "$(git tag | tr "\n" " ")" = "v0.1.0 " ]'
   ;;
+monorepo)
+  chk "TODO.md exists with the task tree heading" '[ -f TODO.md ] && grep -q "^## .*Task Tree" TODO.md'
+  chk "the human-written CHANGELOG entries survive" 'grep -q "Greeting helper in the web package" CHANGELOG.md && grep -q "## \[1.2.0\] - 2026-09-15" CHANGELOG.md'
+  chk "a task mentions the api package power work" 'grep -qi "power" TODO.md || git log --all --format=%s | grep -qi power'
+  chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'
+  chk "nothing outside packages/api and backlog files changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude)" ]'
+  ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

@@ -33,6 +33,15 @@ done
 out="$(TODO_LINT_STRICT=1 bash "$lint" "$fx"/W3-*.md "$changelog" 2>&1)"
 if [ $? -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL W3:"; then ok "strict mode fails on an unfamiliar runner"; else bad "strict mode: $out"; fi
 
+# Gate script: passes on real tests, fails on a failing command, on zero tests and on a count below the baseline.
+gd="$(mktemp -d)"
+printf '# Active Backlog\n\n## 🌳 Task Tree\n\n- [ ] **TASK-001** · P1 · S · Gate fixture\n  - Done when: it runs; `echo Ran 3 tests in 0.1s`; regression: `echo Ran 5 tests in 0.2s`\n- [ ] **TASK-002** · P1 · S · Zero\n  - Done when: zero; `echo Ran 0 tests in 0.0s`\n- [ ] **TASK-003** · P1 · S · Fails\n  - Done when: fails; `false`\n' > "$gd/TODO.md"
+gate="$root/skills/todo/scripts/todo-gate.sh"
+if bash "$gate" TASK-001 --todo "$gd/TODO.md" --baseline 5 >/dev/null 2>&1; then ok "gate passes on counted tests at the baseline"; else bad "gate pass case"; fi
+if bash "$gate" TASK-001 --todo "$gd/TODO.md" --baseline 9 >/dev/null 2>&1; then bad "gate must fail below the baseline"; else ok "gate fails below the baseline"; fi
+if bash "$gate" TASK-002 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must fail on zero tests"; else ok "gate fails on zero tests"; fi
+if bash "$gate" TASK-003 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must fail on a failing command"; else ok "gate fails on a failing command"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

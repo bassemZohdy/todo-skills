@@ -166,6 +166,8 @@ Loaded only when a command needs them, from this skill's `reference/` folder (`.
 | I9 | No dependency cycles, counting the implicit "parent waits for its children" edges |
 | I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, `curl`/`wget` piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=` |
 
+**Gate script.** `scripts/todo-gate.sh <ID> [--regression cmd] [--baseline n]` runs a node's `Done when` and regression commands, fails on a non-zero exit, on a run that executed no tests and on a count below the baseline. `/todo-continue` uses it for the verify step; its result wins over your own reading.
+
 **Lint script.** (`TODO_LINT_STRICT=1` makes the unfamiliar-runner warning W3 a failure, for teams that want an allowlist only.) If `scripts/todo-lint.sh` exists in this skill's folder (`../todo/scripts/todo-lint.sh` relative to a command skill), run `bash <that path>` from the repository root. It is read-only, needs only bash, awk and grep, and checks I1-I10 deterministically. Its result wins over your own reading. If the script is absent, check by reading the files.
 
 Repair automatically only I5 (finish an interrupted drain by deleting the listed IDs from TODO.md). For any other violation, report it, change nothing, and ask the user how to proceed.

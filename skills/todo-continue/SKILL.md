@@ -36,7 +36,7 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
    - **Green:** implement **only what the task line says**. Adjacent findings are not fixed and not added to TODO.md; collect them for the report. No new `TODO`/`FIXME` comments. In no-git mode record each touched file in `State: files:`.
    - **Refactor:** clean up with the tests green.
    - **Parent (integration step):** follow `reference/verification.md`, "Verification protocol" step 7. No feature code.
-8. **Verify.** Run, in full and unnarrowed: the `Done when` commands, then the regression run. Update `State:` after every cycle. See "Test failures".
+8. **Verify.** Run, in full and unnarrowed: the `Done when` commands, then the regression run. When `scripts/todo-gate.sh` exists in the core skill's folder, run `bash <that path> <ID> --baseline <n> [--regression "<cmd>"]` (pass `--regression` when the Done when line has none, using the project's full suite); its `GATE` lines are the evidence for step 9, and any `FAIL` or `SKIPPED regression` means the gate has not passed. Update `State:` after every cycle. See "Test failures".
 9. **Gates.** All must pass, otherwise the node does not complete:
    - Done when exited 0 **and** really ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression is green with no fewer passing tests than the baseline and none deleted or skipped.
    - Every item of the project's Definition of Done, when one exists.

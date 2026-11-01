@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Lane agents hand off a root as `[/]` with `next: drain`; the review step is a self-review without a subagent tool. `--all-lanes` was run with two lane subagents in parallel.
 - Lane rules moved from `/todo-continue` to `reference/lanes.md`, loaded only with a lane flag (smaller context for normal runs).
 - Review pass: `Ref:` is optional everywhere (the ready check only checks a given path); `--plan` approval uses `next: plan proposed` instead of an off-grammar State item; a node's commit always includes `TODO.md`; lane agents skip the base switch and tree claim; a broken test command stops like a red baseline; root merge message defined; guardrail 6 no longer contradicts `/todo-release`.
 - Resume treats changes that fit the task line as the node's own work; a missing baseline means the regression must be fully green. Lane coordinator keeps the main checkout on the base and removes worktrees before deleting branches. Refresh merge message defined; `--plan` commit named.

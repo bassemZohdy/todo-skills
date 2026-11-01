@@ -37,7 +37,7 @@ Lifecycle: ready check → branch → claim → build → review → verify → 
    - Every hunk traces to the task line; no debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
    - The tests assert the `Done when` criteria (not vacuous, nothing weakened, the ID in new test names, or in a docstring or comment when `Done when` fixes the name).
    - No generated files, secrets or `.env` in the diff or in any backlog text you wrote (`Blocked:`, `State:`); only plausible files changed.
-   - When a subagent tool exists, have a fresh-context reviewer do this, given only the task lines, the Ref path and the diff, and report findings. Fix what is valid (at most 2 rounds). The reviewer never edits `TODO.md` and never runs the tests.
+   - When a subagent tool exists, have a fresh-context reviewer do this, given only the task lines, the Ref path and the diff, and report findings. Fix what is valid (at most 2 rounds). The reviewer never edits `TODO.md` and never runs the tests. Without a subagent tool, do the same review yourself.
 9. **Verify.** Run in full and unnarrowed: the `Done when` commands, then the regression. Update `State:` after every cycle ("Test failures"). Then the gates, all of which must pass:
    - Done when exited 0 **and** really ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression is green with no fewer passing tests than the baseline and none deleted or skipped.
    - Every item of the project's Definition of Done, if one exists.

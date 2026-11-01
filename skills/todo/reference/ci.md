@@ -29,7 +29,7 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
    | Other CI (`Jenkinsfile`, `azure-pipelines.yml`, `.circleci/`, …) | Print the one step to add: `bash .todo/check.sh` |
    | No CI and no hosted remote | The local fallback below |
 
-   GitHub workflow (`on: push` to the base branch and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, the install step if the project needs one (`npm ci`, `pip install -e .` or the README's), then `bash .todo/check.sh`.
+   GitHub workflow (`on: push` to the base branch and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, the install step if the README or the existing CI installs dependencies before testing (`npm ci` with a lockfile, `pip install -e .` or `-r requirements.txt`, or the README's own command; none for a project with no dependencies), then `bash .todo/check.sh`.
 
    | Runtime marker | Setup step |
    |---|---|
@@ -47,4 +47,4 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
 
 ## Report
 
-List the files written, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/` and the CI file (they are project files, not backlog files, so no claim commit carries them) and push, so the first CI run starts. A red first run usually means a missing install step; say which line to edit.
+List the files written, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/` and the CI file (they are project files, not backlog files, so no claim commit carries them); the first CI run starts when you push, which the skills never do. A red first run usually means a missing install step; say which line to edit.

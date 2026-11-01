@@ -23,3 +23,5 @@ Common instructions for the agent: work only inside the scratch folder, read the
 | `replan` | A plan doc and three open roots | Run `/todo-plan --revise "FEAT-003 (web dashboard) is out of scope, drop it"` and confirm | FEAT-003 dropped (ID not reused), FEAT-001 untouched, a Revisions line in the plan doc, lint clean, no code changed |
 | `ci-github` | Empty tree, a GitHub `origin` remote, no CI | Run `/todo-init --ci` and say yes to every offer | `.todo/check.sh` (lint + the unittest command) runs green, `.todo/todo-lint.sh` equals the core lint, `.github/workflows/todo-check.yml` sets up Python and runs `check.sh` |
 | `ci-local` | Same, without any remote | Run `/todo-init --ci` and say yes to every offer | `.todo/check.sh` as above, no workflow, an executable `pre-push` hook that runs `check.sh` |
+
+`--all-lanes` with real parallel subagents cannot be run by a trial agent (subagents cannot start subagents). It was run with the main session as coordinator: `setup.sh <dir> lanes`, steps 1-2 of `reference/lanes.md` by hand, two lane subagents started at once, then step 4; `assert.sh <dir> lanes` passed.

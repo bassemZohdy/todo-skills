@@ -40,11 +40,10 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
    - Only plausible files changed; no generated files, secrets or `.env` staged.
    - Documentation drift check (below).
 10. **Complete, in this order.**
-    1. Set `[x]` and delete `State:`. (A root is never `[x]`; it is drained in item 5.)
-    2. Run the lint script (children and parents).
-    3. In git mode commit the node's files by explicit path plus `TODO.md`: `<type>(<scope>): <title>`, body `Refs: <ID>`.
-    4. **Child:** switch to the parent's branch, `git merge --no-ff` the child, `git branch -d` it (`git worktree remove` first with a worktree). Report and stop; the node stays `[x]` until its root drains. No git: first merge its `files:` and `docs:` into the root's `State:`.
-    5. **Root** (a leaf root, or all children `[x]` and the integration step just passed): first refresh from the base (`reference/git-flow.md`). Then drain in this order: (a) prepend one entry to `## [Unreleased]` (core entry format); (b) delete the subtree from TODO.md; (c) lint; (d) commit `chore(backlog): drain <ID>` with `Refs:` and the included IDs. With `--merge`: switch to the base, `git merge --no-ff` the root branch, `git branch -d` it; otherwise print those commands. Never push. No git: do (a) to (c).
+    1. **Child or parent:** set `[x]`, delete `State:`, run the lint script. **Root:** skip this (a root is never `[x]`; item 4 drains it and lints).
+    2. In git mode commit the node's files by explicit path, plus `TODO.md` unless it is an undrained root: `<type>(<scope>): <title>`, body `Refs: <ID>`.
+    3. **Child:** switch to the parent's branch, `git merge --no-ff` the child, `git branch -d` it (`git worktree remove` first with a worktree). Report and stop; the node stays `[x]` until its root drains. No git: first merge its `files:` and `docs:` into the root's `State:`.
+    4. **Root** (a leaf root, or all children `[x]` and the integration step just passed): first refresh from the base (`reference/git-flow.md`). Then drain in this order: (a) prepend one entry to `## [Unreleased]` (core entry format); (b) delete the subtree from TODO.md; (c) lint; (d) commit `chore(backlog): drain <ID>` with `Refs:` and the included IDs. With `--merge`: switch to the base, `git merge --no-ff` the root branch, `git branch -d` it; otherwise print those commands. Never push. No git: do (a) to (c).
 11. **Report**, short: ID and title, commands run and results (regression counts against the baseline), files changed, branch and commit, `children done/total` for a root; the checked-out branch; for a root without `--merge` the merge commands. Then adjacent problems as ready-to-run `/todo-add "<description>" --from <ID>` commands (never add them yourself), the next workable node without starting it, and a suggestion to clear context.
 
 ## Test failures

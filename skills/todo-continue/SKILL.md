@@ -44,7 +44,7 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
    - Only plausible files changed (`git diff --stat`, or `State: files:` in no-git mode); no generated files, secrets or `.env` staged.
    - Documentation drift check (below).
 10. **Complete, in this order.**
-    1. Set the marker to `[x]` and delete `State:`. Skip this for a root: a root is never `[x]`, it is drained in step 5, and its lint runs there.
+    1. Set the marker to `[x]` and delete `State:`. Skip this for a root: a root is never `[x]`, it is drained in item 5 below, and its lint runs there.
     2. Run the lint script (children and parents only). It must pass with the new marker.
     3. In git mode commit the node's files by explicit path plus `TODO.md` (this applies to a root too: its code commit comes before the refresh and the drain): `<type>(<scope>): <title>`, body `Refs: <ID>`. In no-git mode skip.
     4. **Child node:** switch to the parent's branch (or worktree), `git merge --no-ff` the child there, then `git branch -d` the child branch. Report and stop. The node stays `[x]` until its root drains. In no-git mode, before deleting the child's `State:`, merge its `files:` and any doc files it updated (`docs:`) into the root's `State:` (create the item, no duplicates).
@@ -56,7 +56,7 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
 
 ## Checkpoints
 
-`State:` is the only thing that survives a context reset. Format: `attempts <n>/3; [hyp: <one line>;] branch <name> [from <base>]; next: <short>` (git) or `attempts <n>/3; no git; files: <list>; next: <short>`. Update it after each verification cycle and whenever you stop before completing. Read it on resume and continue the count. Never reset the counter except by a new node or a user edit through `/todo-update`.
+`State:` is the only thing that survives a context reset. Format (core, "TODO.md schema"): `attempts <n>/3; baseline <n> passing; [hyp: <one line>;] branch <name> [from <base>]; next: <short>` (git) or `attempts <n>/3; baseline <n> passing; no git; files: <list>; next: <short>`. Update it after each verification cycle and whenever you stop before completing. Read it on resume and continue the count. Never reset the counter except by a new node or a user edit through `/todo-update`.
 
 ## Test failures
 

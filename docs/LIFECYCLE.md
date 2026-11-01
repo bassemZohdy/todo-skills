@@ -30,7 +30,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 |---|---|---|---|
 | 1 | **Ready check** | `[ ]` | Lint passes, the node is workable, the `Ref:` exists, its `Done when` is a runnable command, the working tree is clean, and the regression baseline is green |
 | 2 | **Branch** | `[ ]` | Create `todo/<ID>-<slug>`, creating any missing ancestor branches top-down first (root from the base branch, each child from its parent). Switch to it |
-| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name. |
+| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name |
 | 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
 | 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
 | 5 | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |

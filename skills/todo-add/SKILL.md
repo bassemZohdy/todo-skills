@@ -29,7 +29,7 @@ Defaults: priority `P1`. Type is inferred from the description (bug, crash, regr
    - If the request needs long design, requirements or a plan (more than 6 nodes, or detail that does not fit in 4 lines), offer to write it to `docs/plans/<ROOT-ID>-<slug>.md` and link it with `Ref:`. Create that file only if the user agrees.
 8. **Fit.** The result must stay within 120 lines in total. If it would not fit, add only the root and its first level (marked as such in your reply), say the rest is decomposed lazily when its parent becomes workable, and offer the plan file. If even that does not fit, refuse and suggest finishing or dropping something. Do not trim existing tasks.
 9. **Confirm.** For more than one node, show the proposed tree (IDs, sizes, one-line titles) and wait for confirmation before writing. Add only what the user confirms. A single new leaf needs no confirmation.
-10. Assign IDs (core ID rules) and insert. Do not commit; the next claim commit carries the backlog edit. Suggest adding new roots while on the base branch. new roots ordered P0 → P1 → P2 and by ascending ID within a priority; children at the end of their parent's children. Re-run the lint script.
+10. Assign IDs (core ID rules) and insert. Do not commit; the next claim commit carries the backlog edit. Place new roots ordered P0 → P1 → P2 and by ascending ID within a priority; children go at the end of their parent's children. Suggest adding new roots while on the base branch. Re-run the lint script.
 11. Reply with the inserted tree and its position. Do not start work.
 
 Nothing enters TODO.md unless this command created it from the user's request.

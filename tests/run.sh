@@ -51,6 +51,11 @@ if bash "$gate" TASK-007 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate mu
 bash "$gate" TASK-004 --todo "$gd/TODO.md" >/dev/null 2>&1; if [ $? -eq 3 ]; then ok "gate: exit 3 when no regression ran"; else bad "gate: exit code 3"; fi
 if bash "$gate" TASK-003 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must fail on a failing command"; else ok "gate fails on a failing command"; fi
 
+# The plugin version equals the newest released CHANGELOG version.
+pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.claude-plugin/plugin.json" | head -1)"
+cv="$(sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/p' "$root/CHANGELOG.md" | head -1)"
+if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin version $pv matches the changelog (${cv:-no release yet})"; else bad "plugin.json version '$pv' does not match newest CHANGELOG version '$cv'"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

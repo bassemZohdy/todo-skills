@@ -148,6 +148,16 @@ The gate script (`todo-gate.sh <ID> [--regression cmd] [--baseline n]`) is what 
 
 Run the tests for all three scripts with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and a temporary directory that is removed on exit.
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/). The public interface is the set of things an existing project depends on: the `TODO.md` and `CHANGELOG.md` formats, the command names and flags, the `State:` grammar, the invariants the lint enforces, and the script exit codes.
+
+- **MAJOR** when a valid `TODO.md` or `CHANGELOG.md` can become invalid, a command or flag changes meaning or is removed, or a lint invariant gets stricter in a way old files fail. While the version is `0.x`, such changes bump MINOR.
+- **MINOR** for a new command, flag, optional field, warning or script that existing valid files still pass.
+- **PATCH** for wording fixes, bug fixes and documentation.
+
+The version lives in `.claude-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this). Releases are cut with `/todo-release` and tagged by a person.
+
 ## Design rules
 
 - One active task at a time, enforced by file state.
@@ -161,10 +171,13 @@ Run the tests for all three scripts with `bash tests/run.sh`. They use static fi
 
 [docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short, it leads or ties for lean solo work and is weak on planning depth, team work and maturity.
 
+See [docs/FALLBACKS.md](docs/FALLBACKS.md) for what each skill does when git, a script, tests or the base branch is missing or refuses.
+
 ## Known limits
 
 - Planning is shallow: the tree breakdown, `--plan` and `--clarify`. Requirements and long plans are expected to live in `docs/`.
 - There is no Out of Scope field any more. Boundaries live in the task sentence or in the linked doc.
+- Generated changelogs (release-please, changesets) are not supported: the drain writes its own `[Unreleased]` entries.
 - The 120-line cap holds roughly 28 tasks, so big trees are decomposed lazily.
 - The only independent review is `--isolated`, and it needs a subagent tool.
 - One agent per working tree. Use `--worktree` for parallel work.

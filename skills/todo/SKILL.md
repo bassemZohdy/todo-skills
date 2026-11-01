@@ -140,7 +140,11 @@ Inserted as the first `- ` item of the matching `###` list under `## [Unreleased
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test -- auth`. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2.
 ```
 
-One entry per root, whatever the tree size. A hand-written changelog is left as it is: entries without an ID stay where they are and the new entry goes above them; `/todo-release` moves them with the rest of `[Unreleased]`. When the root has descendants, `Includes:` is last and lists every descendant ID, so Depends and the ID counter still see them. A leaf root has no `Includes:`. `Docs: updated docs/x.md.` goes before `Includes:` and lists README.md and `docs/` files changed by the whole tree: in git mode take them from `git diff --name-only <base>...<root branch>`, in no-git mode from the `docs:` items in the root's `State:`. If the root had `From:`, add `From: FIX-001.`
+A root whose title starts with `BREAKING: ` is written with a `!` after the type (`(feat!)`) and the prefix removed from the text; its commit subject is `<type>(<scope>)!: <title>`. One entry per root, whatever the tree size. A hand-written changelog is left as it is: entries without an ID stay where they are and the new entry goes above them; `/todo-release` moves them with the rest of `[Unreleased]`. When the root has descendants, `Includes:` is last and lists every descendant ID, so Depends and the ID counter still see them. A leaf root has no `Includes:`. `Docs: updated docs/x.md.` goes before `Includes:` and lists README.md and `docs/` files changed by the whole tree: in git mode take them from `git diff --name-only <base>...<root branch>`, in no-git mode from the `docs:` items in the root's `State:`. If the root had `From:`, add `From: FIX-001.`
+
+## Fallbacks
+
+When git, a script, a subagent tool, a test command or the base branch is missing or refuses, the skills degrade instead of stopping; `docs/FALLBACKS.md` lists each case and what it costs.
 
 ## Reference files
 

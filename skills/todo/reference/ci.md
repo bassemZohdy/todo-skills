@@ -47,4 +47,4 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
 
 ## Report
 
-List the files written, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/` and the CI file (they are project files, not backlog files, so no claim commit carries them); the first CI run starts when you push, which the skills never do. A red first run usually means a missing install step; say which line to edit.
+List the files written, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/`, the CI file and the README `Tests:` line yourself (they are project files, not backlog files, so no claim commit carries them; commit them on the base or through a pull request, as you do for any CI change) before the next `/todo-continue`, whose ready check needs a clean tree. The skill does not commit them; the first CI run starts when you push, which the skills never do. A red first run usually means a missing install step; say which line to edit.

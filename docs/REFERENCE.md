@@ -49,7 +49,7 @@ Each node: write the tests first, run `Done when` in full (target a test id or p
 - One branch per node, `todo/<ID>-<slug>`. A root starts from the base branch, a child from its parent's branch. Verified children are merged `--no-ff` into the parent's branch. Nothing is merged into `main` or `develop` until the root is verified, and then only with `--merge`. The one earlier change on the base branch is the tree claim.
 - **No git repository?** Every command warns once and carries on without branches, worktrees, commits or merges. Progress and touched files are recorded in `State:`, and markers and the CHANGELOG drain work as usual. Run `git init` to get isolation and history.
 
-## Definition of Done
+## Project Definition of Done (optional)
 
 Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `Definition of Done`, its checklist applies to every task on top of that task's Done when. Command items run under the same safety rules as Done when. Statement items are checked by inspection and reported one by one.
 

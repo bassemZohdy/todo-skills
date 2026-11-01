@@ -54,6 +54,9 @@ err="$(cd "$fx/changelog" && printf '' | bash "$root/skills/todo-report/todo-rep
 rc=$?
 if [ "$rc" -eq 1 ] && [ "${err#todo-report:}" != "$err" ]; then ok "report generator exits 1 without TODO.md"; else bad "report generator without TODO.md: expected rc=1 and stderr starting 'todo-report:', got rc=$rc: $err"; fi
 
+# This repository's vendored lint (.todo/, from /todo-init --ci) stays identical to the core lint.
+if [ ! -f "$root/.todo/todo-lint.sh" ] || cmp -s "$root/.todo/todo-lint.sh" "$lint"; then ok "vendored .todo/todo-lint.sh matches the core lint"; else bad ".todo/todo-lint.sh differs from skills/todo/scripts/todo-lint.sh: copy it again"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

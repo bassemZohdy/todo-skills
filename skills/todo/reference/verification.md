@@ -26,7 +26,7 @@ An attempt is a failed verification run after you started implementing; the firs
 
 ## Definition of Done (optional)
 
-If README.md, CONTRIBUTING.md or `docs/` has a `Definition of Done` heading, its checklist applies to every node on top of `Done when`. Command items follow the safety rules below; statements are checked by inspection and reported one by one. A missing item blocks completion.
+If README.md, CONTRIBUTING.md or `docs/` has a heading named exactly `Definition of Done` followed by a list, that list applies to every node on top of `Done when`. Command items follow the safety rules below; statements are checked by inspection and reported one by one. A missing item blocks completion.
 
 ## Command safety
 

@@ -53,7 +53,7 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
 
    Do not run the suite. Apart from that optional `Tests:` line and `.todo/check.sh` (`--ci`), do not persist the detected command. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
 5. In a git repo, report the base branch (`main`, `master`, `trunk` or `develop`) and whether the tree is clean.
-6. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
+6. Check for a heading named exactly `Definition of Done` followed by a checklist (list items) in README.md, CONTRIBUTING.md or `docs/`; a heading that only describes the feature does not count. Report where it is, or that none exists. Never create one.
 7. Run the invariant check (the lint script when present). Report concisely: what was created, git or no-git mode, base branch, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, the tree summary (roots with `children done/total`, active node, blocked IDs) and any invariant violations.
 
 8. **Pre-planning** (only when the tree is empty and the user gave a goal, or `/todo-init --plan` is used). Ask once, at most 3 short questions the repo does not answer: the goal and done-state, what is out of scope, and which parts could run as parallel lanes. Offer to save the answers as `docs/plans/PROJECT.md`; write it only on the user's yes. Then point to `/todo-plan` for the tree.

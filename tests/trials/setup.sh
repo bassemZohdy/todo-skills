@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a scratch project in a NEW, empty directory and puts it into the starting state of a trial scenario.
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
-# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo | lanes | replan
+# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo | lanes | replan | ci-github | ci-local
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -200,6 +200,11 @@ replan)
   - Done when: dashboard renders; `python3 -m unittest tests.test_web`
   - Links: Ref: docs/plans/PROJECT.md' > TODO.md
   g add -A && g commit -q -m "init with a plan"
+  ;;
+ci-github|ci-local)
+  printf '%s\n' "$head" > TODO.md
+  g add -A && g commit -q -m "init"
+  [ "$scenario" = ci-github ] && git remote add origin https://github.com/example/minical.git
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac

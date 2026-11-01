@@ -78,6 +78,8 @@ The lifecycle of every node is: ready check → branch → claim `[/]` → red, 
 
 ## Optional checks
 
+**CI with a local fallback.** `/todo-init --ci` writes `.todo/check.sh` (the backlog lint plus your test command) and a vendored copy of the lint. When the project has CI it adds a job that runs the check: a GitHub Actions workflow, a GitLab job on your yes, or the one line to add for other CI. Without CI it offers a git `pre-push` hook that runs the same check. Either way `/todo-continue` runs `.todo/check.sh` as the last gate before a root lands, so "done" is checked by a script, not only by the agent.
+
 `bash skills/todo/scripts/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. Both are read-only and need only bash, awk, grep, sed and tr. `bash tests/run.sh` runs the fixture and hook tests.
 
 ## Status

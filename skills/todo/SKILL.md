@@ -23,7 +23,7 @@ Use native file tools (Read/Edit/Write) for Markdown edits. Use the shell only f
 
 | Command | Purpose |
 |---|---|
-| `/todo-init` | Bootstrap files, detect test command and git, optional pre-planning, migrate the old format |
+| `/todo-init` | Bootstrap files, detect test command and git, optional pre-planning and CI setup, migrate the old format |
 | `/todo-plan` | Plan the work into lanes and a tree; revise the plan at any time |
 | `/todo-add` | Add a task, or break a request into a tree |
 | `/todo-continue` | Execute the next task node, verify it, merge it into its parent |
@@ -151,6 +151,8 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 |---|---|---|
 | `reference/git-flow.md` | Branches, tree claim, staging, merging, refresh from base, conflicts | `/todo-continue`, `/todo-update --status in-progress` or `ready` |
 | `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add` |
+| `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
+| `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
 
 ## Invariants (every todo-* skill checks these first)
 

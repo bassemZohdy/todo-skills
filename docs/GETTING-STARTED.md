@@ -20,6 +20,8 @@ Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/pl
 
 Creates `TODO.md` and `CHANGELOG.md` if missing, detects git, the base branch and your test command, and reports. It never creates your README or docs, and changes nothing else without asking. It offers to add a `Tests: <command>` line to your README so every later run uses the same command; if it reports the command as unknown, add that line yourself.
 
+Optional: `/todo-init --ci` adds `.todo/check.sh` (lint + tests) and a CI job that runs it, or, without CI, a `pre-push` hook. `/todo-continue` then runs the same check before a task lands.
+
 ## 3. Add a task
 
 ```text

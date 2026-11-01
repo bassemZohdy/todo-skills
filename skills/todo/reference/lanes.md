@@ -1,0 +1,15 @@
+# Lanes: `--lane` and `--all-lanes`
+
+Loaded by `/todo-continue` only with `--lane` or `--all-lanes`. Part of the `todo` core skill. Step numbers refer to `/todo-continue`.
+
+A lane is a track of roots handled by one agent context (core, "Lanes"). Without a lane flag all lanes are one queue and you work alone.
+
+- `--lane <name>`: select only roots whose `Lane:` is `<name>`; everything else is unchanged. Nothing workable in that lane: say so and stop.
+- `--all-lanes`: needs a subagent tool, otherwise say so and run the lanes one after another in this thread (as `--seq`). The main thread is the **coordinator**:
+  1. Run steps 1-3 for the first workable root of every lane that has one. Stop if a lane's baseline is red.
+  2. Do each tree claim in turn as in `reference/git-flow.md` (claim commit on the root branch, then fast-forward the base), then switch the main checkout back to the base and create each root's worktree `../<repo>.todo/<ROOT-ID>` on its claimed branch (`git worktree add`). The main checkout stays on the base for the whole run.
+  3. Start one subagent per lane, all at once (with `--seq`, one at a time). Each gets only: its root ID and worktree path, the `Ref` paths, the rules below. It works only inside its worktree, skips the base switch in step 3 and the tree claim in step 4 (already done), and runs steps 1-9 and step 10 items 1-3 (complete and merge into the parent) for each node of that one root depth-first, including the root's own integration step (a parent root only), with everything committed, and **stops before the root's drain** (step 10, item 4). Rules: stay inside the task lines; never edit another lane's nodes, `Done when`, or the base branch; never merge to base; never drain; never push; return a summary per node (ID, commands and results, commit).
+  4. Do not trust the summaries. For each finished root, one at a time: refresh from the base in its worktree (`reference/git-flow.md`; `TODO.md` and `CHANGELOG.md` conflicts from earlier roots are resolved by the coordinator with the conflict rules there; expect them for every root after the first: keep this root's block, drop IDs already drained to `CHANGELOG.md`), re-run `Done when` and the regression there against the base's current pass count, then drain it there (step 10, item 4, whose refresh is then already done). With `--merge`, from the main checkout (on the base): `git merge --no-ff` the root branch, `git worktree remove` its worktree, `git branch -d` it; otherwise print those commands. A real conflict or a red result stops the coordinator and is reported with the branch name.
+  5. Report per lane: finished, blocked (with `Blocked:`), still open, and the merge commands.
+- Work that `Depends:` on another lane's open node is not workable; the lane stops there and reports what it waits for.
+- Lanes only work if their trees touch different files. If a rebase conflict shows they do not, say so and suggest putting them in one lane.

@@ -93,6 +93,16 @@ Between build and verify, `/todo-continue` reads the whole diff against the task
 
 `/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. The optional `skills/todo-report/todo-report.sh` (bash and sed) fills the template deterministically; without it the agent does the same encoding by hand. It renders text with `textContent` only and loads nothing from the network.
 
+## CI and the local fallback
+
+`/todo-init --ci` (rules in `skills/todo/reference/ci.md`) writes, each on your yes:
+
+- `.todo/todo-lint.sh`, a copy of the lint, so CI needs no skills installed;
+- `.todo/check.sh`, which runs the lint and then the project's test command;
+- a CI job that runs `bash .todo/check.sh`: `.github/workflows/todo-check.yml` (runtime set up from the project's marker files), a `todo-check` job for `.gitlab-ci.yml`, or the one line to add for other CI. If CI already runs the tests, the job only runs the lint.
+
+Fallback without CI: a git `pre-push` hook that runs the same check and refuses the push when it fails. In every case `/todo-continue` runs `.todo/check.sh` as the last gate before a root's drain, so the same lint and tests run whether or not CI exists. Commit `.todo/` and the workflow yourself; the skills never push.
+
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/). The public interface is the set of things an existing project depends on: the `TODO.md` and `CHANGELOG.md` formats, the command names and flags, the `State:` grammar, the invariants the lint enforces, and the script exit codes.

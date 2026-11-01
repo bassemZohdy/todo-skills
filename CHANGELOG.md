@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CI integration with a local fallback: `/todo-init --ci` writes `.todo/check.sh` (backlog lint + tests) and a vendored lint, adds a GitHub Actions workflow (or a GitLab job on a yes, or prints the step for other CI), and without CI offers a `pre-push` hook. `/todo-continue` runs `.todo/check.sh` as the last gate before a root lands. Trial scenarios `ci-github` and `ci-local`.
 - `/todo-plan`: turns a goal into a plan doc (`docs/plans/PROJECT.md`) and a proposed tree with lanes; `--revise` re-plans at any time, changes only open `[ ]` nodes, shows the diff, keeps IDs and logs the revision in the plan doc.
 - `/todo-init --plan`: up to 3 pre-planning questions and an optional plan doc.
 - Lanes: `Lane: <name>` on a root (default `main`) puts its tree in a track for one agent context. `/todo-continue --lane <name>` works one lane; `--all-lanes [--seq]` runs one subagent per lane in its own worktree while the main thread claims, re-verifies and merges. The lint accepts `Lane:` on roots only.
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Lane rules moved from `/todo-continue` to `reference/lanes.md`, loaded only with a lane flag (smaller context for normal runs).
 - Review pass: `Ref:` is optional everywhere (the ready check only checks a given path); `--plan` approval uses `next: plan proposed` instead of an off-grammar State item; a node's commit always includes `TODO.md`; lane agents skip the base switch and tree claim; a broken test command stops like a red baseline; root merge message defined; guardrail 6 no longer contradicts `/todo-release`.
 - Resume treats changes that fit the task line as the node's own work; a missing baseline means the regression must be fully green. Lane coordinator keeps the main checkout on the base and removes worktrees before deleting branches. Refresh merge message defined; `--plan` commit named.
 - The regression command comes first from a README `Tests:` line, which `/todo-init` offers to add.

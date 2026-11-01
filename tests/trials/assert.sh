@@ -91,6 +91,17 @@ replan)
   chk "no code or tests changed" '[ -z "$(git diff --name-only HEAD -- calc.py tests)" ]'
   chk "no node started" '! grep -q "^ *- \[/\]" TODO.md'
   ;;
+ci-github|ci-local)
+  chk "check.sh exists and runs green" '[ -f .todo/check.sh ] && bash .todo/check.sh'
+  chk "check.sh runs the lint and the tests" 'grep -q "todo-lint.sh" .todo/check.sh && grep -q "unittest" .todo/check.sh'
+  chk "vendored lint equals the core lint" 'cmp -s .todo/todo-lint.sh .claude/skills/todo/scripts/todo-lint.sh'
+  if [ "$scenario" = ci-github ]; then
+    chk "GitHub workflow runs check.sh with python set up" 'grep -q "check.sh" .github/workflows/todo-check.yml && grep -q "setup-python" .github/workflows/todo-check.yml'
+  else
+    chk "no workflow written without a remote" '[ ! -e .github/workflows/todo-check.yml ]'
+    chk "pre-push hook runs check.sh" 'grep -q "check.sh" .git/hooks/pre-push && [ -x .git/hooks/pre-push ]'
+  fi
+  ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

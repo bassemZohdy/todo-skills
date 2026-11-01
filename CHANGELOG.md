@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **FIX-003** (fix): Make todo-report.sh exit 1 with a stderr message starting "todo-report:" when TODO.md is missing in the current directory. Validated: `bash tests/run.sh`.
+
 ## [0.2.0] - 2026-11-02
 
 ### Added

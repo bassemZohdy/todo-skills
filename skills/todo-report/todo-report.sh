@@ -7,6 +7,7 @@ set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tpl="$here/template.html"
 [ -f "$tpl" ] || { echo "template.html not found next to $0" >&2; exit 1; }
+[ -f TODO.md ] || { echo "todo-report: TODO.md not found in $(pwd); run from the repository root" >&2; exit 1; }
 meta="$(cat)"
 enc() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g'; }
 fill() {   # $1 placeholder, rest of line handled by caller

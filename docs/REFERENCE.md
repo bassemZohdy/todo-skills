@@ -91,7 +91,7 @@ Between build and verify, `/todo-continue` reads the whole diff against the task
 
 ## Status page
 
-`/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. It renders text with `textContent` only and loads nothing from the network.
+`/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. The optional `skills/todo-report/todo-report.sh` (bash and sed) fills the template deterministically; without it the agent does the same encoding by hand. It renders text with `textContent` only and loads nothing from the network.
 
 ## Versioning
 

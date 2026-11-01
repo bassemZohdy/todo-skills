@@ -38,6 +38,17 @@ if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin versi
 tpl="$root/skills/todo-report/template.html"
 if grep -q '>__META__<' "$tpl" && grep -q '>__TODO__<' "$tpl" && grep -q '>__CHANGELOG__<' "$tpl" && grep -q '>__PLAN__<' "$tpl"; then ok "report template placeholders"; else bad "report template placeholders missing"; fi
 
+# Every skill folder has a SKILL.md whose name matches the folder, and the core lists every command skill.
+for d in "$root"/skills/*/; do
+  n="$(basename "$d")"
+  if grep -q "^name: $n\$" "$d/SKILL.md" 2>/dev/null; then ok "skill $n: name matches folder"; else bad "skill $n: SKILL.md missing or name mismatch"; fi
+  if [ "$n" != todo ]; then grep -q "/$n\b" "$root/skills/todo/SKILL.md" && grep -q "/$n\b" "$root/README.md" || bad "skill $n is not listed in the core commands table and README"; fi
+done
+
+# The report generator encodes hostile text (no raw < from the data reaches the page).
+tmp_out="$(cd "$fx/report" && printf 'project: x\n' | bash "$root/skills/todo-report/todo-report.sh")"
+if printf '%s' "$tmp_out" | grep -q '<img' || ! printf '%s' "$tmp_out" | grep -q '&lt;/Script>'; then bad "report generator does not encode the data"; else ok "report generator encodes hostile text"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

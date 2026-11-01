@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Review pass: `Ref:` is optional everywhere (the ready check only checks a given path); `--plan` approval uses `next: plan proposed` instead of an off-grammar State item; a node's commit always includes `TODO.md`; lane agents skip the base switch and tree claim; a broken test command stops like a red baseline; root merge message defined; guardrail 6 no longer contradicts `/todo-release`.
+- The regression command comes first from a README `Tests:` line, which `/todo-init` offers to add.
+- `/todo-add --lane <name>`; `/todo-plan` omits `Lane: main`.
+- `/todo-report` ships an optional `todo-report.sh` (bash + sed) that fills the template with encoded text. `tests/run.sh` checks skill names, command listings and the report encoding.
 - `/todo-report` encodes `&` and `<` in the embedded text and the page sets a Content-Security-Policy, so hostile `TODO.md`/`CHANGELOG.md` text cannot run script; CRLF input and odd lane names render correctly.
 - The forced `git branch -D` of a lost claim runs only when the branch holds exactly the claim commit. `Blocked:` text is redacted of secrets. A red baseline now stops without writing anything.
 - Lint I10 also rejects `eval`, `sh -c`/`bash -c`, `python -c` and `node -e`; the stop hook marks lint output as data and emits valid JSON for tabs and CR. `/todo-release` is manual-only.

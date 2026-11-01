@@ -94,7 +94,7 @@ A leaf is never `L`/`XL`; a parent never `S`/`M`; adding or dropping children re
 ## IDs
 
 - Roots `<PREFIX>-<NNN>`, one global sequence, 3 digits. Children append `.n`: `FEAT-002.1`, `FEAT-002.1.2`. Dots equal the level.
-- Next root number = highest FEAT-/FIX-/TASK- number found in `TODO.md`, `CHANGELOG.md` (including IDs after `Includes:`) **and** `docs/plans/*.md`, plus 1. Next child number = highest child under that parent plus 1, never reused in the tree.
+- Next root number = highest FEAT-/FIX-/TASK- number found in `TODO.md`, `CHANGELOG.md` (including IDs after `Includes:`) **and** `docs/plans/*.md`, plus 1. Next child number = highest existing child under that parent plus 1.
 
 | Prefix | Meaning | CHANGELOG heading | Commit type |
 |---|---|---|---|
@@ -131,7 +131,7 @@ The marker is the status, and each command acts only as that status allows (diag
 
 Order for every node: **ready check → branch → (first node of a tree: tree claim published to the base) → claim `[/]` → build → review → verify → complete `[x]` → merge into parent**. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
 
-**Ready check.** Lint passes, the node is workable, its `Ref:` exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
+**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
 
 ## CHANGELOG entry (written only by a root drain)
 
@@ -178,6 +178,6 @@ Repair automatically only I5 (finish an interrupted drain by deleting the listed
 3. No node is closed without running its `Done when` and its regression and seeing both pass.
 4. At most one `[/]` task in a file. (`[/]` lives on tree branches, so a hotfix started from the base can run while another tree is in progress.)
 5. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain and the confirmed `/todo-release`. Never rewrite released sections.
-6. Never tag, cut a release, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
+6. Never tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
 7. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
 8. When a rule here conflicts with an explicit user instruction, state the conflict and ask.

@@ -7,13 +7,13 @@ description: Generate an interactive HTML status page for the project at docs/st
 
 First load the `todo` core skill (tree format, lanes, git mode). If it is not a skill, read `../todo/SKILL.md`.
 
-Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder. Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
+Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder (filled by the optional `todo-report.sh`, which needs only bash and sed). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
 
 ## Steps
 
 1. Run the invariant check and read the result. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
 2. Read `template.html`. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
-3. Write `docs/status.html` as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
+3. **Preferred:** if `todo-report.sh` exists in this skill's folder, write the META lines (below) to its stdin and its stdout to the file: `printf '<meta lines>' | bash <skill folder>/todo-report.sh > docs/status.html`, from the repository root. It does the encoding. **Otherwise** write `docs/status.html` by hand as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.

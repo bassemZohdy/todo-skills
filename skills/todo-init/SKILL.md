@@ -49,9 +49,9 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
    | `Gemfile` | `bundle exec rspec` or `bundle exec rake test` |
    | `Makefile` with a `test` target | `make test` |
 
-   If no marker matches (for example plain `python3 -m unittest`), use the test command stated in README.md, CONTRIBUTING.md, the Makefile or the CI config, and name that source. If none is stated, report "unknown" and ask the user once; never invent one. Also report the test command CI runs (`.github/workflows`, `.gitlab-ci.yml`, `Jenkinsfile`), so the regression command can match it, and flag a mismatch. Suggest writing the command in README as a `Tests:` line so it is found the same way every time.
+   If no marker matches (for example plain `python3 -m unittest`), use the test command stated in README.md, CONTRIBUTING.md, the Makefile or the CI config, and name that source. If none is stated, report "unknown" and ask the user once; never invent one. Also report the test command CI runs (`.github/workflows`, `.gitlab-ci.yml`, `Jenkinsfile`), so the regression command can match it, and flag a mismatch. If README has no `Tests:` line, offer to add one (`Tests: \`<command>\``) so every later run uses the same command; write it only on the user's yes.
 
-   Do not run the suite and do not persist the detected command anywhere. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
+   Do not run the suite. Apart from that optional `Tests:` line, do not persist the detected command. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
 5. In a git repo, report the base branch (`main`, `master`, `trunk` or `develop`) and whether the tree is clean.
 6. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
 7. Run the invariant check (the lint script when present). Report concisely: what was created, git or no-git mode, base branch, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, the tree summary (roots with `children done/total`, active node, blocked IDs) and any invariant violations.

@@ -19,7 +19,7 @@ Never starts work and never touches code. Without `--revise` it plans; with it, 
    - **Lanes**: one line each, `<name>: <what it covers>; independent of <lanes>`. A lane is a track one agent can work alone. Use `main` when there is only one.
    - **Decisions** and **Open questions**.
    - **Revisions**: empty until the first revise.
-4. Propose the tree with the `/todo-add` rules (sizes, `Done when`, 3 levels, 120 lines): each root gets a `Lane:` in `Links:` and `Ref: docs/plans/PROJECT.md#...`. Order roots so independent lanes do not `Depends:` on each other. Show IDs, sizes, lanes and one-line titles.
+4. Propose the tree with the `/todo-add` rules (sizes, `Done when`, 3 levels, 120 lines): each root gets `Ref: docs/plans/PROJECT.md` (with a section anchor when one fits) and, unless its lane is `main`, a `Lane:` in `Links:`. Order roots so independent lanes do not `Depends:` on each other. Show IDs, sizes, lanes and one-line titles.
 5. **Wait for confirmation.** Then write the plan doc and the tree, only what the user confirms. Lint. Do not commit; the next claim commit carries the files. If the tree would pass 120 lines, add roots and first levels only (decompose lazily).
 
 ## Revise (`--revise`)

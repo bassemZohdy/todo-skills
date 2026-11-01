@@ -1,7 +1,7 @@
 ---
 name: todo-add
-description: Add work to the TODO.md task tree. Use for /todo-add <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--clarify]. Sizes the request, breaks it into a tree until every leaf is S or M, writes each node as a 2-4 line task with an exact Done when command, and inserts it. Never starts work.
-argument-hint: <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--clarify]
+description: Add work to the TODO.md task tree. Use for /todo-add <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]. Sizes the request, breaks it into a tree until every leaf is S or M, writes each node as a 2-4 line task with an exact Done when command, and inserts it. Never starts work.
+argument-hint: <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]
 ---
 
 # /todo-add
@@ -15,7 +15,7 @@ Defaults: priority `P1`. Type is inferred from the description (bug, crash, regr
 1. **Git mode and invariants.** Check git; in a non-git folder print the one-time warning (core, "Git mode") and continue. Run the invariant check.
 2. Resolve `--ref`. If the path does not exist, say so and ask. Anchors (`#section`) are allowed. If none is given and a doc in `docs/` clearly governs the work, propose it. Otherwise omit `Ref`. Never invent a path.
 3. Resolve `--from <ID>`. It must exist in TODO.md or CHANGELOG.md, otherwise ask. It becomes `From:` (provenance only).
-4. Resolve `--parent <ID>`. It must be a `[ ]` node in TODO.md that is not at level 3 (depth limit) and not `[x]`, `[/]` or `[!]`. The new node becomes its last child and the parent's size is recomputed (`L`, or `XL` if the new node gets children of its own). Without `--parent` the new task is a root.
+4. Resolve `--parent <ID>`. It must be a `[ ]` node in TODO.md that is not at level 3 (depth limit) and not `[x]`, `[/]` or `[!]`. The new node becomes its last child and the parent's size is recomputed (`L`, or `XL` if the new node gets children of its own). Without `--parent` the new task is a root. `--lane <name>` (roots only; lowercase, digits, dashes) adds `Lane: <name>` to its `Links:`; children inherit their root's lane.
 5. **Clarify.** Ask **one message of at most 3 short questions** when the behavior, the target module or the verification command cannot be derived from the description and the repo. With `--clarify`, always run one such round first. Wait for the answers. Never guess to avoid asking.
 6. **Check it is not already done.** Search the code and tests for the behavior (names, a quick `grep`; run the targeted test if one exists). If it appears to exist already, say so and ask before adding anything.
 7. **Size and break down.**

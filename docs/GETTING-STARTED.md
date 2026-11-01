@@ -18,7 +18,7 @@ Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/pl
 /todo-init
 ```
 
-Creates `TODO.md` and `CHANGELOG.md` if missing, detects git, the base branch and your test command, and reports. Nothing else changes. It never creates your README or docs. If it reports the test command as unknown, put a line `Tests: <command>` in your README.
+Creates `TODO.md` and `CHANGELOG.md` if missing, detects git, the base branch and your test command, and reports. It never creates your README or docs, and changes nothing else without asking. It offers to add a `Tests: <command>` line to your README so every later run uses the same command; if it reports the command as unknown, add that line yourself.
 
 ## 3. Add a task
 

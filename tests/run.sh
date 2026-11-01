@@ -49,6 +49,11 @@ done
 tmp_out="$(cd "$fx/report" && printf 'project: x\n' | bash "$root/skills/todo-report/todo-report.sh")"
 if printf '%s' "$tmp_out" | grep -q '<img' || ! printf '%s' "$tmp_out" | grep -q '&lt;/Script>'; then bad "report generator does not encode the data"; else ok "report generator encodes hostile text"; fi
 
+# The report generator refuses to run without a TODO.md in the current directory (FIX-003).
+err="$(cd "$fx/changelog" && printf '' | bash "$root/skills/todo-report/todo-report.sh" 2>&1 >/dev/null)"
+rc=$?
+if [ "$rc" -eq 1 ] && [ "${err#todo-report:}" != "$err" ]; then ok "report generator exits 1 without TODO.md"; else bad "report generator without TODO.md: expected rc=1 and stderr starting 'todo-report:', got rc=$rc: $err"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

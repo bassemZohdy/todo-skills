@@ -35,30 +35,30 @@ Each tool gets an integer score from 0 to 5 on 11 criteria. Totals are weighted 
 | beads | 1 | 2 | 4 | 1 | 5 | 1 | 0 | 5 | 5 | 4 | 4 |
 | Taskmaster | 2 | 2 | 3 | 1 | 3 | 3 | 0 | 4 | 2 | 1 | 4 |
 | GSD (low confidence) | 1 | 2 | 2 | 3 | 5 | 5 | 3 | 3 | 3 | 3 | 4 |
-| **todo-skills, reviewer** | 4 | 5 | 4 | 3 | 4 | 2 | 2 | 3 | 2 | 4 | 1 |
+| **todo-skills 0.1.0, reviewer (after simplifying)** | 4 | 5 | 4 | 3 | 5 | 2 | 3 | 3 | 3 | 4 | 2 |
+| todo-skills, earlier reviewer (before simplifying) | 4 | 5 | 4 | 3 | 4 | 2 | 2 | 3 | 2 | 4 | 1 |
 | todo-skills, author | 3 | 5 | 5 | 4 | 4 | 3 | 3 | 4 | 3 | 4 | 1 |
 
 ## Totals
 
 | Rank | Profile A (solo, lean) | Score | Profile B (team, spec-first) | Score |
 |---|---|---|---|---|
-| 1 | todo-skills, reviewer | 67 | GSD | 68 |
+| 1 | **todo-skills 0.1.0** | 73 | GSD (low confidence) | 68 |
 | 2 | OpenSpec | 66 | Spec Kit | 66 |
 | 3 | Backlog.md | 60 | OpenSpec | 66 |
-| 4 | Spec Kit | 58 | BMAD | 63 |
-| 5 | GSD | 57 | todo-skills, reviewer | 58 |
+| 4 | Spec Kit | 58 | **todo-skills 0.1.0** | 65 |
+| 5 | GSD (low confidence) | 57 | BMAD (low confidence) | 63 |
 | 6 | Superpowers | 55 | Superpowers | 57 |
-| 7 | BMAD | 52 | Backlog.md | 56 |
+| 7 | BMAD (low confidence) | 52 | Backlog.md | 56 |
 | 8 | beads | 51 | beads | 55 |
 | 9 | Taskmaster | 40 | Taskmaster | 47 |
 
-The author's own scores for todo-skills would give 74 (A) and 71 (B). They are 7 and 13 points above the reviewer's, which is the size of the self-scoring bias. Use the reviewer's numbers.
+Before simplifying, a reviewer of the same kind gave todo-skills 67 (A) and 58 (B). The author's own scores would give 74 and 71, which shows the size of the self-scoring bias. Use the reviewer's numbers.
 
 ## Reading the results
 
-- Under Profile A, which was designed around lean solo work, todo-skills and OpenSpec lead and the gap between them is noise. Under Profile B the spec-heavy tools (GSD, Spec Kit, OpenSpec, BMAD) lead and todo-skills is fifth.
-- The reviewer scored todo-skills low on planning (2), review (2), team (2) and maturity (1), and agreed it is strong on dependencies (5) and machine-checkable state (4).
-- The reviewer read the README, lifecycle doc and core skill, not the scripts, so verification (3) is a fair score: the gates are followed by the model, not enforced by a tool.
+- Under Profile A, which was designed around lean solo work, todo-skills leads by 7 points over OpenSpec. Under Profile B the spec-heavy tools (GSD, Spec Kit, OpenSpec) lead and todo-skills is fourth.
+- The reviewer scored todo-skills low on planning (2) and maturity (2), middling on verification (3: enforced by the model, not a tool), review, dependencies and team (3 each), and high on tooling dependencies (5), context and resume (5) and machine-checkable state (4). It named three weaknesses: advisory enforcement of "done", almost no field evidence, and thin planning and orchestration.
 - A difference of 1-2 points is noise. Moving one score by one point shifts a total by 1-4 points. To use your own weights, replace the weight columns and apply the formula above.
 
 ## Caveats

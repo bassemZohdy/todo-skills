@@ -167,7 +167,7 @@ The version lives in `.claude-plugin/plugin.json` and must equal the newest `## 
 
 ## Comparison
 
-[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short, it leads or ties for lean solo work and is weak on planning depth, team work and maturity.
+[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short, it leads for lean solo work and is weak on planning depth, team work and maturity.
 
 ## Known limits
 

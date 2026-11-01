@@ -1,7 +1,7 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--isolated] [--worktree] [--merge] [--sync]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation.
-argument-hint: [--plan] [--isolated] [--worktree] [--merge] [--sync]
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--isolated] [--worktree] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation.
+argument-hint: [--plan] [--isolated] [--worktree] [--merge]
 ---
 
 # /todo-continue
@@ -14,7 +14,6 @@ Flags (all optional):
 - `--plan`: stop for approval after reading, before writing any code (step 5).
 - `--isolated`: run steps 5-8 in a fresh-context subagent (see "Isolated mode").
 - `--worktree`: put the node in its own worktree (`../<repo>.todo/<ID>`) instead of switching branches in the current tree.
-- `--sync`: with a remote, fetch first and push the base branch after the tree claim, so other clones see the claim (the only push the skills make).
 - `--merge`: when a **root** finishes, also merge its branch into the base branch. Without it the exact commands are printed instead.
 
 ## State machine
@@ -26,8 +25,8 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
    - A `[/]` node exists: resume it. Read its `State:`; in git mode check out its branch, run `git status` and `git diff --stat`. Resume when the changes fit its task line, otherwise stop and ask. Never revert or commit changes you did not make.
    - Otherwise take the first **workable** `[ ]` node (core, "Which node is next"). Trees claimed by another branch are skipped and reported with their branch name. `[!]` nodes are skipped and `[x]` nodes are never touched. If nothing is workable, list what blocks progress (open dependencies, `[!]` nodes) and stop.
 3. **Ready check** (new nodes only). Lint is clean; the `Ref:` exists; the tree is clean by the core definition (backlog files and generated files excluded), otherwise stop and ask; run the regression command for the **baseline**. It must be green; if it is red do not fix it: block the node as "baseline red" (see "Test failures"). Record the pass count.
-4. **Branch first** (git mode). With `--sync`, fetch first. Create every missing ancestor branch top-down (root from the base branch, each child from its parent), then `todo/<ID>-<slug>`, and switch to it (or `git worktree add` with `--worktree`). Reuse an existing branch that starts with `todo/<ID>-`.
-   **Tree claim** (only when this is the first node of its tree): immediately after the root branch exists, make the claim-only commit on it and fast-forward the base branch to it (core, "Tree claim"), with `--sync` also push. After this the base branch shows the tree as claimed and no other agent will start it. Then continue on the node's branch.
+4. **Branch first** (git mode). Create every missing ancestor branch top-down (root from the base branch, each child from its parent), then `todo/<ID>-<slug>`, and switch to it (or `git worktree add` with `--worktree`). Reuse an existing branch that starts with `todo/<ID>-`.
+   **Tree claim** (only when this is the first node of its tree): immediately after the root branch exists, make the claim-only commit on it and fast-forward the base branch to it (core, "Tree claim"). After this the base branch shows the tree as claimed and no other agent will start it. Then continue on the node's branch.
 5. **Claim.** On the node's branch set `[/]` and write `State: attempts 0/3; branch <name> [from <base>]; next: read docs`. In no-git mode write `State: attempts 0/3; no git; files: -; next: read docs`. In git mode commit `chore(backlog): start <ID>` with `TODO.md` (and `CHANGELOG.md` if new). Nothing else is touched before this. Skip the commit if nothing changed.
 6. **Read before write.** Read the `Ref:` doc (or its anchored section) and the README/doc sections that govern the area. Then read only the code the node needs. If the Ref is missing or contradicts the task line, stop and ask.
    - With `--plan` and no `plan approved` in `State:`: print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed; awaiting approval`, and **stop**. The user's next `/todo-continue` counts as approval.

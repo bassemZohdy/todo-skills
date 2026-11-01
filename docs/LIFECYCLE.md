@@ -30,7 +30,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 |---|---|---|---|
 | 1 | **Ready check** | `[ ]` | Lint passes, the node is workable, the `Ref:` exists, its `Done when` is a runnable command, the working tree is clean, and the regression baseline is green |
 | 2 | **Branch** | `[ ]` | Create `todo/<ID>-<slug>`, creating any missing ancestor branches top-down first (root from the base branch, each child from its parent). Switch to it |
-| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name. `--sync` also pushes |
+| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name. |
 | 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
 | 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
 | 5 | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
@@ -69,12 +69,12 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Lightweight review | The self-review gate, optional `--isolated` fresh-context review, and the human merge into base. Teams can open a pull request from the root branch instead of merging locally |
 | Traceability | The ID is in the branch name, commit body (`Refs:`) and CHANGELOG entry. Put the ID in new test names or comments |
 | CI parity | `/todo-init` reports the test command found in CI config, so the regression command matches what CI runs |
-| Release is separate | The skills never tag, push or move `[Unreleased]` to a version |
+| Release is separate | The skills never tag, push or move `[Unreleased]` to a version, and never touch the network |
 | Hotfix | A `P0` `FIX` root branches from the base branch like any other root |
 
 ## Where the backlog lives
 
-`TODO.md` is versioned like code. The base branch carries one thing about a tree in flight: the **tree claim**, a root `State: branch <name> from <base>`. Everything else (`[/]`, `[x]`, descendants' `State:`) lives on the tree's branches and reaches the base branch at the root merge. A second agent that starts from the base branch sees the claim and skips that tree, so a tree is never run twice. Add new roots from the base branch; add children and follow-ups on the tree's own branches. Claims are local to the repository and its worktrees unless `--sync` pushes the base branch; a claim whose branch is gone is stale and is released with `/todo-update <ROOT-ID> --status ready`.
+`TODO.md` is versioned like code. The base branch carries one thing about a tree in flight: the **tree claim**, a root `State: branch <name> from <base>`. Everything else (`[/]`, `[x]`, descendants' `State:`) lives on the tree's branches and reaches the base branch at the root merge. A second agent that starts from the base branch sees the claim and skips that tree, so a tree is never run twice. Add new roots from the base branch; add children and follow-ups on the tree's own branches. The skills never fetch, pull or push, so a claim reaches other clones the way any commit does. A claim whose branch is gone is stale and is released with `/todo-update <ROOT-ID> --status ready`.
 
 ## Without git
 

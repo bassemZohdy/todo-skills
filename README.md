@@ -21,7 +21,7 @@ Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, a
 | `/todo` | `skills/todo` | Core rules: tree format, sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
 | `/todo-init` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git and the test runner, migrates the old format, reports status |
 | `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--clarify]` | `skills/todo-add` | Sizes the request and adds a task, or a whole tree, until every leaf is S or M. Asks up to 3 questions when unclear |
-| `/todo-continue [--plan] [--isolated] [--worktree] [--merge] [--sync]` | `skills/todo-continue` | Executes one node: branch, tests first, verify plus regression, merge into the parent, drain a finished root |
+| `/todo-continue [--plan] [--isolated] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, verify plus regression, merge into the parent, drain a finished root |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `skills/todo-update` | Manual state changes (dotted IDs allowed) and in-place field edits |
 | `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree, recent history and search |
 
@@ -33,7 +33,6 @@ The command skills load `todo` first, so keep the six folders side by side.
 - `--isolated` runs the implement-and-verify steps in a fresh-context subagent. The main thread re-runs the commands and reviews the diff itself.
 - `--worktree` builds the node in its own worktree (`../<repo>.todo/<ID>`) instead of switching branches.
 - `--merge` also merges a finished root into the base branch. Without it the exact `git merge --no-ff` commands are printed and the merge is yours to run.
-- `--sync` (with a remote) fetches before starting and pushes the base branch after the tree claim, so other clones see the claim. It is the only push the skills make.
 
 ## Install
 
@@ -100,7 +99,7 @@ See [docs/LIFECYCLE.md](docs/LIFECYCLE.md) for the diagram, the command-by-statu
 
 ## Claims: no tree runs twice
 
-When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. Claims are shared by worktrees of one repository; use `--sync` to share them through a remote.
+When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. A claim is a local commit. Worktrees of one repository see it at once; how it reaches other clones is left to git (push, pull request, your usual flow), and a clash shows up as a normal merge conflict.
 
 ## Verification
 
@@ -142,7 +141,7 @@ Run the tests for both scripts with `bash tests/run.sh`. They use static fixture
 - Nothing reaches the base branch before its root is verified.
 - Backlog changes come only from a user command or a completed code transition. The agent never invents tasks. Adjacent findings are returned as ready-to-run `/todo-add ... --from <ID>` commands.
 - `Done when` commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
-- Nothing is required beyond Markdown. Git is used when present. The agent never tags or cuts a release, and pushes only with `--sync`.
+- Nothing is required beyond Markdown. Git is used when present. The skills never tag, release, fetch, pull or push; sharing is git's job.
 
 ## Comparison
 

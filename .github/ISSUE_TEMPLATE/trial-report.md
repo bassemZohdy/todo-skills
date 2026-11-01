@@ -1,0 +1,17 @@
+---
+name: Trial report
+about: You ran the skills on a project and something was wrong, unclear or great
+labels: trial
+---
+
+**Agent and version** (for example Claude Code 2.x, todo-skills 0.1.0):
+
+**Command you ran**:
+
+**What you expected**:
+
+**What happened** (paste the relevant output):
+
+**Skill text that misled the agent** (file and line, if you found it):
+
+**Git or no-git mode, test runner, monorepo?**

@@ -1,20 +1,41 @@
 # todo-skills
 
-Agent skills for tracking software work in two Markdown files, `TODO.md` and `CHANGELOG.md`. There is no issue tracker, no database and no framework. The repository is the state machine.
+[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.1.0 (early, see [Status](#status))
 
-Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, and how it is validated, with the exact test command. Big work is broken into children (`FEAT-002.1`, `FEAT-002.1.2`) until every leaf is small. Each node is built on its own git branch or worktree, verified with its tests and a regression run, and merged into its parent. Only a finished root is drained to `CHANGELOG.md`, as a single entry, so the active queue stays small enough for an agent's context window. Without git the skills still work, just without branches and commits.
+Skills that let a coding agent run a software backlog from two Markdown files, `TODO.md` and `CHANGELOG.md`. No tracker, no database, no framework: the repository is the state machine.
 
-## The four layers
+- **One task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, and the exact command that proves it is done. Big work is split until every leaf is small.
+- **A git branch per task.** Tests are written first, then `Done when` and the full regression run against a baseline taken before coding. Nothing reaches your main branch before its whole tree is verified.
+- **Plan, review, report.** `/todo-plan` (and `--revise` when the plan is off), a review step before verification, lanes for parallel agents, and an interactive `docs/status.html`.
+- **Safe by construction.** The skills never touch the network, tag or push. No required tooling beyond Markdown; git is used when present.
 
-| Layer | File | Role |
-|---|---|---|
-| Requirements | `README.md`, `docs/*.md` | Ground truth. Read-mostly |
-| Active queue | `TODO.md` | One task tree of 2-4 line work items, capped at 120 lines |
-| Validation | Source and tests | What decides "done" |
-| Version store | git | A branch or worktree per task. Nothing reaches the base branch unverified |
-| Archive | `CHANGELOG.md` | Append-only, Keep a Changelog + Conventional Commits |
+```markdown
+- [ ] **FEAT-002** · P1 · L · Add token refresh to the auth service
+  - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
+  - Links: Ref: docs/auth.md#refresh · Lane: api
+  - [/] **FEAT-002.1** · M · Rotate refresh tokens
+    - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
+    - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1-rotate-refresh-tokens from todo/FEAT-002-add-token-refresh-auth; next: add reuse test
+```
 
-## Skills
+## Quick start
+
+```bash
+git clone https://github.com/bassemZohdy/todo-skills
+mkdir -p ~/.claude/skills && cp -r todo-skills/skills/* ~/.claude/skills/
+```
+
+Then, in your project:
+
+```text
+/todo-init
+/todo-add Reject expired JWTs in the auth middleware --priority P0
+/todo-continue
+```
+
+The full walkthrough is in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). Try it in a scratch repository first.
+
+## Commands
 
 | Command | Skill folder | What it does |
 |---|---|---|
@@ -28,160 +49,47 @@ Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, a
 | `/todo-report` | `skills/todo-report` | Writes `docs/status.html`: an interactive, self-contained page with KPIs, lanes, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan |
 | `/todo-release [--version X.Y.Z]` | `skills/todo-release` | Proposes a semantic version from the `[Unreleased]` entries and, after you confirm, writes the dated section. Prints the tag and push commands; never runs them |
 
-The command skills load `todo` first, so keep the nine folders side by side. The core skill keeps two reference files in `skills/todo/reference/` (`git-flow.md`, `verification.md`) that only the commands needing them read, which keeps the always-loaded part small.
-
-### `/todo-continue` flags
-
-- `--plan` stops after reading the docs and prints a short plan. The next `/todo-continue` counts as approval.
-- `--lane <name>` only takes roots of that lane. `--all-lanes` starts one subagent per lane in its own worktree, in parallel (`--seq`: one after another); the main thread claims, re-verifies and merges. A lane is a track of roots for one agent context, set with `Lane: <name>` on a root (default `main`); it can hold one task or many.
-- `--worktree` builds the node in its own worktree (`../<repo>.todo/<ID>`) instead of switching branches.
-- `--merge` also merges a finished root into the base branch. Without it the exact `git merge --no-ff` commands are printed and the merge is yours to run.
+All nine skill folders go together: the command skills load the `todo` core skill and its `reference/` files.
 
 ## Install
 
-Copy the folders into the skills directory your agent reads. Use `.claude/skills/` inside one project or `~/.claude/skills/` for all projects:
+- **Claude Code skills:** copy `skills/*` to `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), as above.
+- **Claude Code plugin:** `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills`. Commands are namespaced, for example `/todo-skills:todo-add`.
+- **Other agents** (Codex, Cursor, and so on): the skills are plain Markdown. Copy `skills/` where your agent reads skills, or point its `AGENTS.md` at `skills/todo/SKILL.md`. Only git and bash are needed, and nothing is Claude-specific, but only Claude Code has been tested.
 
-```bash
-git clone https://github.com/bassemZohdy/todo-skills
-mkdir -p ~/.claude/skills
-cp -r todo-skills/skills/* ~/.claude/skills/
-```
-
-Copying (or symlinking) keeps the short command names.
-
-**As a Claude Code plugin** (commands are namespaced, for example `/todo-skills:todo-add`):
-
-```text
-/plugin marketplace add bassemZohdy/todo-skills
-/plugin install todo-skills@todo-skills
-```
-
-`claude plugin validate` passes, and a local marketplace install copies all nine skills with their `reference/` and `scripts/` folders (tested). The lint script and stop hook are not registered automatically; point your hook settings at `skills/todo/scripts/todo-stop-hook.sh` if you want it.
-
-**Other agents** (Codex, Cursor, and so on): the skills are plain Markdown. Copy `skills/` wherever your agent reads skills, or paste the "Backlog" paragraph below into its `AGENTS.md` and point it at `skills/todo/SKILL.md`. Only the git and bash commands are required; nothing here is Claude-specific, but only Claude Code has been tested.
-
-Skills only load when their description matches, so add this to `AGENTS.md` or `CLAUDE.md` for reliable use:
+Skills load when their description matches, so add this to `AGENTS.md` or `CLAUDE.md` for reliable use:
 
 ```markdown
 ## Backlog
 Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status, /todo-report). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
 ```
 
-## Typical session
+## How it works
 
-```text
-/todo-init --plan  # pre-planning questions, optional docs/plans/PROJECT.md
-/todo-plan "goal"   # lanes + proposed tree; /todo-plan --revise when the plan is off
-/todo-add Reject expired JWTs in the auth middleware --priority P0 --ref docs/auth.md#tokens
-/todo-continue        # implements, validates, drains one task
-/clear
-/todo-continue        # next task, fresh context
-```
+| Layer | File | Role |
+|---|---|---|
+| Requirements | `README.md`, `docs/*.md` | Ground truth, read-mostly |
+| Active queue | `TODO.md` | One task tree, capped at 120 lines |
+| Validation | Source and tests | What decides "done" |
+| Version store | git | A branch or worktree per task |
+| Archive | `CHANGELOG.md` | Append-only, Keep a Changelog + Conventional Commits |
 
-## Task tree
+The lifecycle of every node is: ready check → branch → claim `[/]` → red, green, refactor → **review** → verify (Done when + regression) → complete `[x]` → merge into the parent; a finished root is drained into `CHANGELOG.md`. The marker on each task is its status, and every command acts only as that status allows. Details: [docs/LIFECYCLE.md](docs/LIFECYCLE.md) (diagram, command-by-status matrix, the SDLC practices applied) and [docs/REFERENCE.md](docs/REFERENCE.md) (task format, sizes, claims, verification, lanes, planning, lint and hook, versioning, design rules).
 
-```markdown
-# Active Backlog
+## Optional checks
 
-## 🌳 Task Tree
+`bash skills/todo/scripts/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. Both are read-only and need only bash, awk and grep. `bash tests/run.sh` runs the fixture and hook tests.
 
-- [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
-  - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
-  - [ ] **FEAT-002.1** · L · Refresh endpoint
-    - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
-    - [x] **FEAT-002.1.1** · S · Token store interface
-      - Done when: store round-trips a token; `npm test -- auth/store`
-    - [/] **FEAT-002.1.2** · M · Rotate refresh tokens
-      - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
-      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: add reuse test
-```
+## Status
 
-- **2 to 4 lines per task.** The header says what to do. `Done when:` gives the criteria and at least one exact command. Longer planning goes into `docs/` (for example `docs/plans/FEAT-002-refresh.md`) and is linked with `Ref:`. TODO.md only tracks work.
-- **Markers:** `[ ]` open, `[/]` active (only one), `[!]` blocked, `[x]` verified and merged into its parent, waiting for the root to drain.
-- **Sizes:** leaves are `S` (at most 2 files) or `M` (one context window, at most 5 files). Parents are `L` (children are leaves) or `XL` (has grandchildren). At most 3 levels. The lint script enforces this.
-- **Order:** roots by priority P0 to P2, then by ID. Inside a root, depth first. A parent becomes workable again when all its children are `[x]`; that is its integration step.
-- **Closing:** a child is merged into its parent's branch when verified. A parent closes only when all children are done, and the whole tree is written to `CHANGELOG.md` as one entry ending in `Includes: FEAT-002.1, FEAT-002.1.1, ...`.
-- **Blocked** tasks replace `State:` with `Blocked: reason → \`command\` error → action required`.
+Version 0.1.0 is early. What exists: the specification, a lint with fixtures, and fresh-agent trials of nine scenarios in scratch projects (interrupted merge, refresh from base, claims and races, release, monorepo, lanes through the sequential fallback, replan). What does not: use on real projects or teams, a tested parallel `--all-lanes` run, and any agent besides Claude Code. "Done" is enforced by the agent following the rules and by the optional lint, not by a sandbox, so read a task before you let an agent run its command. [docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against eight similar tools (75 and 71 under two weightings, by an independent reviewer; read the caveats there).
 
-## Lifecycle
+Known limits: planning is shallow (a short plan doc and the tree), the 120-line cap holds about 28 tasks (big trees are decomposed lazily), sharing claims between clones is left to git, and the review step is a self-review when no subagent tool exists.
 
-The marker is the status, and every command acts only as that status allows. The branch is created **before** the task is marked in progress:
+## Contributing and support
 
-`[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
+Trial reports are the most useful contribution: run it on a project and open an issue. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and the [code of conduct](CODE_OF_CONDUCT.md). Versions follow [Semantic Versioning](https://semver.org/) (policy in [docs/REFERENCE.md](docs/REFERENCE.md#versioning)); see [CHANGELOG.md](CHANGELOG.md). This repository tracks its own work with the same `TODO.md` and `CHANGELOG.md`.
 
-See [docs/LIFECYCLE.md](docs/LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
+## License
 
-## Claims: no tree runs twice
-
-When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. A claim is a local commit. Worktrees of one repository see it at once; how it reaches other clones is left to git (push, pull request, your usual flow), and a clash shows up as a normal merge conflict.
-
-## Verification
-
-Each node: write the tests first, run `Done when` in full (target a test id or path, not a name filter), then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests and runs that execute zero tests do not count. Three failed fix cycles block the node.
-
-## Git flow and no-git mode
-
-- One branch per node, `todo/<ID>-<slug>`. A root starts from the base branch, a child from its parent's branch. Verified children are merged `--no-ff` into the parent's branch. Nothing is merged into `main` or `develop` until the root is verified, and then only with `--merge`. The one earlier change on the base branch is the tree claim.
-- **No git repository?** Every command warns once and carries on without branches, worktrees, commits or merges. Progress and touched files are recorded in `State:`, and markers and the CHANGELOG drain work as usual. Run `git init` to get isolation and history.
-
-## Definition of Done
-
-Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `Definition of Done`, its checklist applies to every task on top of that task's Done when. Command items run under the same safety rules as Done when. Statement items are checked by inspection and reported one by one.
-
-## Optional enforcement
-
-The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
-
-```bash
-bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
-```
-
-Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
-
-```json
-{ "hooks": { "Stop": [ { "hooks": [
-  { "type": "command", "command": "bash .claude/skills/todo/scripts/todo-stop-hook.sh" }
-] } ] } }
-```
-
-With a user-level install (`~/.claude/skills`) use `bash ~/.claude/skills/todo/scripts/todo-stop-hook.sh` as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
-
-Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files.
-
-## Versioning
-
-This project follows [Semantic Versioning](https://semver.org/). The public interface is the set of things an existing project depends on: the `TODO.md` and `CHANGELOG.md` formats, the command names and flags, the `State:` grammar, the invariants the lint enforces, and the script exit codes.
-
-- **MAJOR** when a valid `TODO.md` or `CHANGELOG.md` can become invalid, a command or flag changes meaning or is removed, or a lint invariant gets stricter in a way old files fail. While the version is `0.x`, such changes bump MINOR.
-- **MINOR** for a new command, flag, optional field, warning or script that existing valid files still pass.
-- **PATCH** for wording fixes, bug fixes and documentation.
-
-The version lives in `.claude-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this). Releases are cut with `/todo-release` and tagged by a person.
-
-## Design rules
-
-- One active task at a time, enforced by file state.
-- A node closes only when its `Done when` command and the regression run pass. A run that executes zero tests does not count.
-- Nothing reaches the base branch before its root is verified.
-- Backlog changes come only from a user command or a completed code transition. The agent never invents tasks. Adjacent findings are returned as ready-to-run `/todo-add ... --from <ID>` commands.
-- `Done when` commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
-- Nothing is required beyond Markdown. Git is used when present. The skills never tag, release, fetch, pull or push; sharing is git's job.
-
-## Comparison
-
-[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short: 75 for lean solo work (1st) and 71 for team, spec-first work (1st by 3 points, within noise). It is weak on maturity (no field use), enforcement (the model runs the gates) and planning depth.
-
-## Known limits
-
-- Planning is shallow: the tree breakdown, `--plan` and `--clarify`. Requirements and long plans are expected to live in `docs/`.
-- There is no Out of Scope field any more. Boundaries live in the task sentence or in the linked doc.
-- The 120-line cap holds roughly 28 tasks, so big trees are decomposed lazily.
-- The independent review step needs a subagent tool; without one it is a self-review.
-- One agent per working tree. Use `--worktree` for parallel work.
-- Skill triggering depends on the agent runtime. The `AGENTS.md` pointer above reduces misses.
-- Fresh agent sessions have run the skills in scratch projects (`tests/trials`: interrupted merges, refresh, claims and races, release, a monorepo), but no team has used them in a real project yet. The lint, gate script and stop hook have automated tests (`tests/run.sh`).
-
-## This repo's own backlog
-
-`TODO.md` and `CHANGELOG.md` in this repository follow the same schemas.
+[MIT](LICENSE)

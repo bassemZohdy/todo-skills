@@ -157,7 +157,7 @@ Run the tests for both scripts with `bash tests/run.sh`. They use static fixture
 
 ## Comparison
 
-[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings (scored before the task tree and git flow were added, so the numbers are stale). In short, it is competitive for lean solo work and weak on planning depth, team work and maturity.
+[docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short, it leads or ties for lean solo work and is weak on planning depth, team work and maturity.
 
 ## Known limits
 
@@ -167,7 +167,7 @@ Run the tests for both scripts with `bash tests/run.sh`. They use static fixture
 - The only independent review is `--isolated`, and it needs a subagent tool.
 - One agent per working tree. Use `--worktree` for parallel work.
 - Skill triggering depends on the agent runtime. The `AGENTS.md` pointer above reduces misses.
-- The skills have not been run in live agent sessions yet. Only the lint script and stop hook have automated tests (`tests/run.sh`).
+- Fresh agent sessions have run the skills in scratch projects (`tests/trials`: interrupted merges, refresh, claims and races, release, a monorepo), but no team has used them in a real project yet. The lint, gate script and stop hook have automated tests (`tests/run.sh`).
 
 ## This repo's own backlog
 

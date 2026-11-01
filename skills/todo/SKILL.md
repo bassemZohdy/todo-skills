@@ -12,10 +12,11 @@ The repository is a closed-loop state machine built from files that already exis
 | Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`; `docs/status.html` by `todo-report` |
 | Active queue | `TODO.md` | One task tree. A tracker of work items, not a place for design | Edited only by the todo-* skills |
 | Validation | Source code + test suites | Ground truth for "done" | Changed only for the task at hand |
-| Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` is touched, by a root drain, and the confirmed `/todo-release`; `todo-init` creates the file |
+| Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (and, on release, the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file |
+| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, CI job | Lint + tests, run by CI, a pre-push hook and `/todo-continue` | Written by `/todo-init --ci` on a yes; committed by the user |
 | Version store | git | Branch or worktree per task. Nothing reaches the base branch unverified | See "Git mode" |
 
-Use native file tools (Read/Edit/Write) for Markdown edits. Use the shell only for `git`, `Done when` commands and the optional lint script.
+Use native file tools (Read/Edit/Write) for Markdown edits. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the few file commands a skill names (`cp`, `chmod`, `date`, `grep`).
 
 ## Direct use
 
@@ -108,7 +109,7 @@ Children use their root's prefix.
 
 A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, or `[x]` in TODO.md); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`reference/git-flow.md`).
 
-**Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch> --list 'todo/<ID>-*' 'todo/<ID>.*'`). A node that is `[x]` there stopped before its merge: finish the merge and nothing else. A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
+**Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch> --list 'todo/<ID>-*' 'todo/<ID>.*'`). A node that is `[x]` there stopped before its merge: finish the merge, lint, run the parent's regression, and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
 
 ### Lanes
 

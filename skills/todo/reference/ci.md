@@ -39,10 +39,11 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
    | `go.mod` | `actions/setup-go@v5` with `go-version: stable` |
    | `Cargo.toml`, `Makefile` only, plain bash | none (the runner has them) |
 
+Whatever the CI, `/todo-continue` runs `bash .todo/check.sh` as the last gate before a root's drain, when the file exists. Red blocks the root like a failed regression.
+
 ## Local fallback (no CI; with CI only if the user asks for it as well)
 
-- `/todo-continue` runs `bash .todo/check.sh` as the last gate before a root's drain, when the file exists. Red blocks the root like a failed regression.
-- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead.
+- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead. If the hook cannot be written (an existing hook, or your environment refuses writes under `.git/`), print its two lines (`#!/usr/bin/env bash` and `bash .todo/check.sh || exit 1`) and the `chmod +x .git/hooks/pre-push` command for the user to run.
 - Without `.todo/check.sh` everything works as before: `/todo-continue` runs the lint and the regression itself.
 
 ## Report

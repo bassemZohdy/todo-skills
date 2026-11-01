@@ -25,6 +25,7 @@ Complete at most one task per invocation.
 8. **Pre-drain gates.** All must pass, otherwise do not drain:
    - Validation exited 0 **and** actually exercised something. Output such as "0 tests", "no tests found" or "collected 0 items" is a failure.
    - `git diff --stat` shows only files plausibly within Scope. Revert or ask about the rest.
+   - Self-review of the full diff: every changed hunk must trace to a sentence in Scope, nothing in Out of Scope was touched, and no debug output, commented-out code or unrelated reformatting remains. Remove what fails, or stop and ask.
    - Documentation drift check (below).
    - No secrets, `.env` files or build artifacts staged.
 9. **Drain to CHANGELOG** in this exact order, so an interrupted run can be detected and finished:

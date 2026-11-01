@@ -85,6 +85,10 @@ A claimed tree is not lost when something urgent arrives. (`[/]` lives on tree b
 
 `TODO.md` is versioned like code. The base branch carries one thing about a tree in flight: the **tree claim**, a root `State: branch <name> from <base>`. Everything else (`[/]`, `[x]`, descendants' `State:`) lives on the tree's branches and reaches the base branch at the root merge. A second agent that starts from the base branch sees the claim and skips that tree, so a tree is never run twice. Add new roots from the base branch; add children and follow-ups on the tree's own branches. The skills never fetch, pull or push, so a claim reaches other clones the way any commit does. A claim whose branch is gone is stale and is released with `/todo-update <ROOT-ID> --status ready`.
 
+## Lanes
+
+A root's `Lane:` names the agent context that works its tree. One agent walks one lane in order; `/todo-continue --all-lanes` starts one subagent per lane in its own worktree. Lane agents run the steps up to and including verify; the coordinator then refreshes each root from the base, drains and merges it, one at a time. Cross-lane order is `Depends:` only.
+
 ## Without git
 
 Steps 2, 2b, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The review step reads the files listed in `State: files:` against the task line, because there is no diff.

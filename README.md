@@ -64,13 +64,14 @@ Skills only load when their description matches, so add this to `AGENTS.md` or `
 
 ```markdown
 ## Backlog
-Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
+Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, /todo-plan, /todo-add, /todo-continue, /todo-update, /todo-status, /todo-report). Read the `todo` skill before editing TODO.md. Do not change TODO.md outside these commands.
 ```
 
 ## Typical session
 
 ```text
-/todo-init
+/todo-init --plan  # pre-planning questions, optional docs/plans/PROJECT.md
+/todo-plan "goal"   # lanes + proposed tree; /todo-plan --revise when the plan is off
 /todo-add Reject expired JWTs in the auth middleware --priority P0 --ref docs/auth.md#tokens
 /todo-continue        # implements, validates, drains one task
 /clear

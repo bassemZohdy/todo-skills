@@ -128,15 +128,15 @@ Order for every node: **ready check → branch → claim (`[/]`) → build → v
 
 ## Git flow
 
-One branch per node, named `todo/<ID>-<slug>` (slug: 2-4 lowercase words from the title).
+One branch per node, named `todo/<ID>-<slug>` (slug: at most 4 words from the title, lowercase letters, digits and hyphens only, punctuation dropped).
 
-- **Branch chain.** A root branches from the base branch (`main`, `master`, `trunk` or `develop`, whichever exists) and a child from its parent's branch. When the first leaf of a tree is claimed, create every missing ancestor branch top-down, each from the previous one, then the leaf's. Record the base in the root's `State:` (`from main`).
-- **Claim on the new branch.** Create and switch to the branch first, then set `[/]` and write `State:` there, and commit `chore(backlog): start <ID>`. `--worktree` uses `git worktree add ../<repo>.todo/<ID>` instead of switching.
+- **Branch chain.** A root branches from the base branch (`main`, `master`, `trunk` or `develop`, whichever exists) and a child from its parent's branch. When the first leaf of a tree is claimed, create every missing ancestor branch top-down, each from the previous one, then the leaf's. Record the base in the root's `State:` (`from main`). Ancestors get `State: branch <name>[ from <base>]; next: build children` (no attempts) in the first leaf's claim commit, and keep it until they complete or drain; their own claim then writes the full State.
+- **Claim on the new branch.** Create and switch to the branch first, then set `[/]` and write `State:` there, and commit `chore(backlog): start <ID>`. If nothing changed since the last commit (re-claim after `ready`), skip the commit. `--worktree` uses `git worktree add ../<repo>.todo/<ID>` instead of switching.
 - **Clean tree.** `TODO.md` and `CHANGELOG.md` changes do not count as dirty: they travel to the new branch and are committed by the claim commit. Generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`) do not count either and are never staged. If any are tracked, report it once and suggest a task to untrack them. Any other change makes the tree dirty: stop and ask.
 - **Staging.** Add explicit paths only: the files the node changed, `TODO.md` and `CHANGELOG.md`. Never `git add -A` or `git add .`.
 - **Merging.** A verified node is committed on its branch and merged `--no-ff` into its **parent's** branch (local only), then its branch is deleted with `git branch -d`. The marker was already `[x]` in that commit.
 - **Root.** A verified root is drained (below). Its branch is merged into the base branch **only with `--merge`**; otherwise print the exact `git switch <base> && git merge --no-ff <branch>` for the user. Then `git branch -d` it. Nothing reaches the base branch until the root is verified, and the skills never commit on the base branch.
-- Backlog edits made by `/todo-add`, `/todo-update` and `/todo-init` stay uncommitted until the next claim commit carries them. Add tasks while on the base branch so every branch starts from the same backlog.
+- Backlog edits made by `/todo-add`, `/todo-update` and `/todo-init` stay uncommitted until the next claim commit carries them. `TODO.md` lives on the branch where the work happens and reaches the base branch at the root merge, so add new **roots** while on the base branch (so every branch starts from the same backlog). Children (`--parent`) and `--from` follow-ups may be added on the tree's own branches. After a merge you stay on the parent's branch; say which branch is checked out in the report.
 - Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert`.
 
 ## CHANGELOG entry (written only by a root drain)

@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `todo-add` checks that the requested behavior does not already exist, and `todo-continue` stops and asks when new tests already pass instead of adding tests that pass at once.
+- Ancestor `State:` is defined (branch only, written in the first leaf's claim commit); an unchanged re-claim skips the commit; slugs are limited to letters, digits and hyphens; `todo-status` shows "resume" for an active node; the report names the checked-out branch.
+- The no-git `State:` rolls child `files:` and `docs:` up to the root, and a missing-symbol error counts as a valid red.
 - Branch first: `todo-continue` creates the branch chain (ancestors top-down), then sets `[/]` and commits the claim on the new branch. `/todo-update --status in-progress` does the same.
 - Backlog and generated files do not make the tree dirty. Commits stage explicit paths only; the base branch is never committed on. Merged child branches are deleted with `git branch -d`.
 - Completion order is fixed: set `[x]`, lint, commit, merge into the parent.

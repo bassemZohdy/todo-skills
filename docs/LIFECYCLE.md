@@ -69,6 +69,10 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Release is separate | The skills never tag, push or move `[Unreleased]` to a version |
 | Hotfix | A `P0` `FIX` root branches from the base branch like any other root |
 
+## Where the backlog lives
+
+`TODO.md` is versioned like code. The claim commit puts the backlog on the node's branch, so the state of a tree (`[/]`, `[x]`, `State:`) lives on that tree's branches and reaches the base branch at the root merge. Add new roots from the base branch; add children and follow-ups on the tree's own branches.
+
 ## Without git
 
 Steps 2, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The self-review gate reads the files listed in `State: files:` against the task line, because there is no diff.

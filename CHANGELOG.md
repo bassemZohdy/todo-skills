@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Claims are read from the base branch (`git show <base>:TODO.md`), so a tree branch also sees other trees as claimed. Releasing a live claim needs an explicit yes, a clean tree and a base-branch release commit.
 - `todo-add` checks that the requested behavior does not already exist, and `todo-continue` stops and asks when new tests already pass instead of adding tests that pass at once.
 - Ancestor `State:` is defined (branch only, written in the first leaf's claim commit); an unchanged re-claim skips the commit; slugs are limited to letters, digits and hyphens; `todo-status` shows "resume" for an active node; the report names the checked-out branch.
 - The no-git `State:` rolls child `files:` and `docs:` up to the root, and a missing-symbol error counts as a valid red.

@@ -58,7 +58,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
       fail("I3", "line " NR ": " lab ": backticks must hold a runnable shell command, not code or prose: " c)
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
-    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/)
+    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|twine|gem) +(publish|push)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first }
@@ -73,6 +73,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
   if (filt > 0) warn("W2", "line " NR ": " lab ": Done when selects tests by name filter; some runners exit 0 when nothing matches, so target a test id or path that errors when missing")
 }
 BEGIN { cur = 0; prevlvl = -1; nn = 0 }
+{ sub(/\r$/, "") }
 /^[ \t]*$/ { next }
 /^# / { h1++; if ($0 != "# Active Backlog") fail("I6", "line " NR ": first heading must be exactly: # Active Backlog"); next }
 /^## / { h2++; if ($0 !~ /Task Tree$/) fail("I6", "line " NR ": section heading must end in Task Tree (found: " $0 ")"); next }

@@ -116,14 +116,14 @@ The marker is the status, and each command acts only as that status allows (diag
 
 | Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` |
 |---|---|---|---|
-| `[ ]` workable | branch, claim, build, verify, complete | `in-progress`, `blocked`, `drop`, edits | allowed |
+| `[ ]` workable | branch, claim, build, review, verify, complete | `in-progress`, `blocked`, `drop`, edits | allowed |
 | `[ ]` waiting | skip, say what it waits for | `blocked`, `drop`, edits | allowed |
 | `[ ]` in a tree claimed by another branch | skip, report the branch | `ready` on the root releases the claim | refused |
 | `[/]` | resume from `State:` | `ready`, `blocked`, edits; no `drop` | refused |
 | `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
 | `[x]` | never touches | `revert` only | refused |
 
-Order for every node: **ready check → branch → (first node of a tree: tree claim published to the base) → claim `[/]` → build → verify → complete `[x]` → merge into parent**. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
+Order for every node: **ready check → branch → (first node of a tree: tree claim published to the base) → claim `[/]` → build → review → verify → complete `[x]` → merge into parent**. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
 
 **Ready check.** Lint passes, the node is workable, its `Ref:` exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
 

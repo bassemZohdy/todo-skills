@@ -3,7 +3,7 @@
 The marker on each task in `TODO.md` is its status. Every command reads the marker first and does only what that status allows. The git branch is created **before** the status changes, and nothing reaches the base branch until a whole tree is verified.
 
 ```text
-        ready check            branch first          verify                 complete
+        ready check            branch first       review + verify           complete
  [ ] ───────────────► [ ] ───────────────► [/] ───────────────► [/] ───────────────► [x] ──► merged into parent
  Ready   workable?    create branch,      In progress    tests + regression    marker, commit,     (root: drained to
          baseline     switch, then        (claim commit) pass, gates pass      merge --no-ff        CHANGELOG, merged
@@ -33,7 +33,8 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 | 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name |
 | 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
 | 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
-| 5 | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
+| 5 | **Review** | `[/]` | Before any test run: read the whole diff against the task line and `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). A fresh-context reviewer subagent does this when one exists |
+| 5b | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
 | 6 | **Complete** | `[/]` → `[x]` | Set the marker, delete `State:`, lint, then commit the node's files |
 | 7 | **Merge** | `[x]` | `git merge --no-ff` into the parent's branch, then `git branch -d` the child branch |
 | 8 | **Integrate** (parents) | `[ ]` → `[/]` → `[x]` | Once every child is `[x]` the parent is workable. Same steps, but build is a cross-child integration check |
@@ -66,11 +67,11 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Integrate continuously | Roots merge the latest base in and rerun the full regression before landing, so the tested code is the code that lands |
 | Keep the build green, fix or revert at once | A red baseline blocks the node before work starts. Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert` |
 | Definition of Ready | The ready check above, repeated by `/todo-add` when it writes a task |
-| Definition of Done | The project's own `Definition of Done` heading plus the gates: tests, regression, docs drift, self-review, no secrets, no tracked build output, no stray `TODO`/`FIXME` |
+| Definition of Done | The project's own `Definition of Done` heading plus the gates: tests, regression, docs drift, and the review step (hunks trace to the task, no secrets, no tracked build output, no stray `TODO`/`FIXME`) |
 | Red, green, refactor | Build step. Containers run an integration check instead |
 | Test levels | Leaf: unit tests for its `Done when`. Parent: integration check of its children. Root: the full regression suite |
 | Regression testing | The `regression:` command, or the full suite, against a baseline taken before coding |
-| Lightweight review | The self-review gate, optional `--isolated` fresh-context review, and the human merge into base. Teams can open a pull request from the root branch instead of merging locally |
+| Lightweight review | The review step (a fresh-context reviewer when a subagent tool exists) and the human merge into base. Teams can open a pull request from the root branch instead of merging locally |
 | Traceability | The ID is in the branch name, commit body (`Refs:`) and CHANGELOG entry. Put the ID in new test names or comments |
 | CI parity | `/todo-init` reports the test command found in CI config, so the regression command matches what CI runs |
 | Release is separate | Only `/todo-release` moves `[Unreleased]` to a version, after you confirm it. No skill tags, pushes or touches the network |
@@ -86,4 +87,4 @@ A claimed tree is not lost when something urgent arrives. (`[/]` lives on tree b
 
 ## Without git
 
-Steps 2, 2b, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The self-review gate reads the files listed in `State: files:` against the task line, because there is no diff.
+Steps 2, 2b, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The review step reads the files listed in `State: files:` against the task line, because there is no diff.

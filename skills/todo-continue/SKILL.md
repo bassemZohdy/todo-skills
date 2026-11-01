@@ -16,7 +16,7 @@ Complete at most one node per invocation. Flags (all optional):
 
 ## Steps
 
-Lifecycle: ready check → branch → claim → build → verify → complete → merge (core, "Lifecycle by status").
+Lifecycle: ready check → branch → claim → build → review → verify → complete → merge (core, "Lifecycle by status").
 
 1. **Git mode and invariants.** Check git (core, "Git mode"). Run the lint script when present. If it fails only on the active node's `State:` line, show the corrected line and ask to fix it; otherwise stop. The markers are the status of every node.
 2. **Select by status.** In git mode first do the core's "Interrupted work comes first" check: finish a pending merge of an `[x]` child (then lint and run the parent's regression on the parent branch; block the parent if red; report and stop), or resume an unmerged `[/]` branch.
@@ -27,17 +27,19 @@ Lifecycle: ready check → branch → claim → build → verify → complete �
 5. **Claim.** On the node's branch set `[/]` and replace the whole `State:` with `attempts 0/3; baseline <n> passing; branch <name> [from <base>]; next: read docs` (no git: `attempts 0/3; baseline <n> passing; no git; files: -; next: read docs`). In git mode commit `chore(backlog): start <ID>` (skip if nothing changed). Nothing but backlog files changes before this.
 6. **Read before write.** Read the `Ref:` doc and the README/doc sections that govern the area, then only the code the node needs. If the Ref is missing or contradicts the task line, stop and ask. With `--plan` and no `plan approved` in `State:`: print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed; awaiting approval`, and **stop**; the next `/todo-continue` counts as approval.
 7. **Build.**
-   - **Resume:** if the code and tests already exist, skip red and go to Verify; compare against the `baseline` recorded in `State:`. Commit uncommitted earlier work only at step 10.
+   - **Resume:** if the code and tests already exist, skip red and go to Review; compare against the `baseline` recorded in `State:`. Commit uncommitted earlier work only at step 10.
    - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason, quoting the failing assertion. If they already pass, stop and ask: the work may exist or the test is vacuous (offer `/todo-update <ID> --status drop` or a tighter `Done when`). `TASK` refactors get characterization tests.
    - **Green:** implement only what the task line says. Adjacent findings are collected for the report, not fixed or added to TODO.md. No new `TODO`/`FIXME`. In no-git mode record touched files in `State: files:`.
    - **Refactor** with tests green.
    - **Parent (integration step):** `reference/verification.md`, protocol step 8. No feature code.
-8. **Verify.** Run in full and unnarrowed: the `Done when` commands, then the regression. Update `State:` after every cycle ("Test failures").
-9. **Gates.** All must pass:
+8. **Review** (before any test run). Read the whole change with `git diff` (no git: re-read each file in `State: files:`) against the task line and its `Done when`:
+   - Every hunk traces to the task line; no debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
+   - The tests assert the `Done when` criteria (not vacuous, nothing weakened, ID in the new test names).
+   - No generated files, secrets or `.env`; only plausible files changed.
+   - When a subagent tool exists, have a fresh-context reviewer do this, given only the task lines, the Ref path and the diff, and report findings. Fix what is valid (at most 2 rounds). The reviewer never edits `TODO.md` and never runs the tests.
+9. **Verify.** Run in full and unnarrowed: the `Done when` commands, then the regression. Update `State:` after every cycle ("Test failures"). Then the gates, all of which must pass:
    - Done when exited 0 **and** really ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression is green with no fewer passing tests than the baseline and none deleted or skipped.
    - Every item of the project's Definition of Done, if one exists.
-   - Self-review: every changed hunk traces to the task line; no debug output, commented-out code or unrelated reformatting. Review `git diff` (no git: re-read each file in `State: files:`).
-   - Only plausible files changed; no generated files, secrets or `.env` staged.
    - Documentation drift check (below).
 10. **Complete, in this order.**
     1. **Child or parent:** set `[x]`, delete `State:`, run the lint script. **Root:** skip this (a root is never `[x]`; item 4 drains it and lints).

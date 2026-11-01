@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
+- Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
 - Interrupted work is recovered: `/todo-continue` scans the tree's unmerged branches first, finishing the merge of an `[x]` child or resuming a `[/]` node.
 - A root merges the latest base branch in and reruns `Done when` and the full regression before the drain, so the tested code is the code that lands.
 - A failed claim fast-forward re-reads the base's claim before retrying and aborts if another branch took the tree.

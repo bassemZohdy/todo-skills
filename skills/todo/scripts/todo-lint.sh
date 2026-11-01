@@ -140,7 +140,15 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
       else fail("I3", "line " NR ": " id ": Links accepts only Ref, Depends and From (found: " p ")")
     }
   }
-  else if (key == "State") nst[cur] = 1
+  else if (key == "State") {
+    nst[cur] = 1
+    m = split(val, sp, "; ")
+    for (k = 1; k <= m; k++) {
+      kw = trim(sp[k]); sub(/[ :].*/, "", kw)
+      if (kw == "attempts" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
+        if (seenst[cur, kw]++) fail("I3", "line " NR ": " id ": State repeats the item " kw "; a later claim must replace the State line")
+    }
+  }
   else if (key == "Blocked") {
     nbl[cur] = 1
     if (split(val, bp, " → ") < 3) fail("I3", "line " NR ": " id ": Blocked must read: reason → command error → action required")

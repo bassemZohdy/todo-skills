@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Review pass: `Ref:` is optional everywhere (the ready check only checks a given path); `--plan` approval uses `next: plan proposed` instead of an off-grammar State item; a node's commit always includes `TODO.md`; lane agents skip the base switch and tree claim; a broken test command stops like a red baseline; root merge message defined; guardrail 6 no longer contradicts `/todo-release`.
+- Resume treats changes that fit the task line as the node's own work; a missing baseline means the regression must be fully green. Lane coordinator keeps the main checkout on the base and removes worktrees before deleting branches. Refresh merge message defined; `--plan` commit named.
 - The regression command comes first from a README `Tests:` line, which `/todo-init` offers to add.
 - `/todo-add --lane <name>`; `/todo-plan` omits `Lane: main`.
 - `/todo-report` ships an optional `todo-report.sh` (bash + sed) that fills the template with encoded text. `tests/run.sh` checks skill names, command listings and the report encoding.

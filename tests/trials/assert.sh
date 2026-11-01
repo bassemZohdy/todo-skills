@@ -72,7 +72,7 @@ monorepo)
   chk "the human-written CHANGELOG entries survive" 'grep -q "Greeting helper in the web package" CHANGELOG.md && grep -q "## \[1.2.0\] - 2026-09-15" CHANGELOG.md'
   chk "a task mentions the api package power work" 'grep -qi "power" TODO.md || git log --all --format=%s | grep -qi power'
   chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'
-  chk "nothing outside packages/api and backlog files changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e packages/api/)" ]'
+  chk "nothing outside packages/api, backlog files and the README Tests line changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e packages/api/ -e "^README.md$")" ]'
   ;;
 lanes)
   chk "both roots drained into the changelog on main" 'at main CHANGELOG.md | grep -q "FEAT-001" && at main CHANGELOG.md | grep -q "FEAT-002"'

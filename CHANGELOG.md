@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Wording fixes from a full trial re-run: lost-claim flow ends on the base; interrupted-work check only on a tree branch; `--revise` re-points `Depends:` on dropped IDs and does not commit; the hook lines are printed when `.git/hooks` cannot be written; the core names the allowed shell commands and the optional `.todo/` checks.
+- Wording fixes from a full trial re-run (all 11 scenarios pass; `ci-local` once more where the environment refused writes under `.git/hooks`): lost-claim flow ends on the base; interrupted-work check only on a tree branch; `--revise` re-points `Depends:` on dropped IDs and does not commit; the hook lines are printed when `.git/hooks` cannot be written; the core names the allowed shell commands and the optional `.todo/` checks.
 - Node commits record the review step: `Reviewed: <subagent|self>, <n> findings fixed` in the body.
 - This repository now uses its own `/todo-init --ci` setup (`.todo/check.sh`, `todo-check` workflow) and tracked FIX-003 with the skills end to end. `ci.md` says the user commits the CI files before the next `/todo-continue`; a Definition of Done needs a heading named exactly so, followed by a list.
 

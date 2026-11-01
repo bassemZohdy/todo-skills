@@ -109,7 +109,7 @@ Children use their root's prefix.
 
 A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, or `[x]` in TODO.md); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`reference/git-flow.md`).
 
-**Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch> --list 'todo/<ID>-*' 'todo/<ID>.*'`). A node that is `[x]` there stopped before its merge: finish the merge, lint, run the parent's regression, and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
+**Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch, or the base for a root> --list 'todo/<ID>-*' 'todo/<ID>.*'`). A node that is `[x]` there stopped before its merge: finish the merge, lint, run the parent's regression, and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
 
 ### Lanes
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
 ### Added
 
 - CI integration with a local fallback: `/todo-init --ci` writes `.todo/check.sh` (backlog lint + tests) and a vendored lint, adds a GitHub Actions workflow (or a GitLab job on a yes, or prints the step for other CI), and without CI offers a `pre-push` hook. `/todo-continue` runs `.todo/check.sh` as the last gate before a root lands. Trial scenarios `ci-github` and `ci-local`.
@@ -57,5 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bassemZohdy/todo-skills/releases/tag/v0.1.0

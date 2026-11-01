@@ -30,6 +30,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 |---|---|---|---|
 | 1 | **Ready check** | `[ ]` | Lint passes, the node is workable, the `Ref:` exists, its `Done when` is a runnable command, the working tree is clean, and the regression baseline is green |
 | 2 | **Branch** | `[ ]` | Create `todo/<ID>-<slug>`, creating any missing ancestor branches top-down first (root from the base branch, each child from its parent). Switch to it |
+| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name. `--sync` also pushes |
 | 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
 | 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
 | 5 | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
@@ -47,6 +48,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 |---|---|---|---|---|
 | `[ ]` workable | Branches, claims, builds, verifies, completes | `in-progress`, `blocked`, `drop`, field edits | Allowed | Lists it, marks the next one |
 | `[ ]` waiting | Skips and says what it waits for | Same as above | Allowed | Shows what it waits for |
+| `[ ]` in a tree claimed by another branch | Skips and reports the branch | `ready` on the root releases the claim | Refused | Shows `claimed by <branch>`, stale if the branch is gone |
 | `[/]` | Resumes from `State:` and `git status` | `ready` (abandons, keeps the branch), `blocked`, field edits. No `drop` | Refused | Shows branch, State, changes |
 | `[!]` | Skips and reports the `Blocked:` line | `ready`, `drop`, field edits | Refused | Lists reason and action |
 | `[x]` | Never touches it | `revert` only | Refused | Counts it in children done/total |
@@ -56,6 +58,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Practice | How it shows up |
 |---|---|
 | Short-lived branches, small changes (DORA: hours, few active branches) | Sizes S and M, one branch per node, at most 3 levels, so at most 3 branches are open |
+| Visible work in progress, no duplicate work | The tree claim on the base branch names the owning branch |
 | Tests pass before anything merges (DORA: protected trunk) | Nothing merges to the parent without `Done when` and regression green. Nothing merges to base before its root is verified, and then only on `--merge` |
 | Keep the build green, fix or revert at once | A red baseline blocks the node before work starts. Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert` |
 | Definition of Ready | The ready check above, repeated by `/todo-add` when it writes a task |
@@ -71,8 +74,8 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 
 ## Where the backlog lives
 
-`TODO.md` is versioned like code. The claim commit puts the backlog on the node's branch, so the state of a tree (`[/]`, `[x]`, `State:`) lives on that tree's branches and reaches the base branch at the root merge. Add new roots from the base branch; add children and follow-ups on the tree's own branches.
+`TODO.md` is versioned like code. The base branch carries one thing about a tree in flight: the **tree claim**, a root `State: branch <name> from <base>`. Everything else (`[/]`, `[x]`, descendants' `State:`) lives on the tree's branches and reaches the base branch at the root merge. A second agent that starts from the base branch sees the claim and skips that tree, so a tree is never run twice. Add new roots from the base branch; add children and follow-ups on the tree's own branches. Claims are local to the repository and its worktrees unless `--sync` pushes the base branch; a claim whose branch is gone is stale and is released with `/todo-update <ROOT-ID> --status ready`.
 
 ## Without git
 
-Steps 2, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The self-review gate reads the files listed in `State: files:` against the task line, because there is no diff.
+Steps 2, 2b, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The self-review gate reads the files listed in `State: files:` against the task line, because there is no diff.

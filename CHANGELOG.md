@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tree claim: the first claim in a tree is published to the base branch by a claim-only commit and a fast-forward, naming the owning branch, so no other agent starts the same tree. `--sync` pushes it; `/todo-update <ROOT-ID> --status ready` releases a stale claim; `/todo-status` shows claimed trees.
 - `docs/LIFECYCLE.md`: status model, step table, command-by-status matrix and the SDLC practices applied (short-lived branches, Definition of Ready and Done, red-green-refactor, regression, CI parity, revert path).
 - Lint rejects backticks that hold code or prose instead of a shell command (I3), and warns on presence-only checks (W1) and name-filtered tests (W2).
 - "Writing a Done when" guidance, and `n/a (manual)` for manual blocks.

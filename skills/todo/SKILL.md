@@ -38,7 +38,7 @@ At the start of every command run `git rev-parse --is-inside-work-tree`.
 - **Git repo:** git is the version store. Each node of the tree works on its own branch or worktree (see "Git flow").
 - **Not a git repo:** warn **once per command**, in one sentence: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then continue in **no-git mode**: skip every git step, track progress in `State:`, record the files you touched in `State:` for the scope check, and still update markers and drain to CHANGELOG.md. Everything else is unchanged, including verification.
 
-Never push, tag, force, reset hard or clean, in either mode.
+Never tag, force, reset hard or clean, in either mode. Never push, except the opt-in `--sync` described under "Tree claim".
 
 ## TODO.md schema
 
@@ -106,7 +106,7 @@ Children use their root's prefix.
 
 ## Which node is next
 
-A node is **workable** when all hold: it is `[ ]`; every child is `[x]` (a leaf has none); every `Depends:` ID is satisfied; no ancestor is `[!]`. A `Depends:` ID is satisfied when it appears in CHANGELOG.md (as an entry ID or after `Includes:`) or is `[x]` in TODO.md.
+A node is **workable** when all hold: it is `[ ]`; every child is `[x]` (a leaf has none); every `Depends:` ID is satisfied; no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch (see "Tree claim"). A `Depends:` ID is satisfied when it appears in CHANGELOG.md (as an entry ID or after `Includes:`) or is `[x]` in TODO.md.
 
 Order: roots P0 → P1 → P2, then by ID. Within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
 
@@ -118,11 +118,12 @@ The marker is the status, and each command acts only as that status allows. The 
 |---|---|---|---|
 | `[ ]` workable | branch, claim, build, verify, complete | `in-progress`, `blocked`, `drop`, edits | allowed |
 | `[ ]` waiting | skip, say what it waits for | as above | allowed |
+| `[ ]` in a tree claimed by another branch | skip, report the branch | `ready` on the root releases the claim | refused |
 | `[/]` | resume from `State:` | `ready` (keeps the branch), `blocked`, edits; no `drop` | refused |
 | `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
 | `[x]` | never touches | `revert` only | refused |
 
-Order for every node: **ready check → branch → claim (`[/]`) → build → verify → complete (`[x]`) → merge into parent**. The branch always exists before the status changes. Ancestors keep `[ ]` while a descendant is active.
+Order for every node: **ready check → branch → (first node of a tree: tree claim, published to the base branch) → claim (`[/]`) → build → verify → complete (`[x]`) → merge into parent**. The branch always exists before the status changes. Ancestors keep `[ ]` while a descendant is active.
 
 **Ready check.** Lint passes, the node is workable, its `Ref:` exists, its `Done when` holds a runnable command, the working tree is clean (git mode only; skipped in no-git mode), and the regression baseline is green.
 
@@ -131,11 +132,14 @@ Order for every node: **ready check → branch → claim (`[/]`) → build → v
 One branch per node, named `todo/<ID>-<slug>` (slug: at most 4 words from the title, lowercase letters, digits and hyphens only, punctuation dropped).
 
 - **Branch chain.** A root branches from the base branch (`main`, `master`, `trunk` or `develop`, whichever exists) and a child from its parent's branch. When the first leaf of a tree is claimed, create every missing ancestor branch top-down, each from the previous one, then the leaf's. Record the base in the root's `State:` (`from main`). Ancestors get `State: branch <name>[ from <base>]; next: build children` (no attempts) in the first leaf's claim commit, and keep it until they complete or drain; their own claim then writes the full State.
+- **Tree claim (so no one runs the same tree twice).** When the first node of a tree is claimed (the root has no `branch` item in its `State:`), right after creating the root branch make a claim commit on it that changes only the backlog files: the root gets `State: branch todo/<ID>-<slug> from <base>; next: build children`, and any pending backlog edits (new tasks) go in with it. Commit it as `chore(backlog): claim <ROOT-ID> on <branch>`. Then **advance the base branch to that commit by fast-forward** (it is the only commit ahead, so it cannot conflict): run `git merge --ff-only <root branch>` in the worktree where the base branch is checked out (`git worktree list`), or `git switch <base>` first if you are in the only worktree, then return to the root branch. If the fast-forward fails because the base moved, rebase the root branch (it holds only the claim commit) onto the base and retry. The base branch now shows the tree as claimed, with the branch name. Only the root is published; the `[/]` marker and descendants' `State:` stay on the tree's branches.
+  - A root whose `State:` names a branch is **claimed**. Its tree is workable only when the branch you are on is one of its branches (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). From any other branch skip the tree and report `claimed by <branch>`; if that branch no longer exists locally or on the remote, call the claim stale and tell the user to release it with `/todo-update <ROOT-ID> --status ready`. To resume your own tree, `git switch` to its branch first.
+  - With a remote and `--sync` on `/todo-continue` or `/todo-update --status in-progress`: `git fetch` before the ready check, and after the fast-forward `git push <remote> <base>` (the only push the skills make; never force). If the push is rejected, fetch, and if the root is now claimed by another branch, return to the base, `git branch -D` the new root branch (it holds only your unpublished claim commit) and stop. Without `--sync`, claims are visible only to clones that share these refs (worktrees of this repository); when a remote exists, say so once.
 - **Claim on the new branch.** Create and switch to the branch first, then set `[/]` and write `State:` there, and commit `chore(backlog): start <ID>`. If nothing changed since the last commit (re-claim after `ready`), skip the commit. `--worktree` uses `git worktree add ../<repo>.todo/<ID>` instead of switching.
 - **Clean tree.** `TODO.md` and `CHANGELOG.md` changes do not count as dirty: they travel to the new branch and are committed by the claim commit. Generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`) do not count either and are never staged. If any are tracked, report it once and suggest a task to untrack them. Any other change makes the tree dirty: stop and ask.
 - **Staging.** Add explicit paths only: the files the node changed, `TODO.md` and `CHANGELOG.md`. Never `git add -A` or `git add .`.
 - **Merging.** A verified node is committed on its branch and merged `--no-ff` into its **parent's** branch (local only), then its branch is deleted with `git branch -d`. The marker was already `[x]` in that commit.
-- **Root.** A verified root is drained (below). Its branch is merged into the base branch **only with `--merge`**; otherwise print the exact `git switch <base> && git merge --no-ff <branch>` for the user. Then `git branch -d` it. Nothing reaches the base branch until the root is verified, and the skills never commit on the base branch.
+- **Root.** A verified root is drained (below). Its branch is merged into the base branch **only with `--merge`**; otherwise print the exact `git switch <base> && git merge --no-ff <branch>` for the user. Then `git branch -d` it. Apart from the tree claim, the merge of a verified root and a user-requested release, nothing reaches the base branch, and the skills never make other commits on it.
 - Backlog edits made by `/todo-add`, `/todo-update` and `/todo-init` stay uncommitted until the next claim commit carries them. `TODO.md` lives on the branch where the work happens and reaches the base branch at the root merge, so add new **roots** while on the base branch (so every branch starts from the same backlog). Children (`--parent`) and `--from` follow-ups may be added on the tree's own branches. After a merge you stay on the parent's branch; say which branch is checked out in the report.
 - Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert`.
 
@@ -215,6 +219,6 @@ If README.md, CONTRIBUTING.md or a file in `docs/` has a heading `Definition of 
 3. No node is closed without running its Done when command and its regression run and seeing both pass.
 4. At most one active task at any time.
 5. CHANGELOG.md is append-only apart from the `[Unreleased]` insertions made by a root drain. Never rewrite released sections.
-6. Never push, tag, or cut a release. Moving `[Unreleased]` to a version is a human decision.
-7. Nothing is merged into the base branch before its root is verified, and the skills never commit on the base branch.
+6. Never tag or cut a release, and never push except the opt-in `--sync` of a tree claim. Moving `[Unreleased]` to a version is a human decision.
+7. The base branch receives only tree claims (fast-forward), user-requested releases and the merge of a verified root. Nothing else reaches it before its root is verified.
 8. When a rule here conflicts with a user's explicit instruction, state the conflict and ask. Do not silently break the rule.

@@ -13,7 +13,7 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 ## Default report
 
 1. Run the invariant check and give the result in one line.
-2. **Tree**: each root with marker, size, title, `children done/total` and its priority; children indented beneath it as `marker ID size title`. Collapse fully `[x]` subtrees to the count.
+2. **Tree**: each root with marker, size, title, `children done/total`, its priority and, when claimed, `claimed by <branch>` (marked stale if that branch no longer exists locally or on the remote); children indented beneath it as `marker ID size title`. Collapse fully `[x]` subtrees to the count.
 3. **Active**: the `[/]` node and its ancestors (shown as in progress), its `State:` line, and in git mode whether `git status` shows changes and which branch is checked out. In no-git mode show its `State:` and `files:` only.
 4. **Next**: if a `[/]` node exists, `/todo-continue` resumes it: show "resume <ID>". Otherwise show the first workable `[ ]` node (ID, title, Done when command). If none, say what blocks the tree.
 5. **Blocked**: each `[!]` node with its `Blocked:` reason and action required.

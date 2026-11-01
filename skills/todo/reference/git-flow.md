@@ -4,7 +4,7 @@ Loaded by `/todo-continue` and by `/todo-update` when it claims or releases. Par
 
 ## Git flow
 
-One branch per node: `todo/<ID>-<slug>`. Slug: the title lowercased, punctuation turned into spaces, the words a, an, the, to, of, and, for, with dropped, the first 4 words left, joined with hyphens (`calc.py` becomes `calc-py`; empty means `task`).
+One branch per node: `todo/<ID>-<slug>`. Slug: the title lowercased, punctuation turned into spaces, the words a, an, the, to, of, and, for, with dropped, the first 4 words left, joined with hyphens (`calc.py` counts as two words, `calc` and `py`; empty means `task`).
 
 - **Base branch.** The first that exists of `main`, `master`, `trunk`, `develop`, unless the user names another.
 - **Branch chain.** A root branches from the base, a child from its parent's branch. When the first leaf of a tree is claimed, create the missing ancestor branches top-down, then the leaf's. Ancestors get `State: branch <name>[ from <base>]; next: build children` until they complete.
@@ -12,7 +12,7 @@ One branch per node: `todo/<ID>-<slug>`. Slug: the title lowercased, punctuation
   1. Before creating it, read `git show <base>:TODO.md`. If the root's `State:` already names a branch, stop and report it. Never reuse a `todo/<ID>-…` branch that is not yours.
   2. Commit only backlog files on the root branch as `chore(backlog): claim <ROOT-ID> on <branch>`: the root gets `State: branch todo/<ID>-<slug> from <base>; next: build children` (leaf root: `next: start <ID>`), plus pending backlog edits (new tasks). The marker stays `[ ]`.
   3. Fast-forward the base to it: `git merge --ff-only <root branch>` in the worktree where the base is checked out (or `git switch <base>` first, then switch back).
-  4. If that fails, read the base's claim again. Another branch took the tree: delete your new root branch with `git branch -D` (the only forced delete the skills make), report who has it, and stop. Otherwise stop and tell the user the base moved or refused the claim; they can rerun, or keep going with an unpublished claim.
+  4. If that fails, read the base's claim again. Another branch took the tree: from the base branch, delete your new root branch with `git branch -D` (the only forced delete the skills make), report who has it, and stop. Otherwise (the base moved or refused the claim) stop and tell the user; they can rerun.
 - **Read claims from the base.** A tree branch only knows its own claim, so take every root's claim from `git show <base>:TODO.md` too. A root is **claimed** when its `State:` there names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). Otherwise skip it and report `claimed by <branch>`. If that branch no longer exists in this clone, the claim is stale: `/todo-update <ROOT-ID> --status ready` releases it.
 - **Sharing is git's job.** The claim is a local commit. The skills never fetch, pull or push; how a claim reaches other clones is your usual flow.
 - **Claim on the node's branch.** Switch to the branch first, then set `[/]`, write `State:`, commit `chore(backlog): start <ID>` (skip if nothing changed). `--worktree` makes the branch and claim commit first, then `git worktree add ../<repo>.todo/<ID> <branch>`.

@@ -74,6 +74,8 @@ A task is **2 to 4 lines**: what to do, how it is validated, and optional links 
 | `State:` | Optional. `attempts n/3; [baseline <n> passing;] [hyp: <one line>;] branch todo/<ID>-<slug> [from <base>]; next: <step>`. Each item at most once, in this order; a later claim **replaces** the earlier State line, it never adds to it. Written by todo-continue. Survives a context reset. Items are separated by `; `: `attempts`, `baseline`, `hyp`, `branch`, `no git`, `files`, `docs`, `next`. In no-git mode a root also keeps `files: <paths>; docs: <paths>` rolled up from its completed children (a leaf root keeps its own), written right after its `Done when`/`Links`, until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State. `reason → \`command\` error (max 5 lines) → action required`. A manual block by the user has no failing command: write `n/a (manual)` in the middle part |
 
+Layout: one blank line between `## 🌳 Task Tree` and the first task, no blank lines between tasks, and no placeholder text in an empty tree (the heading alone is valid). A drain removes the subtree and its lines only, leaving no extra blank line.
+
 Only these four fields exist. A task never has both State and Blocked. Anything longer than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`, for example `docs/plans/FEAT-002-refresh.md`). If a task needs a longer description, the task is too big: split it.
 
 Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged into its parent, waiting for its root to drain.
@@ -164,7 +166,7 @@ Loaded only when a command needs them, from this skill's `reference/` folder (`.
 | I9 | No dependency cycles, counting the implicit "parent waits for its children" edges |
 | I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, `curl`/`wget` piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=` |
 
-**Lint script.** If `scripts/todo-lint.sh` exists in this skill's folder (`../todo/scripts/todo-lint.sh` relative to a command skill), run `bash <that path>` from the repository root. It is read-only, needs only bash, awk and grep, and checks I1-I10 deterministically. Its result wins over your own reading. If the script is absent, check by reading the files.
+**Lint script.** (`TODO_LINT_STRICT=1` makes the unfamiliar-runner warning W3 a failure, for teams that want an allowlist only.) If `scripts/todo-lint.sh` exists in this skill's folder (`../todo/scripts/todo-lint.sh` relative to a command skill), run `bash <that path>` from the repository root. It is read-only, needs only bash, awk and grep, and checks I1-I10 deterministically. Its result wins over your own reading. If the script is absent, check by reading the files.
 
 Repair automatically only I5 (finish an interrupted drain by deleting the listed IDs from TODO.md). For any other violation, report it, change nothing, and ask the user how to proceed.
 

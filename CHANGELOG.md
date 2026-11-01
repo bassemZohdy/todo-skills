@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Without `--merge`, a finished root prints both the local merge command and the push-and-pull-request steps; neither is run.
 - `/todo-release`: proposes a semantic version from the `[Unreleased]` entries and, after confirmation, writes the dated section. Prints the tag and push commands without running them.
-- `.claude-plugin/plugin.json` so the repository can be installed as a plugin (untested; commands are namespaced when installed that way).
+- `.claude-plugin/plugin.json` and `marketplace.json`: installable as a plugin (`claude plugin validate` passes and a local install copies all skills with their references and scripts; commands are namespaced). README install notes for plugin and other agents.
+- Trial scenarios `race-claim-conflict`, `race-claim-benign` and `release`, run by fresh agents and passing.
+- `TODO_LINT_STRICT=1` turns the unfamiliar-runner warning W3 into a failure.
+- Layout rules for `TODO.md`, monorepo `regression:` guidance, and the rule that plan files stay after a drain.
 - Hotfix path in `docs/LIFECYCLE.md`.
 - Lint warning W3: `Done when` that runs something other than a known test, lint, typecheck or build runner.
 - `tests/trials/`: repeatable agent scenarios (`setup.sh` builds a starting state with plain git, `assert.sh` checks the result) for interrupted merges, refresh from the base and claims by another branch.

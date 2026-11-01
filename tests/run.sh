@@ -29,6 +29,10 @@ for f in "$fx"/*.md; do
   fi
 done
 
+# Strict mode: an unfamiliar runner fails instead of warning.
+out="$(TODO_LINT_STRICT=1 bash "$lint" "$fx"/W3-*.md "$changelog" 2>&1)"
+if [ $? -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL W3:"; then ok "strict mode fails on an unfamiliar runner"; else bad "strict mode: $out"; fi
+
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi

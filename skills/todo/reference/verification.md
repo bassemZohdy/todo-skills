@@ -25,7 +25,8 @@ An attempt is a verification run that fails **after** you started implementing. 
 - Criteria first (what a reader can check), then at least one command in backticks that is a **runnable shell command**. Not code, not prose, not an expression.
 - It must run tests that exercise the behavior. Presence checks (`grep`, `ls`, `test -f`) alone are weak and the lint warns (W1). Pair them with a test.
 - Target a test id or file path, not a name filter. Runners differ on what happens when nothing matches: a name filter (`-k`, `-run`, `--filter`, `-t`) can exit 0 with zero tests on some versions, which the lint warns about (W2). Prefer `python3 -m unittest tests.test_calc.CalcTest.test_multiply`, `pytest tests/test_x.py::test_y`, `go test ./pkg -run '^TestX$' -v` and check the output shows it ran, or a path-targeted command that errors when the file or id is missing.
-- Add `regression:` only when the project's full suite is the wrong guard.
+- Add `regression:` only when the project's full suite is the wrong guard. In a monorepo give the package's own suite (`regression: \`npm test --workspace api\``), and the root's integration step still runs every affected package.
+- A plan file under `docs/plans/` stays after its root drains: it is the design record, and the CHANGELOG entry's `Ref:` keeps pointing at it.
 
 
 ## Definition of Done (optional, project-wide)

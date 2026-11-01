@@ -37,8 +37,11 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 | 6 | **Complete** | `[/]` → `[x]` | Set the marker, delete `State:`, lint, then commit the node's files |
 | 7 | **Merge** | `[x]` | `git merge --no-ff` into the parent's branch, then `git branch -d` the child branch |
 | 8 | **Integrate** (parents) | `[ ]` → `[/]` → `[x]` | Once every child is `[x]` the parent is workable. Same steps, but build is a cross-child integration check |
+| 8b | **Refresh from base** (roots) | | Merge the base branch into the root branch. If anything came in, rerun `Done when` and the full regression on the merged result. Blocks on failure |
 | 9 | **Drain** (roots) | tree removed | One CHANGELOG entry with `Includes:`, subtree deleted from TODO.md, commit |
 | 10 | **Merge to base** | | Only with `--merge`. Otherwise the exact commands are printed |
+
+If a session dies mid-way, the next `/todo-continue` first scans the tree's branches: an unmerged `[x]` branch gets its merge finished, an unmerged `[/]` branch is resumed.
 
 Any step that fails after three cycles, finds a red baseline, or needs something outside the task line ends in `[!]`.
 
@@ -60,6 +63,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Short-lived branches, small changes (DORA: hours, few active branches) | Sizes S and M, one branch per node, at most 3 levels, so at most 3 branches are open |
 | Visible work in progress, no duplicate work | The tree claim on the base branch names the owning branch |
 | Tests pass before anything merges (DORA: protected trunk) | Nothing merges to the parent without `Done when` and regression green. Nothing merges to base before its root is verified, and then only on `--merge` |
+| Integrate continuously | Roots merge the latest base in and rerun the full regression before landing, so the tested code is the code that lands |
 | Keep the build green, fix or revert at once | A red baseline blocks the node before work starts. Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert` |
 | Definition of Ready | The ready check above, repeated by `/todo-add` when it writes a task |
 | Definition of Done | The project's own `Definition of Done` heading plus the gates: tests, regression, docs drift, self-review, no secrets, no tracked build output, no stray `TODO`/`FIXME` |

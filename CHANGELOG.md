@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `tests/trials/`: repeatable agent scenarios (`setup.sh` builds a starting state with plain git, `assert.sh` checks the result) for interrupted merges, refresh from the base and claims by another branch.
 - Tree claim: the first claim in a tree is published to the base branch by a claim-only commit and a fast-forward, naming the owning branch, so no other agent starts the same tree. The skills never touch the network, so sharing claims is left to git. `/todo-update <ROOT-ID> --status ready` releases a stale claim; `/todo-status` shows claimed trees.
 - `docs/LIFECYCLE.md`: status model, step table, command-by-status matrix and the SDLC practices applied (short-lived branches, Definition of Ready and Done, red-green-refactor, regression, CI parity, revert path).
 - Lint rejects backticks that hold code or prose instead of a shell command (I3), and warns on presence-only checks (W1) and name-filtered tests (W2).
@@ -35,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Interrupted work is recovered: `/todo-continue` scans the tree's unmerged branches first, finishing the merge of an `[x]` child or resuming a `[/]` node.
+- A root merges the latest base branch in and reruns `Done when` and the full regression before the drain, so the tested code is the code that lands.
+- A failed claim fast-forward re-reads the base's claim before retrying and aborts if another branch took the tree.
 - Claims are read from the base branch (`git show <base>:TODO.md`), so a tree branch also sees other trees as claimed. Releasing a live claim needs an explicit yes, a clean tree and a base-branch release commit.
 - `todo-add` checks that the requested behavior does not already exist, and `todo-continue` stops and asks when new tests already pass instead of adding tests that pass at once.
 - Ancestor `State:` is defined (branch only, written in the first leaf's claim commit); an unchanged re-claim skips the commit; slugs are limited to letters, digits and hyphens; `todo-status` shows "resume" for an active node; the report names the checked-out branch.

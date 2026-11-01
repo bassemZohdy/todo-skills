@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `docs/LIFECYCLE.md`: status model, step table, command-by-status matrix and the SDLC practices applied (short-lived branches, Definition of Ready and Done, red-green-refactor, regression, CI parity, revert path).
+- Lint rejects backticks that hold code or prose instead of a shell command (I3), and warns on presence-only checks (W1) and name-filtered tests (W2).
+- "Writing a Done when" guidance, and `n/a (manual)` for manual blocks.
 - Task tree: dotted child IDs (`FEAT-002.1`), sizes S/M/L/XL, at most 3 levels, one `## 🌳 Task Tree` section in TODO.md.
 - Compact 2-4 line tasks with `Done when` (criteria plus exact command, optional `regression:`), `Links`, `State` and `Blocked`.
 - Verification protocol: tests first, full `Done when`, regression run against a green baseline.
@@ -31,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Branch first: `todo-continue` creates the branch chain (ancestors top-down), then sets `[/]` and commits the claim on the new branch. `/todo-update --status in-progress` does the same.
+- Backlog and generated files do not make the tree dirty. Commits stage explicit paths only; the base branch is never committed on. Merged child branches are deleted with `git branch -d`.
+- Completion order is fixed: set `[x]`, lint, commit, merge into the parent.
+- Build is red, green, refactor. Parents run a verify-only or cross-child integration step; a root's integration and drain happen in one run.
+- `Includes:` is omitted on a leaf root. `Docs:` is derived from the branch diff, or from `docs:` entries in the root's `State:` without git.
+- `State:` gains `hyp:`; an attempt is a failed run after implementation started. No-git self-review re-reads the files listed in `State:`.
+- `todo-init` falls back to the README, Makefile or CI config for the test command and reports the CI test command.
 - A parent closes only when all children are `[x]`; a finished root drains as one CHANGELOG entry ending in `Includes:`.
 - TODO.md has one section instead of In Progress, Ready and Blocked; the marker carries the state. The old `Scope`, `Validation` and `Progress` fields are now the task sentence, `Done when` and `State`.
 - Lint now accepts only the tree format.

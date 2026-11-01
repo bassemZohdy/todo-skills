@@ -2,6 +2,7 @@
 # todo-lint.sh - deterministic, read-only check of the todo invariants I1-I10.
 # Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
 # Needs only bash, awk and grep. Prints one "FAIL I<n>: ..." line per violation.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 todo="${1:-TODO.md}"
 changelog="${2:-CHANGELOG.md}"
@@ -41,8 +42,9 @@ function addrefs(i, kind, s,   x) {
     refs[i] = refs[i] " " x
   }
 }
-function checkcmds(i, s, lab,   p, q, c, n) {
-  n = 0
+function warn(code, msg) { print "WARN " code ": " msg; nwarn++ }
+function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
+  n = 0; pres = 0; filt = 0
   while ((p = index(s, "`")) > 0) {
     s = substr(s, p + 1)
     q = index(s, "`")
@@ -50,11 +52,19 @@ function checkcmds(i, s, lab,   p, q, c, n) {
     c = trim(substr(s, 1, q - 1))
     s = substr(s, q + 1)
     n++
+    split(c, w, " ")
+    first = w[1]
+    if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
+      fail("I3", "line " NR ": " lab ": backticks must hold a runnable shell command, not code or prose: " c)
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
     if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
+    if (first ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
+    if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++
   }
   if (n == 0) fail("I3", "line " NR ": " lab ": Done when has no backticked command")
+  if (n > 0 && pres == n) warn("W1", "line " NR ": " lab ": Done when only checks that text or files exist; add a command that runs the behavior")
+  if (filt > 0) warn("W2", "line " NR ": " lab ": Done when selects tests by name filter; some runners exit 0 when nothing matches, so target a test id or path that errors when missing")
 }
 BEGIN { cur = 0; prevlvl = -1; nn = 0 }
 /^[ \t]*$/ { next }

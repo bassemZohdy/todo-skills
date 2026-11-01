@@ -89,9 +89,17 @@ Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, 
 - **Closing:** a child is merged into its parent's branch when verified. A parent closes only when all children are done, and the whole tree is written to `CHANGELOG.md` as one entry ending in `Includes: FEAT-002.1, FEAT-002.1.1, ...`.
 - **Blocked** tasks replace `State:` with `Blocked: reason → \`command\` error → action required`.
 
+## Lifecycle
+
+The marker is the status, and every command acts only as that status allows. The branch is created **before** the task is marked in progress:
+
+`[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression + gates) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
+
+See [docs/LIFECYCLE.md](docs/LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
+
 ## Verification
 
-Each node: write the tests first, run `Done when` in full, then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests and runs that execute zero tests do not count. Three failed fix cycles block the node.
+Each node: write the tests first, run `Done when` in full (target a test id or path, not a name filter), then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests and runs that execute zero tests do not count. Three failed fix cycles block the node.
 
 ## Git flow and no-git mode
 
@@ -110,7 +118,7 @@ The invariants I1-I10 (one active task, unique IDs, task fields and size limits,
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
 ```
 
-Exit code 0 means I1-I10 hold. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
+Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [

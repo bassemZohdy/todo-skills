@@ -12,6 +12,7 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
 1. Check git (`git rev-parse --is-inside-work-tree`). If this is not a repository, print the one-time warning from the core skill and say the skills will run in no-git mode. Do not run `git init` unless the user asks.
 2. Look for `README.md`, `docs/`, `TODO.md`, `CHANGELOG.md`.
 3. Bootstrap only what is missing:
+   - Leave both new files uncommitted; the first claim commit carries them.
    - `TODO.md`:
      ```markdown
      # Active Backlog
@@ -46,6 +47,8 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
    | `*.csproj` / `*.sln` | `dotnet test` |
    | `Gemfile` | `bundle exec rspec` or `bundle exec rake test` |
    | `Makefile` with a `test` target | `make test` |
+
+   If no marker matches (for example plain `python3 -m unittest`), use the test command stated in README.md, CONTRIBUTING.md, the Makefile or the CI config, and name that source. If none is stated, report "unknown" and ask the user once; never invent one. Also report the test command CI runs (`.github/workflows`, `.gitlab-ci.yml`, `Jenkinsfile`), so the regression command can match it, and flag a mismatch. Suggest writing the command in README as a `Tests:` line so it is found the same way every time.
 
    Do not run the suite and do not persist the detected command anywhere. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
 5. In a git repo, report the base branch (`main`, `master`, `trunk` or `develop`) and whether the tree is clean.

@@ -20,13 +20,14 @@ Defaults: priority `P1`. Type is inferred from the description (bug, crash, regr
 6. **Size and break down.**
    - Estimate the work: `S` at most 2 files, `M` one context window and at most 5 files. Anything bigger is a parent.
    - Break a parent into children until every leaf is `S` or `M`, with at most 3 levels. Parents are `L` (children are leaves) or `XL` (grandchildren). Order the children as the work will run; add `Depends:` between siblings only when the order is not obvious.
-   - Each node gets a one-sentence "what to do" and a `Done when:` that states the criteria and at least one exact, runnable command. Prefer a targeted test (`pytest tests/test_x.py::test_y`). If the test does not exist yet, name the file the node will create. Add `regression: \`cmd\`` only when the project's full suite is not the right guard. Never write `manual`, `n/a` or a vacuous command (`true`, `echo`, `ls`).
-   - Containers get their own `Done when` (an integration test of the children together).
+   - Each node gets a one-sentence "what to do" and a `Done when:` written by the core rules in "Writing a Done when": criteria plus a runnable command that targets a test id or path, not a name filter. If the test does not exist yet, name the file or id the node will create. Add `regression: \`cmd\`` only when the project's full suite is not the right guard. Never write `manual`, `n/a`, a vacuous command, or code or prose in backticks.
+   - Containers get their own `Done when`: the integration test or, when the children's tests already cover it, the regression command.
+   - **Definition of Ready.** Do not write a node that fails the ready check you can already do: the `Ref` exists, `Depends` IDs exist, the size fits, and the command's test target is named.
    - Optional `Depends:` only for prerequisites the user named or that the breakdown requires. Each ID must exist.
    - If the request needs long design, requirements or a plan (more than 6 nodes, or detail that does not fit in 4 lines), offer to write it to `docs/plans/<ROOT-ID>-<slug>.md` and link it with `Ref:`. Create that file only if the user agrees.
 7. **Fit.** The result must stay within 120 lines in total. If it would not fit, add only the root and its first level (marked as such in your reply), say the rest is decomposed lazily when its parent becomes workable, and offer the plan file. If even that does not fit, refuse and suggest finishing or dropping something. Do not trim existing tasks.
 8. **Confirm.** For more than one node, show the proposed tree (IDs, sizes, one-line titles) and wait for confirmation before writing. Add only what the user confirms. A single new leaf needs no confirmation.
-9. Assign IDs (core ID rules) and insert: new roots ordered P0 → P1 → P2 and by ascending ID within a priority; children at the end of their parent's children. Re-run the lint script.
+9. Assign IDs (core ID rules) and insert. Do not commit; the next claim commit carries the backlog edit. Suggest adding tasks while on the base branch. new roots ordered P0 → P1 → P2 and by ascending ID within a priority; children at the end of their parent's children. Re-run the lint script.
 10. Reply with the inserted tree and its position. Do not start work.
 
 Nothing enters TODO.md unless this command created it from the user's request.

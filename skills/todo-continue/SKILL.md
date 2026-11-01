@@ -1,6 +1,6 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end. Use for /todo-continue [--plan] [--isolated] [--worktree] [--merge]. Resumes the active node or claims the next workable one, works on its own git branch or worktree (or without git, with a warning), writes tests first, runs Done when plus regression tests, merges the verified node into its parent, and drains a finished root to CHANGELOG.md as one entry. Completes at most one node per invocation.
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--isolated] [--worktree] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation.
 argument-hint: [--plan] [--isolated] [--worktree] [--merge]
 ---
 
@@ -18,52 +18,51 @@ Flags (all optional):
 
 ## State machine
 
-1. **Git mode and invariants.** Check git (core, "Git mode"); in a non-git folder print the one-time warning and continue in no-git mode. Run the invariant check (use the lint script when present).
-2. **Select.**
-   - If a node is `[/]`: read its `State:`, and in git mode run `git status` and `git diff --stat`. Resume when the changes fit the node's task line. If they fall outside it or look unrelated, stop and ask. Never revert or commit changes you did not make.
-   - Otherwise take the first **workable** node (core, "Which node is next"). In git mode the tree must be clean, otherwise stop and ask. If nothing is workable, list what blocks progress (open dependencies, `[!]` nodes) and stop.
-3. **Claim.** Set the marker to `[/]` **before touching any code**. In git mode create and switch to `todo/<ID>-<slug>` (a root from the base branch, a child from its parent's branch tip; with `--worktree` use `git worktree add`). If a branch starting with `todo/<ID>-` exists, reuse it. Write `State: attempts 0/3; branch <name> [from <base>]; next: read docs`. In no-git mode write `State: attempts 0/3; no git; files: -; next: read docs`.
-4. **Read before write.** Read the `Ref:` doc (or its anchored section) and the README/doc sections that govern the area. Then read only the code the node needs. If the Ref is missing or contradicts the task line, stop and ask.
-5. **Plan checkpoint.** With `--plan` and no `plan approved` in `State:`: print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed; awaiting approval`, and **stop**. The user's next `/todo-continue` counts as approval.
-6. **Baseline.** Run the regression command (the node's `regression:` or the project's full suite). It must be green. If it is red, do not fix it: block the node as "baseline red" (see "Test failures").
-7. **Tests first, then implement.**
-   - Leaf `FIX` and `FEAT`: write the tests for the `Done when` criteria first and see them fail for the expected reason. If they already pass, stop: the work is done or the test is vacuous.
-   - Leaf `TASK` refactors: add characterization tests that pass before and after.
-   - Container nodes (all children `[x]`): write integration tests that exercise the children together. No new feature code.
-   - Implement **only what the task line says**. Adjacent findings are not fixed and not added to TODO.md. Collect them for the report. In no-git mode record each touched file in `State: files:`.
+Lifecycle: ready check → branch → claim → build → verify → complete → merge. Details and the status matrix are in the core skill ("Lifecycle by status", "Git flow").
+
+1. **Git mode and invariants.** Check git (core, "Git mode"); in a non-git folder print the one-time warning and continue in no-git mode. Run the invariant check (use the lint script when present). Read the markers: that is the status of every node.
+2. **Select by status.**
+   - A `[/]` node exists: resume it. Read its `State:`; in git mode check out its branch, run `git status` and `git diff --stat`. Resume when the changes fit its task line, otherwise stop and ask. Never revert or commit changes you did not make.
+   - Otherwise take the first **workable** `[ ]` node (core, "Which node is next"). `[!]` nodes are skipped and `[x]` nodes are never touched. If nothing is workable, list what blocks progress (open dependencies, `[!]` nodes) and stop.
+3. **Ready check** (new nodes only). Lint is clean; the `Ref:` exists; the tree is clean by the core definition (backlog files and generated files excluded), otherwise stop and ask; run the regression command for the **baseline**. It must be green; if it is red do not fix it: block the node as "baseline red" (see "Test failures"). Record the pass count.
+4. **Branch first** (git mode). Create every missing ancestor branch top-down (root from the base branch, each child from its parent), then `todo/<ID>-<slug>`, and switch to it (or `git worktree add` with `--worktree`). Reuse an existing branch that starts with `todo/<ID>-`. Never commit on the base branch.
+5. **Claim.** On the node's branch set `[/]` and write `State: attempts 0/3; branch <name> [from <base>]; next: read docs`. In no-git mode write `State: attempts 0/3; no git; files: -; next: read docs`. In git mode commit `chore(backlog): start <ID>` with `TODO.md` (and `CHANGELOG.md` if new). Nothing else is touched before this.
+6. **Read before write.** Read the `Ref:` doc (or its anchored section) and the README/doc sections that govern the area. Then read only the code the node needs. If the Ref is missing or contradicts the task line, stop and ask.
+   - With `--plan` and no `plan approved` in `State:`: print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed; awaiting approval`, and **stop**. The user's next `/todo-continue` counts as approval.
+7. **Build.**
+   - **Red** (leaf `FIX`/`FEAT`): write the tests for the `Done when` criteria and see them fail for the expected reason, quoting the failing assertion in your report. If they already pass, stop: the work is done or the test is vacuous. Leaf `TASK` refactors: add characterization tests that pass before and after.
+   - **Green:** implement **only what the task line says**. Adjacent findings are not fixed and not added to TODO.md; collect them for the report. No new `TODO`/`FIXME` comments. In no-git mode record each touched file in `State: files:`.
+   - **Refactor:** clean up with the tests green.
+   - **Parent (integration step):** follow core "Verification protocol" step 7. No feature code.
 8. **Verify.** Run, in full and unnarrowed: the `Done when` commands, then the regression run. Update `State:` after every cycle. See "Test failures".
 9. **Gates.** All must pass, otherwise the node does not complete:
-   - Done when exited 0 **and** really ran tests. "0 tests", "no tests found" or "collected 0 items" fail. The regression run is green and has no fewer passing tests than the baseline, with none deleted or skipped.
+   - Done when exited 0 **and** really ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression is green with no fewer passing tests than the baseline and none deleted or skipped.
    - Every item of the project's Definition of Done, when one exists.
-   - Self-review of the full diff: every changed hunk traces to the task line, no debug output, commented-out code or unrelated reformatting remains. Remove what fails or stop and ask.
-   - In git mode `git diff --stat` shows only plausible files; in no-git mode the files in `State:` do.
+   - Self-review: every changed hunk traces to the task line, and no debug output, commented-out code or unrelated reformatting remains. In git mode review `git diff`; in no-git mode there is no diff, so re-read each file listed in `State: files:` (for a root: the roll-up in its own `State:`) in full against the task line.
+   - Only plausible files changed (`git diff --stat`, or `State: files:` in no-git mode); no generated files, secrets or `.env` staged.
    - Documentation drift check (below).
-   - No secrets, `.env` files or build artifacts staged.
-   - The lint script passes.
-10. **Complete the node.**
-    - **Child node:** set `[x]` and delete its `State:`. In git mode commit on its branch (`<type>(<scope>): <title>`, body `Refs: <ID>`), switch to the parent's branch (or worktree) and `git merge --no-ff` it there. Report and stop. It stays in TODO.md as `[x]` until its root drains.
-    - **Root node** (a leaf root, or a root whose children are all `[x]` and whose integration step just passed): drain, in this exact order so an interrupted run can be detected and finished:
-      1. Prepend one entry to `## [Unreleased]` in CHANGELOG.md (core entry format) ending in `Includes:` with every descendant ID.
-      2. Delete the whole subtree from TODO.md.
-      3. Commit in git mode: code, CHANGELOG.md and TODO.md together on the root's branch, `<type>(<scope>): <title>`, body `Refs: <ID>` and the included IDs.
-      4. With `--merge`: switch to the base branch and `git merge --no-ff` the root's branch. Without it, print those exact commands for the user. Never push.
-      In no-git mode, steps 1-2 only.
-11. **Report** in 3-5 lines: ID and title, commands run and results (including regression counts), files changed, branch and commit hash if any, and `children done/total` for the root. Then:
+10. **Complete, in this order.**
+    1. Set the marker to `[x]` and delete `State:`. Skip this for a root: a root is never `[x]`, it is drained in step 5, and its lint runs there.
+    2. Run the lint script (children and parents only). It must pass with the new marker.
+    3. In git mode commit the node's files by explicit path plus `TODO.md`: `<type>(<scope>): <title>`, body `Refs: <ID>`. In no-git mode skip.
+    4. **Child node:** switch to the parent's branch (or worktree), `git merge --no-ff` the child there, then `git branch -d` the child branch. Report and stop. The node stays `[x]` until its root drains. In no-git mode, before deleting the child's `State:`, merge its `files:` and any doc files it updated (`docs:`) into the root's `State:` (create the item, no duplicates).
+    5. **Root node** (a leaf root, or a root whose children are all `[x]` and whose integration step just passed in this run): drain, in this exact order so an interrupted run can be detected and finished: (a) prepend one entry to `## [Unreleased]` in CHANGELOG.md (core entry format; `Includes:` only when it has descendants); (b) delete the whole subtree from TODO.md; (c) lint; (d) commit on the root's branch with body `Refs: <ID>` and the included IDs. With `--merge`: switch to the base branch, `git merge --no-ff` the root's branch, then `git branch -d` it. Without it, print those exact commands. Never push. In no-git mode do (a) to (c) only.
+11. **Report** in 3-5 lines: ID and title, commands run and results (including regression counts against the baseline), files changed, branch and commit hash if any, and `children done/total` for the root. Then:
     - Adjacent problems as ready-to-run commands: `/todo-add "<description>" --from <ID>`. Never add them yourself.
     - The next workable node (ID, title, Done when), without starting it.
     - A suggestion to clear context before the next `/todo-continue`.
 
 ## Checkpoints
 
-`State:` is the only thing that survives a context reset. Format: `attempts <n>/3; branch <name> [from <base>]; next: <short>` (git) or `attempts <n>/3; no git; files: <list>; next: <short>`. Update it after each verification cycle and whenever you stop before completing. Read it on resume and continue the count. Never reset the counter except by a new node or a user edit through `/todo-update`.
+`State:` is the only thing that survives a context reset. Format: `attempts <n>/3; [hyp: <one line>;] branch <name> [from <base>]; next: <short>` (git) or `attempts <n>/3; no git; files: <list>; next: <short>`. Update it after each verification cycle and whenever you stop before completing. Read it on resume and continue the count. Never reset the counter except by a new node or a user edit through `/todo-update`.
 
 ## Test failures
 
-- Diagnose before changing code. For each failing cycle: reproduce, read the first failing assertion or stack frame, state one hypothesis in `State:`, make the smallest change that tests that hypothesis, and re-run. Do not change several unrelated things at once or retry unchanged code.
-- At most **3** fix-and-verify cycles in total across sessions (the `State:` counter).
+- Diagnose before changing code. For each failing cycle: reproduce, read the first failing assertion or stack frame, state one hypothesis in `State:` (`hyp:`), make the smallest change that tests that hypothesis, and re-run. Do not change several unrelated things at once or retry unchanged code.
+- At most **3** attempts in total across sessions (the `State:` counter). An attempt is a verification run that fails after you started implementing; the first red run is not one.
 - You may change code, and tests the node itself creates, inside the task line's scope.
 - Forbidden: editing the `Done when` commands, deleting, skipping or weakening an existing test, adding `|| true`, loosening assertions, or switching to a narrower command to get green.
-- A failure outside the node (flaky test, broken CI, red baseline, a regression in other code that the change caused and cannot be fixed within the task line) is not fixed here. Block the node: set `[!]`, replace `State:` with `Blocked: <reason> → \`<command>\` <last ≤5 error lines> → <action required>`, and stop. Do not pick up another node.
+- A failure outside the node (flaky test, broken CI, red baseline, a regression in other code that the change caused and cannot be fixed within the task line) is not fixed here. Block the node: set `[!]`, replace `State:` with `Blocked: <reason> → \`<command>\` <last ≤5 error lines> → <action required>`, commit it in git mode (`chore(backlog): block <ID>`), and stop. Do not pick up another node.
 - After the third failed cycle, block the same way and list each hypothesis tried.
 - Run commands only under the safety rules in the core skill.
 

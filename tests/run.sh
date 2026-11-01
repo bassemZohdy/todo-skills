@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md must pass with "WARN W<n>:".
+# ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs only bash, awk and grep. Creates no files.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -19,8 +20,10 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "ok" ]; then
-    if [ "$rc" -eq 0 ]; then ok "$name"; else bad "$name: expected OK, got: $out"; fi
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ]; then
+    if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
+  elif [ "$expect" = "ok" ]; then
+    if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi
   else
     if [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL $expect:"; then ok "$name"; else bad "$name: expected FAIL $expect, got rc=$rc: $out"; fi
   fi

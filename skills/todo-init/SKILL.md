@@ -1,6 +1,6 @@
 ---
 name: todo-init
-description: Bootstrap and report on the todo backlog workspace. Use for /todo-init or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects runtime, package manager and test command, and reports pending items. Idempotent, so it also serves as the status view.
+description: Bootstrap and report on the todo backlog workspace. Use for /todo-init or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects runtime, package manager and test command, and reports pending items. Idempotent.
 ---
 
 # /todo-init
@@ -41,6 +41,7 @@ First load the `todo` core skill (schemas, invariants, guardrails). If it is not
    | `Makefile` with a `test` target | `make test` |
 
    Do not run the suite and do not persist the detected command anywhere. It is reported, and reused when `todo-add` proposes Validation lines.
-4. Run the invariant check. Report concisely: what was created, runtime / package manager / test command, doc files found, counts for In Progress / Ready / Blocked with their IDs, and any invariant violations.
+4. Check for a `Definition of Done` heading in README.md, CONTRIBUTING.md or `docs/`. Report where it is, or that none exists. Never create one.
+5. Run the invariant check (the lint script when present). Report concisely: what was created, runtime / package manager / test command, doc files found, Definition of Done location, whether the lint script is installed, counts for In Progress / Ready / Blocked with their IDs, and any invariant violations.
 
-Do not add, start or modify tasks.
+Do not add, start or modify tasks. For a read-only view without bootstrapping, use `/todo-status`.

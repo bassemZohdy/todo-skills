@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Review step between build and verify, done by a fresh-context reviewer when a subagent tool exists.
 - Trial scenarios `lanes` and `replan`.
 
+### Changed
+
+- A tree claim that fails only because the base moved is rebased once and fast-forwarded again; a base without `TODO.md` means no claim.
+- Lane coordinator drains and merges each root; lane agents stop before the drain.
+- `docs/COMPARISON.md` re-scored: 75 (solo/lean) and 71 (team/spec-first).
+
 ### Removed
 
 - `/todo-continue --isolated`, replaced by lanes and the review step.

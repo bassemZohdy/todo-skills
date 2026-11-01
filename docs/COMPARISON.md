@@ -35,7 +35,8 @@ Each tool gets an integer score from 0 to 5 on 11 criteria. Totals are weighted 
 | beads | 1 | 2 | 4 | 1 | 5 | 1 | 0 | 5 | 5 | 4 | 4 |
 | Taskmaster | 2 | 2 | 3 | 1 | 3 | 3 | 0 | 4 | 2 | 1 | 4 |
 | GSD (low confidence) | 1 | 2 | 2 | 3 | 5 | 5 | 3 | 3 | 3 | 3 | 4 |
-| **todo-skills, reviewer (after plan, lanes, review, report)** | 4 | 5 | 4 | 3 | 5 | 3 | 3 | 3 | 4 | 4 | 2 |
+| **todo-skills 0.2.0, reviewer (after CI integration, parallel lanes run, dogfooding)** | 4 | 5 | 4 | 4 | 5 | 3 | 3 | 3 | 4 | 4 | 2 |
+| todo-skills, reviewer (after plan, lanes, review, report) | 4 | 5 | 4 | 3 | 5 | 3 | 3 | 3 | 4 | 4 | 2 |
 | todo-skills 0.1.0, reviewer (after simplifying) | 4 | 5 | 4 | 3 | 5 | 2 | 3 | 3 | 3 | 4 | 2 |
 | todo-skills, earlier reviewer (before simplifying) | 4 | 5 | 4 | 3 | 4 | 2 | 2 | 3 | 2 | 4 | 1 |
 | todo-skills, author | 3 | 5 | 5 | 4 | 4 | 3 | 3 | 4 | 3 | 4 | 1 |
@@ -44,7 +45,7 @@ Each tool gets an integer score from 0 to 5 on 11 criteria. Totals are weighted 
 
 | Rank | Profile A (solo, lean) | Score | Profile B (team, spec-first) | Score |
 |---|---|---|---|---|
-| 1 | **todo-skills** | 75 | **todo-skills** | 71 |
+| 1 | **todo-skills** | 78 | **todo-skills** | 73 |
 | 2 | OpenSpec | 66 | GSD (low confidence) | 68 |
 | 3 | Backlog.md | 60 | Spec Kit | 66 |
 | 4 | Spec Kit | 58 | OpenSpec | 66 |
@@ -54,11 +55,11 @@ Each tool gets an integer score from 0 to 5 on 11 criteria. Totals are weighted 
 | 8 | beads | 51 | beads | 55 |
 | 9 | Taskmaster | 40 | Taskmaster | 47 |
 
-After adding plan/revise, lanes, the review step and the report page, a blind reviewer re-scored todo-skills at 75 (A) and 71 (B); the changes were planning 2→3 and team 3→4. The B lead over GSD is 3 points, which is within noise: holding those two scores back gives 73 and 65. Before that, 0.1.0 scored 73 and 65, and before simplifying 67 and 58. The author's own scores would give 74 and 71, which shows the size of the self-scoring bias. Use the reviewer's numbers.
+After CI integration (`/todo-init --ci`: `.todo/check.sh` in CI or a pre-push hook), a truly parallel lanes run and dogfooding on this repository, a blind reviewer moved verification from 3 to 4: 78 (A) and 73 (B), first under both. It stays at 4, not 5, because each node is still closed by the agent before CI runs and CI checks the suite, not each `Done when`. Without that move the totals are 75 and 71. Before that, after adding plan/revise, lanes, the review step and the report page, a blind reviewer re-scored todo-skills at 75 (A) and 71 (B); the changes were planning 2→3 and team 3→4. The B lead over GSD is 3 points, which is within noise: holding those two scores back gives 73 and 65. Before that, 0.1.0 scored 73 and 65, and before simplifying 67 and 58. The author's own scores would give 74 and 71, which shows the size of the self-scoring bias. Use the reviewer's numbers.
 
 ## Reading the results
 
-- Under Profile A, which was designed around lean solo work, todo-skills leads by 9 points over OpenSpec. Under Profile B it is first by 3 points over GSD, which is within noise; treat it as a contender for 1st to 3rd.
+- Under Profile A, which was designed around lean solo work, todo-skills leads by 12 points over OpenSpec. Under Profile B it is first by 5 points over GSD (3 without the verification move), close to noise; treat it as a contender for 1st to 3rd.
 - The reviewer scored todo-skills low on planning (2) and maturity (2), middling on verification (3: enforced by the model, not a tool), review, dependencies and team (3 each), and high on tooling dependencies (5), context and resume (5) and machine-checkable state (4). It named three weaknesses: advisory enforcement of "done", almost no field evidence, and thin planning and orchestration.
 - A difference of 1-2 points is noise. Moving one score by one point shifts a total by 1-4 points. To use your own weights, replace the weight columns and apply the formula above.
 

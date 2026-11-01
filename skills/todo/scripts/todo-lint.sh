@@ -3,7 +3,6 @@
 # Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
 # Needs only bash, awk and grep. Prints one "FAIL I<n>: ..." line per violation.
 # Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner) that never change the exit code.
-# Set TODO_LINT_STRICT=1 to turn W3 (unfamiliar runner) into a failure, for an allowlist-only policy.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 todo="${1:-TODO.md}"
 changelog="${2:-CHANGELOG.md}"
@@ -21,7 +20,7 @@ if [ -f "$changelog" ]; then
           } | tr '\n' ' ') "
 fi
 
-awk -v cl="$cl" -v strict="${TODO_LINT_STRICT:-0}" '
+awk -v cl="$cl" '
 function fail(code, msg) { print "FAIL " code ": " msg; bad++ }
 function trim(s) { gsub(/^ +/, "", s); gsub(/ +$/, "", s); return s }
 function dfs(u,   k, n, a, v) {
@@ -43,7 +42,7 @@ function addrefs(i, kind, s,   x) {
     refs[i] = refs[i] " " x
   }
 }
-function warn(code, msg) { if (strict == 1 && code == "W3") { fail("W3", msg); return } print "WARN " code ": " msg; nwarn++ }
+function warn(code, msg) { print "WARN " code ": " msg; nwarn++ }
 function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
   n = 0; pres = 0; filt = 0
   while ((p = index(s, "`")) > 0) {

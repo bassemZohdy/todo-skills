@@ -105,7 +105,7 @@ Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, 
 
 The marker is the status, and every command acts only as that status allows. The branch is created **before** the task is marked in progress:
 
-`[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression + gates) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
+`[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
 
 See [docs/LIFECYCLE.md](docs/LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
 
@@ -128,7 +128,7 @@ Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `
 
 ## Optional enforcement
 
-The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. The lint script and the stop hook are read-only; the gate script runs the commands written in a task (after the same forbidden-command check). All three need only bash, awk, grep and sed, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
 
 ```bash
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
@@ -144,9 +144,7 @@ Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the r
 
 With a user-level install (`~/.claude/skills`) use `bash ~/.claude/skills/todo/scripts/todo-stop-hook.sh` as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
 
-The gate script (`todo-gate.sh <ID> [--regression cmd] [--baseline n]`) is what `/todo-continue` runs at the verify step. It exits 0 when everything passed, 1 when a gate failed, 3 when Done when passed but no regression command was given.
-
-Run the tests for all three scripts with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and a temporary directory that is removed on exit.
+Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files.
 
 ## Versioning
 
@@ -171,13 +169,10 @@ The version lives in `.claude-plugin/plugin.json` and must equal the newest `## 
 
 [docs/COMPARISON.md](docs/COMPARISON.md) scores todo-skills against Superpowers, Spec Kit, BMAD, OpenSpec, Backlog.md, beads, Taskmaster and GSD, under two weightings, scored by an independent reviewer from primary sources. In short, it leads or ties for lean solo work and is weak on planning depth, team work and maturity.
 
-See [docs/FALLBACKS.md](docs/FALLBACKS.md) for what each skill does when git, a script, tests or the base branch is missing or refuses.
-
 ## Known limits
 
 - Planning is shallow: the tree breakdown, `--plan` and `--clarify`. Requirements and long plans are expected to live in `docs/`.
 - There is no Out of Scope field any more. Boundaries live in the task sentence or in the linked doc.
-- Generated changelogs (release-please, changesets) are not supported: the drain writes its own `[Unreleased]` entries.
 - The 120-line cap holds roughly 28 tasks, so big trees are decomposed lazily.
 - The only independent review is `--isolated`, and it needs a subagent tool.
 - One agent per working tree. Use `--worktree` for parallel work.

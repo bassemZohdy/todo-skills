@@ -2,7 +2,7 @@
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
 # A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W3) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
-# Usage: bash tests/run.sh      Needs bash, awk, grep, sed and tr. Uses a temporary directory it removes on exit.
+# Usage: bash tests/run.sh      Needs bash, awk, grep and sed. Creates no files.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/skills/todo/scripts/todo-lint.sh"
@@ -28,28 +28,6 @@ for f in "$fx"/*.md; do
     if [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL $expect:"; then ok "$name"; else bad "$name: expected FAIL $expect, got rc=$rc: $out"; fi
   fi
 done
-
-# Strict mode: an unfamiliar runner fails instead of warning.
-out="$(TODO_LINT_STRICT=1 bash "$lint" "$fx"/W3-*.md "$changelog" 2>&1)"
-if [ $? -ne 0 ] && printf '%s\n' "$out" | grep -q "FAIL W3:"; then ok "strict mode fails on an unfamiliar runner"; else bad "strict mode: $out"; fi
-
-# Gate script: passes on real tests, fails on a failing command, on zero tests and on a count below the baseline.
-gd="$(mktemp -d)"
-trap 'rm -r "$gd"' EXIT
-printf '# Active Backlog\n\n## 🌳 Task Tree\n\n- [ ] **TASK-001** · P1 · S · Gate fixture\n  - Done when: it runs; `echo Ran 3 tests in 0.1s`; regression: `echo Ran 5 tests in 0.2s`\n- [ ] **TASK-002** · P1 · S · Zero\n  - Done when: zero; `echo Ran 0 tests in 0.0s`\n- [ ] **TASK-003** · P1 · S · Fails\n  - Done when: fails; `false`\n' > "$gd/TODO.md"
-gate="$root/skills/todo/scripts/todo-gate.sh"
-if bash "$gate" TASK-001 --todo "$gd/TODO.md" --baseline 5 >/dev/null 2>&1; then ok "gate passes on counted tests at the baseline"; else bad "gate pass case"; fi
-if bash "$gate" TASK-001 --todo "$gd/TODO.md" --baseline 9 >/dev/null 2>&1; then bad "gate must fail below the baseline"; else ok "gate fails below the baseline"; fi
-if bash "$gate" TASK-002 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must fail on zero tests"; else ok "gate fails on zero tests"; fi
-printf '%s\n' 'Ran 4 tests in 0.1s' > "$gd/pytest.txt"
-mocha_out='  10 passing (20ms)'; cargo_out=$(printf 'running 0 tests\ntest result: ok. 0 passed; 0 failed\nrunning 3 tests\ntest result: ok. 3 passed; 0 failed\n')
-printf '# Active Backlog\n\n## 🌳 Task Tree\n\n- [ ] **TASK-004** · P1 · S · Mocha\n  - Done when: ten; `echo "  10 passing (20ms)"`\n- [ ] **TASK-005** · P1 · S · Cargo\n  - Done when: cargo; `printf "running 0 tests\\ntest result: ok. 0 passed; 0 failed\\nrunning 3 tests\\ntest result: ok. 3 passed; 0 failed\\n"`\n- [ ] **TASK-006** · P1 · S · Pytest\n  - Done when: py; `echo "5 passed in 0.1s"`; regression: `echo "5 passed in 0.1s"`\n- [ ] **TASK-007** · P1 · S · Forbidden\n  - Done when: bad; `npm publish`\n' >> "$gd/TODO.md"
-if bash "$gate" TASK-004 --todo "$gd/TODO.md" 2>&1 | grep -q "done-when: PASS (10 tests)"; then ok "gate: 10 passing is not zero tests"; else bad "gate: mocha 10 passing"; fi
-if bash "$gate" TASK-005 --todo "$gd/TODO.md" 2>&1 | grep -q "done-when: PASS (3 tests)"; then ok "gate: cargo sums targets"; else bad "gate: cargo"; fi
-if bash "$gate" TASK-006 --todo "$gd/TODO.md" --baseline 5 2>&1 | grep -q "PASS (5 tests)"; then ok "gate: pytest line-start count"; else bad "gate: pytest count"; fi
-if bash "$gate" TASK-007 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must refuse forbidden commands"; else ok "gate refuses forbidden commands"; fi
-bash "$gate" TASK-004 --todo "$gd/TODO.md" >/dev/null 2>&1; if [ $? -eq 3 ]; then ok "gate: exit 3 when no regression ran"; else bad "gate: exit code 3"; fi
-if bash "$gate" TASK-003 --todo "$gd/TODO.md" >/dev/null 2>&1; then bad "gate must fail on a failing command"; else ok "gate fails on a failing command"; fi
 
 # The plugin version equals the newest released CHANGELOG version.
 pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.claude-plugin/plugin.json" | head -1)"

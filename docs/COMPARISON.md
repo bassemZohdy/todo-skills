@@ -58,7 +58,7 @@ The author's own scores for todo-skills would give 74 (A) and 71 (B). They are 7
 
 - Under Profile A, which was designed around lean solo work, todo-skills and OpenSpec lead and the gap between them is noise. Under Profile B the spec-heavy tools (GSD, Spec Kit, OpenSpec, BMAD) lead and todo-skills is fifth.
 - The reviewer scored todo-skills low on planning (2), review (2), team (2) and maturity (1), and agreed it is strong on dependencies (5) and machine-checkable state (4).
-- The reviewer read the README, lifecycle doc and core skill, not the lint, gate and release scripts, so verification (3) may be low now that `todo-gate.sh` runs the checks; it would still not be a 5, because the gate is invoked by the model.
+- The reviewer read the README, lifecycle doc and core skill, not the scripts, so verification (3) is a fair score: the gates are followed by the model, not enforced by a tool.
 - A difference of 1-2 points is noise. Moving one score by one point shifts a total by 1-4 points. To use your own weights, replace the weight columns and apply the formula above.
 
 ## Caveats

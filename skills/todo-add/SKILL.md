@@ -1,16 +1,14 @@
 ---
 name: todo-add
-description: Add work to the TODO.md task tree. Use for /todo-add <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--breaking] [--clarify]. Sizes the request, breaks it into a tree until every leaf is S or M, writes each node as a 2-4 line task with an exact Done when command, and inserts it. Never starts work.
-argument-hint: <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--breaking] [--clarify]
+description: Add work to the TODO.md task tree. Use for /todo-add <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--clarify]. Sizes the request, breaks it into a tree until every leaf is S or M, writes each node as a 2-4 line task with an exact Done when command, and inserts it. Never starts work.
+argument-hint: <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type feat|fix|task] [--from <ID>] [--parent <ID>] [--clarify]
 ---
 
 # /todo-add
 
 First load the `todo` core skill (tree format, sizes, IDs, invariants, guardrails) and read `reference/verification.md` from its folder ("Writing a Done when"). If the core is not available as a skill, read `../todo/SKILL.md` and `../todo/reference/verification.md`.
 
-`--breaking` marks a root as a breaking change: its title is prefixed `BREAKING: `, and the drain writes the type with a `!` (`feat!`) so `/todo-release` proposes a major bump (minor while the version is `0.x`). Not allowed on children.
-
-Defaults: priority `P1`. Type is inferred from the description (bug, crash, regression, broken → `FIX`; add, implement, support, new → `FEAT`; otherwise `TASK`; a description that starts with tests, docs, refactor, rename or chore is `TASK` even when it begins with "add") unless `--type` is given. Entries under `### Removed`, `### Deprecated` and `### Security`, and breaking-change markers, are not written by the skills; add them by hand before `/todo-release` when they apply. With `--parent`, the type is the parent's prefix. Show the chosen prefix in the result.
+Defaults: priority `P1`. Type is inferred from the description (bug, crash, regression, broken → `FIX`; add, implement, support, new → `FEAT`; otherwise `TASK`; a description that starts with tests, docs, refactor, rename or chore is `TASK` even when it begins with "add") unless `--type` is given. With `--parent`, the type is the parent's prefix. Show the chosen prefix in the result.
 
 ## Steps
 

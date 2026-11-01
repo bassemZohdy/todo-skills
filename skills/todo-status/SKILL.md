@@ -17,7 +17,7 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 3. **Active**: the `[/]` node and its ancestors (shown as in progress), its `State:` line, and in git mode whether `git status` shows changes and which branch is checked out. In no-git mode show its `State:` and `files:` only.
 4. **Next**: if a `[/]` node exists, `/todo-continue` resumes it: show "resume <ID>". Otherwise show the first workable `[ ]` node (ID, title, Done when command). If none, say what blocks the tree.
 5. **Blocked**: each `[!]` node with its `Blocked:` reason and action required.
-6. **Recently drained**: the newest `--last <N>` entries of `## [Unreleased]` (default 5).
+6. **Recently drained**: the newest `--last <N>` entries of CHANGELOG.md (default 5): `## [Unreleased]` first, then the latest version section when `[Unreleased]` has fewer.
 
 ## Search
 

@@ -50,7 +50,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` | `/todo-status` |
 |---|---|---|---|---|
 | `[ ]` workable | Branches, claims, builds, verifies, completes | `in-progress`, `blocked`, `drop`, field edits | Allowed | Lists it, marks the next one |
-| `[ ]` waiting | Skips and says what it waits for | Same as above | Allowed | Shows what it waits for |
+| `[ ]` waiting | Skips and says what it waits for | `blocked`, `drop`, field edits (`in-progress` is refused) | Allowed | Shows what it waits for |
 | `[ ]` in a tree claimed by another branch | Skips and reports the branch | `ready` on the root releases the claim | Refused | Shows `claimed by <branch>`, stale if the branch is gone |
 | `[/]` | Resumes from `State:` and `git status` | `ready` (abandons, keeps the branch), `blocked`, field edits. No `drop` | Refused | Shows branch, State, changes |
 | `[!]` | Skips and reports the `Blocked:` line | `ready`, `drop`, field edits | Refused | Lists reason and action |
@@ -78,7 +78,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 
 ## Interrupting for a hotfix
 
-A claimed tree is not lost when something urgent arrives. Commit or stash your work, `git switch` to the base branch, add the fix with `/todo-add "..." --type fix --priority P0`, and run `/todo-continue`. On the base branch the claimed trees are skipped, the P0 root is picked first, and it gets its own branch. When it is merged, `git switch` back to the parked tree's branch and `/todo-continue` resumes it.
+A claimed tree is not lost when something urgent arrives. (`[/]` lives on tree branches, so the base branch has none and the one-active-task rule holds per file.) Commit or stash your work, `git switch` to the base branch, add the fix with `/todo-add "..." --type fix --priority P0`, and run `/todo-continue`. On the base branch the claimed trees are skipped, the P0 root is picked first, and it gets its own branch. When it is merged, `git switch` back to the parked tree's branch and `/todo-continue` resumes it.
 
 ## Where the backlog lives
 

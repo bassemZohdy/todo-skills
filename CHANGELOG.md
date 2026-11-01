@@ -9,72 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Without `--merge`, a finished root prints both the local merge command and the push-and-pull-request steps; neither is run.
-- `/todo-release`: proposes a semantic version from the `[Unreleased]` entries and, after confirmation, writes the dated section. Prints the tag and push commands without running them.
-- `.claude-plugin/plugin.json` and `marketplace.json`: installable as a plugin (`claude plugin validate` passes and a local install copies all skills with their references and scripts; commands are namespaced). README install notes for plugin and other agents.
-- Trial scenarios `race-claim-conflict`, `race-claim-benign` and `release`, run by fresh agents and passing.
-- `docs/COMPARISON.md` rescored by an independent reviewer from primary sources; the author's own scores are shown beside it.
-- `scripts/todo-gate.sh`: runs Done when and regression, fails on zero-test runs and on counts below the baseline, so the verification gate is executed by a script and not only followed by the model.
-- `TODO_LINT_STRICT=1` turns the unfamiliar-runner warning W3 into a failure.
-- Layout rules for `TODO.md`, monorepo `regression:` guidance, and the rule that plan files stay after a drain.
-- Hotfix path in `docs/LIFECYCLE.md`.
-- Lint warning W3: `Done when` that runs something other than a known test, lint, typecheck or build runner.
-- `tests/trials/`: repeatable agent scenarios (`setup.sh` builds a starting state with plain git, `assert.sh` checks the result) for interrupted merges, refresh from the base and claims by another branch.
-- Tree claim: the first claim in a tree is published to the base branch by a claim-only commit and a fast-forward, naming the owning branch, so no other agent starts the same tree. The skills never touch the network, so sharing claims is left to git. `/todo-update <ROOT-ID> --status ready` releases a stale claim; `/todo-status` shows claimed trees.
-- `docs/LIFECYCLE.md`: status model, step table, command-by-status matrix and the SDLC practices applied (short-lived branches, Definition of Ready and Done, red-green-refactor, regression, CI parity, revert path).
-- Lint rejects backticks that hold code or prose instead of a shell command (I3), and warns on presence-only checks (W1) and name-filtered tests (W2).
-- "Writing a Done when" guidance, and `n/a (manual)` for manual blocks.
-- Task tree: dotted child IDs (`FEAT-002.1`), sizes S/M/L/XL, at most 3 levels, one `## 🌳 Task Tree` section in TODO.md.
-- Compact 2-4 line tasks with `Done when` (criteria plus exact command, optional `regression:`), `Links`, `State` and `Blocked`.
-- Verification protocol: tests first, full `Done when`, regression run against a green baseline.
-- Git flow: branch per node, `--no-ff` merge into the parent, `--worktree`, and `--merge` for the base branch.
+- `todo` core skill (rules, task format, invariants, guardrails) and the command skills `todo-init`, `todo-add`, `todo-continue`, `todo-update`, `todo-status` and `todo-release`, with `reference/git-flow.md` and `reference/verification.md` loaded only when a command needs them.
+- Task tree in `TODO.md`: dotted IDs (`FEAT-002.1`), sizes S/M/L/XL, at most 3 levels, 2-4 line tasks with `Done when` (criteria plus an exact command, optional `regression:`), `Links`, `State` and `Blocked`. A parent closes when its children are done and drains as one CHANGELOG entry ending in `Includes:`.
+- Lifecycle by status: ready check, branch first, tree claim published to the base branch, claim `[/]`, red-green-refactor, verify, complete in the branch, `--no-ff` merge into the parent, refresh from the base, drain, and a root merge only with `--merge`. Interrupted work is recovered first. See `docs/LIFECYCLE.md`.
+- Tree claims: the first claim in a tree is a claim-only commit fast-forwarded onto the base branch, naming the owning branch, so no other agent starts the same tree. A lost race aborts cleanly; a stale claim is released with `/todo-update <ROOT-ID> --status ready`; `/todo-status` shows claimed trees.
+- Verification protocol with a recorded baseline, regression against it, and a gate script `scripts/todo-gate.sh` that runs Done when and regression, refuses forbidden commands, fails on zero-test runs and on counts below the baseline (unittest, pytest, jest, mocha, cargo and maven output recognised).
+- `scripts/todo-lint.sh`: invariants I1-I10 plus warnings W1 (presence-only check), W2 (name-filtered tests) and W3 (unfamiliar runner; `TODO_LINT_STRICT=1` makes it a failure). `scripts/todo-stop-hook.sh` is an optional Claude Code Stop hook.
+- `/todo-release`: proposes a semantic version from the `[Unreleased]` entries and, after confirmation, writes the dated section and links. It prints the tag and push commands without running them.
+- `/todo-add --parent`, `--from` and `--clarify`; `/todo-update --status revert`; `/todo-continue --plan`, `--isolated`, `--worktree` and `--merge`; migration of the old three-section format in `/todo-init`.
 - No-git mode: every command warns once and works without branches, worktrees or commits.
-- `/todo-add --parent <ID>`, `/todo-update --status revert`, and migration of the old three-section format in `/todo-init`.
-- Lint invariants I8 (tree integrity), I9 (dependency cycles) and I10 (forbidden commands in `Done when`).
-- Fixtures for I1-I10, and a test that this repository's own backlog lints clean.
-- `todo-status`: read-only status, recent history and search.
-- `scripts/todo-lint.sh` in the `todo` skill: deterministic check of invariants I1-I7.
-- `scripts/todo-stop-hook.sh`: optional Claude Code Stop hook that blocks a session end on an invalid backlog.
-- `tests/run.sh` with static fixtures covering every invariant and the hook.
-- `From:` provenance and `Progress:` checkpoint fields; invariant I7 for dangling `Depends:` / `From:` references.
-- Optional project-wide Definition of Done, read from a `Definition of Done` heading.
-- `/todo-continue --plan` (approval checkpoint) and `--isolated` (fresh-context subagent, main thread re-verifies).
-- `/todo-add --from <ID>` and `--clarify`, and up to 3 clarifying questions when the request is unclear.
-- `docs/COMPARISON.md`: scored comparison with two weighting profiles.
-- `todo` core skill and the `todo-init`, `todo-add`, `todo-continue` and `todo-update` command skills.
-- README with install steps, task format and known limits.
-
-### Changed
-
-- `State:` records `baseline <n> passing` at the claim, so a resumed node compares against a real baseline; commit subjects and CHANGELOG insertion position are specified.
-- The core skill is split: the always-loaded part is about 14 KB (was 22 KB); git flow and git-conflict rules moved to `reference/git-flow.md`, verification, Done when, Definition of Done and command safety to `reference/verification.md`. Each command loads only what it needs.
-- Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
-- Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
-- Interrupted work is recovered: `/todo-continue` scans the tree's unmerged branches first, finishing the merge of an `[x]` child or resuming a `[/]` node.
-- A root merges the latest base branch in and reruns `Done when` and the full regression before the drain, so the tested code is the code that lands.
-- A failed claim fast-forward re-reads the base's claim before retrying and aborts if another branch took the tree.
-- Claims are read from the base branch (`git show <base>:TODO.md`), so a tree branch also sees other trees as claimed. Releasing a live claim needs an explicit yes, a clean tree and a base-branch release commit.
-- `todo-add` checks that the requested behavior does not already exist, and `todo-continue` stops and asks when new tests already pass instead of adding tests that pass at once.
-- Ancestor `State:` is defined (branch only, written in the first leaf's claim commit); an unchanged re-claim skips the commit; slugs are limited to letters, digits and hyphens; `todo-status` shows "resume" for an active node; the report names the checked-out branch.
-- The no-git `State:` rolls child `files:` and `docs:` up to the root, and a missing-symbol error counts as a valid red.
-- Branch first: `todo-continue` creates the branch chain (ancestors top-down), then sets `[/]` and commits the claim on the new branch. `/todo-update --status in-progress` does the same.
-- Backlog and generated files do not make the tree dirty. Commits stage explicit paths only; the base branch is never committed on. Merged child branches are deleted with `git branch -d`.
-- Completion order is fixed: set `[x]`, lint, commit, merge into the parent.
-- Build is red, green, refactor. Parents run a verify-only or cross-child integration step; a root's integration and drain happen in one run.
-- `Includes:` is omitted on a leaf root. `Docs:` is derived from the branch diff, or from `docs:` entries in the root's `State:` without git.
-- `State:` gains `hyp:`; an attempt is a failed run after implementation started. No-git self-review re-reads the files listed in `State:`.
-- `todo-init` falls back to the README, Makefile or CI config for the test command and reports the CI test command.
-- A parent closes only when all children are `[x]`; a finished root drains as one CHANGELOG entry ending in `Includes:`.
-- TODO.md has one section instead of In Progress, Ready and Blocked; the marker carries the state. The old `Scope`, `Validation` and `Progress` fields are now the task sentence, `Done when` and `State`.
-- Lint now accepts only the tree format.
-- `todo-continue` creates a local `todo/<ID>-<slug>` branch when started on `main`, `master` or `trunk`, so the drain can commit instead of leaving changes uncommitted.
-- `todo-continue` persists the fix-attempt counter in `Progress:`, so the 3-attempt cap survives a context reset.
-- Test failures now require a stated hypothesis and a minimal change per cycle (root cause before retry).
-- Renumbering a colliding ID rewrites every `Depends:` and `From:` reference and names the old and new ID in the commit.
-- Self-review gate in `todo-continue`: every changed hunk must trace to the task's Scope before the drain.
-- Invariant I1 now also ties each marker to its section; I3 rejects vacuous Validation commands.
-- The "no tool dependencies" guardrail now reads "no required tooling"; the lint script and hook are optional and read-only.
-
-### Removed
-
-- The `Out of Scope` and `Notes` fields. Boundaries go in the task sentence or a linked doc.
+- `.claude-plugin/plugin.json` and `marketplace.json`; `claude plugin validate` passes and a local install copies every skill with its references and scripts. Commands are namespaced when installed as a plugin.
+- `tests/run.sh` (fixtures for every invariant and warning, the gate script, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
+- `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.

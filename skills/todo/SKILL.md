@@ -59,7 +59,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, and optional links 
 - [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
   - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
-  - State: attempts 1/3; branch todo/FEAT-002-refresh from main; next: add reuse test
+  - State: attempts 1/3; branch todo/FEAT-002-add-token-refresh-auth from main; next: add reuse test
   - [ ] **FEAT-002.1** · L · Refresh endpoint
     - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
     - [ ] **FEAT-002.1.1** · S · Token store interface
@@ -71,7 +71,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, and optional links 
 | Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
 | `Done when:` | **Required.** The criteria, then at least one exact command in backticks. Optional `regression: \`cmd\``. Without it the regression command is the project's full suite |
 | `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, separated by ` · ` |
-| `State:` | Optional. `attempts n/3; [baseline <n> passing;] [hyp: <one line>;] branch todo/<ID>-<slug> [from <base>]; next: <step>`. Each item at most once, in this order; a later claim **replaces** the earlier State line, it never adds to it. Written by todo-continue. Survives a context reset. Items are separated by `; `: `attempts`, `baseline`, `hyp`, `branch`, `no git`, `files`, `docs`, `next`. In no-git mode a root also keeps `files: <paths>; docs: <paths>` rolled up from its completed children (a leaf root keeps its own), written right after its `Done when`/`Links`, until the drain |
+| `State:` | Optional. `attempts n/3; [baseline <n> passing|none;] [hyp: <one line>;] branch todo/<ID>-<slug> [from <base>]; next: <step>`. Each item at most once, in this order; a later claim **replaces** the earlier State line, it never adds to it. Written by todo-continue. Survives a context reset. Items are separated by `; `: `attempts`, `baseline`, `hyp`, `branch`, `no git`, `files`, `docs`, `next`. In no-git mode a root also keeps `files: <paths>; docs: <paths>` rolled up from its completed children (a leaf root keeps its own), written right after its `Done when`/`Links`, until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State. `reason → \`command\` error (max 5 lines) → action required`. A manual block by the user has no failing command: write `n/a (manual)` in the middle part |
 
 Layout: one blank line between `## 🌳 Task Tree` and the first task, no blank lines between tasks, and no placeholder text in an empty tree (the heading alone is valid). A drain removes the subtree and its lines only, leaving no extra blank line.
@@ -97,7 +97,7 @@ A leaf is never `L` or `XL`; a parent is never `S` or `M`. Adding or dropping ch
 ## IDs
 
 - Roots: `<PREFIX>-<NNN>`, one global sequence shared by all prefixes, zero-padded to 3 digits. Children append `.n` to the parent: `FEAT-002.1`, `FEAT-002.1.2`. The number of dots equals the level.
-- Next root number = highest root number found anywhere in `TODO.md` **and** `CHANGELOG.md` (including IDs after `Includes:`), plus 1. Next child number = highest existing child number under that parent, plus 1, never reused within the same tree.
+- Next root number = highest root number among FEAT-, FIX- and TASK- IDs found anywhere in `TODO.md` **and** `CHANGELOG.md` (including IDs after `Includes:`; other patterns such as `CVE-2023-1` or `GH-123` are ignored), plus 1. Next child number = highest existing child number under that parent, plus 1, never reused within the same tree.
 
 | Prefix | Meaning | CHANGELOG heading | Commit type |
 |---|---|---|---|
@@ -122,7 +122,7 @@ The marker is the status, and each command acts only as that status allows. The 
 | Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` |
 |---|---|---|---|
 | `[ ]` workable | branch, claim, build, verify, complete | `in-progress`, `blocked`, `drop`, edits | allowed |
-| `[ ]` waiting | skip, say what it waits for | as above | allowed |
+| `[ ]` waiting | skip, say what it waits for | `blocked`, `drop`, edits (`in-progress` is refused) | allowed |
 | `[ ]` in a tree claimed by another branch | skip, report the branch | `ready` on the root releases the claim | refused |
 | `[/]` | resume from `State:` | `ready` (keeps the branch), `blocked`, edits; no `drop` | refused |
 | `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
@@ -130,11 +130,11 @@ The marker is the status, and each command acts only as that status allows. The 
 
 Order for every node: **ready check → branch → (first node of a tree: tree claim, published to the base branch) → claim (`[/]`) → build → verify → complete (`[x]`) → merge into parent**. The branch always exists before the status changes. Ancestors keep `[ ]` while a descendant is active.
 
-**Ready check.** Lint passes, the node is workable, its `Ref:` exists, its `Done when` holds a runnable command, the working tree is clean (git mode only; skipped in no-git mode), and the regression baseline is green.
+**Ready check.** Lint passes, the node is workable, its `Ref:` exists, its `Done when` holds a runnable command, the working tree is clean (git mode only; untracked files, backlog files and generated files do not count; skipped in no-git mode), and the regression baseline is green.
 
 ## CHANGELOG entry (written only by a root drain)
 
-Inserted at the top of the matching `###` list under `## [Unreleased]`, directly under the heading, newest first, with no blank line between entries. Create the heading if missing, keeping the Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
+Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]` (after the blank line that follows the heading, if any), newest first, with no blank line between entries. An existing `## Unreleased`, `## [unreleased]` or similar heading counts as the Unreleased section; never add a second one. Create the heading if missing, keeping the Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
 
 ```markdown
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test -- auth`. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2.
@@ -177,8 +177,8 @@ Repair automatically only I5 (finish an interrupted drain by deleting the listed
 1. No ghost tasks. Every change to TODO.md traces to an explicit user command or to a completed code transition.
 2. No required tooling. No SQLite, JSON caches, hidden files, MCP servers or SaaS. Markdown plus git only; git itself is optional. The lint script and hook are optional, read-only conveniences.
 3. No node is closed without running its Done when command and its regression run and seeing both pass.
-4. At most one active task at any time.
+4. At most one `[/]` task in a file. The base branch never holds one (`[/]` lives on tree branches), so a hotfix started from the base branch is allowed while another tree is in progress on its own branch.
 5. CHANGELOG.md is append-only apart from the `[Unreleased]` insertions made by a root drain and the confirmed `/todo-release`. Never rewrite released sections.
 6. Never tag, cut a release, fetch, pull or push. Moving `[Unreleased]` to a version happens only through `/todo-release`, after the user confirms the version.
-7. The base branch receives only tree claims (fast-forward), user-requested releases and the merge of a verified root. Nothing else reaches it before its root is verified.
+7. The base branch receives only tree claims (fast-forward), the claim release commit of `/todo-update --status ready`, the confirmed release commit of `/todo-release` and the merge of a verified root. Nothing else reaches it before its root is verified.
 8. When a rule here conflicts with a user's explicit instruction, state the conflict and ask. Do not silently break the rule.

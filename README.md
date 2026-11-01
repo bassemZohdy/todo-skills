@@ -91,7 +91,7 @@ Work is tracked in TODO.md and CHANGELOG.md with the todo-* skills (/todo-init, 
       - Done when: store round-trips a token; `npm test -- auth/store`
     - [/] **FEAT-002.1.2** · M · Rotate refresh tokens
       - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
-      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate from todo/FEAT-002.1-refresh; next: add reuse test
+      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: add reuse test
 ```
 
 - **2 to 4 lines per task.** The header says what to do. `Done when:` gives the criteria and at least one exact command. Longer planning goes into `docs/` (for example `docs/plans/FEAT-002-refresh.md`) and is linked with `Ref:`. TODO.md only tracks work.
@@ -124,11 +124,11 @@ Each node: write the tests first, run `Done when` in full (target a test id or p
 
 ## Definition of Done
 
-Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `Definition of Done`, its checklist applies to every task on top of that task's Validation. Command items run under the same safety rules as Validation. Statement items are checked by inspection and reported one by one.
+Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `Definition of Done`, its checklist applies to every task on top of that task's Done when. Command items run under the same safety rules as Done when. Statement items are checked by inspection and reported one by one.
 
 ## Optional enforcement
 
-The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk and grep, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. The lint script and the stop hook are read-only; the gate script runs the commands written in a task (after the same forbidden-command check). All three need only bash, awk, grep and sed, and are installed with the `todo` skill.
 
 ```bash
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
@@ -142,9 +142,11 @@ Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the r
 ] } ] } }
 ```
 
-The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
+With a user-level install (`~/.claude/skills`) use `bash ~/.claude/skills/todo/scripts/todo-stop-hook.sh` as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
 
-Run the tests for both scripts with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files.
+The gate script (`todo-gate.sh <ID> [--regression cmd] [--baseline n]`) is what `/todo-continue` runs at the verify step. It exits 0 when everything passed, 1 when a gate failed, 3 when Done when passed but no regression command was given.
+
+Run the tests for all three scripts with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and a temporary directory that is removed on exit.
 
 ## Design rules
 

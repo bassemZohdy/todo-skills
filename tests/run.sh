@@ -2,7 +2,7 @@
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
 # A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W3) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
-# Usage: bash tests/run.sh      Needs only bash, awk and grep. Creates no files.
+# Usage: bash tests/run.sh      Needs bash, awk, grep, sed and tr. Uses a temporary directory it removes on exit.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/skills/todo/scripts/todo-lint.sh"

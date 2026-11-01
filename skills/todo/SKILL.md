@@ -71,7 +71,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, and optional links 
 | Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
 | `Done when:` | **Required.** The criteria, then at least one exact command in backticks. Optional `regression: \`cmd\``. Without it the regression command is the project's full suite |
 | `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, separated by ` · ` |
-| `State:` | Optional. `attempts n/3; [hyp: <one line>;] branch todo/<ID>-<slug> [from <base>]; next: <step>`. Each item at most once, in this order; a later claim **replaces** the earlier State line, it never adds to it. Written by todo-continue. Survives a context reset. Items are separated by `; `: `attempts`, `hyp`, `branch`, `no git`, `files`, `docs`, `next`. In no-git mode a root also keeps `files: <paths>; docs: <paths>` rolled up from its completed children (a leaf root keeps its own), written right after its `Done when`/`Links`, until the drain |
+| `State:` | Optional. `attempts n/3; [baseline <n> passing;] [hyp: <one line>;] branch todo/<ID>-<slug> [from <base>]; next: <step>`. Each item at most once, in this order; a later claim **replaces** the earlier State line, it never adds to it. Written by todo-continue. Survives a context reset. Items are separated by `; `: `attempts`, `baseline`, `hyp`, `branch`, `no git`, `files`, `docs`, `next`. In no-git mode a root also keeps `files: <paths>; docs: <paths>` rolled up from its completed children (a leaf root keeps its own), written right after its `Done when`/`Links`, until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State. `reason → \`command\` error (max 5 lines) → action required`. A manual block by the user has no failing command: write `n/a (manual)` in the middle part |
 
 Only these four fields exist. A task never has both State and Blocked. Anything longer than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`, for example `docs/plans/FEAT-002-refresh.md`). If a task needs a longer description, the task is too big: split it.
@@ -132,7 +132,7 @@ Order for every node: **ready check → branch → (first node of a tree: tree c
 
 ## CHANGELOG entry (written only by a root drain)
 
-Inserted at the top of the matching `###` list under `## [Unreleased]`. Create the heading if missing, keeping the Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
+Inserted at the top of the matching `###` list under `## [Unreleased]`, directly under the heading, newest first, with no blank line between entries. Create the heading if missing, keeping the Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
 
 ```markdown
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test -- auth`. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2.

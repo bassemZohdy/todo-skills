@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `State:` records `baseline <n> passing` at the claim, so a resumed node compares against a real baseline; commit subjects and CHANGELOG insertion position are specified.
 - The core skill is split: the always-loaded part is about 14 KB (was 22 KB); git flow and git-conflict rules moved to `reference/git-flow.md`, verification, Done when, Definition of Done and command safety to `reference/verification.md`. Each command loads only what it needs.
 - Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
 - Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.

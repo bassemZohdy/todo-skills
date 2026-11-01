@@ -149,7 +149,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
     m = split(val, sp, "; ")
     for (k = 1; k <= m; k++) {
       kw = trim(sp[k]); sub(/[ :].*/, "", kw)
-      if (kw == "attempts" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
+      if (kw == "attempts" || kw == "baseline" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
         if (seenst[cur, kw]++) fail("I3", "line " NR ": " id ": State repeats the item " kw "; a later claim must replace the State line")
     }
   }

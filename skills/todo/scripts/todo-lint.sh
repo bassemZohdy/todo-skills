@@ -2,7 +2,7 @@
 # todo-lint.sh - deterministic, read-only check of the todo invariants I1-I10.
 # Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
 # Needs only bash, awk and grep. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 todo="${1:-TODO.md}"
 changelog="${2:-CHANGELOG.md}"
@@ -59,6 +59,10 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
     if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
+    runner = first
+    if (first ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[2]) > 0) runner = w[2]
+    if (runner !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/ && runner !~ /^[.][/]/ && runner !~ /[/]gradlew$/ && runner !~ /[/]mvnw$/)
+      warn("W3", "line " NR ": " lab ": Done when runs " runner ", which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
     if (first ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
     if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++
   }

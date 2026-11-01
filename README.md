@@ -24,8 +24,9 @@ Work is one **task tree** in `TODO.md`. Each task is 2 to 4 lines: what to do, a
 | `/todo-continue [--plan] [--isolated] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, verify plus regression, merge into the parent, drain a finished root |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `skills/todo-update` | Manual state changes (dotted IDs allowed) and in-place field edits |
 | `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree, recent history and search |
+| `/todo-release [--version X.Y.Z]` | `skills/todo-release` | Proposes a semantic version from the `[Unreleased]` entries and, after you confirm, writes the dated section. Prints the tag and push commands; never runs them |
 
-The command skills load `todo` first, so keep the six folders side by side.
+The command skills load `todo` first, so keep the seven folders side by side. The core skill keeps two reference files in `skills/todo/reference/` (`git-flow.md`, `verification.md`) that only the commands needing them read, which keeps the always-loaded part small.
 
 ### `/todo-continue` flags
 
@@ -122,7 +123,7 @@ The invariants I1-I10 (one active task, unique IDs, task fields and size limits,
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
 ```
 
-Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
+Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [

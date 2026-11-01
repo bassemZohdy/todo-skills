@@ -65,7 +65,7 @@ refresh-from-base)
   g switch -q -c todo/FEAT-001-subtract
   python3 - <<'PY'
 p='TODO.md'
-s=open(p).read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-subtract from main; next: build')
+s=open(p).read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('branch todo/FEAT-001-subtract from main; next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-subtract from main; next: build')
 open(p,'w').write(s)
 PY
   g add TODO.md && g commit -q -m "chore(backlog): start FEAT-001"

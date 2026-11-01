@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Without `--merge`, a finished root prints both the local merge command and the push-and-pull-request steps; neither is run.
+- `/todo-release`: proposes a semantic version from the `[Unreleased]` entries and, after confirmation, writes the dated section. Prints the tag and push commands without running them.
+- `.claude-plugin/plugin.json` so the repository can be installed as a plugin (untested; commands are namespaced when installed that way).
+- Hotfix path in `docs/LIFECYCLE.md`.
+- Lint warning W3: `Done when` that runs something other than a known test, lint, typecheck or build runner.
 - `tests/trials/`: repeatable agent scenarios (`setup.sh` builds a starting state with plain git, `assert.sh` checks the result) for interrupted merges, refresh from the base and claims by another branch.
 - Tree claim: the first claim in a tree is published to the base branch by a claim-only commit and a fast-forward, naming the owning branch, so no other agent starts the same tree. The skills never touch the network, so sharing claims is left to git. `/todo-update <ROOT-ID> --status ready` releases a stale claim; `/todo-status` shows claimed trees.
 - `docs/LIFECYCLE.md`: status model, step table, command-by-status matrix and the SDLC practices applied (short-lived branches, Definition of Ready and Done, red-green-refactor, regression, CI parity, revert path).
@@ -36,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The core skill is split: the always-loaded part is about 14 KB (was 22 KB); git flow and git-conflict rules moved to `reference/git-flow.md`, verification, Done when, Definition of Done and command safety to `reference/verification.md`. Each command loads only what it needs.
 - Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
 - Scenario trials passed (interrupted merge, refresh from base, claimed elsewhere). Follow-ups: merge-commit message formats, a resume skips red and the separate baseline, a root's code commit precedes the refresh and a `chore(backlog): drain` commit, slugs turn punctuation into hyphens, a later claim replaces `State:`, and the lint (I3) rejects a repeated `State:` item.
 - Interrupted work is recovered: `/todo-continue` scans the tree's unmerged branches first, finishing the merge of an `[x]` child or resuming a `[/]` node.

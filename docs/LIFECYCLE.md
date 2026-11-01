@@ -39,7 +39,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 | 8 | **Integrate** (parents) | `[ ]` → `[/]` → `[x]` | Once every child is `[x]` the parent is workable. Same steps, but build is a cross-child integration check |
 | 8b | **Refresh from base** (roots) | | Merge the base branch into the root branch. If anything came in, rerun `Done when` and the full regression on the merged result. Blocks on failure |
 | 9 | **Drain** (roots) | tree removed | One CHANGELOG entry with `Includes:`, subtree deleted from TODO.md, commit |
-| 10 | **Merge to base** | | Only with `--merge`. Otherwise the exact commands are printed |
+| 10 | **Merge to base** | | Only with `--merge`. Otherwise two options are printed and left to you: the local `git merge --no-ff`, or push the branch and open a pull request with the CHANGELOG entry as its body |
 
 If a session dies mid-way, the next `/todo-continue` first scans the tree's branches: an unmerged `[x]` branch gets its merge finished, an unmerged `[/]` branch is resumed.
 
@@ -73,8 +73,12 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 | Lightweight review | The self-review gate, optional `--isolated` fresh-context review, and the human merge into base. Teams can open a pull request from the root branch instead of merging locally |
 | Traceability | The ID is in the branch name, commit body (`Refs:`) and CHANGELOG entry. Put the ID in new test names or comments |
 | CI parity | `/todo-init` reports the test command found in CI config, so the regression command matches what CI runs |
-| Release is separate | The skills never tag, push or move `[Unreleased]` to a version, and never touch the network |
+| Release is separate | Only `/todo-release` moves `[Unreleased]` to a version, after you confirm it. No skill tags, pushes or touches the network |
 | Hotfix | A `P0` `FIX` root branches from the base branch like any other root |
+
+## Interrupting for a hotfix
+
+A claimed tree is not lost when something urgent arrives. Commit or stash your work, `git switch` to the base branch, add the fix with `/todo-add "..." --type fix --priority P0`, and run `/todo-continue`. On the base branch the claimed trees are skipped, the P0 root is picked first, and it gets its own branch. When it is merged, `git switch` back to the parked tree's branch and `/todo-continue` resumes it.
 
 ## Where the backlog lives
 

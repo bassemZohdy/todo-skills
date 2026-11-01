@@ -12,7 +12,7 @@ branch_exists() { git rev-parse --verify -q "refs/heads/$1" >/dev/null; }
 at() { git show "$1:$2"; }   # file at a ref
 
 chk "no .pyc tracked" '[ "$(git ls-files | grep -c "\.pyc$")" = 0 ]'
-chk "tests pass on the checked-out branch" 'python3 -m unittest discover -s tests'
+if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'; else chk "tests pass on the checked-out branch" 'python3 -m unittest discover -s tests'; fi
 chk "lint passes on the checked-out branch" 'bash "$lint" TODO.md CHANGELOG.md'
 
 case "$scenario" in
@@ -72,7 +72,7 @@ monorepo)
   chk "the human-written CHANGELOG entries survive" 'grep -q "Greeting helper in the web package" CHANGELOG.md && grep -q "## \[1.2.0\] - 2026-09-15" CHANGELOG.md'
   chk "a task mentions the api package power work" 'grep -qi "power" TODO.md || git log --all --format=%s | grep -qi power'
   chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'
-  chk "nothing outside packages/api and backlog files changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude)" ]'
+  chk "nothing outside packages/api and backlog files changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e packages/api/)" ]'
   ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac

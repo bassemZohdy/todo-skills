@@ -39,7 +39,7 @@ At the start of every command run `git rev-parse --is-inside-work-tree`.
 - **Git repo:** git is the version store. Each node of the tree works on its own branch or worktree (see `reference/git-flow.md`).
 - **Not a git repo:** warn **once per command**, in one sentence: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then continue in **no-git mode**: skip every git step, track progress in `State:`, record the files you touched in `State:` for the scope check, and still update markers and drain to CHANGELOG.md. Everything else is unchanged, including verification.
 
-Never tag, force, reset hard or clean, in either mode. **The skills never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours.
+Never tag, force-push, reset hard or clean, in either mode. The one forced local deletion is `git branch -D` of your own unpublished claim branch after a lost race (`reference/git-flow.md`). **The skills never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours.
 
 ## TODO.md schema
 
@@ -140,7 +140,7 @@ Inserted at the top of the matching `###` list under `## [Unreleased]`, directly
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test -- auth`. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2.
 ```
 
-One entry per root, whatever the tree size. When the root has descendants, `Includes:` is last and lists every descendant ID, so Depends and the ID counter still see them. A leaf root has no `Includes:`. `Docs: updated docs/x.md.` goes before `Includes:` and lists README.md and `docs/` files changed by the whole tree: in git mode take them from `git diff --name-only <base>...<root branch>`, in no-git mode from the `docs:` items in the root's `State:`. If the root had `From:`, add `From: FIX-001.`
+One entry per root, whatever the tree size. A hand-written changelog is left as it is: entries without an ID stay where they are and the new entry goes above them; `/todo-release` moves them with the rest of `[Unreleased]`. When the root has descendants, `Includes:` is last and lists every descendant ID, so Depends and the ID counter still see them. A leaf root has no `Includes:`. `Docs: updated docs/x.md.` goes before `Includes:` and lists README.md and `docs/` files changed by the whole tree: in git mode take them from `git diff --name-only <base>...<root branch>`, in no-git mode from the `docs:` items in the root's `State:`. If the root had `From:`, add `From: FIX-001.`
 
 ## Reference files
 

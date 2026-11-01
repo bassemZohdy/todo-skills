@@ -61,6 +61,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     runner = first
+    if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first }
     if (first ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[2]) > 0) runner = w[2]
     if (runner !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/ && runner !~ /^[.][/]/ && runner !~ /[/]gradlew$/ && runner !~ /[/]mvnw$/)
       warn("W3", "line " NR ": " lab ": Done when runs " runner ", which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")

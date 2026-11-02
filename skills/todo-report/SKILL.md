@@ -7,7 +7,7 @@ description: Generate an interactive HTML status page for the project at docs/st
 
 First load the `todo` core skill (tree format, lanes, git mode). If it is not a skill, read `../todo/SKILL.md`.
 
-Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder (filled by the optional `todo-report.sh`, which needs only bash and sed). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
+Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that is renamed or removed) (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder (filled by the optional `todo-report.sh`, which needs only bash and sed). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
 
 ## Steps
 

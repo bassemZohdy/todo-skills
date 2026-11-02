@@ -2,7 +2,7 @@
 
 Loaded by `/todo-init --ci`. Part of the `todo` core skill.
 
-One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests. CI runs it on every push and pull request when the project has CI; otherwise, or as well, it runs locally. The skills still never touch the network: they write these files and print what to do, and pushing is yours.
+One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests. CI runs it on pushes to the base branch and on pull requests when the project has CI; otherwise, or as well, it runs locally. The skills still never touch the network: they write these files and print what to do, and pushing is yours.
 
 ## Files (`/todo-init --ci`, each written only on the user's yes)
 
@@ -45,7 +45,7 @@ Whatever the CI, `/todo-continue` runs `bash .todo/check.sh` as the last gate be
 
 ## Local fallback (only in the last row of the table above, or when the user names the hook)
 
-- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes, in its own tool call) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead. If the hook cannot be written (an existing hook, or your environment refuses writes under `.git/`), print its two lines (`#!/usr/bin/env bash` and `bash .todo/check.sh || exit 1`) and the `chmod +x .git/hooks/pre-push` command for the user to run.
+- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes, in its own tool call, then `chmod +x .git/hooks/pre-push` and check it with `test -x`) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead. If the hook cannot be written (an existing hook, or your environment refuses writes under `.git/`), print its two lines (`#!/usr/bin/env bash` and `bash .todo/check.sh || exit 1`) and the `chmod +x .git/hooks/pre-push` command for the user to run.
 - Without `.todo/check.sh` everything works as before: `/todo-continue` runs the lint and the regression itself.
 
 ## Report

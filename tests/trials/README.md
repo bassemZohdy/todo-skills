@@ -24,7 +24,7 @@ A scenario passes only when every check in `assert.sh` passes; the **trial score
 
 `bash tests/trials/selftest.sh` (run in CI) checks the harness itself: every scenario sets up, has a prompt, and an untouched setup **fails** its assert, except the read-only scenarios (`baseline-red`, `release-ask`, `status-readonly`), where doing nothing is correct.
 
-The overall evaluation used while iterating on the skills is `0.15 x tests/run.sh pass rate + 0.55 x trial score + 0.30 x rubric`, where the rubric is the mean of two independent blind reviews of the skill text (7 criteria, 0-10 each: consistency, unambiguity, completeness, safety, executability, conciseness, testability).
+The overall evaluation used while iterating on the skills is `0.15 x tests/run.sh pass rate + 0.55 x trial score + 0.30 x rubric`, where the rubric is the mean of two independent blind reviews of the skill text (7 criteria, 0-10 each: consistency, unambiguity, completeness, safety, executability, conciseness, testability). Each review deducts about 1 point per medium defect, 2-3 per high and 0.25 per low. A third agent then verifies every medium and high finding against the same text, before any fix: a rejected finding (misread, already resolved elsewhere, or no concrete failure) is credited back at the reviewer's rate, a downgraded one is re-counted as low. Both the raw and the verified rubric are reported.
 
 | Scenario | Starting state | Prompt | Expected |
 |---|---|---|---|

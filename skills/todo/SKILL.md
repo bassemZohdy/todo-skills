@@ -16,9 +16,9 @@ The repository is a closed-loop state machine built from files that already exis
 | Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, CI job | Lint + tests, run by CI, a pre-push hook and `/todo-continue` | Written by `/todo-init --ci` on a yes; committed by the user |
 | Version store | git | Branch or worktree per task. Nothing reaches the base branch unverified | See "Git mode" |
 
-Use native file tools (Read/Edit/Write) for file edits, keeping the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the few file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`).
+Use native file tools (Read/Edit/Write) for file edits, keeping the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`, `cmp`, `mv`, and `rm` of a skill's own temporary file).
 
-**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/*.md` written by a todo-* skill, and the README `Tests:` line written by `/todo-init` (README.md is staged only while `git diff README.md` is exactly that added line (and a blank line before it); any other README change is the user's: it counts for the clean-tree check and is never staged). Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
+**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md` named by a `Ref:`, and the README `Tests:` line written by `/todo-init`. README.md is staged only while `git diff README.md` adds exactly that line, optionally after a blank line; any other README change is the user's: it counts for the clean-tree check and is never staged. Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
 
 ## Direct use
 
@@ -41,7 +41,7 @@ Each skill runs only its own command and never chains into another unprompted.
 
 At the start of every command run `git rev-parse --is-inside-work-tree`.
 
-- **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`). The **base branch** is the one the user names, otherwise the first that exists of `main`, `master`, `trunk`, `develop`; with none of them, ask once.
+- **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`). The **base branch** is the one the user names, otherwise the first that exists of `main`, `master`, `trunk`, `develop`; with none of them, ask once. Every step that checks out or merges into the base (tree claim, claim release, base merge, release) runs in the **main checkout** (the first entry of `git worktree list`): from a linked worktree, `cd` there first; if it is on another branch with changes, stop and print the commands.
 - **Not a git repo:** warn **once per command**: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then use **no-git mode**: skip every git step, track progress in `State:` (including `files:` touched), still update markers and drain to CHANGELOG.md. Verification is unchanged.
 
 Never tag, force-push, reset hard or clean. The one forced branch delete is of a branch holding only the skill's own unpublished claim commit (`reference/git-flow.md`, tree claim steps 2 and 5). **The skills' own git commands never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours. A test command may download dependencies; if it fails for lack of network, block with that reason instead of retrying.
@@ -75,7 +75,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, optional links and 
 | Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
 | `Done when:` | **Required.** Criteria, then `; ` and at least one exact command in backticks. Optional `; regression: \`cmd\``; without it the regression is the project's full suite |
 | `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` · ` |
-| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids>`), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
+| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids, comma-separated>`), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State and in its place (the last field line): `<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`. A manual block writes `n/a (manual)` in the middle |
 
 Only these four fields exist; a task never has both State and Blocked. More than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`). If a task needs more, split it.
@@ -112,7 +112,7 @@ Children use their root's prefix.
 
 A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, `/todo-continue` merges the base into the branch the node will start from before starting it, step 3; read-only commands report "waits for a base merge"); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically.
 
-**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`. Skip this on the base branch.
+**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`; a branch whose node is no longer in its parent branch's TODO.md (dropped) is ignored. Skip this on the base branch.
 
 ### Lanes
 
@@ -154,7 +154,7 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | File | Contents | Loaded by |
 |---|---|---|
 | `reference/git-flow.md` | Branches, tree claim, staging, merging, refresh from base, conflicts | `/todo-continue`, `/todo-update --status in-progress` or `ready` |
-| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add` |
+| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add`, `/todo-plan`, `/todo-update --status in-progress`, `/todo-init --ci` |
 | `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
 | `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
 
@@ -182,8 +182,8 @@ On a violation, report it, change nothing, and ask, with one exception: a writin
 1. No ghost tasks. Every change to TODO.md traces to a user command or a completed code transition.
 2. No required tooling. Markdown plus git only; git itself is optional. The lint script and hook are optional and read-only.
 3. No node is closed without running its `Done when` and its regression and seeing both pass.
-4. At most one `[/]` task in a file. (`[/]` lives on tree branches, so a hotfix started from the base can run while another tree is in progress.)
+4. I1. (`[/]` lives on tree branches, so a hotfix started from the base can run while another tree is in progress.)
 5. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain, the confirmed `/todo-release`, and `/todo-init` adding a missing `## [Unreleased]`. Never rewrite released sections.
-6. Never tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
+6. "Git mode" above: no tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
 7. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
 8. When a rule here conflicts with an explicit user instruction, state the conflict and ask.

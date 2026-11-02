@@ -59,4 +59,4 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
 8. **Pre-planning** (only with `--plan`, or when the tree is empty and the user's `/todo-init` message states a project goal). Ask once, at most 3 short questions the repo does not answer: the goal and done-state, what is out of scope, and which parts could run as parallel lanes. Offer to save the answers as `docs/plans/PROJECT.md`; write it only on the user's yes. Then point to `/todo-plan` for the tree.
 9. **CI** (only with `--ci`, or when the user asks for it). Read `reference/ci.md` from the core's folder (`../todo/reference/ci.md`) and follow it: `.todo/check.sh` (lint + tests), the CI job that fits the repository, or the local pre-push fallback. Every file only on the user's yes. Without `--ci`, mention it once in the report if `.todo/check.sh` does not exist.
 
-Do not add, start or modify tasks. For a read-only view without bootstrapping, use `/todo-status`.
+Apart from a confirmed migration (step 3), do not add, start or modify tasks. For a read-only view without bootstrapping, use `/todo-status`.

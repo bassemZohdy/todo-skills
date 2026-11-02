@@ -18,7 +18,7 @@ The repository is a closed-loop state machine built from files that already exis
 
 Use native file tools (Read/Edit/Write) for file edits, keeping the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the few file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`).
 
-**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/*.md` written by a todo-* skill, and the README `Tests:` line written by `/todo-init` (README.md is staged only while `git diff README.md` is exactly that added line; any other README change is the user's: it counts for the clean-tree check and is never staged). Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
+**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/*.md` written by a todo-* skill, and the README `Tests:` line written by `/todo-init` (README.md is staged only while `git diff README.md` is exactly that added line (and a blank line before it); any other README change is the user's: it counts for the clean-tree check and is never staged). Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
 
 ## Direct use
 

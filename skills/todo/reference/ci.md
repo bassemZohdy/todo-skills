@@ -6,8 +6,10 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
 
 ## Files (`/todo-init --ci`, each written only on the user's yes)
 
-1. `.todo/todo-lint.sh` (`cp`, then `chmod +x`): a copy of the core's `scripts/todo-lint.sh`, so CI does not need the skills installed. On a later `--ci`, replace it if it differs and say so.
-2. `.todo/check.sh` (`chmod +x`), with the detected test command (step 4 of `/todo-init`; the README `Tests:` line wins):
+Create `.todo/` with `mkdir -p` and write each file with the native file tools (or `cp`). A later `--ci` compares each existing file with what it would write now and, when it differs, shows the difference and replaces it only on a yes.
+
+1. `.todo/todo-lint.sh` (`cp`, then `chmod +x`): a copy of the core's `scripts/todo-lint.sh`, so CI does not need the skills installed.
+2. `.todo/check.sh` (`chmod +x`), with the detected test command (`/todo-init` step 4). After writing it, run it once and report the result:
 
    ```bash
    #!/usr/bin/env bash
@@ -24,28 +26,28 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
    | Found | Do |
    |---|---|
    | `.github/workflows/` with a job that runs the tests | Add `.github/workflows/todo-check.yml` with a single lint job (`bash .todo/todo-lint.sh TODO.md CHANGELOG.md`); the tests already run there |
-   | `.github/workflows/` without tests, or a GitHub remote and no CI | Add `.github/workflows/todo-check.yml` that sets up the runtime (table below) and runs `bash .todo/check.sh` |
+   | `.github/workflows/` without tests, or no CI file and an `origin` whose URL host is `github.com` | Add `.github/workflows/todo-check.yml` that sets up the runtime (table below) and runs `bash .todo/check.sh` |
    | `.gitlab-ci.yml` | Show a `todo-check` job (`script: [bash .todo/check.sh]`, image for the runtime) and add it to the file only on a yes |
    | Other CI (`Jenkinsfile`, `azure-pipelines.yml`, `.circleci/`, …) | Print the one step to add: `bash .todo/check.sh` |
-   | No CI and no hosted remote | The local fallback below |
+   | No CI file, and no `origin` on `github.com` (no remote, or another host) | The local fallback below |
 
-   GitHub workflow (`on: push` to the base branch and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, the install step if the README or the existing CI installs dependencies before testing (`npm ci` with a lockfile, `pip install -e .` or `-r requirements.txt`, or the README's own command; none for a project with no dependencies), then `bash .todo/check.sh`.
+   GitHub workflow (`on: push` with `branches: [<base>]` and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, the install step if the README or the existing CI installs dependencies before testing (`npm ci` with a lockfile, `pip install -e .` or `-r requirements.txt`, or the README's own command; none for a project with no dependencies), then `bash .todo/check.sh`.
 
    | Runtime marker | Setup step |
    |---|---|
    | `package.json` | `actions/setup-node@v4` with `node-version: lts/*` |
-   | `pyproject.toml`, `requirements.txt`, or a test command that starts with `python`/`pytest` | `actions/setup-python@v5` with `python-version: "3.x"` |
+   | `pyproject.toml`, `requirements.txt`, `setup.cfg`, `pytest.ini`, or a test command that starts with `python`/`pytest`/`uv` | `actions/setup-python@v5` with `python-version: "3.x"` |
    | `pom.xml`, `build.gradle(.kts)` | `actions/setup-java@v4` with `distribution: temurin`, `java-version: "21"` |
    | `go.mod` | `actions/setup-go@v5` with `go-version: stable` |
    | `Cargo.toml`, `Makefile` only, plain bash | none (the runner has them) |
 
-Whatever the CI, `/todo-continue` runs `bash .todo/check.sh` as the last gate before a root's drain, when the file exists. Red blocks the root like a failed regression.
+Whatever the CI, `/todo-continue` runs `bash .todo/check.sh` as the last gate before a root's drain (after the refresh from the base), when the file exists. Red blocks the root like a failed regression.
 
-## Local fallback (no CI; with CI only if the user asks for it as well)
+## Local fallback (only in the last row of the table above, or when the user names the hook)
 
-- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead. If the hook cannot be written (an existing hook, or your environment refuses writes under `.git/`), print its two lines (`#!/usr/bin/env bash` and `bash .todo/check.sh || exit 1`) and the `chmod +x .git/hooks/pre-push` command for the user to run.
+- Offer a git `pre-push` hook (`.git/hooks/pre-push`, not versioned, written only on a yes, in its own tool call) that runs `bash .todo/check.sh` and refuses the push when it fails. Never overwrite an existing hook: show the line to add instead. If the hook cannot be written (an existing hook, or your environment refuses writes under `.git/`), print its two lines (`#!/usr/bin/env bash` and `bash .todo/check.sh || exit 1`) and the `chmod +x .git/hooks/pre-push` command for the user to run.
 - Without `.todo/check.sh` everything works as before: `/todo-continue` runs the lint and the regression itself.
 
 ## Report
 
-List the files written, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/`, the CI file and the README `Tests:` line yourself (they are project files, not backlog files, so no claim commit carries them; commit them on the base or through a pull request, as you do for any CI change) before the next `/todo-continue`, whose ready check needs a clean tree. The skill does not commit them; the first CI run starts when you push, which the skills never do. A red first run usually means a missing install step; say which line to edit.
+Part of the single `/todo-init` report: the files written, the `check.sh` result, the CI chosen (or "local fallback"), and the exact next step for the user: commit `.todo/` and the CI file yourself (they are project files, not backlog files, so no claim commit carries them; commit them on the base or through a pull request, as you do for any CI change). While uncommitted they are untracked and do not block `/todo-continue`. The skill does not commit them; the first CI run starts when you push, which the skills never do. A red first run usually means a missing install step; say which line to edit.

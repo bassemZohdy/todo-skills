@@ -8,7 +8,7 @@ argument-hint: [--search <text>] [--last <N>]
 
 First load the `todo` core skill (tree format, IDs, invariants). If it is not available as a skill, read `../todo/SKILL.md`.
 
-This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`. In a non-git folder print the one-time warning from the core skill.
+This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`. In a non-git folder print the core's no-git warning. An invariant violation is reported, never repaired.
 
 ## Default report
 
@@ -21,6 +21,6 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 
 ## Search
 
-`--search <text>`: case-insensitive search of TODO.md and CHANGELOG.md. Return matching task lines and changelog entries with their IDs. No match is an acceptable answer. Do not search the rest of the repository.
+`--search <text>`: print only the search result, not the default report. Case-insensitive search of TODO.md and CHANGELOG.md. Return matching task lines and changelog entries with their IDs. No match is an acceptable answer. Do not search the rest of the repository.
 
 Keep the output short. Do not add suggestions beyond pointing to the command that would act on what you found.

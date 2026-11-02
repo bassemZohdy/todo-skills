@@ -170,6 +170,7 @@ update-drop)
   chk "FEAT-002 is gone from TODO.md and not in CHANGELOG" '! grep -q FEAT-002 TODO.md && ! grep -q FEAT-002 CHANGELOG.md'
   chk "FEAT-001 untouched" 'grep -q "^- \[ \] \*\*FEAT-001\*\* · P1 · S · Add subtract to calc.py" TODO.md'
   chk "nothing committed on the base" 'unchanged'
+  chk "the dropped ID is recorded in the plan's Revisions" 'sed -n "/^## Revisions/,\$p" docs/plans/PROJECT.md | grep -q FEAT-002'
   ;;
 status-readonly)
   chk "nothing changed" 'unchanged && clean'

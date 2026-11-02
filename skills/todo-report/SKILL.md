@@ -11,9 +11,18 @@ Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it i
 
 ## Steps
 
-1. Run the invariant check and read the result. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
+1. Check git (core "Git mode") and run the invariant check (core); report a violation in the page's `lint` line, never repair it. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
 2. Read `template.html`. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
-3. **Preferred:** if `todo-report.sh` exists in this skill's folder, write the META lines (below) to its stdin and its stdout to the file: `printf '<meta lines>' | bash <skill folder>/todo-report.sh > docs/status.html`, from the repository root. It does the encoding. **Otherwise** write `docs/status.html` by hand as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
+3. **Preferred:** if `todo-report.sh` exists in this skill's folder, run it from the repository root with the META lines (below) on stdin through a quoted heredoc, never inside a `printf` format (META values such as branch names are untrusted text):
+
+   ```bash
+   bash <skill folder>/todo-report.sh > docs/status.html <<'META'
+   project: minical
+   base: main
+   META
+   ```
+
+   It does the encoding. **Otherwise** write `docs/status.html` by hand as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.

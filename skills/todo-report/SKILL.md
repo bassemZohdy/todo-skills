@@ -11,16 +11,18 @@ Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it i
 
 ## Steps
 
-1. Check git (core "Git mode") and run the invariant check (core); report a violation in the page's `lint` line, never repair it. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
+1. If `TODO.md` is missing, say so, suggest `/todo-init` and stop. Check git (core "Git mode") and run the invariant check (core); report a violation in the page's `lint` line, never repair it. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
 2. Read `template.html`. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
 3. **Preferred:** if `todo-report.sh` exists in this skill's folder, run it from the repository root with the META lines (below) on stdin through a quoted heredoc, never inside a `printf` format (META values such as branch names are untrusted text):
 
    ```bash
-   bash <skill folder>/todo-report.sh > docs/status.html <<'META'
+   bash <skill folder>/todo-report.sh > docs/status.html.tmp <<'META'
    project: <folder name>
    base: <base branch>
    META
    ```
+
+   then, if it exited 0, `mv docs/status.html.tmp docs/status.html` (otherwise remove the `.tmp` file and report the error). A committed `docs/status.html` that this rewrites is a change the user commits; say so.
 
    It does the encoding. **Otherwise** write `docs/status.html` by hand as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
    - `__TODO__`: the full text of `TODO.md`.

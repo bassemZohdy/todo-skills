@@ -9,7 +9,7 @@ The repository is a closed-loop state machine built from files that already exis
 
 | Layer | File(s) | Role | Write policy |
 |---|---|---|---|
-| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`; the README `Tests:` line by `todo-init` on a yes; `docs/status.html` by `todo-report` |
+| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`/`todo-update`; the README `Tests:` line by `todo-init` on a yes; `docs/status.html` by `todo-report` |
 | Active queue | `TODO.md` | One task tree. A tracker of work items, not a place for design | Edited only by the todo-* skills |
 | Validation | Source code + test suites | Ground truth for "done" | Changed only for the task at hand |
 | Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (on release: renamed to the version, a new empty one above it, and the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file or adds a missing `[Unreleased]` |
@@ -18,7 +18,7 @@ The repository is a closed-loop state machine built from files that already exis
 
 Use native file tools (Read/Edit/Write) for file edits, keeping the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the few file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`).
 
-**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/*.md` written by a todo-* skill, and the README `Tests:` line written by `/todo-init`. Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
+**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/*.md` written by a todo-* skill, and the README `Tests:` line written by `/todo-init` (README.md is staged only while `git diff README.md` is exactly that added line; any other README change is the user's: it counts for the clean-tree check and is never staged). Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. The clean-tree check (`reference/git-flow.md`) ignores them.
 
 ## Direct use
 
@@ -54,7 +54,7 @@ Never tag, force-push, reset hard or clean. The one forced branch delete is of a
 ## 🌳 Task Tree
 ```
 
-Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is just the heading.
+Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks.
 
 A task is **2 to 4 lines**: what to do, how it is validated, optional links and state.
 
@@ -110,7 +110,7 @@ Children use their root's prefix.
 
 ## Which node is next
 
-A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, first `git merge <base>` into the root branch with the message `Merge <base> into <ROOT-ID>` and run only the regression; the root's integration step verifies the rest later); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically.
+A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, `/todo-continue` merges the base into the branch the node will start from before starting it, step 3; read-only commands report "waits for a base merge"); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically.
 
 **Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`. Skip this on the base branch.
 
@@ -135,7 +135,7 @@ The marker is the status, and each command acts only as that status allows (diag
 
 Order for every node: **ready check → branch (in an unclaimed tree: tree claim published to the base first) → start `[/]` → build → review → verify → complete `[x]` → merge into parent**. "Claim" means the tree claim; marking a node `[/]` is its start. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
 
-**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
+**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green (or `none`, or red for a FIX node; `reference/verification.md` step 1).
 
 ## CHANGELOG entry (written only by a root drain)
 

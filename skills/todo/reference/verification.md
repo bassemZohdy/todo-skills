@@ -11,7 +11,7 @@ A node closes only through this protocol.
 3. **Green.** Implement only what the task line says.
 4. **Refactor** with the tests green.
 5. **Done when**, in full, exactly as written.
-6. **Regression.** Run the node's `regression:` command, or the project's full suite: the README's `Tests:` line if there is one, otherwise the command `/todo-init` would detect (marker files, CONTRIBUTING, Makefile, CI config); ask once if there is none. Check that it really runs tests before using it as the baseline. No fewer passing tests than the baseline, none deleted or skipped. If the test command itself cannot run (not found, or a broken setup), stop as for a red baseline (step 1). A suite of several packages counts the passing tests of all of them.
+6. **Regression.** Run the node's `regression:` command, or the project's full suite: the README's `Tests:` line if there is one, otherwise the command `/todo-init` would detect (marker files, CONTRIBUTING, Makefile, CI config); ask once if there is none; if the user has none either, record `baseline none`. Check that it really runs tests before using it as the baseline. No fewer passing tests than the baseline, none deleted or skipped. If the test command itself cannot run (not found, or a broken setup), stop as for a red baseline (step 1). A suite of several packages counts the passing tests of all of them.
 7. **No cheating.** No deleted, skipped or weakened tests. A run that executed zero tests does not count.
 8. **Parents** (integration step): when every child is `[x]`, run the parent's `Done when` and the regression. Add one test only if the children's tests do not already cover the combined behavior. No feature code. A root's integration step and drain happen in one invocation, with the full suite last.
 

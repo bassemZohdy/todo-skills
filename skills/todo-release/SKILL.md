@@ -16,4 +16,4 @@ First load the `todo` core skill (invariants, guardrails). If it is not availabl
 5. **Commit** (git mode): run the invariant check again (it reads CHANGELOG.md for I5 and I7); if it fails, stop and report, leaving the edit uncommitted. Otherwise commit `CHANGELOG.md` only (`git commit -- CHANGELOG.md`), as `chore(release): X.Y.Z`, without a body. No git: skip the commit.
 6. **Report** the new version heading and its `###` headings, and print, without running them, `git tag -a vX.Y.Z -m "X.Y.Z"` and `git push --follow-tags` (git mode only).
 
-Never rewrite a released section (core guardrails 5-6).
+Never rewrite a released section (core guardrails 4-5).

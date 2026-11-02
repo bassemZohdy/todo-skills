@@ -21,7 +21,7 @@ Create `.todo/` with `mkdir -p` and write each file with the native file tools (
    ```
 
    No test command known: write only the lint line and say so.
-3. **CI**, by what the repository already has:
+3. **CI**, by the first row that matches (no git: write only `.todo/` and say CI and the hook need git):
 
    | Found | Do |
    |---|---|

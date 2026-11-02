@@ -24,7 +24,7 @@ Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that 
 
    then, if it exited 0, `mv docs/status.html.tmp docs/status.html` (otherwise remove the `.tmp` file and report the error). A committed `docs/status.html` that this rewrites is a change the user commits; say so.
 
-   It does the encoding. **Otherwise** write `docs/status.html` by hand as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
+   It does the encoding. **Otherwise** write `docs/status.html.tmp` by hand (then `mv` it) as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.

@@ -180,6 +180,12 @@ report)
   chk "hostile title is encoded" 'grep -q "FEAT-002" docs/status.html && ! grep -q "& </script> in the title" docs/status.html'
   chk "only docs/status.html changed" 'unchanged && [ "$(git status --porcelain)" = "?? docs/status.html" ]'
   ;;
+blocked-sibling)
+  chk "the blocked node's branch is untouched" '[ "$(git rev-parse todo/FEAT-001.1-subtract-test)" = "$(grep FEAT-001.1 .git/trial-refs | cut -d" " -f2)" ]'
+  chk "FEAT-001.1 was not restarted anywhere" '! git grep -q "\[/\] \*\*FEAT-001.1" $(git for-each-ref --format="%(refname)" refs/heads)'
+  chk "FEAT-001.2 started on its own branch" 'b=$(git branch --list "todo/FEAT-001.2-*" | tr -d "* "); [ -n "$b" ] && at $b TODO.md | grep -q "\[/\] \*\*FEAT-001.2"'
+  chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " .git/trial-refs | cut -d" " -f2)" ]'
+  ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

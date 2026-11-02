@@ -3,7 +3,7 @@
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
 # Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release-ask | release |
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
-#   status-readonly | report
+#   status-readonly | report | blocked-sibling
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -239,6 +239,26 @@ update-block|update-drop|status-readonly|report)
   - Links: From: FEAT-000' > TODO.md
   printf '# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [Unreleased]\n\n### Added\n\n- **FEAT-000** (feat): Add add() to calc.py. Validated: `python3 -m unittest tests.test_calc`.\n' > CHANGELOG.md
   g add -A && g commit -q -m "init with two roots"
+  ;;
+blocked-sibling)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · L · Add subtract and multiply to calc.py
+  - Done when: both functions work; `python3 -m unittest discover -s tests`
+  - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
+  - [ ] **FEAT-001.1** · S · Add subtract with a test
+    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - [ ] **FEAT-001.2** · S · Add multiply with a test
+    - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  g add -A && g commit -q -m "init with claimed tree"
+  g switch -q -c todo/FEAT-001-subtract-multiply
+  g switch -q -c todo/FEAT-001.1-subtract-test
+  python3 - <<'PY2'
+p='TODO.md'
+s=open(p).read().replace('- [ ] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
+ '- [!] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`\n    - Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready')
+open(p,'w').write(s)
+PY2
+  g add TODO.md && g commit -q -m "chore(backlog): block FEAT-001.1"
+  g switch -q todo/FEAT-001-subtract-multiply   # the parent's branch still shows FEAT-001.1 as [ ]
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac

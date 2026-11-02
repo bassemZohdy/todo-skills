@@ -6,7 +6,7 @@ Loaded by `/todo-continue` and `/todo-add`. Part of the `todo` core skill.
 
 A node closes only through this protocol.
 
-1. **Baseline.** Before work starts, the regression command must be green. Note the passing count in `State:` as `baseline <n> passing`. A red baseline stops the node before any branch or file change; fix it first with a `FIX` root, which is the one node allowed to start on it: it records `baseline red: <failing test ids>`, and its gate is a fully green regression with no test deleted, skipped or weakened. A project with no test command, or one that runs zero tests, records `baseline none`; its first node creates the test harness, and its regression gate is only that its own `Done when` runs at least one test and passes.
+1. **Baseline.** Before work starts, the regression command must be green. Note the passing count in `State:` as `baseline <n> passing`. A red baseline stops the node before any branch or file change; fix it first with a `FIX` node, the one kind of node allowed to start on it: it records `baseline red: <failing test ids>`, and its gate is a fully green regression with no test deleted, skipped or weakened. A project with no test command, or one that runs zero tests, records `baseline none`; its first node creates the test harness, and its regression gate is only that its own `Done when` runs at least one test and passes.
 2. **Red.** Write the tests first. `FIX` and `FEAT` leaves must fail for the expected reason: an assertion about the new behavior, or a missing-symbol error for the new thing under test. `TASK` refactors get characterization tests that pass before and after.
 3. **Green.** Implement only what the task line says.
 4. **Refactor** with the tests green.
@@ -15,7 +15,7 @@ A node closes only through this protocol.
 7. **No cheating.** No deleted, skipped or weakened tests. A run that executed zero tests does not count.
 8. **Parents** (integration step): when every child is `[x]`, run the parent's `Done when` and the regression. Add one test only if the children's tests do not already cover the combined behavior. No feature code. A root's integration step and drain happen in one invocation, with the full suite last.
 
-An attempt is a failed verification run after you started implementing; the first red run is not one. Three attempts block the node.
+An attempt and the 3-attempt limit are defined in `/todo-continue` ("Test failures").
 
 ## Writing a Done when
 

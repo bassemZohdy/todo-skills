@@ -17,8 +17,8 @@ Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it i
 
    ```bash
    bash <skill folder>/todo-report.sh > docs/status.html <<'META'
-   project: minical
-   base: main
+   project: <folder name>
+   base: <base branch>
    META
    ```
 
@@ -26,7 +26,7 @@ Writes exactly one file, `docs/status.html` (ask before creating `docs/` if it i
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.
-   - `__META__`: one `key: value` per line, only those you actually know: `project` (repo or folder name), `generated` (today's date), `base`, `branch` (checked out), `mode` (git or no-git), `tests` (the detected test command, see `/todo-init` step 4), `lint` (pass or the failures), `Definition of Done` (where it is), `claim` (one line per claimed root: `<ID> -> <branch>`, add `(stale)` if the branch is gone), `branches` (open `todo/*` branches), `version` (newest released CHANGELOG version).
+   - `__META__`: one `key: value` per line, only those you actually know (leave a key out rather than writing "none"): `project` (repo or folder name), `generated` (today's date), `base`, `branch` (checked out), `mode` (git or no-git), `tests` (the detected test command, see `/todo-init` step 4), `lint` (pass or the failures), `Definition of Done` (where it is), `claim` (one line per claimed root: `<ID> -> <branch>`, add `(stale)` if the branch is gone), `branches` (open `todo/*` branches), `version` (newest released CHANGELOG version).
 4. Report the path in one line, and that opening the file in a browser shows it. Mention that it is a snapshot: rerun `/todo-report` to refresh. Suggest committing it only if the team wants it versioned.
 
 Do not summarise the data in chat beyond the one-line counts (roots, in progress, blocked, drained).

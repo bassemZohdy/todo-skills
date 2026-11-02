@@ -9,7 +9,7 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
 Create `.todo/` with `mkdir -p` and write each file with the native file tools (or `cp`). A later `--ci` compares each existing file with what it would write now and, when it differs, shows the difference and replaces it only on a yes.
 
 1. `.todo/todo-lint.sh` (`cp`, then `chmod +x`): a copy of the core's `scripts/todo-lint.sh`, so CI does not need the skills installed.
-2. `.todo/check.sh` (`chmod +x`), with the detected test command (`/todo-init` step 4). After writing it, run it once and report the result:
+2. `.todo/check.sh` (`chmod +x`), with the detected test command (`/todo-init` step 4). Check that command against "Command safety" in `reference/verification.md` (read it now); if it fails, write the file but do not run it, and say why. Otherwise run it once after writing and report the result:
 
    ```bash
    #!/usr/bin/env bash

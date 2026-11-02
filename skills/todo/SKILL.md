@@ -44,7 +44,7 @@ At the start of every command run `git rev-parse --is-inside-work-tree`.
 - **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`). The **base branch** is the one the user names, otherwise the first that exists of `main`, `master`, `trunk`, `develop`; with none of them, ask once.
 - **Not a git repo:** warn **once per command**: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then use **no-git mode**: skip every git step, track progress in `State:` (including `files:` touched), still update markers and drain to CHANGELOG.md. Verification is unchanged.
 
-Never tag, force-push, reset hard or clean. The one forced branch delete is a lost tree claim (`reference/git-flow.md`). **The skills' own git commands never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours. A test command may download dependencies; if it fails for lack of network, block with that reason instead of retrying.
+Never tag, force-push, reset hard or clean. The one forced branch delete is of a branch holding only the skill's own unpublished claim commit (`reference/git-flow.md`, tree claim steps 2 and 5). **The skills' own git commands never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours. A test command may download dependencies; if it fails for lack of network, block with that reason instead of retrying.
 
 ## TODO.md schema
 
@@ -110,7 +110,7 @@ Children use their root's prefix.
 
 ## Which node is next
 
-A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, refresh the root branch from the base first, as in git-flow); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically.
+A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, first `git merge <base>` into the root branch with the message `Merge <base> into <ROOT-ID>` and run only the regression; the root's integration step verifies the rest later); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically.
 
 **Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`. Skip this on the base branch.
 
@@ -133,7 +133,7 @@ The marker is the status, and each command acts only as that status allows (diag
 | `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
 | `[x]` | never touches | `revert` only | refused |
 
-Order for every node: **ready check → branch (first node of a tree: tree claim published to the base) → start `[/]` → build → review → verify → complete `[x]` → merge into parent**. "Claim" means the tree claim; marking a node `[/]` is its start. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
+Order for every node: **ready check → branch (in an unclaimed tree: tree claim published to the base first) → start `[/]` → build → review → verify → complete `[x]` → merge into parent**. "Claim" means the tree claim; marking a node `[/]` is its start. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
 
 **Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
 
@@ -171,7 +171,7 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, leaves S or M, parents L or XL |
 | I9 | No dependency cycles, counting "parent waits for its children" |
-| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, download piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec`, `sh -c`/`bash -c`/`zsh -c`, `python -c`, `node -e`/`--eval`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), `git -C … push`, `.ssh`/`.aws` credentials |
+| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, download piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec`, `sh -c`/`bash -c`/`zsh -c`, `python -c`, `node -e`/`--eval`, `ruby -e`, `perl -e`, `php -r`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), `git -C … push`, `.ssh`/`.aws` credentials |
 
 **The invariant check** ("lint" in the skills) means: if `scripts/todo-lint.sh` exists in this skill's folder (`.claude/skills/todo/scripts/todo-lint.sh` in a project install; `../todo/scripts/` from a command skill), run `bash <path>` from the repository root; otherwise check I1-I10 by reading. The script is read-only, needs bash, awk, grep, sed and tr, and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). A lint run after an edit that fails means the edit is wrong: fix it or undo it before you stop.
 
@@ -183,7 +183,7 @@ On a violation, report it, change nothing, and ask, with one exception: a writin
 2. No required tooling. Markdown plus git only; git itself is optional. The lint script and hook are optional and read-only.
 3. No node is closed without running its `Done when` and its regression and seeing both pass.
 4. At most one `[/]` task in a file. (`[/]` lives on tree branches, so a hotfix started from the base can run while another tree is in progress.)
-5. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain and the confirmed `/todo-release`. Never rewrite released sections.
+5. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain, the confirmed `/todo-release`, and `/todo-init` adding a missing `## [Unreleased]`. Never rewrite released sections.
 6. Never tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
 7. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
 8. When a rule here conflicts with an explicit user instruction, state the conflict and ask.

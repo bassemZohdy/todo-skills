@@ -14,7 +14,7 @@ Never starts work and never touches code. Without `--revise` it plans; with it, 
 
 1. Run the invariant check. Read README.md, `docs/`, `TODO.md`, `CHANGELOG.md`, and `docs/plans/PROJECT.md` if it exists.
 2. **Ask once**, at most 3 short questions, only for what the repo does not answer: the goal and its done-state, what is out of scope, and which parts can run in parallel (independent tracks). Skip any that are answered.
-3. Draft the plan doc `docs/plans/PROJECT.md` (not written yet; ask first before creating `docs/` if it is absent; if the doc exists, propose edits to it instead of a new draft). Keep it short, sections in this order:
+3. Draft the plan doc `docs/plans/PROJECT.md` (not written yet; ask first before creating `docs/` if it is absent; if the doc exists, propose edits to it instead of a new draft). Keep it short, sections as `##` headings in this order:
    - **Goal**, **Scope**, **Out of scope**.
    - **Lanes**: one line each, `<name>: <what it covers>; independent of <lanes>`. A lane is a track one agent can work alone. Use `main` when there is only one.
    - **Decisions** and **Open questions**.

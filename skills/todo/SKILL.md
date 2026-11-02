@@ -9,14 +9,16 @@ The repository is a closed-loop state machine built from files that already exis
 
 | Layer | File(s) | Role | Write policy |
 |---|---|---|---|
-| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`; `docs/status.html` by `todo-report` |
+| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`/`todo-update`; the README `Tests:` line by `todo-init` on a yes; `docs/status.html` by `todo-report` |
 | Active queue | `TODO.md` | One task tree. A tracker of work items, not a place for design | Edited only by the todo-* skills |
 | Validation | Source code + test suites | Ground truth for "done" | Changed only for the task at hand |
-| Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (and, on release, the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file |
+| Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (on release: renamed to the version, a new empty one above it, and the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file or adds a missing `[Unreleased]` |
 | Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, CI job | Lint + tests, run by CI, a pre-push hook and `/todo-continue` | Written by `/todo-init --ci` on a yes; committed by the user |
 | Version store | git | Branch or worktree per task. Nothing reaches the base branch unverified | See "Git mode" |
 
-Use native file tools (Read/Edit/Write) for Markdown edits. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the few file commands a skill names (`cp`, `chmod`, `date`, `grep`).
+Use native file tools (Read/Edit/Write) for file edits, keeping the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`, `cmp`, `mv`, and `rm` of a skill's own temporary file).
+
+**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md` named by a `Ref:`, and the README `Tests:` and `Base:` lines written by a todo-* skill. README.md is staged by a backlog commit only while `git diff README.md` adds exactly those lines, optionally after a blank line; README edits a node makes under "Documentation drift" are that node's files and are committed with it; any other README change is the user's: it counts for the clean-tree check and is never staged by a backlog commit. Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. New roots, and any change to a node of an unclaimed tree, are made only on the base branch; on a `todo/` branch the skills refuse them and name the base. The clean-tree check (`reference/git-flow.md`) ignores them.
 
 ## Direct use
 
@@ -39,10 +41,10 @@ Each skill runs only its own command and never chains into another unprompted.
 
 At the start of every command run `git rev-parse --is-inside-work-tree`.
 
-- **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`).
+- **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`). The **base branch** is the one the user names, otherwise the README `Base:` line, otherwise the first that exists of `main`, `master`, `trunk`, `develop`; with none of them, ask once. When the user names a base that differs from that default, offer to add `Base: <branch>` to README (written on a yes; a backlog file like the `Tests:` line). Every step that checks out or merges into the base (tree claim, claim release, base merge, release) runs in the **main checkout** (the first entry of `git worktree list`): from a linked worktree, `cd` there first; if it is on another branch with changes, stop and print the commands.
 - **Not a git repo:** warn **once per command**: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then use **no-git mode**: skip every git step, track progress in `State:` (including `files:` touched), still update markers and drain to CHANGELOG.md. Verification is unchanged.
 
-Never tag, force-push, reset hard or clean. The one forced branch delete is a lost tree claim (`reference/git-flow.md`). **The skills never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours.
+Never tag, force-push, reset hard or clean. The one forced branch delete is of a branch holding only the skill's own unpublished claim commit (`reference/git-flow.md`, tree claim steps 2 and 5). **The skills' own git commands never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours. A test command may download dependencies; if it fails for lack of network, block with that reason instead of retrying.
 
 ## TODO.md schema
 
@@ -52,32 +54,33 @@ Never tag, force-push, reset hard or clean. The one forced branch delete is a lo
 ## 🌳 Task Tree
 ```
 
-Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is just the heading.
+Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks.
 
 A task is **2 to 4 lines**: what to do, how it is validated, optional links and state.
 
 ```markdown
 - [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
+  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
-  - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002-add-token-refresh-auth from main; next: add reuse test
+  - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
   - [ ] **FEAT-002.1** · L · Refresh endpoint
-    - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
-    - [ ] **FEAT-002.1.1** · S · Token store interface
-      - Done when: store round-trips a token; `npm test -- auth/store`
+    - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
+    - [/] **FEAT-002.1.1** · S · Token store interface
+      - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
+      - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.1-token-store-interface from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
 | Part | Rule |
 |---|---|
 | Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
-| `Done when:` | **Required.** Criteria, then at least one exact command in backticks. Optional `regression: \`cmd\``; without it the regression is the project's full suite |
+| `Done when:` | **Required.** Criteria, then `; ` and at least one exact command in backticks. Optional `; regression: \`cmd\``; without it the regression is the project's full suite |
 | `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` · ` |
-| `State:` | Optional, written by todo-continue, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`), `hyp: <one line>`, `branch todo/<ID>-<slug> [from <base>]`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. A later claim **replaces** the whole line. In no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
-| `Blocked:` | On `[!]` tasks, instead of State: `reason → command in backticks, error (at most 5 lines joined with " / ") → action required`. A manual block writes `n/a (manual)` in the middle |
+| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids, comma-separated>`), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
+| `Blocked:` | On `[!]` tasks, instead of State and in its place (the last field line): `<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`. A manual block writes `n/a (manual)` in the middle |
 
 Only these four fields exist; a task never has both State and Blocked. More than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`). If a task needs more, split it.
 
-Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged into its parent, waiting for its root to drain.
+Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged (or being merged) into its parent, waiting for its root to drain.
 
 ### Tree, levels and sizes
 
@@ -90,12 +93,12 @@ A node at level L has its header indented `2L` spaces and its fields `2L+2`. Max
 | `L` | Has children, all leaves | Parent |
 | `XL` | Has grandchildren | Parent |
 
-A leaf is never `L`/`XL`; a parent never `S`/`M`; adding or dropping children recomputes the parent's size. Roots carry the priority; children inherit it.
+A leaf is never `L`/`XL`, except a node too big to split yet: it keeps `L`/`XL` with `State: next: decompose` and counts as a parent for its own parent's size. A parent is never `S`/`M`. Adding or dropping a node recomputes the size of **every** ancestor (`L` when all children are leaves, else `XL`). Roots carry the priority and the lane; children inherit both.
 
 ## IDs
 
 - Roots `<PREFIX>-<NNN>`, one global sequence, 3 digits. Children append `.n`: `FEAT-002.1`, `FEAT-002.1.2`. Dots equal the level.
-- Next root number = highest FEAT-/FIX-/TASK- number found in `TODO.md`, `CHANGELOG.md` (including IDs after `Includes:`) **and** `docs/plans/*.md`, plus 1. Next child number = highest existing child under that parent plus 1.
+- IDs are never reused. Next root number = highest FEAT-/FIX-/TASK- number found in `TODO.md`, `CHANGELOG.md` (including IDs after `Includes:`), `docs/plans/*.md` **and**, in git mode, commit subjects (`git log --all --format=%s`, which name dropped IDs), plus 1. Next child number = the highest child number under that parent found in the same places, plus 1.
 
 | Prefix | Meaning | CHANGELOG heading | Commit type |
 |---|---|---|---|
@@ -107,19 +110,19 @@ Children use their root's prefix.
 
 ## Which node is next
 
-A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, or `[x]` in TODO.md); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`reference/git-flow.md`).
+A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, `/todo-continue` merges the base into the branch the node will start from before starting it, step 3; read-only commands report "waits for a base merge"); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically. If backlog files hold uncommitted edits on the base, `git switch` to that branch fails: say so and offer `git stash push -- <backlog paths>` first and `git stash pop` back on the base.
 
-**Interrupted work comes first (git mode).** On a tree branch, check that tree's unmerged branches (`git branch --no-merged <parent branch, or the base for a root> --list 'todo/<ID>-*' 'todo/<ID>.*'`). A node that is `[x]` there stopped before its merge: finish the merge, lint, run the parent's regression, and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. Skip this on the base branch.
+**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`; a branch whose node is no longer in its parent branch's TODO.md (dropped) is ignored; a branch already merged into its parent's branch is deleted with `git branch -d`. Skip this on the base branch.
 
 ### Lanes
 
-A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (lowercase, digits, dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main`. Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lane names are listed in the plan doc `docs/plans/PROJECT.md` when one exists.
+A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main` (so `--lane main` selects those roots). Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lane names are listed in the plan doc `docs/plans/PROJECT.md` when one exists.
 
-Order: roots P0 → P1 → P2, then by ID (with `--lane` only that lane's roots); within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
+Order: roots P0 → P1 → P2, then by ID number (the global sequence, ignoring the prefix) (with `--lane` only that lane's roots); within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
 
 ## Lifecycle by status
 
-The marker is the status, and each command acts only as that status allows (diagram and SDLC mapping in `docs/LIFECYCLE.md`).
+The marker is the status, and each command acts only as that status allows.
 
 | Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` |
 |---|---|---|---|
@@ -130,19 +133,19 @@ The marker is the status, and each command acts only as that status allows (diag
 | `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
 | `[x]` | never touches | `revert` only | refused |
 
-Order for every node: **ready check → branch → (first node of a tree: tree claim published to the base) → claim `[/]` → build → review → verify → complete `[x]` → merge into parent**. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
+Order for every node: **ready check → branch (in an unclaimed tree: tree claim published to the base first) → start `[/]` → build → review → verify → complete `[x]` → merge into parent**. "Claim" means the tree claim; marking a node `[/]` is its start. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
 
-**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green.
+**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green (or `none`, or red for a FIX node; `reference/verification.md` step 1).
 
 ## CHANGELOG entry (written only by a root drain)
 
 Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
 
 ```markdown
-- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test -- auth`. Includes: FEAT-002.1, FEAT-002.1.1.
+- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.
 ```
 
-One entry per root. With descendants, `Includes:` is last and lists every descendant ID; a leaf root has none. `Docs: updated docs/x.md.` (before `Includes:`) lists README/`docs/` files the tree changed: from `git diff --name-only <base>...<root branch>`, or the `docs:` items in no-git mode. If the root had `From:`, add `From: FIX-001.`
+One entry per root. Parts in this order, each only when it applies: `Ref:` (the root's), `Validated:` (the root's `Done when` commands, each in backticks, without a `regression:` command), `From: FIX-001.` (the root's `From:`), `Docs: updated docs/x.md.` (README/`docs/` files the tree changed: `git diff --name-only <base>...<root branch>` without backlog files, or the `docs:` items in no-git mode), and last `Includes:` with every descendant ID (a leaf root has none).
 
 ## Reference files
 
@@ -151,7 +154,7 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | File | Contents | Loaded by |
 |---|---|---|
 | `reference/git-flow.md` | Branches, tree claim, staging, merging, refresh from base, conflicts | `/todo-continue`, `/todo-update --status in-progress` or `ready` |
-| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add` |
+| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add`, `/todo-plan`, `/todo-update --status in-progress`, `/todo-init --ci` |
 | `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
 | `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
 
@@ -168,19 +171,18 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, leaves S or M, parents L or XL |
 | I9 | No dependency cycles, counting "parent waits for its children" |
-| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, download piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `sh -c`/`bash -c`, `python -c`, `node -e`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm publish`, `cargo publish`, `twine`, `gem push`), `git -C … push`, `.ssh`/`.aws` credentials |
+| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, download piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec` (the shell builtins; `bundle exec`, `npm exec`, `pnpm exec` are fine), `sh -c`/`bash -c`/`zsh -c`, `python -c`, `node -e`/`--eval`, `ruby -e`, `perl -e`, `php -r`, `find -exec rm`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), `git -C … push`, `.ssh`/`.aws` credentials |
 
-**Lint script.** If `scripts/todo-lint.sh` exists in this skill's folder (`../todo/scripts/` from a command skill), run `bash <path>` from the repository root. It is read-only, needs bash, awk, grep, sed and tr, checks I1-I10 and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). Without the script, check by reading.
+**The invariant check** ("lint" in the skills) means: if `scripts/todo-lint.sh` exists in this skill's folder (`.claude/skills/todo/scripts/todo-lint.sh` in a project install; `../todo/scripts/` from a command skill), resolve it to an absolute path and run `bash <path>` from the repository root; otherwise check I1-I10 by reading. The script is read-only, needs bash, awk, grep, sed and tr, and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). A lint run after an edit that fails means the edit is wrong: fix it or undo it before you stop.
 
-Repair automatically only I5 (finish an interrupted drain by deleting the listed IDs from TODO.md). For any other violation, report it, change nothing, and ask.
+On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report.
 
 ## Hard guardrails
 
 1. No ghost tasks. Every change to TODO.md traces to a user command or a completed code transition.
 2. No required tooling. Markdown plus git only; git itself is optional. The lint script and hook are optional and read-only.
 3. No node is closed without running its `Done when` and its regression and seeing both pass.
-4. At most one `[/]` task in a file. (`[/]` lives on tree branches, so a hotfix started from the base can run while another tree is in progress.)
-5. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain and the confirmed `/todo-release`. Never rewrite released sections.
-6. Never tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
-7. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
-8. When a rule here conflicts with an explicit user instruction, state the conflict and ask.
+4. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain, the confirmed `/todo-release`, and `/todo-init` adding a missing `## [Unreleased]`. Never rewrite released sections.
+5. "Git mode" above: no tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
+6. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
+7. When a rule here conflicts with an explicit user instruction, state the conflict and ask.

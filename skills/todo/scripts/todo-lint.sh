@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # todo-lint.sh - deterministic, read-only check of the todo invariants I1-I10.
 # Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
-# Needs only bash, awk and grep. Prints one "FAIL I<n>: ..." line per violation.
+# Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
 # Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 todo="${1:-TODO.md}"
@@ -57,15 +57,16 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
       fail("I3", "line " NR ": " lab ": backticks must hold a runnable shell command, not code or prose: " c)
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
-    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(curl|wget)[^|]*[|] *(sh|bash)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean/ || c ~ /(^|[ ;&|])(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-c/ || c ~ /python[0-9.]* +-c/ || c ~ /node +(-e|--eval)/ || c ~ /chmod +-R/ || c ~ /mkfs/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|twine|gem) +(publish|push)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
+    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(^|[ ;&|])rm +.*--(recursive|force)/ || c ~ /(curl|wget)[^|]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean( |$)/ || c ~ /(^|[;&|] *)(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-[a-z]*c/ || c ~ /python[0-9.]*( +-[A-Za-z]+)* +-[A-Za-z]*c( |$)/ || c ~ /-exec(dir)? +rm( |$)/ || c ~ /(ruby|perl) +-e/ || c ~ /php +-r/ || c ~ /node +(-[a-z]*[ep]( |$)|--eval|--print)/ || c ~ /chmod +-R/ || c ~ /(^|[ ;&|])mkfs([. ]|$)/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /(^| )-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|poetry|gem) +(npm +)?(publish|push)/ || c ~ /twine +upload/ || c ~ /(docker|podman) +push/ || c ~ /nuget +push/ || c ~ /mvnw? .*deploy( |$)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     runner = first
-    if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first }
+    if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first
+      if (c ~ /^(true|:|echo( .*)?|ls( .*)?|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c) }
     if (first ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[2]) > 0) runner = w[2]
     if (runner !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/ && runner !~ /^[.][/]/ && runner !~ /[/]gradlew$/ && runner !~ /[/]mvnw$/)
       warn("W3", "line " NR ": " lab ": Done when runs " runner ", which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
     if (first ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
-    if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++
+    if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha|(npm|yarn|pnpm|bun)( run)? test)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++
   }
   if (n == 0) fail("I3", "line " NR ": " lab ": Done when has no backticked command")
   if (n > 0 && pres == n) warn("W1", "line " NR ": " lab ": Done when only checks that text or files exist; add a command that runs the behavior")
@@ -155,7 +156,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
     nst[cur] = 1
     m = split(val, sp, "; ")
     for (k = 1; k <= m; k++) {
-      kw = trim(sp[k]); sub(/[ :].*/, "", kw)
+      kw = trim(sp[k]); if (kw == "next: decompose") ndec[cur] = 1; sub(/[ :].*/, "", kw)
       if (kw == "attempts" || kw == "baseline" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
         if (seenst[cur, kw]++) fail("I3", "line " NR ": " id ": State repeats the item " kw "; a later claim must replace the State line")
     }
@@ -172,6 +173,7 @@ END {
   if (h2 != 1) fail("I6", "expected exactly one ## Task Tree section, found " h2 + 0 " second-level headings")
   if (NR > 120) fail("I4", "TODO.md has " NR " lines (max 120)")
   if (nact > 1) fail("I1", "more than one active [/] task:" actlist)
+  for (i = 1; i <= nn; i++) if (ndec[i] && npar[i]) kidk[npar[i]] = 1   # a node waiting to be decomposed counts as a parent
   for (i = 1; i <= nn; i++) {
     id = nid[i]
     if (nmark[i] == "/" && nopen[i] > 0) fail("I1", id ": active parent still has " nopen[i] " open child task(s); only the integration step may be active")
@@ -186,7 +188,7 @@ END {
       if (nkid[i] > 0) {
         want = kidk[i] ? "XL" : "L"
         if (nsz[i] != want) fail("I8", "line " nline[i] ": " id ": size " nsz[i] " but its children imply " want)
-      } else if (nsz[i] == "L" || nsz[i] == "XL") fail("I8", "line " nline[i] ": " id ": leaf task must be S or M, found " nsz[i])
+      } else if ((nsz[i] == "L" || nsz[i] == "XL") && !ndec[i]) fail("I8", "line " nline[i] ": " id ": leaf task must be S or M (or L/XL with State next: decompose), found " nsz[i])
     }
     if (index(cl, " " id " ") > 0) fail("I5", id " is in both TODO.md and CHANGELOG.md")
     m = split(refs[i], r, " ")

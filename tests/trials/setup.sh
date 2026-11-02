@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Builds a scratch project in a NEW, empty directory and puts it into the starting state of a trial scenario.
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
-# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release | monorepo | lanes | replan | ci-github | ci-local
+# Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release-ask | release |
+#   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
+#   status-readonly | report | blocked-sibling
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -31,7 +33,7 @@ head='# Active Backlog
 
 ## 🌳 Task Tree
 '
-git init -q -b main
+[ "$scenario" = no-git ] || git init -q -b main
 
 case "$scenario" in
 interrupted-merge)
@@ -54,7 +56,8 @@ p='TODO.md'
 s=open(p).read().replace('- [ ] **FEAT-001.1**','- [x] **FEAT-001.1**')
 open(p,'w').write(s)
 PY
-  g add calc.py tests/test_calc.py TODO.md && g commit -q -m "feat(calc): add subtract" -m "Refs: FEAT-001.1"
+  g add calc.py tests/test_calc.py TODO.md && g commit -q -m "feat(calc): add subtract" -m "Refs: FEAT-001.1
+Reviewed: self, 0 findings fixed"
   g switch -q todo/FEAT-001-subtract-multiply   # the session died here, before the merge
   ;;
 refresh-from-base)
@@ -125,7 +128,7 @@ rm -f "\$gd/race-index"
 HOOK
   chmod +x "$hook"
   ;;
-release)
+release|release-ask)
   printf '%s\n' "$head" > TODO.md
   cat > CHANGELOG.md <<'CL'
 # Changelog
@@ -206,6 +209,59 @@ ci-github|ci-local)
   g add -A && g commit -q -m "init"
   [ "$scenario" = ci-github ] && git remote add origin https://github.com/example/minical.git
   ;;
+happy-path)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  g add -A && g commit -q -m "init with one free root"
+  ;;
+baseline-red)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  printf 'def add(a, b):\n    return a - b\n' > calc.py   # a bug already on main: the baseline is red
+  g add -A && g commit -q -m "init with a red baseline"
+  ;;
+no-git)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  ;;
+add-fix)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  g add -A && g commit -q -m "init with one root"
+  ;;
+update-block|update-drop|status-readonly|report)
+  mkdir -p docs/plans
+  printf '# Plan\n\n## Goal\nA calculator with more operations.\n\n## Lanes\nmain: all work\n\n## Revisions\n' > docs/plans/PROJECT.md
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+- [ ] **FEAT-002** · P2 · S · Add round_to to calc.py <with> "quotes" & </script> in the title
+  - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
+  - Links: From: FEAT-000' > TODO.md
+  printf '# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [Unreleased]\n\n### Added\n\n- **FEAT-000** (feat): Add add() to calc.py. Validated: `python3 -m unittest tests.test_calc`.\n' > CHANGELOG.md
+  g add -A && g commit -q -m "init with two roots"
+  ;;
+blocked-sibling)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · L · Add subtract and multiply to calc.py
+  - Done when: both functions work; `python3 -m unittest discover -s tests`
+  - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
+  - [ ] **FEAT-001.1** · S · Add subtract with a test
+    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - [ ] **FEAT-001.2** · S · Add multiply with a test
+    - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  g add -A && g commit -q -m "init with claimed tree"
+  g switch -q -c todo/FEAT-001-subtract-multiply
+  g switch -q -c todo/FEAT-001.1-subtract-test
+  python3 - <<'PY2'
+p='TODO.md'
+s=open(p).read().replace('- [ ] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
+ '- [!] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`\n    - Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready')
+open(p,'w').write(s)
+PY2
+  g add TODO.md && g commit -q -m "chore(backlog): block FEAT-001.1"
+  g switch -q todo/FEAT-001-subtract-multiply   # the parent's branch still shows FEAT-001.1 as [ ]
+  ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac
-echo "ready: $dir ($scenario) on branch $(git rev-parse --abbrev-ref HEAD)"
+# Snapshot of the starting state for the read-only checks in assert.sh (inside .git, never tracked).
+if [ -d .git ]; then git rev-parse HEAD > .git/trial-start; git for-each-ref --format='%(refname) %(objectname)' > .git/trial-refs; fi
+echo "ready: $dir ($scenario) on branch $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo none)"

@@ -12,3 +12,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fixtures, hook and repository checks
         run: bash tests/run.sh
+      - name: Trial harness self-test
+        run: bash tests/trials/selftest.sh

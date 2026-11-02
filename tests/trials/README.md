@@ -8,7 +8,23 @@ bash tests/trials/setup.sh /tmp/trial-a interrupted-merge
 bash tests/trials/assert.sh /tmp/trial-a interrupted-merge
 ```
 
-Common instructions for the agent: work only inside the scratch folder, read the skills in `.claude/skills/<name>/SKILL.md`, follow them literally, never push, never use `git add -A`, and report every ambiguity with the quoted text.
+`prompt.sh <dir> <scenario>` prints the exact prompt for the fresh agent (the common instructions plus the scenario's task), so every run uses the same words. The agent works only inside the scratch folder, reads the skills in `.claude/skills/<name>/SKILL.md`, follows them literally, never pushes, never uses `git add -A`, and reports every ambiguity with the quoted text.
+
+## Scoring a batch
+
+Lay out a batch as `<runs>/<scenario>/<repo>` (one `setup.sh` per scenario), run one fresh agent per scenario, then:
+
+```bash
+bash tests/trials/score.sh <runs>
+```
+
+A scenario passes only when every check in `assert.sh` passes; the **trial score** is the share of passing scenarios. The check rate is printed too, but it flatters: an agent that does nothing still passes the generic checks. `TRIAL_SKIP=<regex>` leaves out checks the trial environment itself refuses (for example a sandbox that denies writes under `.git/hooks`); skipped checks are printed, and it is never used to hide a skill bug.
+
+`assert.sh` also runs generic checks on every git scenario: conventional commit subjects, `Refs:` and `Reviewed:` on node commits, the skills' merge messages, no tags, tests and lint green, and the CHANGELOG entry format. Read-only scenarios compare against a snapshot `setup.sh` writes to `.git/trial-start` and `.git/trial-refs`.
+
+`bash tests/trials/selftest.sh` (run in CI) checks the harness itself: every scenario sets up, has a prompt, and an untouched setup **fails** its assert, except the read-only scenarios (`baseline-red`, `release-ask`, `status-readonly`), where doing nothing is correct.
+
+The overall evaluation used while iterating on the skills is `0.15 x tests/run.sh pass rate + 0.55 x trial score + 0.30 x rubric`, where the rubric is the mean of two independent blind reviews of the skill text (7 criteria, 0-10 each: consistency, unambiguity, completeness, safety, executability, conciseness, testability).
 
 | Scenario | Starting state | Prompt | Expected |
 |---|---|---|---|
@@ -23,5 +39,14 @@ Common instructions for the agent: work only inside the scratch folder, read the
 | `replan` | A plan doc and three open roots | Run `/todo-plan --revise "FEAT-003 (web dashboard) is out of scope, drop it"` and confirm | FEAT-003 dropped (ID not reused), FEAT-001 untouched, a Revisions line in the plan doc, lint clean, no code changed |
 | `ci-github` | Empty tree, a GitHub `origin` remote, no CI | Run `/todo-init --ci` and say yes to every offer | `.todo/check.sh` (lint + the unittest command) runs green, `.todo/todo-lint.sh` equals the core lint, `.github/workflows/todo-check.yml` sets up Python and runs `check.sh` |
 | `ci-local` | Same, without any remote | Run `/todo-init --ci` and say yes to every offer | `.todo/check.sh` as above, no workflow, an executable `pre-push` hook that runs `check.sh` |
+| `release-ask` | As `release` | Run `/todo-release` and stop at the question | Nothing changes: no commit, no edit |
+| `happy-path` | One free leaf root | Run `/todo-continue --merge` | Claim on main, start, node commit with trailers, drain, `Merge FEAT-001 into main`, branch deleted |
+| `baseline-red` | `add` is broken on main | Run `/todo-continue` | Nothing changes; a FIX is suggested |
+| `no-git` | No repository | Run `/todo-continue` | Built and drained without git, no `.git` created |
+| `add-fix` | One root | `/todo-add` a crash report with `--priority P0` | `FIX-002 · P0 · S` first in the tree, Done when names a test id, nothing committed |
+| `update-block` / `update-drop` | Two roots and a plan doc | Block / drop FEAT-002 | `[!]` with a manual Blocked line / FEAT-002 gone and named in Revisions; nothing committed on main |
+| `status-readonly` | Two roots | Run `/todo-status` | Nothing changes |
+| `report` | Two roots, one with a hostile title | Run `/todo-report` | Only `docs/status.html` written, the title encoded |
+| `blocked-sibling` | FEAT-001.1 is `[!]` on its own branch only; HEAD on the root branch | Run `/todo-continue`; stop after the start commit | FEAT-001.1 is not restarted; FEAT-001.2 starts |
 
 `--all-lanes` with real parallel subagents cannot be run by a trial agent (subagents cannot start subagents). It was run with the main session as coordinator: `setup.sh <dir> lanes`, steps 1-2 of `reference/lanes.md` by hand, two lane subagents started at once, then step 4; `assert.sh <dir> lanes` passed.

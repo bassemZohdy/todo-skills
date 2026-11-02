@@ -6,8 +6,8 @@ dir="${1:?usage: prompt.sh <dir> <scenario>}"; scenario="${2:?scenario}"
 case "$scenario" in
   interrupted-merge)  task='Run `/todo-continue`. Stop after one invocation.' ;;
   refresh-from-base)  task='Run `/todo-continue` (no `--merge`). Stop after one invocation.' ;;
-  claimed-elsewhere)  task='Run `/todo-continue`; stop right after the claim (the `[/]` claim commit). Do not build.' ;;
-  race-claim-*)       task='Run `/todo-continue`; stop after the claim step (the `[/]` claim commit, or earlier if the skill says to stop). Do not build. Do not modify or remove git hooks.' ;;
+  claimed-elsewhere)  task='Run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`). Do not build.' ;;
+  race-claim-*)       task='Run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`), or earlier if the skill says to stop. Do not build. Do not modify or remove git hooks.' ;;
   release-ask)        task='Run `/todo-release`. When the skill tells you to ask the user something, STOP there and end your turn with the question.' ;;
   release)            task='Run `/todo-release`. The user has already answered your version question with: "0.2.0, confirmed".' ;;
   monorepo)           task='Run, in order, `/todo-init`, then `/todo-add "add a power function to the api package"`, then `/todo-continue --merge`. Accept every proposal and confirm every confirmation.' ;;

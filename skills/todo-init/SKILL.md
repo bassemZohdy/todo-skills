@@ -41,7 +41,7 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
    |---|---|
    | `pom.xml` | `mvn test` |
    | `build.gradle(.kts)` | `./gradlew test` |
-   | `package.json` with `scripts.test` | `pnpm test` / `yarn test` / `bun test` / `npm test`, chosen by lockfile |
+   | `package.json` with `scripts.test` | `pnpm test` / `yarn test` / `bun run test` / `npm test`, chosen by lockfile |
    | `Cargo.toml` | `cargo test` |
    | `pyproject.toml`, `pytest.ini`, `setup.cfg` | `uv run pytest` if `uv.lock` exists, else `pytest` |
    | `go.mod` | `go test ./...` |

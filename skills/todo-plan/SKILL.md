@@ -8,7 +8,7 @@ argument-hint: [<goal>] [--revise [<reason>]]
 
 First load the `todo` core skill (tree format, sizes, IDs, lanes, invariants), and read `../todo-add/SKILL.md` and `../todo/reference/verification.md` for how nodes are sized and written. If the core is not a skill, read `../todo/SKILL.md`.
 
-Never starts work and never touches code. Without `--revise` it plans; with it, it re-plans. Check git (core "Git mode"). In git mode read claims from `git show <base>:TODO.md`: the nodes of a claimed tree may be changed only from that tree's branch; anywhere else, list them as locked and leave them unchanged. Dates are `date +%F`. Show every proposal in full before asking for confirmation.
+Never starts work and never touches code. Without `--revise` it plans; with it, it re-plans. Check git (core "Git mode"). In git mode read claims from `git show <base>:TODO.md`: the nodes of a claimed tree may be changed only from that tree's branch; anywhere else, list them as locked and leave them unchanged. Dates are `date +%F`. New roots, and changes to unclaimed trees, are written only on the base: on a `todo/` branch, show the proposal but refuse to write it and name the base. Show every proposal in full before asking for confirmation.
 
 ## Plan (default)
 

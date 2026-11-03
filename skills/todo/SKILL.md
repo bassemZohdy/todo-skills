@@ -107,7 +107,7 @@ A leaf with `State: next: decompose` may carry `L`/`XL`.
 | `mid` | Ordinary work that needs some investigation or design (the default) | a new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 
-A parent's complexity is that of its integration step, at least the highest of its children when the combination is the hard part. Roots carry the priority and the lane; children inherit both.
+A parent is rated by its integration step alone (usually `low` or `mid`); its children carry their own levels. Roots carry the priority and the lane; children inherit both.
 
 ### Model routing (optional)
 

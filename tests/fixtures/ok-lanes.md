@@ -2,9 +2,9 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-060** · P1 · S · API lane task
+- [ ] **FEAT-060** · P1 · low · API lane task
   - Done when: api answers; `make test`
   - Links: Lane: api · Depends: FEAT-061
-- [ ] **FEAT-061** · P1 · S · Web lane task
+- [ ] **FEAT-061** · P1 · low · Web lane task
   - Done when: page renders; `make test`
   - Links: Lane: web

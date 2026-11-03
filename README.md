@@ -10,10 +10,10 @@ Skills that let a coding agent run a software backlog from two Markdown files, `
 - **Safe by construction.** The skills never touch the network, tag or push. No required tooling beyond Markdown; git is used when present.
 
 ```markdown
-- [ ] **FEAT-002** · P1 · L · Add token refresh to the auth service
+- [ ] **FEAT-002** · P1 · mid · L · Add token refresh to the auth service
   - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Lane: api
-  - [/] **FEAT-002.1** · M · Rotate refresh tokens
+  - [/] **FEAT-002.1** · high · M · Rotate refresh tokens
     - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
     - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1-rotate-refresh-tokens from todo/FEAT-002-add-token-refresh-auth; next: add reuse test
 ```
@@ -39,11 +39,11 @@ The full walkthrough is in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). T
 
 | Command | Skill folder | What it does |
 |---|---|---|
-| `/todo` | `skills/todo` | Core rules: tree format, sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
+| `/todo` | `skills/todo` | Core rules: tree format, complexity (low/mid/high, for model choice) and optional sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
 | `/todo-init [--plan]` | `skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git and the test runner, migrates the old format, reports status. `--plan` adds up to 3 pre-planning questions and an optional `docs/plans/PROJECT.md` |
 | `/todo-plan [<goal>] [--revise [<reason>]]` | `skills/todo-plan` | Plans the work into lanes and a proposed tree. `--revise` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept |
-| `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]` | `skills/todo-add` | Sizes the request and adds a task, or a whole tree, until every leaf is S or M. Asks up to 3 questions when unclear |
-| `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root. Lane flags run one subagent per lane |
+| `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]` | `skills/todo-add` | Splits the request, rates each node's complexity and adds a task, or a whole tree, until every leaf is S or M. Asks up to 3 questions when unclear |
+| `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--delegate] [--merge]` | `skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root. Lane flags run one subagent per lane |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `skills/todo-update` | Manual state changes (dotted IDs allowed) and in-place field edits |
 | `/todo-status [--search <text>] [--last <N>]` | `skills/todo-status` | Read-only tree by lane, recent history and search |
 | `/todo-report` | `skills/todo-report` | Writes `docs/status.html`: an interactive, self-contained page with KPIs, lanes, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan |

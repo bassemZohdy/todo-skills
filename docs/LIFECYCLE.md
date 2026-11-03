@@ -61,7 +61,7 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 
 | Practice | How it shows up |
 |---|---|
-| Short-lived branches, small changes (DORA: hours, few active branches) | Sizes S and M, one branch per node, at most 3 levels, so at most 3 branches are open |
+| Short-lived branches, small changes (DORA: hours, few active branches) | Leaves fit one context window (at most 5 files), one branch per node, at most 3 levels, so at most 3 branches are open |
 | Visible work in progress, no duplicate work | The tree claim on the base branch names the owning branch |
 | Tests pass before anything merges (DORA: protected trunk) | Nothing merges to the parent without `Done when` and regression green. Nothing merges to base before its root is verified, and then only on `--merge` |
 | Integrate continuously | Roots merge the latest base in and rerun the full regression before landing, so the tested code is the code that lands |

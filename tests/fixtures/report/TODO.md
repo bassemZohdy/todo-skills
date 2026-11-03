@@ -2,5 +2,5 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-001** · P1 · S · Hostile </Script><img src=x onerror=alert(1)>
+- [ ] **FEAT-001** · P1 · low · Hostile </Script><img src=x onerror=alert(1)>
   - Done when: x; `make test`

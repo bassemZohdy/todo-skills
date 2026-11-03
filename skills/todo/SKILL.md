@@ -1,6 +1,6 @@
 ---
 name: todo
-description: Core rules for the todo-* skills (todo-init, todo-plan, todo-add, todo-continue, todo-update, todo-status, todo-report, todo-release) - the task tree in TODO.md, compact task format, sizes, IDs, git flow with a no-git fallback, invariants, Definition of Done and hard guardrails. Load this before running any todo-* command or when editing a TODO.md in the `# Active Backlog` task-tree format. Invoked directly as /todo it only prints the command list and a read-only invariant check.
+description: Core rules for the todo-* skills (todo-init, todo-plan, todo-add, todo-continue, todo-update, todo-status, todo-report, todo-release) - the task tree in TODO.md, compact task format, complexity levels and model routing, IDs, git flow with a no-git fallback, invariants, Definition of Done and hard guardrails. Load this before running any todo-* command or when editing a TODO.md in the `# Active Backlog` task-tree format. Invoked directly as /todo it only prints the command list and a read-only invariant check.
 ---
 
 # todo (core)
@@ -59,32 +59,36 @@ Exactly this heading and one section. No In Progress, Ready or Blocked sections:
 A task is **2 to 4 lines**: what to do, how it is validated, optional links and state.
 
 ```markdown
-- [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
+- [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
   - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
   - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
-  - [ ] **FEAT-002.1** · L · Refresh endpoint
+  - [ ] **FEAT-002.1** · mid · Refresh endpoint
     - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
-    - [/] **FEAT-002.1.1** · S · Token store interface
+    - [/] **FEAT-002.1.1** · high · Token store interface
       - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.1-token-store-interface from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
 | Part | Rule |
 |---|---|
-| Header | `- [m] **ID** · [P0-P2, roots only ·] SIZE · what to do, one sentence` |
+| Header | `- [m] **ID** · [P0-P2, roots only ·] COMPLEXITY [· SIZE] · what to do, one sentence`: complexity `low`, `mid` or `high` (required); size `S`, `M`, `L` or `XL` (optional) |
 | `Done when:` | **Required.** Criteria, then `; ` and at least one exact command in backticks. Optional `; regression: \`cmd\``; without it the regression is the project's full suite |
 | `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` · ` |
-| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids, comma-separated>`), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
+| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids, comma-separated>`), `tier: <low|mid|high>` (only once raised above the node's complexity), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
 | `Blocked:` | On `[!]` tasks, instead of State and in its place (the last field line): `<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`. A manual block writes `n/a (manual)` in the middle |
 
 Only these four fields exist; a task never has both State and Blocked. More than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`). If a task needs more, split it.
 
 Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged (or being merged) into its parent, waiting for its root to drain.
 
-### Tree, levels and sizes
+### Tree, levels and complexity
 
 A node at level L has its header indented `2L` spaces and its fields `2L+2`. Maximum 3 levels.
+
+**Scope rule.** Every leaf is one change that fits one context window and touches at most 5 files; bigger work is split into children (`/todo-add`). A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down.
+
+**Size** (optional, after the complexity) records scope when it helps a reader; when present, it must match the tree, and adding or dropping a node updates every ancestor's size:
 
 | Size | Meaning | Where |
 |---|---|---|
@@ -93,7 +97,25 @@ A node at level L has its header indented `2L` spaces and its fields `2L+2`. Max
 | `L` | Has children, all leaves | Parent |
 | `XL` | Has grandchildren | Parent |
 
-A leaf is never `L`/`XL`, except a node too big to split yet: it keeps `L`/`XL` with `State: next: decompose` and counts as a parent for its own parent's size. A parent is never `S`/`M`. Adding or dropping a node recomputes the size of **every** ancestor (`L` when all children are leaves, else `XL`). Roots carry the priority and the lane; children inherit both.
+A leaf with `State: next: decompose` may carry `L`/`XL`.
+
+**Complexity** says how hard the reasoning is, not how big the change is, so an agent can pick a fitting model:
+
+| Complexity | Meaning | Examples |
+|---|---|---|
+| `low` | Mechanical; the test and the change are obvious | rename, docs, config, a small function with a named test |
+| `mid` | Ordinary feature or fix work (the default) | a new endpoint, a bug with a clear reproduction |
+| `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
+
+A parent's complexity is that of its integration step, at least the highest of its children when the combination is the hard part. Roots carry the priority and the lane; children inherit both.
+
+### Model routing (optional)
+
+A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both:
+
+- `/todo-continue --delegate` and lane runs give each node (or lane root, at its highest complexity) a subagent on the mapped model.
+- The reviewer runs at the node's tier or higher.
+- **Escalation:** after a failed verification attempt the next attempt runs one tier higher (`low` → `mid` → `high`), recorded in `State:` as `tier:`. A wrong `low` label costs one cheap attempt, not a blocked node.
 
 ## IDs
 
@@ -164,12 +186,12 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 |---|---|
 | I1 | At most one `[/]` task, and a `[/]` parent has no open children |
 | I2 | Every ID is unique in TODO.md |
-| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no State together with Blocked, a Blocked line on every `[!]`, a priority on roots only, a valid size and a title |
+| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no State together with Blocked, a Blocked line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
 | I4 | TODO.md is at most 120 lines |
 | I5 | No ID appears in both TODO.md and CHANGELOG.md (IDs after `Includes:` count) |
 | I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
-| I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, leaves S or M, parents L or XL |
+| I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, and any size given matches the tree |
 | I9 | No dependency cycles, counting "parent waits for its children" |
 | I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, download piped into a shell, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec` (the shell builtins; `bundle exec`, `npm exec`, `pnpm exec` are fine), `sh -c`/`bash -c`/`zsh -c`, `python -c`, `node -e`/`--eval`, `ruby -e`, `perl -e`, `php -r`, `find -exec rm`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), `git -C … push`, `.ssh`/`.aws` credentials |
 

@@ -97,18 +97,21 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
   if (lvl > prevlvl + 1) fail("I8", "line " NR ": " id ": indent jumps more than one level")
   np = split(rest, parts, " · ")
   if (lvl == 0) {
-    pri = parts[2]; sz = parts[3]; ts = 4
+    pri = parts[2]; sz = parts[3]; ts = 4   # sz: the complexity token
     if (pri !~ /^P[0-2]$/) fail("I3", "line " NR ": " id ": root task needs a priority P0, P1 or P2")
   } else {
     sz = parts[2]; ts = 3
     if (sz ~ /^P[0-2]$/) { fail("I3", "line " NR ": " id ": priority is allowed on root tasks only"); sz = parts[3]; ts = 4 }
   }
+  size = ""   # optional size token right after the complexity
+  if (np > ts && parts[ts] ~ /^(S|M|L|XL)$/) { size = parts[ts]; ts++ }
   title = ""
   for (k = ts; k <= np; k++) title = title (k > ts ? " · " : "") parts[k]
   if (trim(title) == "") fail("I3", "line " NR ": " id ": empty title")
-  if (sz != "S" && sz != "M" && sz != "L" && sz != "XL") fail("I3", "line " NR ": " id ": size must be S, M, L or XL (found: " sz ")")
+  if (sz == "S" || sz == "M" || sz == "L" || sz == "XL") fail("I3", "line " NR ": " id ": the complexity (low, mid or high) comes first and the size is optional after it; run /todo-init to migrate (found: " sz ")")
+  else if (sz != "low" && sz != "mid" && sz != "high") fail("I3", "line " NR ": " id ": complexity must be low, mid or high (found: " sz ")")
   nn++
-  nid[nn] = id; nmark[nn] = mk; nsz[nn] = sz; nlvl[nn] = lvl; nline[nn] = NR; nlines[nn] = 1
+  nid[nn] = id; nmark[nn] = mk; nsz[nn] = size; nlvl[nn] = lvl; nline[nn] = NR; nlines[nn] = 1
   if (id in idx) fail("I2", "line " NR ": duplicate ID " id)
   else idx[id] = nn
   d = id; dots = gsub(/\./, ".", d)
@@ -123,8 +126,8 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
   npar[nn] = par
   if (par) {
     nkid[par]++
-    if (mk != "x") nopen[par]++
     if (npar[par]) kidk[npar[par]] = 1
+    if (mk != "x") nopen[par]++
   }
   sidx[lvl] = nn
   prevlvl = lvl
@@ -162,7 +165,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
     m = split(val, sp, "; ")
     for (k = 1; k <= m; k++) {
       kw = trim(sp[k]); if (kw == "next: decompose") ndec[cur] = 1; sub(/[ :].*/, "", kw)
-      if (kw == "attempts" || kw == "baseline" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
+      if (kw == "attempts" || kw == "baseline" || kw == "tier" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
         if (seenst[cur, kw]++) fail("I3", "line " NR ": " id ": State repeats the item " kw "; a later claim must replace the State line")
     }
   }
@@ -178,7 +181,7 @@ END {
   if (h2 != 1) fail("I6", "expected exactly one ## Task Tree section, found " h2 + 0 " second-level headings")
   if (NR > 120) fail("I4", "TODO.md has " NR " lines (max 120)")
   if (nact > 1) fail("I1", "more than one active [/] task:" actlist)
-  for (i = 1; i <= nn; i++) if (ndec[i] && npar[i]) kidk[npar[i]] = 1   # a node waiting to be decomposed counts as a parent
+  for (i = 1; i <= nn; i++) if (ndec[i] && npar[i]) { kidk[npar[i]] = 1; ndecp[npar[i]] = 1 }   # a node waiting to be decomposed counts as a parent
   for (i = 1; i <= nn; i++) {
     id = nid[i]
     if (nmark[i] == "/" && nopen[i] > 0) fail("I1", id ": active parent still has " nopen[i] " open child task(s); only the integration step may be active")
@@ -189,11 +192,11 @@ END {
     if (nlines[i] > 4) fail("I3", "line " nline[i] ": " id ": task has " nlines[i] " lines (max 4)")
     if (nmark[i] == "x" && nopen[i] > 0) fail("I8", "line " nline[i] ": " id ": marked done but has open children")
     if (nmark[i] == "x" && nlvl[i] == 0) fail("I8", "line " nline[i] ": " id ": root task marked done; a finished root must be drained to CHANGELOG.md")
-    if (nsz[i] == "S" || nsz[i] == "M" || nsz[i] == "L" || nsz[i] == "XL") {
-      if (nkid[i] > 0) {
+    if (nsz[i] != "") {   # an optional size must match the tree
+      if (nkid[i] > 0 || ndecp[i]) {
         want = kidk[i] ? "XL" : "L"
         if (nsz[i] != want) fail("I8", "line " nline[i] ": " id ": size " nsz[i] " but its children imply " want)
-      } else if ((nsz[i] == "L" || nsz[i] == "XL") && !ndec[i]) fail("I8", "line " nline[i] ": " id ": leaf task must be S or M (or L/XL with State next: decompose), found " nsz[i])
+      } else if ((nsz[i] == "L" || nsz[i] == "XL") && !ndec[i]) fail("I8", "line " nline[i] ": " id ": leaf size must be S or M (or L/XL with State next: decompose), found " nsz[i])
     }
     if (index(cl, " " id " ") > 0) fail("I5", id " is in both TODO.md and CHANGELOG.md")
     m = split(refs[i], r, " ")

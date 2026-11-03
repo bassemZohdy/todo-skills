@@ -1,18 +1,19 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works one root of that lane.
-argument-hint: [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--merge]
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works one root of that lane.
+argument-hint: [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]
 ---
 
 # /todo-continue
 
-First load the `todo` core skill (tree format, sizes, git mode, invariants, guardrails) and read `reference/git-flow.md` and `reference/verification.md` from its folder (and `reference/lanes.md` with a lane flag). If the core is not a skill, read `../todo/SKILL.md` and those files from `../todo/reference/`.
+First load the `todo` core skill (tree format, complexity and model routing, git mode, invariants, guardrails) and read `reference/git-flow.md` and `reference/verification.md` from its folder (and `reference/lanes.md` with a lane flag). If the core is not a skill, read `../todo/SKILL.md` and those files from `../todo/reference/`.
 
 Complete at most one node per invocation (lane runs excepted, see "Lanes"). Flags (all optional):
 - `--plan`: stop for approval after reading, before writing code (step 6). Not combined with a lane flag; an invalid flag combination is reported and nothing runs.
 - `--lane <name>`: only take roots of that lane (core, "Lanes"); one agent, in order.
 - `--all-lanes [--seq]`: one subagent per lane, one root per lane per run, in parallel; `--seq` (only with `--all-lanes`) runs the lanes one after another (see "Lanes"). `--lane` with `--all-lanes`, and `--worktree` with a lane flag, are invalid combinations.
 - `--worktree`: put the node in its own worktree (`reference/git-flow.md`); the main checkout is never switched, and the baseline is taken inside the new worktree before the claim commit (red: `git worktree remove` it, `git branch -d` its new branches, stop). Refused while backlog files in the main checkout hold uncommitted edits: stash your other changes, run once without it (the claim commits the backlog edits), then restore them.
+- `--delegate`: run steps 6-9 for the node in a subagent on the model its tier maps to (core "Model routing"); you keep steps 1-5 and 10-11 and check its result by rerunning the verify commands yourself. Without a subagent tool or a `Models:` line, say so and work in this thread.
 - `--merge`: when a **root** finishes, also merge it into the base branch. Without it the exact commands are printed.
 
 ## Steps
@@ -43,7 +44,7 @@ The order of every node is the core's "Lifecycle by status".
    - Every hunk traces to the task line; no debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
    - The tests assert the `Done when` criteria (not vacuous, nothing weakened, the ID in new test names, or in a docstring or comment when `Done when` fixes the name).
    - No generated files, secrets or `.env` in the diff or in any backlog text you wrote (`Blocked:`, `State:`); only plausible files changed.
-   - When a subagent tool exists, have a fresh-context reviewer do this, given only the task lines, the Ref path and the diff, and report findings. Fix what is valid yourself (at most 2 rounds; valid findings left after that block the node as "Test failures" says, listing them). The reviewer never edits files and never runs the tests. Without a subagent tool, do the same review yourself and say so (`Reviewed: self`).
+   - When a subagent tool exists, have a fresh-context reviewer do this (on the model for the node's tier or higher, when the project has a `Models:` line), given only the task lines, the Ref path and the diff, and report findings. Fix what is valid yourself (at most 2 rounds; valid findings left after that block the node as "Test failures" says, listing them). The reviewer never edits files and never runs the tests. Without a subagent tool, do the same review yourself and say so (`Reviewed: self`).
 9. **Verify.** Run in full and unnarrowed: the `Done when` commands, then the regression. Update `State:` after every cycle ("Test failures"). Then the gates, all of which must pass:
    - Done when exited 0 **and** really ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression is green with no fewer passing tests than the baseline and none deleted or skipped.
    - Every item of the project's Definition of Done, if one exists.
@@ -64,6 +65,7 @@ The order of every node is the core's "Lifecycle by status".
 
 - Diagnose before changing code: reproduce, read the first failing assertion, state one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, re-run.
 - At most **3** attempts in total across sessions (`State:` counter). An attempt is a failed verification run after you started implementing; the first red run is not one.
+- **Escalation** (core "Model routing"): when the project has a `Models:` line and work runs in a subagent (`--delegate` or a lane), a failed attempt raises the next attempt one tier (`low` → `mid` → `high`) and records it as `tier:` in `State:`. Without routing, note in the report that a stronger model might help.
 - You may change code and the tests the node itself creates, inside the task line's scope.
 - Forbidden: editing the `Done when` commands, deleting, skipping or weakening tests, `|| true`, loosening assertions, or a narrower command to get green.
 - A failure outside the node (flaky test, a regression that cannot be fixed within the task line) is not fixed here. Block the node: `[!]`, replace `State:` with a `Blocked:` line in the core's format (secrets and tokens in the error lines redacted; in no-git mode a root's `files:`/`docs:` go into the action part as `(files: …; docs: …)`). In git mode commit the node's changed files (by explicit path) with `TODO.md` as `chore(backlog): block <ID>`, so the work in progress stays on the node's branch; stop. After the third failed cycle, block the same way listing each hypothesis tried. A blocked root works the same way.

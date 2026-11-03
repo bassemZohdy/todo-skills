@@ -43,7 +43,7 @@ function addrefs(i, kind, s,   x) {
   }
 }
 function warn(code, msg) { print "WARN " code ": " msg; nwarn++ }
-function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
+function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
   n = 0; pres = 0; filt = 0
   while ((p = index(s, "`")) > 0) {
     s = substr(s, p + 1)
@@ -57,15 +57,20 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt) {
     if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
       fail("I3", "line " NR ": " lab ": backticks must hold a runnable shell command, not code or prose: " c)
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
-    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(^|[ ;&|])rm +.*--(recursive|force)/ || c ~ /(curl|wget)[^|]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean( |$)/ || c ~ /(^|[;&|] *)(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-[a-z]*c/ || c ~ /python[0-9.]*( +-[A-Za-z]+)* +-[A-Za-z]*c( |$)/ || c ~ /-exec(dir)? +rm( |$)/ || c ~ /(ruby|perl) +-e/ || c ~ /php +-r/ || c ~ /node +(-[a-z]*[ep]( |$)|--eval|--print)/ || c ~ /chmod +-R/ || c ~ /(^|[ ;&|])mkfs([. ]|$)/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /(^| )-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|poetry|gem) +(npm +)?(publish|push)/ || c ~ /twine +upload/ || c ~ /(docker|podman) +push/ || c ~ /nuget +push/ || c ~ /mvnw? .*deploy( |$)/ || c ~ /[.]ssh[/]|id_rsa|[.]aws[/]credentials/)
+    if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(^|[ ;&|])rm +.*--(recursive|force)/ || c ~ /(curl|wget)[^|]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean( |$)/ || c ~ /(^|[;&|] *)(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-[a-z]*c/ || c ~ /python[0-9.]*( +-[A-Za-z]+)* +-[A-Za-z]*c( |$)/ || c ~ /-exec(dir)? +rm( |$)/ || c ~ /(ruby|perl) +-e/ || c ~ /php +-r/ || c ~ /node +(-[a-z]*[ep]( |$)|--eval|--print)/ || c ~ /chmod +-R/ || c ~ /(^|[ ;&|])mkfs([. ]|$)/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /(^| )-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|poetry|gem) +(npm +)?(publish|push)/ || c ~ /twine +upload/ || c ~ /(docker|podman) +push/ || c ~ /nuget +push/ || c ~ /mvnw? .*deploy( |$)/ || c ~ /[.]ssh\/|id_rsa|[.]aws\/credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first
       if (c ~ /^(true|:|echo( .*)?|ls( .*)?|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c) }
-    if (first ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[2]) > 0) runner = w[2]
-    if (runner !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/ && runner !~ /^[.][/]/ && runner !~ /[/]gradlew$/ && runner !~ /[/]mvnw$/)
+    wi = 1
+    while (w[wi] ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[wi + 1]) > 0) wi++
+    runner = w[wi]; norm = runner
+    sub(/^(\.\/)?(\.venv|venv|env)\/bin\//, "", norm)
+    sub(/^(\.\/)?node_modules\/\.bin\//, "", norm)
+    if (norm == "./gradlew" || norm == "./mvnw") sub(/^\.\//, "", norm)
+    if (norm !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/)
       warn("W3", "line " NR ": " lab ": Done when runs " runner ", which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
-    if (first ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
+    if (norm ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
     if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha|(npm|yarn|pnpm|bun)( run)? test)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++
   }
   if (n == 0) fail("I3", "line " NR ": " lab ": Done when has no backticked command")

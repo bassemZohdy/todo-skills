@@ -103,8 +103,8 @@ A leaf with `State: next: decompose` may carry `L`/`XL`.
 
 | Complexity | Meaning | Examples |
 |---|---|---|
-| `low` | Mechanical; the test and the change are obvious | rename, docs, config, a small function with a named test |
-| `mid` | Ordinary feature or fix work (the default) | a new endpoint, a bug with a clear reproduction |
+| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function whose fix the task line states |
+| `mid` | Ordinary work that needs some investigation or design (the default) | a new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 
 A parent's complexity is that of its integration step, at least the highest of its children when the combination is the hard part. Roots carry the priority and the lane; children inherit both.

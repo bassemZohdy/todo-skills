@@ -1,7 +1,7 @@
 ---
 name: Trial report
 about: You ran the skills on a project and something was wrong, unclear or great
-labels: trial
+labels: enhancement
 ---
 
 **Agent and version** (for example Claude Code 2.x, todo-skills 0.1.0):

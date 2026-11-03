@@ -97,3 +97,5 @@ Trial reports are the most useful contribution: run it on a project and open an 
 ## License
 
 [MIT](LICENSE)
+
+A project-level Claude Code install may be discovered by a running session without a restart; availability depends on the client version. The installed lint script is a copy: keep any project-vendored `.todo/todo-lint.sh` synchronized when upgrading or patching `skills/todo/scripts/todo-lint.sh`.

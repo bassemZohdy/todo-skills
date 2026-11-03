@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Make the lint portable to macOS awk, recognize virtualenv and local tool runners, and warn for unknown local scripts. Document verification for non-code deliverables and infrastructure-dependent suites; run tests on macOS and Linux.
+
 - **FIX-003** (fix): Make todo-report.sh exit 1 with a stderr message starting "todo-report:" when TODO.md is missing in the current directory. Validated: `bash tests/run.sh`.
 
 ## [0.2.0] - 2026-11-02

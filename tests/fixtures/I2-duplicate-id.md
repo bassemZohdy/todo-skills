@@ -2,7 +2,7 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-010** · P1 · S · First
+- [ ] **TASK-010** · P1 · low · First
   - Done when: `make test`
-- [ ] **TASK-010** · P2 · S · Same ID again
+- [ ] **TASK-010** · P2 · low · Same ID again
   - Done when: `make test`

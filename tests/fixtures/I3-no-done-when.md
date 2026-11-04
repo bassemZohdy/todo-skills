@@ -2,5 +2,5 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-010** · P1 · S · No criteria
+- [ ] **TASK-010** · P1 · low · No criteria
   - Links: Ref: docs/x.md

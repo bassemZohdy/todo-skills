@@ -119,9 +119,9 @@ lanes)
 replan)
   chk "FEAT-003 is gone from the tree" '! grep -q "FEAT-003" TODO.md'
   chk "FEAT-003 id is not reused" '[ "$(grep -o "FEAT-003" TODO.md | wc -l)" = 0 ]'
-  chk "FEAT-001 untouched" 'grep -q "\*\*FEAT-001\*\* · P1 · S · Add subtract to calc.py" TODO.md'
+  chk "FEAT-001 untouched" 'grep -q "\*\*FEAT-001\*\* · P1 · low · Add subtract to calc.py" TODO.md'
   chk "plan doc has a dated revision line naming FEAT-003" 'sed -n "/^## Revisions/,\$p" docs/plans/PROJECT.md | grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} · " | grep -q FEAT-003'
-  chk "FEAT-002 untouched" 'grep -q "\*\*FEAT-002\*\* · P1 · S · Add a command line interface to the calculator" TODO.md'
+  chk "FEAT-002 untouched" 'grep -q "\*\*FEAT-002\*\* · P1 · low · Add a command line interface to the calculator" TODO.md'
   chk "nothing committed" 'unchanged'
   chk "no code or tests changed" '[ -z "$(git diff --name-only HEAD -- calc.py tests)" ]'
   chk "no node started" '! grep -q "^ *- \[/\]" TODO.md'
@@ -155,7 +155,7 @@ no-git)
   chk "FEAT-001 drained with the core format" 'entry FEAT-001 < CHANGELOG.md && ! grep -q FEAT-001 TODO.md'
   ;;
 add-fix)
-  chk "a P0 S FIX-002 root (one global ID sequence)" 'grep -Eq "^- \[ \] \*\*FIX-002\*\* · P0 · S · " TODO.md'
+  chk "a P0 FIX-002 root with a complexity (one global ID sequence)" 'grep -Eq "^- \[ \] \*\*FIX-002\*\* · P0 · (low|mid|high) · " TODO.md'
   chk "FIX-002 placed before the P1 root" '[ "$(grep -o "^- \[ \] \*\*[A-Z]*-[0-9]*" TODO.md | head -1)" = "- [ ] **FIX-002" ]'
   chk "its Done when targets a test id" 'grep -A1 "FIX-002\*\*" TODO.md | grep -Eq "Done when: .*\`python3 -m unittest tests\.test_calc\.[A-Za-z]+\.test_[a-z_]+\`"'
   chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
@@ -168,7 +168,7 @@ update-block)
   ;;
 update-drop)
   chk "FEAT-002 is gone from TODO.md and not in CHANGELOG" '! grep -q FEAT-002 TODO.md && ! grep -q FEAT-002 CHANGELOG.md'
-  chk "FEAT-001 untouched" 'grep -q "^- \[ \] \*\*FEAT-001\*\* · P1 · S · Add subtract to calc.py" TODO.md'
+  chk "FEAT-001 untouched" 'grep -q "^- \[ \] \*\*FEAT-001\*\* · P1 · low · Add subtract to calc.py" TODO.md'
   chk "nothing committed on the base" 'unchanged'
   chk "the dropped ID is recorded in the plan's Revisions" 'sed -n "/^## Revisions/,\$p" docs/plans/PROJECT.md | grep -q FEAT-002'
   ;;

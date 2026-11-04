@@ -31,7 +31,7 @@ Optional: `/todo-init --ci` adds `.todo/check.sh` (lint + tests) and a CI job th
 The skill may ask up to three short questions. It then writes a 2 to 4 line task with an exact test command (and breaks a large request into a tree, asking you to confirm it):
 
 ```markdown
-- [ ] **FIX-001** · P0 · S · Reject expired JWTs in the auth middleware
+- [ ] **FIX-001** · P0 · mid · S · Reject expired JWTs in the auth middleware
   - Done when: an expired token gets 401; `npm test -- auth/expired`
 ```
 

@@ -37,12 +37,12 @@ head='# Active Backlog
 
 case "$scenario" in
 interrupted-merge)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · L · Add subtract and multiply to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
   - Done when: both functions work; `python3 -m unittest discover -s tests`
   - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
-  - [ ] **FEAT-001.1** · S · Add subtract with a test
+  - [ ] **FEAT-001.1** · low · Add subtract with a test
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
-  - [ ] **FEAT-001.2** · S · Add multiply with a test
+  - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with claimed tree"
   g switch -q -c todo/FEAT-001-subtract-multiply
@@ -61,7 +61,7 @@ Reviewed: self, 0 findings fixed"
   g switch -q todo/FEAT-001-subtract-multiply   # the session died here, before the merge
   ;;
 refresh-from-base)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add a subtract function to calc.py with a test
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - State: branch todo/FEAT-001-subtract from main; next: start FEAT-001' > TODO.md
   g add -A && g commit -q -m "init with claimed root"
@@ -90,16 +90,16 @@ PY
   g stash pop -q
   ;;
 claimed-elsewhere)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add a subtract function to calc.py with a test
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - State: branch todo/FEAT-001-subtract from main; next: start FEAT-001
-- [ ] **FEAT-002** · P1 · S · Add a multiply function to calc.py with a test
+- [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with one claimed root"
   g branch todo/FEAT-001-subtract
   ;;
 race-claim-conflict|race-claim-benign)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add a subtract function to calc.py with a test
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   g add -A && g commit -q -m "init with one free root"
   # A hook plays the second session: the first time a todo/FEAT-001* branch is checked out, it moves main
@@ -182,10 +182,10 @@ CL
   g add -A && g commit -q -m "initial monorepo"
   ;;
 lanes)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - Links: Lane: math
-- [ ] **FEAT-002** · P1 · S · Add shout to text.py
+- [ ] **FEAT-002** · P1 · low · Add shout to text.py
   - Done when: shout("hi") returns HI!; `python3 -m unittest tests.test_text.TextTest.test_shout`
   - Links: Lane: text' > TODO.md
   g add -A && g commit -q -m "init with two lanes"
@@ -193,13 +193,13 @@ lanes)
 replan)
   mkdir -p docs/plans
   printf '# Plan\n\n## Goal\nA calculator with more operations.\n\n## Lanes\nmain: all work\n\n## Revisions\n' > docs/plans/PROJECT.md
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - Links: Ref: docs/plans/PROJECT.md
-- [ ] **FEAT-002** · P1 · S · Add a command line interface to the calculator
+- [ ] **FEAT-002** · P1 · low · Add a command line interface to the calculator
   - Done when: cli prints the sum; `python3 -m unittest tests.test_cli`
   - Links: Ref: docs/plans/PROJECT.md
-- [ ] **FEAT-003** · P2 · S · Add a web dashboard for the calculator
+- [ ] **FEAT-003** · P2 · low · Add a web dashboard for the calculator
   - Done when: dashboard renders; `python3 -m unittest tests.test_web`
   - Links: Ref: docs/plans/PROJECT.md' > TODO.md
   g add -A && g commit -q -m "init with a plan"
@@ -210,51 +210,51 @@ ci-github|ci-local)
   [ "$scenario" = ci-github ] && git remote add origin https://github.com/example/minical.git
   ;;
 happy-path)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   g add -A && g commit -q -m "init with one free root"
   ;;
 baseline-red)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   printf 'def add(a, b):\n    return a - b\n' > calc.py   # a bug already on main: the baseline is red
   g add -A && g commit -q -m "init with a red baseline"
   ;;
 no-git)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   ;;
 add-fix)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   g add -A && g commit -q -m "init with one root"
   ;;
 update-block|update-drop|status-readonly|report)
   mkdir -p docs/plans
   printf '# Plan\n\n## Goal\nA calculator with more operations.\n\n## Lanes\nmain: all work\n\n## Revisions\n' > docs/plans/PROJECT.md
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · S · Add subtract to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
-- [ ] **FEAT-002** · P2 · S · Add round_to to calc.py <with> "quotes" & </script> in the title
+- [ ] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title
   - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
   - Links: From: FEAT-000' > TODO.md
   printf '# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [Unreleased]\n\n### Added\n\n- **FEAT-000** (feat): Add add() to calc.py. Validated: `python3 -m unittest tests.test_calc`.\n' > CHANGELOG.md
   g add -A && g commit -q -m "init with two roots"
   ;;
 blocked-sibling)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · L · Add subtract and multiply to calc.py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
   - Done when: both functions work; `python3 -m unittest discover -s tests`
   - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
-  - [ ] **FEAT-001.1** · S · Add subtract with a test
+  - [ ] **FEAT-001.1** · low · Add subtract with a test
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
-  - [ ] **FEAT-001.2** · S · Add multiply with a test
+  - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with claimed tree"
   g switch -q -c todo/FEAT-001-subtract-multiply
   g switch -q -c todo/FEAT-001.1-subtract-test
   python3 - <<'PY2'
 p='TODO.md'
-s=open(p).read().replace('- [ ] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
- '- [!] **FEAT-001.1** · S · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`\n    - Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready')
+s=open(p).read().replace('- [ ] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
+ '- [!] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`\n    - Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready')
 open(p,'w').write(s)
 PY2
   g add TODO.md && g commit -q -m "chore(backlog): block FEAT-001.1"

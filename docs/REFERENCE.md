@@ -9,21 +9,22 @@ The full format and rules of the todo-skills. The rules themselves live in [`ski
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-002** · P1 · XL · Add token refresh to the auth service
+- [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
   - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
-  - [ ] **FEAT-002.1** · L · Refresh endpoint
+  - [ ] **FEAT-002.1** · mid · L · Refresh endpoint
     - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
-    - [x] **FEAT-002.1.1** · S · Token store interface
+    - [x] **FEAT-002.1.1** · low · S · Token store interface
       - Done when: store round-trips a token; `npm test -- auth/store`
-    - [/] **FEAT-002.1.2** · M · Rotate refresh tokens
+    - [/] **FEAT-002.1.2** · high · M · Rotate refresh tokens
       - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
       - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: add reuse test
 ```
 
 - **2 to 4 lines per task.** The header says what to do. `Done when:` gives the criteria and at least one exact command. Longer planning goes into `docs/` (for example `docs/plans/FEAT-002-refresh.md`) and is linked with `Ref:`. TODO.md only tracks work.
 - **Markers:** `[ ]` open, `[/]` active (only one), `[!]` blocked, `[x]` verified and merged into its parent, waiting for the root to drain.
-- **Sizes:** leaves are `S` (at most 2 files) or `M` (one context window, at most 5 files). Parents are `L` (children are leaves) or `XL` (has grandchildren). At most 3 levels. The lint script enforces this.
+- **Complexity** (required): `low`, `mid` or `high`, how hard the reasoning is, so an agent can pick a model. An optional README line `Models: low=…, mid=…, high=…` maps levels to models for `--delegate`, lane subagents and the reviewer; a failed attempt escalates one tier.
+- **Sizes** (optional, after the complexity): leaves are `S` (at most 2 files) or `M` (one context window, at most 5 files). Parents are `L` (children are leaves) or `XL` (has grandchildren). Every leaf must fit one context window whether or not a size is written. At most 3 levels. The lint script enforces this.
 - **Order:** roots by priority P0 to P2, then by ID. Inside a root, depth first. A parent becomes workable again when all its children are `[x]`; that is its integration step.
 - **Closing:** a child is merged into its parent's branch when verified. A parent closes only when all children are done, and the whole tree is written to `CHANGELOG.md` as one entry ending in `Includes: FEAT-002.1, FEAT-002.1.1, ...`.
 - **Blocked** tasks replace `State:` with `Blocked: reason → \`command\` error → action required`.
@@ -55,7 +56,7 @@ Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `
 
 ## Optional enforcement
 
-The invariants I1-I10 (one active task, unique IDs, task fields and size limits, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk, grep, sed and tr, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields, complexity and any sizes, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk, grep, sed and tr, and are installed with the `todo` skill.
 
 ```bash
 bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root

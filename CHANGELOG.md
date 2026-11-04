@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Complexity level per task (`low`, `mid`, `high`, required) so agents can pick a model; optional README `Models:` mapping, `/todo-continue --delegate`, lane and reviewer routing, and escalation one tier per failed attempt. Sizes (`S`/`M`/`L`/`XL`) become optional after the complexity; `/todo-init` migrates the earlier format.
+
 ### Changed
 
 - Wording fixes from a full trial re-run (all 11 scenarios pass; `ci-local` once more where the environment refused writes under `.git/hooks`): lost-claim flow ends on the base; interrupted-work check only on a tree branch; `--revise` re-points `Depends:` on dropped IDs and does not commit; the hook lines are printed when `.git/hooks` cannot be written; the core names the allowed shell commands and the optional `.todo/` checks.

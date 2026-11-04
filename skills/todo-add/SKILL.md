@@ -21,7 +21,7 @@ Defaults: priority `P1`. Unless `--type` is given, the type is the first rule th
 7. **Split and rate.**
    - Apply the core scope rule: a leaf is one change that fits one context window and touches at most 5 files. Anything bigger is a parent.
    - Break a parent into children until every leaf fits, with at most 3 levels. Order the children as the work will run; add `Depends:` between siblings only when the order is not obvious.
-   - Add a size (core table) only when the project's tree already uses sizes or the user asks.
+   - No size by default: add one (core table) only when a node already in TODO.md carries a size or the user asks; an empty tree has none.
    - Rate each node's complexity with the core table (`low`, `mid`, `high`; `mid` when unsure); a parent is rated by its integration step. Rate the reasoning, not the size: a one-file race condition is `high`, a five-file rename is `low`.
    - Each node gets a one-sentence "what to do" and a `Done when:` written by the rules in `reference/verification.md`, "Writing a Done when": criteria, `; `, then a runnable command that targets a test id or path, not a name filter. If the test does not exist yet, name the file or id the node will create. Add `regression: \`cmd\`` only when the project's full suite is not the right guard. Never write `manual`, `n/a`, a vacuous command, or code or prose in backticks: write identifiers and calls bare (calc.power(2, 3) returns 8) and put only the runnable command in backticks.
    - Containers get their own `Done when`: the integration test or, when the children's tests already cover it, the regression command. A parent's `Done when` may pass at baseline; only leaves must start red.

@@ -50,11 +50,11 @@ interrupted-merge)
   printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
   python3 - <<'PY'
 p='tests/test_calc.py'
-s=open(p).read().replace('if __name__','    def test_subtract(self):\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
-open(p,'w').write(s)
+s=open(p,encoding='utf-8').read().replace('if __name__','    def test_subtract(self):\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
 p='TODO.md'
-s=open(p).read().replace('- [ ] **FEAT-001.1**','- [x] **FEAT-001.1**')
-open(p,'w').write(s)
+s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001.1**','- [x] **FEAT-001.1**')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   g add calc.py tests/test_calc.py TODO.md && g commit -q -m "feat(calc): add subtract" -m "Refs: FEAT-001.1
 Reviewed: self, 0 findings fixed"
@@ -68,16 +68,16 @@ refresh-from-base)
   g switch -q -c todo/FEAT-001-subtract
   python3 - <<'PY'
 p='TODO.md'
-s=open(p).read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('branch todo/FEAT-001-subtract from main; next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-subtract from main; next: build')
-open(p,'w').write(s)
+s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('branch todo/FEAT-001-subtract from main; next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-subtract from main; next: build')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   g add TODO.md && g commit -q -m "chore(backlog): start FEAT-001"
   # work in progress, uncommitted: implementation plus test
   printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
   python3 - <<'PY'
 p='tests/test_calc.py'
-s=open(p).read().replace('if __name__','    def test_subtract(self):\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
-open(p,'w').write(s)
+s=open(p,encoding='utf-8').read().replace('if __name__','    def test_subtract(self):\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   # meanwhile another tree landed on main
   g stash -q -u
@@ -253,9 +253,9 @@ blocked-sibling)
   g switch -q -c todo/FEAT-001.1-subtract-test
   python3 - <<'PY2'
 p='TODO.md'
-s=open(p).read().replace('- [ ] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
+s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
  '- [!] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`\n    - Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready')
-open(p,'w').write(s)
+open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY2
   g add TODO.md && g commit -q -m "chore(backlog): block FEAT-001.1"
   g switch -q todo/FEAT-001-subtract-multiply   # the parent's branch still shows FEAT-001.1 as [ ]

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Marketplace manifest gets a description; the I10 rule text in the core skill and the command-safety text in `verification.md` describe the forbidden commands in words instead of literal shell patterns (the lint still enforces the same set), to keep directory scans from reading rules as instructions.
 - **TASK-017** (docs): `docs/COMPARISON.md` separates source-backed features, estimates and end-to-end trials for the changes after 0.3.0; other tools' scores and alternatives were not re-read. Validated: `bash tests/run.sh`.
 
 ## [0.3.1] - 2026-11-07

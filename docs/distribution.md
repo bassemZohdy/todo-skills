@@ -12,3 +12,16 @@ Keep `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same ve
 ## Anthropic directory submission
 
 Not yet submitted. Submission date and reference go here once done.
+
+### Checklist (owner action)
+
+Prepared from the repository; the portal's own fields may differ, so check them as you fill the form.
+
+- [ ] Sign in at claude.ai/directory/manage and accept the directory terms.
+- [ ] Plugin: `todo-skills`, manifest `.claude-plugin/plugin.json`, license MIT, author Bassem Zohdy, homepage https://github.com/bassemZohdy/todo-skills.
+- [ ] Version: the newest release in CHANGELOG.md (0.2.0 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
+- [ ] `bash tests/run.sh` passes on the commit you submit.
+- [ ] Short description: "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md."
+- [ ] Install check from a clean client: `/plugin marketplace add bassemZohdy/todo-skills`, then confirm the nine skills (todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update) are listed.
+- [ ] Security notes for the reviewer: no network access by the skills, no required tooling beyond git/bash, see SECURITY.md.
+- [ ] After submitting, record below: `Submitted: <YYYY-MM-DD> · Reference: <id or URL from the portal>`, and set the table row above to "Submitted".

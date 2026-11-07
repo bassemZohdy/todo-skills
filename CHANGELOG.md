@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Marketplace manifest gets a description; the I10 rule text in the core skill and the command-safety text in `verification.md` describe the forbidden commands in words instead of literal shell patterns (the lint still enforces the same set), to keep directory scans from reading rules as instructions.
+
 ### Added
 - **TASK-015** (docs): Record Claude Code and Codex lifecycle evidence in docs/agent-compatibility.md; Codex stays install-verified only. Validated: `test -f docs/agent-compatibility.md`, `bash tests/run.sh`.
 - **TASK-013** (docs): Run lifecycle trials on TypeScript, Java and multi-module scratch projects and record them in docs/trials.md. Validated: `test -f docs/trials.md`, `bash tests/run.sh`.

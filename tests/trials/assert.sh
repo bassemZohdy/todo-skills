@@ -26,7 +26,10 @@ if [ -d .git ]; then
   chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$")" ]'
 fi
 if [ "$scenario" != baseline-red ]; then
-  if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'; else chk "tests pass on the checked-out branch" 'python3 -m unittest discover -s tests'; fi
+  if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'
+  elif [ -f package.json ]; then chk "tests pass on the checked-out branch" 'npm test'
+  elif [ -f pom.xml ]; then chk "tests pass on the checked-out branch" 'mvn -q -B test'
+  else chk "tests pass on the checked-out branch" 'python3 -m unittest discover -s tests'; fi
 fi
 chk "lint passes on the checked-out branch" 'bash "$lint" TODO.md CHANGELOG.md'
 
@@ -185,6 +188,31 @@ blocked-sibling)
   chk "FEAT-001.1 was not restarted anywhere" '! git grep -q "\[/\] \*\*FEAT-001.1" $(git for-each-ref --format="%(refname)" refs/heads)'
   chk "FEAT-001.2 started on its own branch" 'b=$(git branch --list "todo/FEAT-001.2-*" | tr -d "* "); [ -n "$b" ] && at $b TODO.md | grep -q "\[/\] \*\*FEAT-001.2"'
   chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " .git/trial-refs | cut -d" " -f2)" ]'
+  ;;
+ts-lifecycle)
+  chk "FEAT-001 drained into the changelog on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'
+  chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
+  chk "subtract and multiply exist on main" 'at main src/calc.ts | grep -q subtract && at main src/calc.ts | grep -q multiply'
+  chk "a test file per child exists on main" 'git cat-file -e main:tests/subtract.test.ts && git cat-file -e main:tests/multiply.test.ts'
+  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l)" = 1 ]'
+  chk "main checked out, tree clean, node_modules not tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "^node_modules/")" = 0 ]'
+  ;;
+java-lifecycle)
+  chk "FEAT-001 drained into the changelog on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'
+  chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
+  chk "subtract and multiply exist on main" 'at main src/main/java/mini/Calc.java | grep -q subtract && at main src/main/java/mini/Calc.java | grep -q multiply'
+  chk "SubtractTest and MultiplyTest exist on main" 'git cat-file -e main:src/test/java/mini/SubtractTest.java && git cat-file -e main:src/test/java/mini/MultiplyTest.java'
+  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l)" = 1 ]'
+  chk "main checked out, tree clean, target/ not tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "/target/\\|^target/")" = 0 ]'
+  ;;
+multi-module)
+  chk "both roots drained into the changelog on main" 'at main CHANGELOG.md | entry FEAT-001 && at main CHANGELOG.md | entry FEAT-002'
+  chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
+  chk "subtract is in core and shout in text, each only in its own module" 'at main core/src/main/java/mini/core/Calc.java | grep -q subtract && at main text/src/main/java/mini/text/Text.java | grep -q shout && ! at main text/src/main/java/mini/text/Text.java | grep -q subtract'
+  chk "SubtractTest and ShoutTest exist on main" 'git cat-file -e main:core/src/test/java/mini/core/SubtractTest.java && git cat-file -e main:text/src/test/java/mini/text/ShoutTest.java'
+  chk "each lane ran in its own worktree and none is left" '[ "$(git worktree list | wc -l)" = 1 ] && [ -z "$(git branch --list "todo/*")" ]'
+  chk "main checked out, tree clean, no build output tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "target/")" = 0 ]'
+  chk "the whole reactor build passes on main" 'mvn -q -B test'
   ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac

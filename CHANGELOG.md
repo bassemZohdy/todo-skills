@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Listing icon (a square PNG in the plugin manifest folder) and a disclosure of what the plugin runs, reads, writes and sends (README, SECURITY.md) for the directory submission.
 
+### Changed
+
+- **TASK-007** (chore): Submit to the Anthropic plugin directory and record it. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

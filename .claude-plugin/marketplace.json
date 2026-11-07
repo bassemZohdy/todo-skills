@@ -1,6 +1,7 @@
 {
   "name": "todo-skills",
   "owner": { "name": "Bassem Zohdy" },
+  "metadata": { "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md." },
   "plugins": [
     {
       "name": "todo-skills",

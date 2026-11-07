@@ -43,12 +43,16 @@ When the first node of a tree is claimed, the root branch gets a claim-only comm
 
 ## Verification
 
-Each node: write the tests first, run `Done when` in full (target a test id or path, not a name filter), then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests and runs that execute zero tests do not count. Three failed fix cycles block the node.
+Each node: write the tests first, run `Done when` in full (target a test id or path, not a name filter), then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests, runs that execute zero tests, masked failures (`|| true`, `; exit 0`) and test paths that do not exist do not count; the optional `todo-verify.sh` classifies a finished run, and the lint rejects masked failures in a `Done when`. Three failed fix cycles block the node.
 
 ## Git flow and no-git mode
 
 - One branch per node, `todo/<ID>-<slug>`. A root starts from the base branch, a child from its parent's branch. Verified children are merged `--no-ff` into the parent's branch. Nothing is merged into `main` or `develop` until the root is verified, and then only with `--merge`. The one earlier change on the base branch is the tree claim.
 - **No git repository?** Every command warns once and carries on without branches, worktrees, commits or merges. Progress and touched files are recorded in `State:`, and markers and the CHANGELOG drain work as usual. Run `git init` to get isolation and history.
+
+## Requirements traceability (optional)
+
+Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash skills/todo/scripts/todo-rtm.sh` prints the resolved location and flags stale task IDs (R1) and archived rows without verification (R2). Format and rules: `skills/todo/reference/rtm.md`.
 
 ## Project Definition of Done (optional)
 

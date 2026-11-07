@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Listing icon (`.claude-plugin/icon.png`) and a disclosure of what the plugin runs, reads, writes and sends (README, SECURITY.md) for the directory submission.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

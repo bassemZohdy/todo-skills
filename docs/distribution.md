@@ -5,13 +5,15 @@
 | Claude Code plugin marketplace (this repo) | Available | `/plugin marketplace add bassemZohdy/todo-skills` |
 | Codex plugin marketplace (this repo) | Available, verified on codex-cli 0.167.0 | `codex plugin marketplace add bassemZohdy/todo-skills` |
 | skills CLI | Available | `npx skills add bassemZohdy/todo-skills` |
-| Anthropic plugin directory | Not submitted | Owner action at claude.ai/directory/manage (login and terms) |
+| Anthropic plugin directory | Validated, not yet submitted (0.3.0; 4 warnings, 6 policy holds to review) | Owner action at claude.ai/directory/manage (login and terms) |
 
 Keep `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
 
 ## Anthropic directory submission
 
 Not yet submitted. Submission date and reference go here once done.
+
+Validation of `main @ 29817a3` passed with 4 warnings and 6 policy holds. Handled since: listing icon added (`.claude-plugin/icon.png`), the `todo-release` wording that could read as a skill command line, and a disclosure of what the plugin runs, reads, writes and sends (README, SECURITY.md). Left for the reviewer: the credential-read hold (the safety rules name credential paths only to refuse them) and the name-resemblance hold. Re-validate before submitting; the report covers only the commit it read.
 
 ### Checklist (owner action)
 

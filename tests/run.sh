@@ -59,6 +59,9 @@ badtype="$(cd "$root/plugin" && find . -type f ! -name '*.md' ! -name '*.json' !
 badshebang="$(cd "$root/plugin" && find . -type f \( -name '*.md' -o -name '*.json' -o -name '*.yml' -o -name '*.yaml' -o -name '*.txt' \) -exec sh -c 'head -c2 "$1" | grep -q "^#!" && echo "$1"' _ {} \; | head -5)"
 if [ -z "$badtype" ] && [ -z "$badshebang" ]; then ok "plugin folder ships only allowed file types and no #! files"; else bad "plugin folder has disallowed files: $badtype $badshebang"; fi
 if [ -f "$root/plugin/.claude-plugin/plugin.json" ] && grep -q '"source": "./plugin"' "$root/.claude-plugin/marketplace.json" && grep -q '"path": "./plugin"' "$root/.agents/plugins/marketplace.json"; then ok "marketplaces point at the plugin folder"; else bad "a marketplace does not point at ./plugin"; fi
+# The plugin folder has a README of at least 40 words outside code blocks (directory requirement).
+words="$(sed '/^```/,/^```/d' "$root/plugin/README.md" 2>/dev/null | wc -w)"
+if [ "${words:-0}" -ge 40 ]; then ok "plugin README has $words words"; else bad "plugin/README.md is missing or has fewer than 40 words"; fi
 # The report template embedded in the skill (Markdown) equals tools/template.html.
 emb="$(awk '/^````html$/{f=1;next} /^````$/{f=0} f' "$root/plugin/skills/todo-report/template.md")"
 if [ "$emb" = "$(cat "$root/tools/template.html")" ]; then ok "embedded report template equals tools/template.html"; else bad "plugin/skills/todo-report/template.md differs from tools/template.html: regenerate it"; fi

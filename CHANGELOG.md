@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-07
+
 ### Added
 
 - **FEAT-008** (feat): Add optional Markdown RTM traceability with docs/RTM.md preferred and README.md `## RTM` fallback; plan, add, update and continue link and record requirements only when an RTM exists. Ref: skills/todo/reference/rtm.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/REFERENCE.md. Includes: FEAT-008.1, FEAT-008.2, FEAT-008.3, FEAT-008.4.
@@ -79,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bassemZohdy/todo-skills/releases/tag/v0.1.0

@@ -6,6 +6,7 @@
 # Prints "RTM: <location>" (or "RTM: none"), then one "FAIL R<n>: ..." line per problem:
 #   R1 a task ID in the RTM is in neither TODO.md nor CHANGELOG.md (stale link)
 #   R2 every task of a row is archived in CHANGELOG.md but the Verification cell is empty
+#   R3 the same Req ID appears in more than one row (a duplicate mapping)
 # Exit codes: 0 no RTM or no problems, 1 problems found. Needs bash, awk, grep, sed and tr.
 root="${1:-.}"
 if [ -f "$root/docs/RTM.md" ]; then src="$root/docs/RTM.md"; loc="docs/RTM.md"; sect=0
@@ -33,6 +34,7 @@ sect && !on { next }
   if (n < 5) next
   req = trim(c[2]); tasks = trim(c[4]); ver = trim(c[5])
   if (req == "Req" || req ~ /^:?-+:?$/ || req == "") next
+  if (req in seen) fail("3: " req ": the requirement appears in more than one row"); seen[req] = 1
   m = split(tasks, t, /[ ,;]+/); done = (m > 0); cnt = 0
   for (k = 1; k <= m; k++) {
     if (t[k] !~ /^[A-Z]+-[0-9]+(\.[0-9]+)*$/) continue

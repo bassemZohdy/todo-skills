@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **TASK-012** (feat): Opt-in `todo-verify.sh --strict` also rejects output with no recognizable passing count, unchecked pipes, `set +e` and `|| echo`; default mode is unchanged. Validated: `bash tests/run.sh`.
+- **TASK-014** (test): RTM check R3 (duplicate requirement rows) and fixtures for docs precedence, README fallback, missing RTM, duplicates and archived tasks. Validated: `bash tests/run.sh`.
+- **TASK-016** (docs): `/todo-plan` documents an optional independent design review (fresh-context reviewer or an external tool such as EGM) for high-risk roots, never a required stage. Validated: `bash tests/run.sh`.
+- Trial scenarios `ts-lifecycle`, `java-lifecycle` and `multi-module` (Node, Maven, Maven multi-module), `tests/trials/run-claude.sh`, `docs/trials.md` and `docs/agent-compatibility.md`. No agent run is recorded yet.
 - Listing icon (a square PNG in the plugin manifest folder) and a disclosure of what the plugin runs, reads, writes and sends (README, SECURITY.md) for the directory submission.
 
 ### Changed
 
+- **TASK-017** (docs): `docs/COMPARISON.md` separates source-backed features, estimates and end-to-end trials for the changes after 0.3.0; other tools' scores and alternatives were not re-read. Validated: `bash tests/run.sh`.
 - **TASK-007** (chore): Submit to the Anthropic plugin directory and record it. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
 
 ## [0.3.0] - 2026-11-07

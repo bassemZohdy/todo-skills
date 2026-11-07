@@ -90,6 +90,14 @@ out="$(bash "$rtm" "$rx/stale" 2>&1)"
 if printf '%s\n' "$out" | grep -q "FAIL R1:.*GHOST-999" && printf '%s\n' "$out" | grep -q "FAIL R2:.*R-002"; then ok "rtm flags a stale task link (R1) and an archived row without verification (R2)"; else bad "rtm stale checks: $out"; fi
 out="$(bash "$rtm" "$rx/readme-only" 2>&1)"
 if printf '%s\n' "$out" | grep -q FAIL; then bad "rtm: a table outside the README RTM section was checked: $out"; else ok "rtm: README tables outside ## RTM are ignored; a completed task with verification passes"; fi
+rtm_is duplicate 1 docs/RTM.md
+out="$(bash "$rtm" "$rx/duplicate" 2>&1)"
+if printf '%s\n' "$out" | grep -q "FAIL R3:.*R-001"; then ok "rtm flags a requirement mapped twice (R3)"; else bad "rtm duplicate check: $out"; fi
+rtm_is archived-ok 0 docs/RTM.md
+out="$(bash "$rtm" "$rx/archived-ok" 2>&1)"
+if [ "$(printf '%s\n' "$out" | grep -c FAIL)" -eq 0 ]; then ok "rtm: archived tasks (bullet and Includes) with verification are consistent, open work needs none"; else bad "rtm archived-ok: $out"; fi
+out="$(bash "$rtm" "$rx/both" 2>&1)"
+if printf '%s\n' "$out" | head -1 | grep -q 'docs/RTM.md' && ! printf '%s' "$out" | grep -q 'README'; then ok "rtm: docs/RTM.md takes precedence over a README RTM section"; else bad "rtm precedence: $out"; fi
 out="$(bash "$rtm" "$fx/changelog" 2>&1)"
 if [ "$out" = "RTM: none" ]; then ok "rtm: a folder with no README or docs has no RTM"; else bad "rtm without files: $out"; fi
 if grep -q 'reference/rtm.md' "$root/skills/todo/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-plan/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-add/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-continue/SKILL.md" && [ -f "$root/skills/todo/reference/rtm.md" ]; then ok "plan, add and continue point at the RTM rules"; else bad "an RTM reference is missing from the core, plan, add or continue skill"; fi
@@ -115,6 +123,28 @@ vcase REJECT 0 'bash tests/run.sh || true' '65 passed'
 vcase REJECT 0 'bash tests/run.sh; exit 0' '65 passed'
 vcase REJECT 1 'bash tests/run.sh' '1 failed'
 vcase REJECT x 'bash tests/run.sh' '1 passed'
+
+# Strict mode (TASK-012): opt-in; default mode keeps accepting count-less runners.
+vstrict() { want="$1"; rc_in="$2"; cmd="$3"; text="$4"; out="$(cd "$root" && printf '%s\n' "$text" | bash "$vf" --strict "$rc_in" "$cmd" 2>&1)"; if [ "${out%% *}" = "$want" ]; then ok "verify --strict $want: $cmd [$text]"; else bad "verify --strict expected $want for '$cmd' [$text], got: $out"; fi; }
+vstrict ACCEPT 0 'bash tests/run.sh' '65 passed, 0 failed'
+vstrict ACCEPT 0 'python3 -m unittest tests.test_calc' 'Ran 3 tests in 0.01s'
+vstrict ACCEPT 0 'go test ./...' 'ok  	example.com/pkg	0.01s'
+vstrict ACCEPT 0 'set -o pipefail; bash tests/run.sh | tail -3' '65 passed'
+vstrict REJECT 0 'make check' 'done'
+vstrict REJECT 0 'bash tests/run.sh | tail -3' '65 passed'
+vstrict REJECT 0 'bash tests/run.sh 2>&1 | grep passed' '65 passed'
+vstrict REJECT 0 'set +e; bash tests/run.sh' '65 passed'
+vstrict REJECT 0 'bash tests/run.sh || echo failed' '65 passed'
+vstrict REJECT 0 'pytest' 'collected 0 items'
+vstrict REJECT 1 'bash tests/run.sh' '1 failed'
+vstrict REJECT 0 'bash tests/run.sh || true' '65 passed'
+out="$(cd "$root" && printf 'done\n' | bash "$vf" 0 'make check' 2>&1)"
+if [ "$out" = "ACCEPT" ]; then ok "verify default mode still accepts a count-less runner"; else bad "default mode changed: $out"; fi
+
+# Optional independent design review (TASK-016): documented, optional, never required.
+pl="$root/skills/todo-plan/SKILL.md"
+if grep -q 'Independent design review (optional, never a required stage)' "$pl" && grep -q 'never block a plan on it' "$pl" && grep -q 'EGM' "$pl" && grep -q 'neither bundles nor requires' "$pl"; then ok "todo-plan documents an optional fresh-context or external design review"; else bad "todo-plan design review section missing or implies it is required"; fi
+if grep -q -- '--strict' "$root/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"

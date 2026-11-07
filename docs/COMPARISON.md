@@ -63,6 +63,16 @@ After CI integration (`/todo-init --ci`: `.todo/check.sh` in CI or a pre-push ho
 - The reviewer scored todo-skills low on planning (2) and maturity (2), middling on verification (3: enforced by the model, not a tool), review, dependencies and team (3 each), and high on tooling dependencies (5), context and resume (5) and machine-checkable state (4). It named three weaknesses: advisory enforcement of "done", almost no field evidence, and thin planning and orchestration.
 - A difference of 1-2 points is noise. Moving one score by one point shifts a total by 1-4 points. To use your own weights, replace the weight columns and apply the formula above.
 
+## Evidence levels for todo-skills after 0.3.0
+
+The scores above mix three kinds of evidence. For todo-skills, as of this change:
+
+- **Source-backed** (a file or test in this repository shows it): machine-checked backlog invariants (`todo-lint.sh`, I1-I10), an opt-in strict verification classifier (`todo-verify.sh --strict`), optional RTM checks with duplicate and stale detection (`todo-rtm.sh`, R1-R3), plugin manifests for Claude Code and Codex, and a self-testing trial harness. `bash tests/run.sh` covers these.
+- **Estimates** (a judgement, not a measurement): maturity and evidence, team and parallel work, planning depth, and every score for the other tools on this page. The weights are unchanged from the table above; they were not re-derived.
+- **End-to-end trials** (an agent ran the skills and `assert.sh` checked the result): the Python scenarios listed in `tests/trials/README.md`. The TypeScript, Java and multi-module scenarios exist (`docs/trials.md`) but have no recorded run yet, so they support no score.
+
+Not refreshed here: the other tools' scores and the list of alternatives. They were last read from each tool's primary sources before this version, and re-reading them is a separate piece of work.
+
 ## Caveats
 
 - Evidence for BMAD and GSD is partial and marked low confidence; GSD's original repository is archived and development moved to `open-gsd/gsd-core`.

@@ -8,7 +8,7 @@ Loaded by `/todo-plan`, `/todo-add` and `/todo-continue` only when an RTM exists
 2. Otherwise the `## RTM` section of README.md (the heading line is exactly `## RTM`; the section ends at the next `## ` heading).
 3. Otherwise there is no RTM: skip everything below. The skills never create one on their own; the user opts in by creating `docs/RTM.md` or an `## RTM` section (a plan or add run may offer it once, never twice).
 
-`bash ../todo/scripts/todo-rtm.sh [repo-root]` (optional, read-only) prints the resolved location and checks the rules below.
+`bash ../todo/scripts/todo-rtm.sh [repo-root]` (optional, read-only) prints the resolved location and checks the rules below, including R3: the same Req ID in two rows is reported as a duplicate mapping.
 
 ## Format
 

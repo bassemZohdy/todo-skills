@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # Scores a batch of finished trials. Read-only.
-# Layout: <runs-dir>/<scenario>/<repo>/ as made by `setup.sh <runs-dir>/<scenario>/<repo> <scenario>`.
-# A scenario passes only when every one of its checks passes; the trial score is the share of passing scenarios.
-# The check rate (all checks over all scenarios) is printed too, but it flatters: an agent that does nothing
-# still passes the generic checks, so use the scenario rate.
+# Layout: <runs-dir>/<scenario>/repo/ as made by `setup.sh <runs-dir>/<scenario>/repo <scenario>`, and the agent's
+# evidence in <runs-dir>/<scenario>/evidence/<id>/ as written by run-claude.sh (the newest <id> counts). Older batches with
+# agent.log directly in the scenario folder are still read.
+# Every scenario folder is counted in the totals and gets one verdict:
+#   PASS         the agent ran (exit 0, a report) and every check in assert.sh passes
+#   FAIL         the agent ran and at least one check fails
+#   INFRA_ERROR  the agent exited non-zero (for example 124, a timeout), or evidence/<id>/outcome.txt says INFRA_ERROR
+#                (written by whoever saw a permission denial or sandbox block)
+#   UNVERIFIED   there is no repo, or no record that an agent ran. A repo that satisfies the checks without an agent run
+#                (the read-only scenarios do) is never a PASS
+# The trial score is PASS over all scenarios. The check rate is printed too, but it flatters.
 # TRIAL_SKIP=<regex> leaves out checks whose name matches, for steps the trial environment itself refuses
 # (for example a sandbox that denies writes under .git/hooks). Skips are printed; never use it to hide a skill bug.
 # Usage: [TRIAL_SKIP=regex] bash tests/trials/score.sh <runs-dir>
@@ -11,23 +18,57 @@ set -u
 runs="${1:?usage: score.sh <runs-dir>}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skip="${TRIAL_SKIP:-}"
-n=0; ok=0; P=0; T=0
+n=0; ok=0; P=0; T=0; nfail=0; ninfra=0; nunv=0
 for d in "$runs"/*/; do
-  s="$(basename "$d")"
-  repo="$(find "$d" -mindepth 1 -maxdepth 1 -type d ! -name '*.todo' | head -1)"
-  [ -n "$repo" ] || continue
+  [ -d "$d" ] || continue
+  s="$(basename "$d")"; n=$((n + 1))
+  repo=""
+  if [ -d "$d/repo" ]; then repo="$d/repo"
+  else repo="$(find "$d" -mindepth 1 -maxdepth 1 -type d ! -name '*.todo' ! -name evidence | head -1)"; fi
+  if [ -z "$repo" ]; then
+    printf '%-11s %-22s no repo in the scenario folder\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
+  fi
+  # the agent's record: newest evidence folder, else the old agent.log
+  evd=""; [ -d "$d/evidence" ] && evd="$(ls -1 "$d/evidence" 2>/dev/null | sort | tail -1)"
+  code=""; outcome=""; report=""
+  if [ -n "$evd" ]; then
+    e="$d/evidence/$evd"
+    [ -f "$e/agent-exit.txt" ] && code="$(tr -d ' \r\n' < "$e/agent-exit.txt")"
+    [ -f "$e/outcome.txt" ] && outcome="$(tr -d ' \r\n' < "$e/outcome.txt")"
+    [ -s "$e/report.txt" ] && report=yes
+    export TRIAL_REPORT="$e/report.txt"
+  elif [ -f "$d/agent.log" ]; then
+    code="$(sed -n 's/^agent exit: *//p' "$d/agent.log" | tail -1 | tr -d ' \r')"
+    [ -n "$(grep -v '^agent exit:' "$d/agent.log" | tr -d ' \r\n')" ] && report=yes
+    export TRIAL_REPORT="$d/agent.log"
+  else
+    unset TRIAL_REPORT
+  fi
+  if [ -z "$code" ]; then
+    printf '%-11s %-22s no record that an agent ran\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
+  fi
+  if [ "$outcome" = INFRA_ERROR ] || [ "$code" != 0 ]; then
+    printf '%-11s %-22s agent exit %s%s\n' INFRA_ERROR "$s" "$code" "$([ "$outcome" = INFRA_ERROR ] && echo ', marked INFRA_ERROR')"; ninfra=$((ninfra + 1)); continue
+  fi
+  if [ -z "$report" ]; then
+    printf '%-11s %-22s agent exit 0 but no report\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
+  fi
   out="$(bash "$here/assert.sh" "$repo" "$s" 2>&1 | grep -E '^(PASS|FAIL)  ')"
   if [ -n "$skip" ]; then
     printf '%s\n' "$out" | grep -E "^(PASS|FAIL)  .*($skip)" | sed "s/^/    SKIP /"
     out="$(printf '%s\n' "$out" | grep -Ev "^(PASS|FAIL)  .*($skip)")"
   fi
   p="$(printf '%s\n' "$out" | grep -c '^PASS')"; f="$(printf '%s\n' "$out" | grep -c '^FAIL')"
-  [ $((p + f)) -gt 0 ] || continue
-  n=$((n + 1)); P=$((P + p)); T=$((T + p + f))
-  if [ "$f" = 0 ]; then ok=$((ok + 1)); v=PASS; else v=FAIL; fi
-  printf '%-4s %-22s %d/%d checks\n' "$v" "$s" "$p" $((p + f))
+  P=$((P + p)); T=$((T + p + f))
+  if [ $((p + f)) -eq 0 ]; then
+    printf '%-11s %-22s no checks ran\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
+  fi
+  if [ "$f" = 0 ]; then ok=$((ok + 1)); v=PASS; else nfail=$((nfail + 1)); v=FAIL; fi
+  printf '%-11s %-22s %d/%d checks\n' "$v" "$s" "$p" $((p + f))
   printf '%s\n' "$out" | grep '^FAIL' | sed 's/^FAIL  /       - /'
 done
 [ "$n" -gt 0 ] || { echo "no trials found in $runs"; exit 1; }
-awk -v ok="$ok" -v n="$n" -v p="$P" -v t="$T" 'BEGIN {
-  printf "\nTRIAL SCORE %.1f%% (%d/%d scenarios pass); check rate %.1f%% (%d/%d)\n", 100*ok/n, ok, n, 100*p/t, p, t }'
+awk -v ok="$ok" -v n="$n" -v p="$P" -v t="$T" -v f="$nfail" -v i="$ninfra" -v u="$nunv" 'BEGIN {
+  rate = (t > 0) ? 100*p/t : 0
+  printf "\nTRIAL SCORE %.1f%% (%d/%d scenarios pass); check rate %.1f%% (%d/%d)\n", 100*ok/n, ok, n, rate, p, t
+  printf "PASS %d FAIL %d INFRA_ERROR %d UNVERIFIED %d\n", ok, f, i, u }'

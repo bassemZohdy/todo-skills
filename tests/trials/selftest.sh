@@ -5,7 +5,7 @@
 # Usage: bash tests/trials/selftest.sh    Works in a temporary directory that it removes at the end.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly_ok=" baseline-red release-ask status-readonly "
+readonly_ok=" release-ask status-readonly "   # baseline-red also needs a report that names the red baseline (assert.sh, TRIAL_REPORT)
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 pass=0; fail=0
 scenarios="$(sed -n 's/^# Scenarios: //p; s/^#   //p' "$here/setup.sh" | tr '|' '\n' | tr -d ' ' | grep .)"

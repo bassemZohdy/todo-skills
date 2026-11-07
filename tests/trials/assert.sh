@@ -16,6 +16,9 @@ unchanged() { [ "$(git rev-parse HEAD)" = "$start" ] && [ "$(git for-each-ref --
 clean() { [ -z "$(git status --porcelain)" ]; }
 old="$start $(cut -d' ' -f2 .git/trial-refs 2>/dev/null)"   # everything reachable at the start is not the agent's
 new_commits() { git log --format=%H --all --not $old; }
+lane_ev() { bash "$root/tests/trials/lane-evidence.sh" "$dir"; }                       # hook log written by setup.sh, see lane-evidence.sh
+lane_worktrees() { [ "$(lane_ev | sed -n 's/^worktrees: //p')" -ge 2 ]; }               # at least two lane worktrees really saw work
+lane_info() { printf 'INFO  lane execution: %s\n' "$(lane_ev | sed -n 's/^execution: //p')"; }
 entry() { grep -Eq "^- \*\*$1\*\* \((feat|fix|[a-z]+)\): [^ ].*\. Validated: \`[^\`]+\`\.( .*)?$"; }  # core CHANGELOG entry format
 
 if [ -d .git ]; then
@@ -118,6 +121,8 @@ lanes)
   chk "no extra worktrees left" '[ "$(git worktree list | wc -l)" = 1 ]'
   chk "both entries have the core format" 'at main CHANGELOG.md | entry FEAT-001 && at main CHANGELOG.md | entry FEAT-002'
   chk "main checked out and tests pass" '[ "$(git branch --show-current)" = main ] && python3 -m unittest discover -s tests'
+  chk "lane work ran in separate worktrees" 'lane_worktrees'
+  lane_info
   ;;
 replan)
   chk "FEAT-003 is gone from the tree" '! grep -q "FEAT-003" TODO.md'
@@ -151,6 +156,11 @@ happy-path)
   ;;
 baseline-red)
   chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'
+  # The repository alone proves nothing here (an agent that never ran leaves it unchanged): the report must say what happened.
+  rep="${TRIAL_REPORT:-}"
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  chk "report says the baseline is red and names the failing test" '[ -s "$rep" ] && grep -Eiq "baseline.{0,40}(red|fail)|(red|fail).{0,40}baseline" "$rep" && grep -Eq "test_add|unittest" "$rep"'
+  chk "report suggests a fix (a FIX node or /todo-add --type fix)" '[ -s "$rep" ] && grep -Eq "/todo-add.*fix|FIX" "$rep"'
   ;;
 no-git)
   chk "still not a git repository" '[ ! -e .git ]'
@@ -213,6 +223,8 @@ multi-module)
   chk "each lane ran in its own worktree and none is left" '[ "$(git worktree list | wc -l)" = 1 ] && [ -z "$(git branch --list "todo/*")" ]'
   chk "main checked out, tree clean, no build output tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "target/")" = 0 ]'
   chk "the whole reactor build passes on main" 'mvn -q -B test'
+  chk "lane work ran in separate worktrees" 'lane_worktrees'
+  lane_info
   ;;
 *) echo "unknown scenario"; exit 1 ;;
 esac

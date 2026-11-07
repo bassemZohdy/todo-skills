@@ -17,3 +17,5 @@ jobs:
         run: bash tests/run.sh
       - name: Trial harness self-test
         run: bash tests/trials/selftest.sh
+      - name: Trial harness tests
+        run: for t in tests/trials/test-*.sh; do bash "$t" || exit 1; done

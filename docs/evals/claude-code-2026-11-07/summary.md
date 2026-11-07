@@ -98,3 +98,19 @@ For every run the controller recorded, before `assert.sh`, the hash of the whole
 3. Add one sentence to `reference/verification.md` for F3: when a `Done when` fails before any test runs for a reason outside the task (import path, missing tool), stop and report it, or state exactly which scaffolding file is allowed. Today three of four agents improvised the same file and one stopped.
 4. Make `run-claude.sh` pass `TRIAL_SKIP` through (or print INFRA_ERROR for a permission denial) so `ci-local` is not reported as a skill failure.
 5. Record these runs in `docs/trials.md` and `docs/agent-compatibility.md` and remove the statement that nested agents cannot be launched.
+
+## Follow-up (same day): fixes and re-validation
+
+The three tasks filed from this evaluation were then implemented, together with four related harness tasks (`TASK-020` to `TASK-023`). Each fix was checked by a test script and, where an agent matters, by fresh sessions with the corrected harness (logs of these re-validation runs were not added to `runs/`):
+
+| Finding | Task | Result after the fix |
+|---|---|---|
+| F1 prompt contradicts assertion | TASK-025 | `ts-lifecycle` and `java-lifecycle` each pass 13/13 in one fresh session with the new prompt ("run it again after each report until the root is merged") |
+| F2 cp1252 setup failure | TASK-026 | `bash tests/trials/selftest.sh` gives 24 passed, 0 failed on this Windows host with no `PYTHONUTF8` override |
+| F3 no rule for an unrunnable Done when | TASK-027 | `reference/verification.md` now says: add one empty scaffolding file inside the node's own folders and report it, otherwise stop and report "Done when cannot run" |
+| (observation) baseline-red passed without a report | TASK-020 | a real `baseline-red` session passes 10/10 including the new report checks; silent, empty and wrong reports are rejected |
+| (observation) lane evidence was only a clean worktree count | TASK-021 | hook-based `lane-evidence.sh`: a real `lanes` session passes 16/16 and a real `multi-module` session 15/15, both `execution: overlapping` |
+| (observation) INFRA vs PASS in scoring | TASK-022 | `score.sh` reports PASS, FAIL, INFRA_ERROR and UNVERIFIED and counts every scenario |
+| (observation) evidence overwritten | TASK-023 | `run-claude.sh` writes one checksummed folder per invocation |
+
+`TASK-018`, `TASK-019` and `TASK-024` need a logged-in Codex and were not attempted.

@@ -335,6 +335,23 @@ XML
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac
+# The lane scenarios log every checkout and commit with its worktree and a nanosecond time to <git-common-dir>/trial-events,
+# so lane-evidence.sh can tell separate worktrees and overlapping lanes from sequential work (the agent's report is not evidence).
+case "$scenario" in lanes|multi-module)
+  cat > .git/hooks/post-checkout <<'HOOK'
+#!/bin/sh
+top=$(git rev-parse --show-toplevel)
+gd=$(git rev-parse --git-common-dir)
+case "$gd" in /*|?:*) ;; *) gd="$top/$gd" ;; esac
+ts=$(date +%s%N 2>/dev/null)
+case "$ts" in ""|*N*) ts=$(python3 -c 'import time; print(time.time_ns())' 2>/dev/null || echo "$(date +%s)000000000") ;; esac
+printf '%s %s %s %s\n' "$ts" "$(basename "$0")" "$top" "$(git symbolic-ref -q --short HEAD || echo -)" >> "$gd/trial-events"
+exit 0
+HOOK
+  cp .git/hooks/post-checkout .git/hooks/post-commit
+  chmod +x .git/hooks/post-checkout .git/hooks/post-commit
+  rm -f .git/trial-events ;;
+esac
 # Snapshot of the starting state for the read-only checks in assert.sh (inside .git, never tracked).
 if [ -d .git ]; then git rev-parse HEAD > .git/trial-start; git for-each-ref --format='%(refname) %(objectname)' > .git/trial-refs; fi
 echo "ready: $dir ($scenario) on branch $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo none)"

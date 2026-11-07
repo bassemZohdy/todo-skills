@@ -24,6 +24,13 @@ An attempt and the 3-attempt limit are defined in `/todo-continue` ("Test failur
 - Target a test id or file path, not a name filter, which can exit 0 with zero tests (lint W2): `python3 -m unittest tests.test_calc.CalcTest.test_x`, `pytest tests/test_x.py::test_y`.
 - A command may start with `cd <dir> &&` (a package in a monorepo). Add `; regression: \`cmd\`` only when the full suite is the wrong guard, for example a package's own suite. The root always runs the full suite.
 
+## A Done when that cannot run
+
+If the `Done when` command fails before any test executes, for a reason outside the task's behavior (a dotted test path that resolves to a foreign package, a missing runtime or tool, an absent service), the node is not red and the failure is not an attempt. Never edit `Done when`, and never close the node with a different or narrower command. Then:
+
+1. If one empty or declarative file inside the node's own test or source folders makes the command resolve (for example an empty `__init__.py`), add it, name it in the node commit body, and report it under "Adjacent problems".
+2. Otherwise stop and report "Done when cannot run" with the command and its first error. Fixing the host (an installed package, a path entry, a service) is the user's call.
+
 ## Definition of Done (optional)
 
 If README.md, CONTRIBUTING.md or `docs/` has a heading named exactly `Definition of Done` followed by a list, that list applies to every node on top of `Done when`. Command items follow the safety rules below; statements are checked by inspection and reported one by one. A missing item blocks the node as `/todo-continue` "Test failures" says, naming the item; it is not an attempt.

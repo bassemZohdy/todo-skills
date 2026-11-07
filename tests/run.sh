@@ -157,6 +157,9 @@ if [ "$out" = "ACCEPT" ]; then ok "verify default mode still accepts a count-les
 pl="$root/plugin/skills/todo-plan/SKILL.md"
 if grep -q 'Independent design review (optional, never a required stage)' "$pl" && grep -q 'never block a plan on it' "$pl" && grep -q 'EGM' "$pl" && grep -q 'neither bundles nor requires' "$pl"; then ok "todo-plan documents an optional fresh-context or external design review"; else bad "todo-plan design review section missing or implies it is required"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
+# A Done when that cannot run for an environmental reason (TASK-027).
+vr="$root/plugin/skills/todo/reference/verification.md"
+if grep -q '^## A Done when that cannot run' "$vr" && grep -q 'before any test executes' "$vr" && grep -qi 'never edit `Done when`' "$vr" && grep -q 'empty `__init__.py`' "$vr" && grep -q 'Adjacent problems' "$vr" && grep -q 'Done when cannot run' "$vr"; then ok "verification reference says what to do when a Done when cannot run"; else bad "verification reference lacks the cannot-run rule"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"

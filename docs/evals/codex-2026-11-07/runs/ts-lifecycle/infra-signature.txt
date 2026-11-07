@@ -1,0 +1,1 @@
+**Stopped at step 3: baseline red.** FEAT-001.1, “Add subtract with a test,” cannot start because the regression command `npm test` failed before executing the test: Node reported `Error: spawn EPERM`. The suite reported 0 passing and 1 failing test.

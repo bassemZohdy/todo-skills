@@ -1,0 +1,12 @@
+**Stopped at step 4:** FEAT-001, “Add subtract to calc.py,” could not start because Git could not create the required branch:
+
+```text
+fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-calc-py':
+unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-calc-py
+```
+
+The regression baseline, `python3 -m unittest discover -s tests`, passed **1 test**. No files changed and no commit was created. The checkout remains on `main` at `0e4c19e`; FEAT-001 remains the next workable node. Restoring permission to create Git refs is needed before it can proceed.
+
+Adjacent problems: none. Consider clearing context before the next invocation.
+
+Ambiguities, contradictions, or unclear instructions encountered: **none**.

@@ -1,0 +1,1 @@
+bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trial-base/codex-runs/java-lifecycle/repo /c/Users/<user>/todo-trial-base/codex-runs/java-lifecycle/evidence/20261107T191808Z-1417/prompt.txt /c/Users/<user>/todo-trial-base/codex-runs/java-lifecycle/evidence/20261107T191808Z-1417/report.txt   # see codex-exec.sh for the codex flags

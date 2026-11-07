@@ -1,0 +1,24 @@
+## HEAD
+1e956e6365bca4876b7ba9c5c7615f6fc1a879b4
+## current branch
+main
+## branches
+* main 1e956e6 init with one free root
+## worktrees
+C:/Users/<user>/todo-trial-base/codex-runs/race-claim-conflict/repo  1e956e6 [main]
+## tags
+## refs
+refs/heads/main 1e956e6365bca4876b7ba9c5c7615f6fc1a879b4
+## log --all --graph
+* 1e956e6  (HEAD -> main) init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

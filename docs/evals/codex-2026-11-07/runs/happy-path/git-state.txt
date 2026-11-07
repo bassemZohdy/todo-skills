@@ -1,0 +1,24 @@
+## HEAD
+0e4c19e5186e69b6248370fea380eb826f905ed9
+## current branch
+main
+## branches
+* main 0e4c19e init with one free root
+## worktrees
+C:/Users/<user>/todo-trial-base/codex-runs/happy-path/repo  0e4c19e [main]
+## tags
+## refs
+refs/heads/main 0e4c19e5186e69b6248370fea380eb826f905ed9
+## log --all --graph
+* 0e4c19e  (HEAD -> main) init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

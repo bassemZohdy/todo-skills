@@ -1,0 +1,23 @@
+## HEAD
+ad1e18065645558484f2bbdf14e9266a309cfc4e
+## current branch
+main
+## branches
+* main ad1e180 init typescript project
+## worktrees
+C:/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/repo  ad1e180 [main]
+## tags
+## refs
+refs/heads/main ad1e18065645558484f2bbdf14e9266a309cfc4e
+## log --all --graph
+* ad1e180  (HEAD -> main) init typescript project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./package.json
+./src/calc.ts
+./tests/add.test.ts

@@ -1,0 +1,15 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+FAIL  the rival's claim is on main
+FAIL  main's tip is still the rival's claim (not overwritten)
+PASS  the agent deleted its own root branch
+PASS  no subtract anywhere
+PASS  rival branch untouched
+PASS  ends on the base with a clean tree
+
+11 passed, 2 failed

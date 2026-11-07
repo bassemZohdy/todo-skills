@@ -1,0 +1,9 @@
+**Completed the interrupted merge** of `FEAT-001.1` — Add subtract with a test — into its parent branch.
+
+- Merge commit: `bf56d6d` on `todo/FEAT-001-subtract-multiply`; the child branch was deleted.
+- Files brought into the parent: `TODO.md`, `calc.py`, and `tests/test_calc.py`.
+- Manual invariant check passed; no lint script was present. Tests and regression were not run, as directed for an interrupted merge.
+- Parent progress: **1 of 2 children done**. Next workable node: `FEAT-001.2` — Add multiply with a test.
+- The working tree is clean. Clear context before the next invocation if useful.
+
+Ambiguities, contradictions, or unclear instructions encountered: **none**.

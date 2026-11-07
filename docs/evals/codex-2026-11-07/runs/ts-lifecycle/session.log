@@ -1,0 +1,564 @@
+Reading additional input from stdin...
+OpenAI Codex v0.167.0
+--------
+workdir: C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+model: gpt-6.1-terra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir]
+reasoning effort: high
+reasoning summaries: none
+session id: 01a1b772-62b1-7423-a8b8-1e15faae4553
+--------
+user
+You are a trial agent testing a set of agent skills. Your ONLY working folder is /c/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/repo (cd there with an absolute path in every shell call). Do not read or write outside it, except the worktrees the skills create at ../<repo>.todo/.
+
+The skills are in .claude/skills/<name>/SKILL.md inside that folder (core rules: .claude/skills/todo/SKILL.md and .claude/skills/todo/reference/*.md). Slash commands are not available: to run /todo-x, read .claude/skills/todo-x/SKILL.md and follow it literally, loading what it tells you to load. Never push or fetch, never use git add -A or git add ., never tag. If git needs an identity, use git -c user.email=t@t -c user.name=t.
+
+Task: Run `/todo-continue --merge`. It executes one node per invocation, so run it again after each report until the skill says nothing is left to continue and the root is merged into main.
+
+Reply with (1) the report the skill asks for, and (2) every ambiguity, contradiction or unclear instruction you hit in the skill text, each with the exact quoted text and how you resolved it ("none" if none).
+warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings.
+  user (C:\Users\<user>\.codex\config.toml): `windows_wsl_setup_acknowledged` is ignored.
+warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings.
+  user (C:\Users\<user>\.codex\config.toml): `windows_wsl_setup_acknowledged` is ignored.
+2026-11-07T19:18:14.285248Z ERROR codex_models_manager::manager: failed to refresh available models: request timed out
+codex
+I’ll read the continuation skill and its required rules, then follow the lifecycle one invocation at a time and keep track of any unclear instructions.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Set-Location -LiteralPath 'C:\\Users\\<user>\\todo-trial-base\\codex-runs\\ts-lifecycle\\repo'
+Get-Content -LiteralPath '.claude/skills/todo-continue/SKILL.md'" in C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+ succeeded in 158ms:
+---
+name: todo-continue
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works one root of that lane.
+argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]"
+---
+
+# /todo-continue
+
+First load the `todo` core skill and read `reference/git-flow.md` and `reference/verification.md` from its folder (`reference/lanes.md` too with a lane flag). If the core is not a skill, read `../todo/SKILL.md` and those files from `../todo/reference/`.
+
+Complete at most one node per invocation (lane runs excepted). Flags, all optional; an invalid combination is reported and nothing runs:
+- `--plan`: stop for approval after reading, before writing code (step 6). Not with a lane flag.
+- `--lane <name>`: only roots of that lane, in order. `--all-lanes [--seq]`: one subagent per lane, in parallel (`--seq`: one after another); see `reference/lanes.md`. Not together, and not with `--worktree`.
+- `--worktree`: work in a separate worktree; the main checkout is never switched (`reference/git-flow.md`, "--worktree").
+- `--delegate`: steps 6-9 run in a subagent on the model the node's tier maps to (core "Model routing"); you keep the other steps and rerun the verify commands yourself. Without a subagent tool or a `Models:` line, say so and work in this thread.
+- `--merge`: when a **root** finishes, also merge it into the base. Without it the commands are printed.
+
+## Steps
+
+The order of every node is the core's "Lifecycle by status".
+
+1. **Git mode and invariants.** Check git and run the invariant check (core). If it fails only on the active node's `State:` line, show the corrected line and ask; on I5, apply the core's repair; otherwise report and stop.
+2. **Select by status.**
+   - **Interrupted merge** (on a `todo/` branch; core "Interrupted work comes first"): finish it as step 10 item 3, lint, report and stop. No tests here; the parent's integration step runs them.
+   - **Interrupted drain** (a root branch whose uncommitted `CHANGELOG.md` holds its entry): make the drain commit (10.4.3 d), go on at 10.4.4, report and stop. A drained root branch not yet merged into the base is reported with its merge commands (with `--merge`: go to 10.4.4).
+   - **A `[/]` node:** resume it on its branch (or worktree); check `git status` and `git diff --stat`. Uncommitted changes that fit its task line are its earlier work, committed at step 10; anything else: stop and ask, never revert or commit it. Skip steps 3-5 and go on where `next:` says: `read docs` or `plan proposed` �+' 6, `build` �+' 7, `drain` �+' 10.4, other or missing �+' 6. Without a baseline in `State:`, the regression must be fully green with no test deleted, skipped or weakened.
+   - **Otherwise** the first **workable** `[ ]` node (core "Which node is next"); claimed trees are skipped with the resume hint, `[!]` nodes (also those `[!]` only on their own branch) are skipped, `[x]` nodes are never touched. A node with `next: decompose` is broken down, not built: on the base for an unclaimed tree (as step 3 "Where to start"), with `../todo-add/SKILL.md` steps 7-8 (over 120 lines: write nothing, say so, stop); show the children, write them after the user confirms (on a `todo/` branch commit `chore(backlog): decompose <ID>`), and stop. Nothing workable: list what blocks progress and stop.
+3. **Ready check** (new nodes only), in this order:
+   - Lint clean; the `Ref:` path, if any, exists; tree clean by the git-flow definition (otherwise stop and ask).
+   - **Where to start** (git mode). A node in an unclaimed tree (no branch in its root's `State:` in `git show <base>:TODO.md`) starts from the base: on a `todo/` branch first commit pending backlog edits there (`chore(backlog): pending edits <IDs>`, by path), then `git switch <base>`. A root missing from the base's TODO.md is skipped: say it must be added on the base. Every other node stays on its tree's branch.
+   - **Base dependency.** A `Depends:` satisfied only by the base's CHANGELOG: first `git merge <base>` into the start branch (`Merge <base> into <its ID>`). This merge only brings in the base and stays even if the baseline is then red; nothing else changes.
+   - **Baseline.** Run the regression command (`reference/verification.md`, protocol step 6) on the start branch: the nearest ancestor branch that exists; for a leaf that already has its own branch, the branch after its `from`; for a parent's integration step, its own branch.
+     - Green: note the pass count. No tests (none run): `baseline none`.
+     - Red: a `FIX` node whose `Done when` runs at least one failing test may start with `baseline red: <ids>`. Otherwise change nothing more, report "baseline red" with the command and its failing tests, suggest `/todo-add "fix the failing baseline: <failing test ids>" --type fix --priority P0`, and stop.
+4. **Branch first** (git mode). Follow `reference/git-flow.md`: in an unclaimed tree, root branch �+' tree claim commit �+' fast-forward of the base (**do not go on until it succeeded**) �+' missing ancestor branches �+' the node's branch; otherwise only the missing branches. No git: skip.
+5. **Start.** On the node's branch set `[/]` and replace `State:` with `attempts 0/3; baseline <n> passing; branch <name> from <branch it was created from>; next: read docs` (or `baseline none` / `red: �?�`). No git: `attempts 0/3; baseline �?�; no git; files: <a root's rolled-up files, else ->; docs: <rolled-up docs, if any>; next: read docs`. Commit `chore(backlog): start <ID>` with any pending backlog edits. Nothing but backlog files changes before this.
+6. **Read before write.** Read the `Ref:` doc and the README/doc sections that govern the area, then only the code the node needs. A missing `Ref:` or a doc that contradicts the task line: stop and ask.
+   - **Plan** (`--plan`, or `next: plan proposed`). If a plan was proposed, show it (the body of the newest commit whose subject is exactly `chore(backlog): plan <ID>`; none or no git: print a new one) and ask "approve the plan? (yes / change: �?�)": yes sets `next: build` and goes on; a change is committed the same way (`--allow-empty` if `TODO.md` is unchanged) and stops. Otherwise print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed`, commit it as `chore(backlog): plan <ID>` with the plan as the body, and **stop**.
+7. **Build.**
+   - **Resume:** code and tests already exist: skip red and go to review (its findings are fixed like any others).
+   - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`). `TASK` refactors get characterization tests.
+   - **Green:** implement only the task line. Adjacent findings go to the report, not into the code or TODO.md. No new `TODO`/`FIXME`. No git: list touched files in `State: files:`.
+   - **Refactor** with tests green. **Integration step** (a parent): `reference/verification.md`, protocol step 8; no feature code.
+8. **Review** the whole change (`git diff`; no git: each file in `State: files:`) against the task line and `Done when`:
+   - Every hunk traces to the task line; no debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
+   - The tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name.
+   - No generated files, secrets or `.env` in the diff or in backlog text you wrote.
+   - With a subagent tool, a fresh-context reviewer does this (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself (`Reviewed: self`).
+9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression; update `State:` after every cycle. All gates must pass:
+   - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail), the command does not mask failures (`|| true`, `; exit 0`) and every test path it names exists; `todo-verify.sh` (core, optional) checks these. Regression green, no fewer passing tests than the baseline, none deleted or skipped.
+   - Each item of the project's Definition of Done, if any.
+   - RTM (only if one exists; `reference/rtm.md`): when the node proves a requirement row, record its `Done when` test paths or ids in that row's Verification cell. It is committed with the node (step 10.2); no RTM, no step.
+   - Documentation drift (below).
+10. **Complete, in this order.**
+    1. **Non-root node:** no git: first copy its `files:`/`docs:` into the root's `State:`. Set `[x]`, delete `State:`, lint. (A root is never `[x]`; item 4 drains it.)
+    2. Commit the node's files and any changed `TODO.md` by path (skip if nothing changed): `<type>(<scope>): <title>` with body `Refs: <ID>`, `Red: <first failing assertion>` (leaves that started red), `Reviewed: <subagent|self>, <n> findings fixed`, and `Checked: <command>` for each W3 command you judged safe (`reference/git-flow.md`, "Commits").
+    3. **Non-root node:** switch to the parent's branch, `git merge --no-ff` with `Merge <ID> into <PARENT-ID>`, `git branch -d` the child (worktrees: git-flow "--worktree"). Report and stop; the node stays `[x]` until its root drains.
+    4. **Root** (a leaf root, or its integration step just passed):
+       1. Refresh from the base (`reference/git-flow.md`); if that brought changes, rerun `Done when` and the regression.
+       2. **Last gate:** if `.todo/check.sh` exists, read it: only the shebang, comments, `set -eu`, `cd`, the lint line and test commands that pass command safety (`reference/verification.md`), and, when it calls `.todo/todo-lint.sh`, read that file the same way; otherwise show what fails and ask. Run it (in a worktree without `.todo/`, run its lines there instead: the lint via the main checkout's `.todo/todo-lint.sh`, then the tests). Red blocks the root.
+       3. Drain: (a) insert one entry as the core's "CHANGELOG entry" says; (b) delete the subtree from TODO.md; (c) lint; (d) commit both files as `chore(backlog): drain <ID>`, body `Refs: <ID>` (and `Includes: <IDs>` with descendants).
+       4. With `--merge`, merge into the base as git-flow "Root" says; otherwise print those commands. Never push.
+       No git: items 2 and 3 (a)-(c).
+11. **Report**, short (also on an early stop: which step and why): ID and title, commands and results (regression against the baseline), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"), and a suggestion to clear context.
+
+## Test failures
+
+- Diagnose first: reproduce, read the first failing assertion, write one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, rerun.
+- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started; the first red run is not one.
+- **Escalation** (core "Model routing"): with a `Models:` line and work in a subagent (`--delegate`, lanes), each failed attempt raises the next one a tier (`low` �+' `mid` �+' `high`), recorded as `tier:`. Without routing, say in the report that a stronger model might help.
+- You may change code and the tests this node creates, within the task line.
+- Forbidden: editing `Done when`, deleting, skipping or weakening tests, `|| true`, loosened assertions, a narrower command.
+- A failure outside the node (a flaky test, a regression beyond the task line), and the third failed attempt (list each hypothesis), block the node: `[!]`, `State:` replaced by a `Blocked:` line in the core format (secrets redacted; no git: a root's `files:`/`docs:` go into the action part as `(files: �?�; docs: �?�)`), committed with the node's changed files as `chore(backlog): block <ID>`; stop. Roots block the same way.
+- Run commands only under the safety rules in `reference/verification.md`.
+
+## Documentation drift
+
+- If the implementation must deviate from the `Ref` doc, stop and let the user choose: change the code, or update the doc in this node.
+- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, renamed, removed or with a changed meaning), search README.md and `docs/` (not `docs/plans/`) for each changed name with `grep -rnF -- '<name>' README.md docs`. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
+- Report every hit as an actionable reference, one line each: `<file>:<line>: <name> - <what to change>` (for example `docs/REFERENCE.md:48: --worktree - flag renamed to --tree`). Update the hits that fit within the task line (`Docs: updated <file>` for the CHANGELOG entry; no git: the root's `State: docs:`); give the rest as `/todo-add "update <file>:<line> for <name>" --type task --from <ID>` commands in the report. Only a hit the `Done when` or the Definition of Done names blocks the node. Uses grep only; no new tool.
+- Report README setup or test instructions that disagree with the commands that passed.
+- TODO.md never duplicates docs; spec-like text goes to `docs/` with a `Ref:`.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Set-Location -LiteralPath 'C:\\Users\\<user>\\todo-trial-base\\codex-runs\\ts-lifecycle\\repo'
+Get-Content -LiteralPath '.claude/skills/todo/SKILL.md'
+Get-Content -LiteralPath '.claude/skills/todo/reference/git-flow.md'
+Get-Content -LiteralPath '.claude/skills/todo/reference/verification.md'" in C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+ succeeded in 175ms:
+---
+name: todo
+description: Core rules for the todo-* skills (todo-init, todo-plan, todo-add, todo-continue, todo-update, todo-status, todo-report, todo-release) - the task tree in TODO.md, compact task format, complexity levels and model routing, IDs, git flow with a no-git fallback, invariants, Definition of Done and hard guardrails. Load this before running any todo-* command or when editing a TODO.md in the `# Active Backlog` task-tree format. Invoked directly as /todo it only prints the command list and a read-only invariant check.
+---
+
+# todo (core)
+
+The repository is a closed-loop state machine built from files that already exist. Nothing else stores state.
+
+| Layer | File(s) | Role | Write policy |
+|---|---|---|---|
+| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`/`todo-update`; the README `Tests:` line by `todo-init` on a yes; the optional RTM (`reference/rtm.md`) by `todo-plan`/`todo-add`/`todo-continue` only when it already exists; `docs/status.html` by `todo-report` |
+| Active queue | `TODO.md` | One task tree. A tracker of work items, not a place for design | Edited only by the todo-* skills |
+| Validation | Source code + test suites | Ground truth for "done" | Changed only for the task at hand |
+| Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (on release: renamed to the version, a new empty one above it, and the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file or adds a missing `[Unreleased]` |
+| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, CI job | Lint + tests, run by CI, a pre-push hook and `/todo-continue` | `check.sh` written by `/todo-init --ci` on a yes; `todo-lint.sh` copied in by the user; committed by the user |
+| Version store | git | Branch or worktree per task. Nothing reaches the base branch unverified | See "Git mode" |
+
+Prefer native file tools (Read/Edit/Write) for file edits; however you edit, change only the intended lines and keep the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`, `cmp`, `mv`, and `rm` of a skill's own temporary file).
+
+**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md` named by a `Ref:`, and the README `Tests:` and `Base:` lines written by a todo-* skill. README.md is staged by a backlog commit only while `git diff README.md` adds exactly those lines, optionally after a blank line; README edits a node makes under "Documentation drift" are that node's files and are committed with it; any other README change is the user's: it counts for the clean-tree check and is never staged by a backlog commit. Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. New roots, and any change to a node of an unclaimed tree, are made only on the base branch; on a `todo/` branch the skills refuse them and name the base. The clean-tree check (`reference/git-flow.md`) ignores them.
+
+## Direct use
+
+`/todo` alone is read-only: list the commands, run the invariant check on `TODO.md` if it exists, report. Change nothing.
+
+| Command | Purpose |
+|---|---|
+| `/todo-init` | Bootstrap files, detect test command and git, optional pre-planning and CI setup, migrate the old format |
+| `/todo-plan` | Plan the work into lanes and a tree; revise the plan at any time |
+| `/todo-add` | Add a task, or break a request into a tree |
+| `/todo-continue` | Execute the next task node, verify it, merge it into its parent |
+| `/todo-update` | Manual state and field changes |
+| `/todo-status` | Read-only tree, lanes, history and search |
+| `/todo-report` | Write an interactive HTML status page to `docs/status.html` |
+| `/todo-release` | Turn `[Unreleased]` into a version after the user confirms it |
+
+Each skill runs only its own command and never chains into another unprompted.
+
+## Git mode
+
+At the start of every command run `git rev-parse --is-inside-work-tree`.
+
+- **Git repo:** each node works on its own branch or worktree (`reference/git-flow.md`). The **base branch** is the one the user names, otherwise the README `Base:` line, otherwise the first that exists of `main`, `master`, `trunk`, `develop`; with none of them, ask once. When the user names a base that differs from that default, offer to add `Base: <branch>` to README (written on a yes; a backlog file like the `Tests:` line). Every step that checks out or merges into the base (tree claim, claim release, base merge, release) runs in the **main checkout** (the first entry of `git worktree list`): from a linked worktree, `cd` there first; if it is on another branch with changes, stop and print the commands.
+- **Not a git repo:** warn **once per command**: "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Then use **no-git mode**: skip every git step, track progress in `State:` (including `files:` touched), still update markers and drain to CHANGELOG.md. Verification is unchanged.
+
+Never tag, force-push, reset hard or clean. The one forced branch delete is of a branch holding only the skill's own unpublished claim commit (`reference/git-flow.md`, tree claim steps 2 and 5). **The skills' own git commands never touch the network:** no fetch, pull or push. Sharing commits is git's job and yours. A test command may download dependencies; if it fails for lack of network, block with that reason instead of retrying.
+
+## TODO.md schema
+
+```markdown
+# Active Backlog
+
+## dYO3 Task Tree
+```
+
+Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks.
+
+A task is **2 to 4 lines**: what to do, how it is validated, optional links and state.
+
+```markdown
+- [ ] **FEAT-002** A� P1 A� mid A� XL A� Add token refresh to the auth service
+  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
+  - Links: Ref: docs/auth.md#refresh A� Depends: TASK-001 A� From: FIX-001
+  - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
+  - [ ] **FEAT-002.1** A� mid A� Refresh endpoint
+    - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
+    - [/] **FEAT-002.1.1** A� high A� Token store interface
+      - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
+      - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.1-token-store-interface from todo/FEAT-002.1-refresh-endpoint; next: build
+```
+
+| Part | Rule |
+|---|---|
+| Header | `- [m] **ID** A� [P0-P2, roots only A�] COMPLEXITY [A� SIZE] A� what to do, one sentence`: complexity `low`, `mid` or `high` (required); size `S`, `M`, `L` or `XL` (optional) |
+| `Done when:` | **Required.** Criteria, then `; ` and at least one exact command in backticks. Optional `; regression: \`cmd\``; without it the regression is the project's full suite |
+| `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` A� ` |
+| `State:` | Optional, survives a context reset. Items separated by `; `, each at most once, in this order: `attempts n/3`, `baseline <n> passing` (or `none`, or `red: <failing test ids, comma-separated>`), `tier: <low|mid|high>` (only once raised above the node's complexity), `hyp: <one line>`, `branch todo/<ID>-<slug> from <branch it was created from>`, `no git`, `files: <paths>`, `docs: <paths>`, `next: <step>`. `next:` is one of `start <ID>`, `build children` (tree claim, ancestors), `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert`. A later claim **replaces** the whole line, except that in no-git mode a root keeps `files:` and `docs:` rolled up from its finished children until the drain |
+| `Blocked:` | On `[!]` tasks, instead of State and in its place (the last field line): `<reason> �+' <command in backticks> <error, at most 5 lines joined with " / "> �+' <action required>`. A manual block writes `n/a (manual)` in the middle |
+
+Only these four fields exist; a task never has both State and Blocked. More than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`). If a task needs more, split it.
+
+Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged (or being merged) into its parent, waiting for its root to drain.
+
+### Tree, levels and complexity
+
+A node at level L has its header indented `2L` spaces and its fields `2L+2`. Maximum 3 levels.
+
+**Scope rule.** Every leaf is one change that fits one context window and touches at most 5 files; bigger work is split into children (`/todo-add`). A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down.
+
+**Size** (optional, after the complexity) records scope when it helps a reader; when present, it must match the tree, and adding or dropping a node updates every ancestor's size:
+
+| Size | Meaning | Where |
+|---|---|---|
+| `S` | One change, at most 2 files | Leaf |
+| `M` | One context window, at most 5 files | Leaf |
+| `L` | Has children, all leaves | Parent |
+| `XL` | Has grandchildren | Parent |
+
+A leaf with `State: next: decompose` may carry `L`/`XL`.
+
+**Complexity** says how hard the reasoning is, not how big the change is, so an agent can pick a fitting model:
+
+| Complexity | Meaning | Examples |
+|---|---|---|
+| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function whose fix the task line states |
+| `mid` | Ordinary work that needs some investigation or design (the default) | a new endpoint, a bug whose cause must be found |
+| `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
+
+A parent is rated by its integration step alone (usually `low` or `mid`); its children carry their own levels. Roots carry the priority and the lane; children inherit both.
+
+### Model routing (optional)
+
+A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both:
+
+- `/todo-continue --delegate` and lane runs give each node (or lane root, at its highest complexity) a subagent on the mapped model.
+- The reviewer runs at the node's tier or higher.
+- **Escalation:** after a failed verification attempt the next attempt runs one tier higher (`low` �+' `mid` �+' `high`), recorded in `State:` as `tier:`. A wrong `low` label costs one cheap attempt, not a blocked node.
+
+## IDs
+
+- Roots `<PREFIX>-<NNN>`, one global sequence, 3 digits. Children append `.n`: `FEAT-002.1`, `FEAT-002.1.2`. Dots equal the level.
+- IDs are never reused. Next root number = highest FEAT-/FIX-/TASK- number found in `TODO.md`, `CHANGELOG.md` (including IDs after `Includes:`), `docs/plans/*.md` **and**, in git mode, commit subjects (`git log --all --format=%s`, which name dropped IDs), plus 1. Next child number = the highest child number under that parent found in the same places, plus 1.
+
+| Prefix | Meaning | CHANGELOG heading | Commit type |
+|---|---|---|---|
+| `FEAT` | New capability | `### Added` | `feat` |
+| `FIX` | Bug or regression | `### Fixed` | `fix` |
+| `TASK` | Refactor, chore, docs, test, perf, build | `### Changed` | whichever fits |
+
+Children use their root's prefix.
+
+## Which node is next
+
+A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:` ID is satisfied (in CHANGELOG.md as an entry ID or after `Includes:`, also in `git show <base>:CHANGELOG.md` in git mode, or `[x]` in TODO.md; when only the base's CHANGELOG satisfies it, `/todo-continue` merges the base into the branch the node will start from before starting it, step 3; read-only commands report "waits for a base merge"); no ancestor is `[!]`; and, in git mode, its root is not claimed by another branch. A root is **claimed** when its `State:` in the base branch's `TODO.md` (`git show <base>:TODO.md`) names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-�?�` or `todo/<ROOT-ID>.�?�`). A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume". A branch in this clone can belong to another session, so it is never resumed from the base automatically. If backlog files hold uncommitted edits on the base, `git switch` to that branch fails: say so and offer `git stash push -- <backlog paths>` first and `git stash pop` back on the base.
+
+**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches (`git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'`) and read each one's node in `git show <branch>:TODO.md`. A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails) stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2). A node that is `[/]` is resumed, deepest first. A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`; a branch whose node is no longer in its parent branch's TODO.md (dropped) is ignored; a branch already merged into its parent's branch is deleted with `git branch -d`. Skip this on the base branch.
+
+### Lanes
+
+A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main` (so `--lane main` selects those roots). Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lane names are listed in the plan doc `docs/plans/PROJECT.md` when one exists.
+
+Order: roots P0 �+' P1 �+' P2, then by ID number (the global sequence, ignoring the prefix) (with `--lane` only that lane's roots); within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
+
+## Lifecycle by status
+
+The marker is the status, and each command acts only as that status allows.
+
+| Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` |
+|---|---|---|---|
+| `[ ]` workable | branch, claim, build, review, verify, complete | `in-progress`, `blocked`, `drop`, edits | allowed |
+| `[ ]` waiting | skip, say what it waits for | `blocked`, `drop`, edits | allowed |
+| `[ ]` in a tree claimed by another branch | skip, report the branch | `ready` on the root releases the claim | refused |
+| `[/]` | resume from `State:` | `ready`, `blocked`, edits; no `drop` | refused |
+| `[!]` | skip, report `Blocked:` | `ready`, `drop`, edits | refused |
+| `[x]` | never touches | `revert` only | refused |
+
+Order for every node: **ready check �+' branch (in an unclaimed tree: tree claim published to the base first) �+' start `[/]` �+' build �+' review �+' verify �+' complete `[x]` �+' merge into parent**. "Claim" means the tree claim; marking a node `[/]` is its start. The branch exists before the status changes. Ancestors stay `[ ]` while a descendant is active.
+
+**Ready check.** Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` has a runnable command, the tree is clean (git mode), and the regression baseline is green (or `none`, or red for a FIX node; `reference/verification.md` step 1).
+
+## CHANGELOG entry (written only by a root drain)
+
+Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before and after it:
+
+```markdown
+- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.
+```
+
+One entry per root. Parts in this order, each only when it applies: `Ref:` (the root's), `Validated:` (the root's `Done when` commands, each in backticks, without a `regression:` command), `From: FIX-001.` (the root's `From:`), `Docs: updated docs/x.md.` (README/`docs/` files the tree changed: `git diff --name-only <base>...<root branch>` without backlog files, or the `docs:` items in no-git mode), and last `Includes:` with every descendant ID (a leaf root has none).
+
+## Reference files
+
+Loaded only when a command needs them, from `reference/` (`../todo/reference/` from a command skill):
+
+| File | Contents | Loaded by |
+|---|---|---|
+| `reference/git-flow.md` | Branches, tree claim, staging, merging, refresh from base, conflicts | `/todo-continue`, `/todo-update --status in-progress` or `ready` |
+| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add`, `/todo-plan`, `/todo-update --status in-progress`, `/todo-init --ci` |
+| `reference/rtm.md` | Optional RTM: `docs/RTM.md` first, else README `## RTM`, else none; format and rules | `/todo-plan`, `/todo-add`, `/todo-continue`, only when an RTM exists |
+| `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
+| `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
+
+## Invariants (every todo-* skill checks these first)
+
+| # | Invariant |
+|---|---|
+| I1 | At most one `[/]` task, and a `[/]` parent has no open children |
+| I2 | Every ID is unique in TODO.md |
+| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no State together with Blocked, a Blocked line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
+| I4 | TODO.md is at most 120 lines |
+| I5 | No ID appears in both TODO.md and CHANGELOG.md (IDs after `Includes:` count) |
+| I6 | The file is exactly `# Active Backlog` plus one `## �?� Task Tree` section |
+| I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
+| I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, and any size given matches the tree |
+| I9 | No dependency cycles, counting "parent waits for its children" |
+| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, a downloaded script run without review (a fetch whose output goes straight to a shell), `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec` (the shell builtins; `bundle exec`, `npm exec`, `pnpm exec` are fine), one-liner code flags of the shells and interpreters (the -c flag of sh, bash, zsh and python; -e or --eval of node, ruby and perl; -r of php), `find -exec rm`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), `git -C �?� push`, and reads of credential files in the home directory (SSH keys, cloud credentials) |
+
+**The invariant check** ("lint" in the skills) means: if `.todo/todo-lint.sh` exists in the project, run `bash .todo/todo-lint.sh` from the repository root (read it first under "Command safety" in `reference/verification.md`); otherwise check I1-I10 by reading. The plugin itself ships Markdown only: the lint and the other optional read-only scripts (`todo-verify.sh`, `todo-rtm.sh`, the Stop hook, `todo-report.sh`) live in the `tools/` folder of the todo-skills repository, and a user who wants them copies them into the project by hand (the skills never download anything). The lint needs bash, awk, grep, sed and tr and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). A lint run after an edit that fails means the edit is wrong: fix it or undo it before you stop.
+
+On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report.
+
+## Hard guardrails
+
+1. No ghost tasks. Every change to TODO.md traces to a user command or a completed code transition.
+2. No required tooling. Markdown plus git only; git itself is optional. The lint script and hook are optional and read-only.
+3. No node is closed without running its `Done when` and its regression and seeing both pass.
+4. CHANGELOG.md is append-only apart from `[Unreleased]` insertions by a root drain, the confirmed `/todo-release`, and `/todo-init` adding a missing `## [Unreleased]`. Never rewrite released sections.
+5. "Git mode" above: no tag, fetch, pull or push. `[Unreleased]` becomes a version only through `/todo-release`, after the user confirms.
+6. The base branch receives only tree claims (fast-forward), claim releases, the confirmed release commit and the merge of a verified root.
+7. When a rule here conflicts with an explicit user instruction, state the conflict and ask.
+# Git flow and conflicts
+
+Loaded by `/todo-continue` and by `/todo-update` when it claims or releases. Part of the `todo` core skill.
+
+## Git flow
+
+One branch per node: `todo/<ID>-<slug>`. Slug: lowercase the title, turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`), drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain, join them with hyphens (nothing left means `task`). The base branch is defined in the core ("Git mode").
+
+- **Order for the first node of a tree** (each step only after the previous one succeeded):
+  1. Read `git show <base>:TODO.md` (a base without `TODO.md` means no claim). If the root's `State:` already names a branch, stop and report it. Never reuse a `todo/<ID>-�?�` branch that is not yours.
+  2. From the base, create and switch to the root branch (`git switch -c todo/<ROOT-ID>-<slug>`). If it already exists (an unpublished claim from an earlier run): when it is a **bare claim branch** (below) checked out in no worktree, delete it with `git branch -D` and create it again; otherwise stop and report it, suggesting to rename it (`git branch -m`) and rerun.
+  3. **Tree claim commit** on it, staging only backlog files (core "Backlog files", by explicit path): the root gets `State: branch todo/<ROOT-ID>-<slug> from <base>; next: build children` (leaf root: `next: start <ROOT-ID>`); the marker stays `[ ]`. Subject `chore(backlog): claim <ROOT-ID> on <branch>`.
+  4. **Publish it:** `git switch <base> && git merge --ff-only <root branch>`, as its own command; read the result. On success, `git switch <root branch>` and go on.
+  5. If the fast-forward failed, stay on the base and read `git show <base>:TODO.md` again:
+     - **Lost:** the root's `State:` there names another branch. If your root branch is a bare claim branch, delete it with `git branch -D` (the only forced delete the skills make). Otherwise leave it and report it; when its claim commit carries other backlog edits (new roots, a plan doc), print `git checkout <branch> -- <those paths>` so the user can restore them on the base. Report who has the tree and stop, on the base.
+     - **The base only moved:** `git rebase <base> <root branch>` (this checks out the root branch; if it stops on a conflict, resolve `TODO.md`/`CHANGELOG.md` with the conflict rules below and `GIT_EDITOR=true git rebase --continue`, and for any other file `git rebase --abort`, `git switch <base>`, report and stop), lint, then `git switch <base> && git merge --ff-only <root branch>` once more and switch back to the root branch. If the base changed any file other than backlog files, take the baseline again on the root branch; if it is red and the node may not start red (`/todo-continue` step 3), stop and report (the claim stays; `/todo-update <ROOT-ID> --status ready` releases it). If this fails too, stop on the base and tell the user (your unpublished branch may stay; a rerun deletes it at step 2).
+  6. Only now create the remaining ancestor branches top-down, each from its parent's branch, then the node's branch (for a leaf root, the root branch is the node's branch).
+- **Bare claim branch:** `git log <base>..<branch>` shows exactly one `claim <ROOT-ID>` commit, `git diff --name-only <base> <branch>` lists only `TODO.md`, and that diff changes only the root's `State:` line. Only such a branch may be force-deleted.
+- **Branch chain.** A root branches from the base, a child from its parent's branch. Ancestors get `State: branch <name> from <parent branch>; next: build children` (written in the leaf's start commit) until they complete.
+- **Read claims from the base.** A tree branch only knows its own claim, so take every root's claim from `git show <base>:TODO.md` too (core "Which node is next"). If a claimed branch no longer exists in this clone, the claim is stale: `/todo-update <ROOT-ID> --status ready` releases it.
+- **Sharing is git's job.** The claim is a local commit. The skills never fetch, pull or push; how a claim reaches other clones is your usual flow.
+- **Start commit on the node's branch.** Switch to the branch, set `[/]`, write `State:`, commit `chore(backlog): start <ID>` (with pending backlog edits). If `todo/<ID>-<slug>` already exists and is this node's (it holds the node's earlier work), switch to it instead of creating it.
+- **`--worktree`.** The main checkout is never switched; its unrelated changes are ignored by the clean-tree check, but pending backlog edits there refuse `--worktree` (stash other changes, run once without it so the claim commits the backlog edits, then restore). For an unclaimed tree: `git branch <root branch> <base>`, `mkdir -p ../<repo>.todo && git worktree add ../<repo>.todo/<ROOT-ID> <root branch>` (`<repo>`: the main checkout's folder name), take the baseline there (red: `git worktree remove` it, `git branch -d` the branch, stop), make the claim commit there, and fast-forward the base from the main checkout when it is on the base (`git merge --ff-only` works beside unrelated changes; otherwise stop and print the command). Create other missing branches with `git branch <branch> <from>`, add the node's worktree (`../<repo>.todo/<ID>`; a leaf root uses the root's) and make the start commit there. A child merge runs inside the node's worktree (if the parent's branch is checked out elsewhere, merge there when that checkout is clean, else stop and print the commands); then `cd` to the main checkout and `git worktree remove` the node's worktree (lane worktrees stay). The tree's next node is started from the root's worktree or branch.
+- **Clean tree.** Untracked files, backlog files (core) and generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`) do not count. Any other change: stop and offer commit, stash or `--worktree`.
+- **Staging.** Explicit paths only: `git add <path>�?�`, then `git commit -- <path>�?�` (so nothing staged earlier rides along): the node's files and the backlog files a skill changed. Never `git add -A`, `.` or `-p`. Pending edits that earlier todo-* commands made to backlog files belong in the next claim or start commit (core "Backlog files"); ask only about edits no todo-* skill made.
+- **Commits.** Subject `<type>(<scope>): <title>`: the scope is the package name in a monorepo, otherwise the module or top-level directory of the main code change, never `tests` (`calc.py` with its test: `calc`); title lowercase, no final period. Node commits have the body `Refs: <ID>`, `Red: <first failing assertion>` (leaves that started red), `Reviewed: <subagent|self>, <n> findings fixed` and any `Checked:` lines (`/todo-continue` step 10); backlog commits (`chore(backlog): �?�`) have no body except `Refs:` and `Includes:` on a drain and the plan on `chore(backlog): plan <ID>`.
+- **Concluding a merge** after resolving conflicts: `git commit --no-edit`.
+- **Merging.** A verified node is committed on its branch, then merged `--no-ff` into its parent's branch with the message `Merge <ID> into <PARENT-ID>` and its branch deleted with `git branch -d` (with a worktree, as `/todo-continue` step 10 item 3 says). A root: `Merge <ROOT-ID> into <base>`.
+- **Refresh before a root lands.** After the root's integration step (a leaf root: after its own verify) and before the drain, `git merge <base>` into the root branch with the message `Merge <base> into <ROOT-ID>` (already up to date: no commit, nothing to rerun). If it brought changes, rerun `Done when` and the full regression; block the root if red.
+- **Root.** Drain it, then merge into the base only with `--merge`, from the main checkout and only when it is clean, backlog files included (otherwise print the commands and say what to commit or stash first); if the base moved since the refresh (`git merge-base --is-ancestor <base> <root branch>` fails), refresh and verify again first, and if that is red, report it, print the merge commands and do not merge. Without `--merge`, print `git switch <base> && git merge --no-ff -m "Merge <ROOT-ID> into <base>" <root branch> && git branch -d <root branch>` (plus `git worktree remove <path>` first when there is one) and the push-and-pull-request alternative, and run none of them.
+- **Where backlog edits go.** `/todo-add`, `/todo-init` and `/todo-plan` leave their edits uncommitted (core "Backlog files"); `/todo-update` commits only its own claim, release, ready, block, drop and revert changes, and only on a `todo/` branch except the claim release. New roots (a `--from` follow-up without `--parent` is one) are added only on the base; children of the tree with `--parent` can be added on the tree's branch.
+- **Revert** a bad merge: `/todo-update <ID> --status revert` (it prints the user's `git revert` steps).
+
+## Git conflicts
+
+- Never take one side wholesale (`--ours`/`--theirs`) on TODO.md or CHANGELOG.md.
+- **CHANGELOG.md**: keep both sides' entries, drop duplicates of the same ID.
+- **TODO.md**: keep the union of task blocks. If two roots share an ID, keep the one already in the base, renumber the newer one and its subtree, and rewrite every `Depends:` and `From:` that pointed into it; if the renumbered root is claimed, stop and ask instead. If an ID is now in both files, remove it from TODO.md.
+- **Source files**: inside the node's scope, resolve minimally and rerun `Done when`; otherwise stop and ask.
+- One agent per working tree. Use `--worktree` or lanes (`/todo-continue --all-lanes`) for parallel work.
+# Verification, Done when, Definition of Done, command safety
+
+Loaded by the commands the core's "Reference files" table lists. Part of the `todo` core skill.
+
+## Verification protocol
+
+A node closes only through this protocol.
+
+1. **Baseline.** Before work starts, the regression command must be green. Note the passing count in `State:` as `baseline <n> passing`. A red baseline stops the node before any branch or file change; fix it first with a `FIX` node, the one kind of node allowed to start on it: it records `baseline red: <failing test ids>`, and its gate is a fully green regression with no test deleted, skipped or weakened. A project with no test command, or one that runs zero tests, records `baseline none`; its first node creates the test harness, and its regression gate is only that its own `Done when` runs at least one test and passes.
+2. **Red.** Write the tests first. `FIX` and `FEAT` leaves must fail for the expected reason: an assertion about the new behavior, or a missing-symbol error for the new thing under test. `TASK` refactors get characterization tests that pass before and after.
+3. **Green.** Implement only what the task line says.
+4. **Refactor** with the tests green.
+5. **Done when**, in full, exactly as written.
+6. **Regression.** Run the node's `regression:` command, or the project's full suite: the README's `Tests:` line if there is one, otherwise the command `/todo-init` would detect (marker files, CONTRIBUTING, Makefile, CI config); ask once if there is none; if the user has none either, record `baseline none`. Check that it really runs tests before using it as the baseline. No fewer passing tests than the baseline, none deleted or skipped. If the test command itself cannot run (not found, or a broken setup), stop as for a red baseline (step 1). A suite of several packages counts the passing tests of all of them.
+7. **No cheating.** No deleted, skipped or weakened tests. A run that executed zero tests does not count. A failure masked by `|| true`, `; exit 0` or an unchecked pipe does not count, and a test file or path the command names must exist. `tools/todo-verify.sh <exit status> '<command>' < output` in the todo-skills repository (optional, read-only, runs nothing, not shipped in the plugin) rejects these cases and non-zero exits (add `--strict` before the exit status to also reject output with no recognizable passing count, unchecked pipes such as `cmd | tail`, `set +e` and `|| echo`; default mode keeps accepting runners that print no count); the lint rejects masked failures in a `Done when` (I3).
+8. **Parents** (integration step): when every child is `[x]`, run the parent's `Done when` and the regression. Add one test only if the children's tests do not already cover the combined behavior. No feature code. A root's integration step and drain happen in one invocation, with the full suite last.
+
+An attempt and the 3-attempt limit are defined in `/todo-continue` ("Test failures").
+
+## Writing a Done when
+
+- Criteria first, then at least one **runnable shell command** in backticks. Write identifiers and calls bare in the criteria; only the command goes in backticks.
+- It must run tests that exercise the behavior. `grep` or `test -f` alone is weak (lint W1); a backticked command that is only `ls`, `echo`, `true` or `exit 0` (after any `cd �?� &&`) is vacuous (I3).
+- Target a test id or file path, not a name filter, which can exit 0 with zero tests (lint W2): `python3 -m unittest tests.test_calc.CalcTest.test_x`, `pytest tests/test_x.py::test_y`.
+- A command may start with `cd <dir> &&` (a package in a monorepo). Add `; regression: \`cmd\`` only when the full suite is the wrong guard, for example a package's own suite. The root always runs the full suite.
+
+## A Done when that cannot run
+
+If the `Done when` command fails before any test executes, for a reason outside the task's behavior (a dotted test path that resolves to a foreign package, a missing runtime or tool, an absent service), the node is not red and the failure is not an attempt. Never edit `Done when`, and never close the node with a different or narrower command. Then:
+
+1. If one empty or declarative file inside the node's own test or source folders makes the command resolve (for example an empty `__init__.py`), add it, name it in the node commit body, and report it under "Adjacent problems".
+2. Otherwise stop and report "Done when cannot run" with the command and its first error. Fixing the host (an installed package, a path entry, a service) is the user's call.
+
+## Definition of Done (optional)
+
+If README.md, CONTRIBUTING.md or `docs/` has a heading named exactly `Definition of Done` followed by a list, that list applies to every node on top of `Done when`. Command items follow the safety rules below; statements are checked by inspection and reported one by one. A missing item blocks the node as `/todo-continue` "Test failures" says, naming the item; it is not an attempt.
+
+## Command safety
+
+`Done when` text can be influenced by docs and pull requests. Run a command only if it is a test, lint, typecheck or build command. The same rules apply to the regression command (the README `Tests:` line, CI config or detected command) before running it in each invocation. When a command runs a script or target (`bash <file>`, `sh <file>`, `./<file>`, `make <target>`, `npm`/`yarn`/`pnpm`/`bun test` or `run <script>` (read `package.json` scripts) and the like), read what it executes first and apply these rules to that too; block if it cannot be read. `npx`/`bunx`/`uvx`/`pnpm dlx` run only packages already in the lockfile (prefer `npx --no-install`). Refuse and block on anything that deletes files, uses `sudo`, runs downloaded code without review, pushes or publishes, deploys, touches paths outside the repo and its todo worktrees, or reads credentials.
+
+When a `Done when` names an exact test id, keep that name; put the task ID in the test's docstring or a comment instead.
+
+## Deliverables without a natural unit test
+
+Choose a focused, safe executable check of the deliverable. For a shell script, invoke it in a controlled fixture and assert its exit status and output; before implementation, a missing script or the expected assertion failure is red. For CI YAML, parse the workflow and assert the required jobs and steps; the missing workflow or a specific missing step is red. For documentation, run a link or anchor checker against the changed pages; a missing target or the expected broken link is red. For configuration, run a local validation or smoke command with an assertion on the intended behavior; missing configuration or that assertion failing is red. An unrelated syntax, setup, or network error is not the expected red. Read scripts before running them and apply the command safety rules above.
+
+`Tests:` and `Done when` may use environment assignments, such as `SERVICE_URL=127.0.0.1:17233 pytest -q`. Prefer a reviewed, self-contained test entry script that starts and cleans up required services when practical. If infrastructure is unavailable, record the exact command and environment failure, restore the dependency or use an already approved equivalent environment, and rerun the baseline. Do not call an infrastructure failure a passing baseline or skip tests. If restoring the infrastructure requires implementation, track it as a FIX node under the red-baseline exception and verify the full suite once available.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Set-Location -LiteralPath 'C:\\Users\\<user>\\todo-trial-base\\codex-runs\\ts-lifecycle\\repo'
+git rev-parse --is-inside-work-tree
+git status --short --branch
+git branch --list
+git worktree list
+Get-Content -LiteralPath 'TODO.md'
+Get-Content -LiteralPath 'CHANGELOG.md'
+Get-Content -LiteralPath 'README.md'
+if (Test-Path '.todo/todo-lint.sh') { Get-Content -LiteralPath '.todo/todo-lint.sh' }
+if (Test-Path '.todo/check.sh') { Get-Content -LiteralPath '.todo/check.sh' }" in C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+ succeeded in 246ms:
+true
+## main
+* main
+C:/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/repo  ad1e180 [main]
+# Active Backlog
+
+## ðŸŒ³ Task Tree
+
+- [ ] **FEAT-001** Â· P1 Â· mid Â· Add subtract and multiply to src/calc.ts
+  - Done when: both functions work; `npm test`
+  - [ ] **FEAT-001.1** Â· low Â· Add subtract with a test
+    - Done when: subtract works; `node --experimental-strip-types --test tests/subtract.test.ts`
+  - [ ] **FEAT-001.2** Â· low Â· Add multiply with a test
+    - Done when: multiply works; `node --experimental-strip-types --test tests/multiply.test.ts`
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+# minits
+A tiny TypeScript calculator. Tests: `npm test`.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Set-Location -LiteralPath 'C:\\Users\\<user>\\todo-trial-base\\codex-runs\\ts-lifecycle\\repo'
+rg --files -g '"'!node_modules'"' -g '"'!.git'"' -g '"'!.claude'"'
+Get-Content -LiteralPath 'package.json'
+Get-Content -LiteralPath 'src/calc.ts'
+Get-Content -LiteralPath 'tests/add.test.ts'
+git show main:TODO.md
+git show main:CHANGELOG.md" in C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+ succeeded in 252ms:
+TODO.md
+README.md
+CHANGELOG.md
+package.json
+tests\add.test.ts
+src\calc.ts
+{
+  "name": "minits",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "test": "node --experimental-strip-types --test \"tests/*.test.ts\"" }
+}
+export function add(a: number, b: number): number {
+  return a + b;
+}
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { add } from "../src/calc.ts";
+
+test("add", () => {
+  assert.equal(add(1, 2), 3);
+});
+# Active Backlog
+
+## 🌳 Task Tree
+
+- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to src/calc.ts
+  - Done when: both functions work; `npm test`
+  - [ ] **FEAT-001.1** · low · Add subtract with a test
+    - Done when: subtract works; `node --experimental-strip-types --test tests/subtract.test.ts`
+  - [ ] **FEAT-001.2** · low · Add multiply with a test
+    - Done when: multiply works; `node --experimental-strip-types --test tests/multiply.test.ts`
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+codex
+The backlog is clean and the first workable node is FEAT-001.1. I’ll establish the test baseline, then claim the tree and implement that node.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Set-Location -LiteralPath 'C:\\Users\\<user>\\todo-trial-base\\codex-runs\\ts-lifecycle\\repo'
+npm test" in C:\Users\<user>\todo-trial-base\codex-runs\ts-lifecycle\repo
+ exited 1 in 695ms:
+npm notice run minits@1.0.0 test
+npm notice run node --experimental-strip-types --test "tests/*.test.ts"
+✖ tests\add.test.ts (2.5557ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.6373
+
+✖ failing tests:
+
+test at tests\add.test.ts:1:1
+✖ tests\add.test.ts (2.5557ms)
+  Error: spawn EPERM
+      at ChildProcess.spawn (node:internal/child_process:441:11)
+      at spawn (node:child_process:796:9)
+      at TestContext.<anonymous> (node:internal/test_runner/runner:454:19)
+      at FileTest.runInAsyncScope (node:async_hooks:227:14)
+      at FileTest.run (node:internal/test_runner/test:1306:25)
+      at FileTest.start (node:internal/test_runner/test:1177:17)
+      at runTestFile (node:internal/test_runner/runner:536:32)
+      at node:internal/test_runner/runner:925:25
+      at node:internal/per_context/primordials:561:37
+      at new Promise (<anonymous>) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'spawn'
+  }
+
+codex
+**Stopped at step 3: baseline red.** FEAT-001.1, “Add subtract with a test,” cannot start because the regression command `npm test` failed before executing the test: Node reported `Error: spawn EPERM`. The suite reported 0 passing and 1 failing test.
+
+No files changed and no commits were made. The checkout remains on `main`. The next workable node is FEAT-001.1, once the test environment can run the baseline. The skill suggests:
+
+```text
+/todo-add "fix the failing baseline: tests/add.test.ts" --type fix --priority P0
+```
+
+The failure appears to be a process-spawning restriction, so the environment needs to be restored before another invocation can make progress. Clear context before resuming if useful.
+
+Ambiguities, contradictions, or unclear skill instructions encountered: **none**.
+tokens used
+27,258
+**Stopped at step 3: baseline red.** FEAT-001.1, “Add subtract with a test,” cannot start because the regression command `npm test` failed before executing the test: Node reported `Error: spawn EPERM`. The suite reported 0 passing and 1 failing test.
+
+No files changed and no commits were made. The checkout remains on `main`. The next workable node is FEAT-001.1, once the test environment can run the baseline. The skill suggests:
+
+```text
+/todo-add "fix the failing baseline: tests/add.test.ts" --type fix --priority P0
+```
+
+The failure appears to be a process-spawning restriction, so the environment needs to be restored before another invocation can make progress. Clear context before resuming if useful.
+
+Ambiguities, contradictions, or unclear skill instructions encountered: **none**.

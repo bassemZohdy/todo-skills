@@ -33,6 +33,7 @@ tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)   # macOS has n
 code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"
 cp "$ev/agent.log" "$ev/report.txt"
+bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches
 TRIAL_REPORT="$ev/report.txt" bash "$here/assert.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1
 arc=$?
 printf '%s\n' "$arc" > "$ev/assert-exit.txt"

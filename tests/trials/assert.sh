@@ -6,22 +6,25 @@ dir="${1:?usage: assert.sh <dir> <scenario>}"; scenario="${2:?scenario}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 lint="$root/tools/todo-lint.sh"
 cd "$dir" || exit 1
+# the git directory: .git is a file pointing elsewhere when run-codex.sh moved it out of the sandboxed workspace
+gd="$(git rev-parse --git-common-dir 2>/dev/null || true)"
+case "$gd" in ""|/*|?:*) ;; *) gd="$dir/$gd" ;; esac
 pass=0; fail=0
 chk() { if eval "$2" >/dev/null 2>&1; then pass=$((pass+1)); printf 'PASS  %s\n' "$1"; else fail=$((fail+1)); printf 'FAIL  %s\n' "$1"; fi; }
 branch_exists() { git rev-parse --verify -q "refs/heads/$1" >/dev/null; }
 at() { git show "$1:$2"; }   # file at a ref
 
-start="$(cat .git/trial-start 2>/dev/null || true)"
-unchanged() { [ "$(git rev-parse HEAD)" = "$start" ] && [ "$(git for-each-ref --format='%(refname) %(objectname)')" = "$(cat .git/trial-refs)" ]; }
+start="$(cat "$gd/trial-start" 2>/dev/null || true)"
+unchanged() { [ "$(git rev-parse HEAD)" = "$start" ] && [ "$(git for-each-ref --format='%(refname) %(objectname)')" = "$(cat "$gd/trial-refs")" ]; }
 clean() { [ -z "$(git status --porcelain)" ]; }
-old="$start $(cut -d' ' -f2 .git/trial-refs 2>/dev/null)"   # everything reachable at the start is not the agent's
+old="$start $(cut -d' ' -f2 "$gd/trial-refs" 2>/dev/null)"   # everything reachable at the start is not the agent's
 new_commits() { git log --format=%H --all --not $old; }
 lane_ev() { bash "$root/tests/trials/lane-evidence.sh" "$dir"; }                       # hook log written by setup.sh, see lane-evidence.sh
 lane_worktrees() { [ "$(lane_ev | sed -n 's/^worktrees: //p')" -ge 2 ]; }               # at least two lane worktrees really saw work
 lane_info() { printf 'INFO  lane execution: %s\n' "$(lane_ev | sed -n 's/^execution: //p')"; }
 entry() { grep -Eq "^- \*\*$1\*\* \((feat|fix|[a-z]+)\): [^ ].*\. Validated: \`[^\`]+\`\.( .*)?$"; }  # core CHANGELOG entry format
 
-if [ -d .git ]; then
+if [ -e .git ]; then
   chk "no .pyc tracked" '[ "$(git ls-files | grep -c "\.pyc$")" = 0 ]'
   chk "no tag created" '[ "$(git tag | grep -vc "^v0\.1\.0$")" = 0 ]'
   chk "new commit subjects are conventional or merges" '[ -z "$(git log --format=%s --all --not $old | grep -Ev "^((feat|fix|chore|docs|refactor|test|perf|build|ci|style)(\([a-z0-9._/-]+\))?!?: [^A-Z]|Merge )")" ]'
@@ -144,7 +147,7 @@ ci-github|ci-local)
     chk "workflow runs on pull_request and push to main" 'grep -q "pull_request" .github/workflows/todo-check.yml && grep -Eq "branches: *\[ *main *\]|- main" .github/workflows/todo-check.yml'
   else
     chk "no workflow written without a remote" '[ ! -e .github/workflows/todo-check.yml ]'
-    chk "pre-push hook runs check.sh" 'grep -q "check.sh" .git/hooks/pre-push && [ -x .git/hooks/pre-push ]'
+    chk "pre-push hook runs check.sh" 'grep -q "check.sh" "$gd/hooks/pre-push" && [ -x "$gd/hooks/pre-push" ]'
   fi
   ;;
 happy-path)
@@ -194,10 +197,10 @@ report)
   chk "only docs/status.html changed" 'unchanged && [ "$(git status --porcelain)" = "?? docs/status.html" ]'
   ;;
 blocked-sibling)
-  chk "the blocked node's branch is untouched" '[ "$(git rev-parse todo/FEAT-001.1-subtract-test)" = "$(grep FEAT-001.1 .git/trial-refs | cut -d" " -f2)" ]'
+  chk "the blocked node's branch is untouched" '[ "$(git rev-parse todo/FEAT-001.1-subtract-test)" = "$(grep FEAT-001.1 "$gd/trial-refs" | cut -d" " -f2)" ]'
   chk "FEAT-001.1 was not restarted anywhere" '! git grep -q "\[/\] \*\*FEAT-001.1" $(git for-each-ref --format="%(refname)" refs/heads)'
   chk "FEAT-001.2 started on its own branch" 'b=$(git branch --list "todo/FEAT-001.2-*" | tr -d "* "); [ -n "$b" ] && at $b TODO.md | grep -q "\[/\] \*\*FEAT-001.2"'
-  chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " .git/trial-refs | cut -d" " -f2)" ]'
+  chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " "$gd/trial-refs" | cut -d" " -f2)" ]'
   ;;
 ts-lifecycle)
   chk "FEAT-001 drained into the changelog on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'

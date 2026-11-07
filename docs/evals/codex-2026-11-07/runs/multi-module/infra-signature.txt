@@ -1,0 +1,1 @@
+**Stopped at lane setup, step 2:** Git could not create the first root branch because the repository’s `.git` directory is read-only in this session. The error was:

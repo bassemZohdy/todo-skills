@@ -1,0 +1,22 @@
+Stopped at **step 4, branch creation** for **FEAT-001 — Add a subtract function to calc.py with a test**. Git could not create the branch:
+
+```text
+fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-function-calc': unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-function-calc
+```
+
+The environment grants read-only access to `.git`, which prevents the required branch and commits. No files changed, no commit was made, and the checked-out branch remains `main`.
+
+The regression baseline passed: `python3 -m unittest discover -s tests` ran **1 test**. FEAT-001 remains the next workable node. No adjacent problems were identified. Clear context before the next attempt if useful.
+
+Once the root has been completed and drained, the skill’s merge command would be:
+
+```sh
+git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-function-calc && git branch -d todo/FEAT-001-add-subtract-function-calc
+```
+
+A push and pull request are an alternative for sharing the completed branch; the user prohibited pushing in this run.
+
+**Instruction conflicts and ambiguities:**
+
+- The core says, **“When a rule here conflicts with an explicit user instruction, state the conflict and ask.”** The continuation workflow proceeds to build after the start commit, while you explicitly required stopping there and not building. I treated your instruction as the governing scope and did not ask to continue.
+- The core says, **“Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names”**, while also saying, **“Prefer native file tools (Read/Edit/Write) for file edits.”** No native file-reading tool was available in this session, so I used PowerShell to read the required skill and repository files.

@@ -44,6 +44,15 @@ Fresh `claude -p` processes (Claude Code 2.1.319, `claude-sonnet-5-5`, Windows 1
 | `lanes` | INFRA_ERROR on a host whose Python imports a foreign `tests` package; with `PYTHONNOUSERSITE=1` pass in 4 of 4 runs, both with subagents (genuinely overlapping) and with the Agent tool disabled |
 | `ci-local` | INFRA_ERROR: the headless agent may not write `.git/hooks` (12 of 13 checks pass; the skill printed the hook) |
 
+### Codex runs (2026-11-07)
+
+Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0, Windows 11). Details, evidence and the sandbox findings: [docs/evals/codex-2026-11-07/summary.md](evals/codex-2026-11-07/summary.md).
+
+| Scenario | Result |
+|---|---|
+| `baseline-red`, `interrupted-merge` | Pass (10/10, 16/16) |
+| `happy-path`, `race-claim-conflict`, `ts-lifecycle`, `java-lifecycle`, `multi-module`, `ci-local` | INFRA_ERROR: the sandbox blocked Git branch creation, Node child processes or `.git/hooks`; the cause is recorded per run and none is counted as a skill failure |
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above supersede them for Claude Code; Codex still has no recorded run.

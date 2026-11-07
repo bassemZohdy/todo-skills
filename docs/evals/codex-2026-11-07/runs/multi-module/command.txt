@@ -1,0 +1,1 @@
+bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trial-base/codex-runs/multi-module/repo /c/Users/<user>/todo-trial-base/codex-runs/multi-module/evidence/20261107T191808Z-1421/prompt.txt /c/Users/<user>/todo-trial-base/codex-runs/multi-module/evidence/20261107T191808Z-1421/report.txt   # see codex-exec.sh for the codex flags

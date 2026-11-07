@@ -18,4 +18,9 @@ jobs:
       - name: Trial harness self-test
         run: bash tests/trials/selftest.sh
       - name: Trial harness tests
-        run: for t in tests/trials/test-*.sh; do bash "$t" || exit 1; done
+        # test-codex-isolation.sh and test-codex-invocation.sh need a logged-in Codex; they are run by hand
+        run: |
+          for t in tests/trials/test-*.sh; do
+            case "$t" in *test-codex-isolation.sh|*test-codex-invocation.sh) continue ;; esac
+            bash "$t" || exit 1
+          done

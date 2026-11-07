@@ -1,0 +1,16 @@
+**Stopped at lane setup, step 2:** Git could not create the first root branch because the repository’s `.git` directory is read-only in this session. The error was:
+
+> `fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-core-module': unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-core-module`
+
+The session’s approval policy does not permit an escalation, so I could not create the claims, run the lane agents, or merge the roots.
+
+- **core:** FEAT-001, “Add subtract to the core module,” remains open and is the next workable root.
+- **text:** FEAT-002, “Add shout to the text module,” remains open and is the next workable root.
+- **Baseline:** `mvn -B test` passed with 2 tests total, one in each module. No task-specific tests ran.
+- **Files and Git:** No tracked files changed and no commits or branches were created. Maven created an untracked `.m2/` cache and generated `target/` output inside the repository. The checked-out branch remains `main` at `96e9458`. No adjacent problems were identified.
+
+Once Git metadata is writable, rerun `/todo-continue --all-lanes --merge`. Clearing context before that run is also an option.
+
+**Instruction ambiguity encountered:**
+
+- The lane instructions say to “create its root branch, make its tree claim commit and fast-forward the base … then switch back to the base before the next root” and also say “The main checkout stays on the base for the whole run.” Creating the claim as prescribed by git-flow requires temporarily switching away from the base. I interpreted the latter as requiring a return to the base after each claim; branch creation failed before a switch occurred.

@@ -1,0 +1,24 @@
+## HEAD
+6e6b0954e7dc51d82fbe3223a37c5de05772486a
+## current branch
+main
+## branches
+* main 6e6b095 init with a red baseline
+## worktrees
+C:/Users/<user>/todo-trial-base/codex-runs/baseline-red/repo  6e6b095 [main]
+## tags
+## refs
+refs/heads/main 6e6b0954e7dc51d82fbe3223a37c5de05772486a
+## log --all --graph
+* 6e6b095  (HEAD -> main) init with a red baseline
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

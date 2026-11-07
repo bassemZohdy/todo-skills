@@ -1,0 +1,1 @@
+bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/repo /c/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/evidence/20261107T191808Z-1415/prompt.txt /c/Users/<user>/todo-trial-base/codex-runs/ts-lifecycle/evidence/20261107T191808Z-1415/report.txt   # see codex-exec.sh for the codex flags

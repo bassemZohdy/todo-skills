@@ -1,0 +1,7 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'TODO.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'calc.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_calc.py', LF will be replaced by CRLF the next time Git touches it
+ready: /c/Users/<user>/todo-trial-base/codex-runs/happy-path/repo (happy-path) on branch main

@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **TASK-027** (docs): `reference/verification.md` says what to do when a Done when cannot run for an environmental reason: add one empty scaffolding file inside the node's own folders and report it, otherwise stop and report. Never edit Done when. Validated: `bash tests/run.sh`.
+- **TASK-025** (fix): The `ts-lifecycle` and `java-lifecycle` trial prompts ask the agent to run `/todo-continue` again until the root is merged (it executes one node per invocation); `test-prompt-assert.sh` rejects a prompt that stops earlier than its assertion allows. Validated: `bash tests/trials/test-prompt-assert.sh`.
+- **TASK-026** (fix): `tests/trials/setup.sh` reads and writes its files as UTF-8, so every scenario sets up on Windows without `PYTHONUTF8`. Validated: `bash tests/trials/selftest.sh`.
+- **TASK-020** (test): The `baseline-red` trial passes only with an agent report that names the red baseline, the failing test and a FIX (`TRIAL_REPORT`); an unchanged repository alone no longer passes. Validated: `bash tests/trials/test-baseline-red-report.sh`.
+- **TASK-021** (test): The `lanes` and `multi-module` trials log checkouts and commits per worktree by hook; `lane-evidence.sh` tells overlapping lanes from sequential ones and from no worktree use, and `assert.sh` requires two lane worktrees. Validated: `bash tests/trials/test-lane-evidence.sh`.
+- **TASK-022** (test): `score.sh` gives every scenario one verdict (PASS, FAIL, INFRA_ERROR or UNVERIFIED) and counts all of them; a scenario without a recorded agent run, or whose agent exited non-zero, cannot pass. Validated: `bash tests/trials/test-score-outcomes.sh`.
+- **TASK-023** (test): `run-claude.sh` writes a new checksummed evidence folder per invocation (prompt, command, log, exit code, report, assertions, outcome); earlier runs are never overwritten. Validated: `bash tests/trials/test-evidence-retention.sh`.
 - **TASK-015** (docs): Record Claude Code and Codex lifecycle evidence in docs/agent-compatibility.md; Codex stays install-verified only. Validated: `test -f docs/agent-compatibility.md`, `bash tests/run.sh`.
 - **TASK-013** (docs): Run lifecycle trials on TypeScript, Java and multi-module scratch projects and record them in docs/trials.md. Validated: `test -f docs/trials.md`, `bash tests/run.sh`.
 

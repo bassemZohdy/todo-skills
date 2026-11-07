@@ -8,7 +8,14 @@
 #   - a test target named in the command (a tests/ test/ spec/ path or a script/test file) that does not exist;
 #   - output that reports zero tests and no passing test ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN", ...).
 # Accepts (exit 0, "ACCEPT") anything else, including runners whose output has no recognizable count.
+# Opt-in --strict (first argument) additionally rejects what default mode tolerates:
+#   - output with no recognizable passing-test count at all (ambiguous);
+#   - an unchecked pipe (cmd | tail/grep/head/cat/tee/sed/awk/cut/sort/uniq/wc) unless pipefail or PIPESTATUS is used;
+#   - set +e, || echo ..., || printf ... and || exit 0 style masks.
+# Default mode never changes: runners that print no count still pass without --strict.
 # Needs bash, grep and sed.
+strict=0
+if [ "${1:-}" = "--strict" ]; then strict=1; shift; fi
 rc="${1:-}"; cmd="${2:-}"
 out="$(cat)"
 reject() { echo "REJECT $1"; exit 1; }
@@ -33,4 +40,9 @@ done
 zero='(^|[^0-9.])0 (tests?|specs?|examples?|passed|passing)([^a-z]|$)|collected 0 items|Ran 0 tests?|Tests: +0 total|no tests? (found|ran|to run)|no test files|NO TESTS RAN|0 tests? (run|executed)'
 pos='(^|[^0-9.])[1-9][0-9]* (tests?|specs?|examples?|passed|passing)([^a-z]|$)|Ran [1-9][0-9]* tests?|^ok[[:space:]]|^PASS[[:space:]]'
 if printf '%s\n' "$out" | grep -qiE "$zero" && ! printf '%s\n' "$out" | grep -qE "$pos"; then reject "the run executed zero tests"; fi
+if [ "$strict" -eq 1 ]; then
+  if printf '%s' "$cmd" | grep -qE '(set \+e|\|\| *(echo|printf)\b)'; then reject "strict: command masks failures: $cmd"; fi
+  if printf '%s' "$cmd" | grep -qE '[^|]\|[^|&][[:space:]]*(tail|grep|head|cat|tee|sed|awk|cut|sort|uniq|wc|less|more)\b' && ! printf '%s' "$cmd" | grep -qE 'pipefail|PIPESTATUS'; then reject "strict: unchecked pipe hides the exit status: $cmd"; fi
+  printf '%s\n' "$out" | grep -qE "$pos" || reject "strict: output reports no passing test count (ambiguous)"
+fi
 echo ACCEPT

@@ -1,0 +1,8 @@
+ CHANGELOG.md        | 5 +++++
+ TODO.md             | 4 ----
+ calc.py             | 3 +++
+ extra.py            | 2 ++
+ tests/__init__.py   | 0
+ tests/test_calc.py  | 3 +++
+ tests/test_extra.py | 8 ++++++++
+ 7 files changed, 21 insertions(+), 4 deletions(-)

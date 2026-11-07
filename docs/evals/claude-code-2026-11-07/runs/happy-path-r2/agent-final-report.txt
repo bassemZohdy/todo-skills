@@ -1,0 +1,52 @@
+## (1) Report
+
+**FEAT-001 · Add subtract to calc.py** is done, drained and merged into `main`.
+
+- **Done when:** `python3 -m unittest tests.test_calc.CalcTest.test_subtract` passes (1 test).
+- **Regression:** `python3 -m unittest discover -s tests` shows 2 passing, against a baseline of 1. No tests were deleted or skipped.
+- **Red:** `AttributeError: module 'calc' has no attribute 'subtract'`.
+- **Files changed:**
+  - `calc.py` (the `subtract` function)
+  - `tests/test_calc.py` (`test_subtract`, with a FEAT-001 docstring)
+  - `tests/__init__.py` (new, empty)
+  - `TODO.md` and `CHANGELOG.md` (drain)
+- **Branch and commits:**
+  - Branch `todo/FEAT-001-add-subtract-calc-py` was merged with `--merge` and then deleted.
+  - Commits on `main`: claim `6c043f2`, start `74a56fa`, feat `87e853a`, drain `ac6ceae`, merge `34ba437`.
+- **Checked-out branch:** `main`, with a clean tree. The merge commands needed no printing because `--merge` was used. Nothing was pushed.
+- **Review:** `Reviewed: self, 0 findings fixed`.
+- **Skipped checks:**
+  - No `.todo/check.sh` exists, so the last gate was skipped.
+  - The refresh from the base was a no-op ("Already up to date").
+  - The invariant check was done by reading, since there is no `todo-lint.sh`. The tree was empty after the drain.
+- **Adjacent problem:** the project had no `tests/__init__.py`, so the `Done when` module path could not import. I added the file because it is a test-support file within this node. I did not run `/todo-add` for it.
+- **Next workable node:** none. The tree is empty.
+- **Suggestion:** clear context before the next task.
+
+## (2) Ambiguities and unclear instructions
+
+1. **Red when the `Done when` command is unrunnable.**
+   - Text: Step 7 "Red … write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error."
+   - Problem: my first red run failed with `ModuleNotFoundError: No module named 'tests.test_calc'`, not the expected reason. No step covers a `Done when` command that cannot import even when the code is right.
+   - Resolution: "You may change code and the tests this node creates" (Test failures) allowed adding `tests/__init__.py`. I then re-confirmed the red by temporarily restoring the old `calc.py`, which gave the `AttributeError`.
+   - Open question: does a fix like this count as an "attempt", and is `tests/__init__.py` within the task line?
+2. **Order of step 10 item 2 versus item 4 for a leaf root.**
+   - Text: item 1 says "(A root is never `[x]`; item 4 drains it.)", and item 2 says "Commit the node's files and any changed `TODO.md` by path (skip if nothing changed)".
+   - Problem: for a leaf root, the node commit and the drain commit are separate, and the text never says whether to commit `State:` changes first.
+   - Resolution: I made a feat commit with code only, then a drain commit.
+3. **Step 5 versus step 10 for `State:`.** The `State:` line stayed at `next: read docs` throughout, and I never updated it to `build` or `drain`. Step 9 says "update `State:` after every cycle", but a green first run is not clearly a "cycle". I left it alone, since it is deleted at the drain anyway.
+4. **Unclear "Ready check" wording.**
+   - Text: "Lint clean … tree clean by the git-flow definition".
+   - Problem: I ran `python3 -m unittest` for the baseline, which created an ignored `__pycache__`. That is fine under the definition, but the order of the checks was not explicit.
+   - Resolution: no real conflict.
+5. **Step 4 versus Step 5 on baseline timing.** Step 3 takes the baseline "on the start branch", which is `main`. The claim commit later lands on `main` by fast-forward. This is consistent, but I had to infer that the baseline need not be retaken on the root branch.
+6. **Drain commit staging.** The drain changes both `TODO.md` and `CHANGELOG.md`. The spec says "by path", and I used `git commit -- <paths>` for both. The Windows CRLF warnings were harmless.
+7. **Slug rule.** "`calc.py` becomes the two words `calc` and `py`" gave `add-subtract-calc-py`, with "to" dropped. This is clear, but it is the fourth word that makes the cut. I mention it only because the cap is easy to misapply.
+8. **`Includes:` for a leaf root.**
+   - Text: "(and `Includes:` with descendants)", with the reading that a leaf root has none.
+   - Resolution: I omitted it from both the CHANGELOG entry and the commit body.
+9. **Missing optional parts.** There was no `Ref:`, so the CHANGELOG entry had no `Ref:`. There was no `From:`, so none was added.
+10. **Possible contradiction about the reviewer.**
+    - Text: "With a subagent tool, a fresh-context reviewer does this".
+    - Problem: I have an Agent tool, but the trial scope and the "do not spawn" system guidance argue against using it.
+    - Resolution: I reviewed it myself and recorded `Reviewed: self`. The skill does not say which instruction wins.

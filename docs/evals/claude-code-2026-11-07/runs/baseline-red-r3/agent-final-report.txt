@@ -1,0 +1,27 @@
+**Report (`/todo-continue`, stopped at step 3, "Ready check → Baseline")**
+
+- **Git mode:** a git repo on `main`, which is the base. The tree is clean.
+- **Invariants:** I1–I10 pass by reading, since there is no `.todo/todo-lint.sh`. The file holds one root, FEAT-001.
+- **Selected node:** FEAT-001, "Add subtract to calc.py" (P1, low). It is `[ ]` and workable, with no Ref, Depends or claim.
+- **Baseline: red.**
+  - The regression command is `python3 -m unittest discover -s tests`, from the README `Tests:` line.
+  - The result is 1 test run and 1 failure.
+  - The failing test is `tests.test_calc.CalcTest.test_add`, with `AssertionError: -1 != 3`. `calc.add` returns `a - b`.
+  - FEAT-001 is a FEAT node, not a FIX node, so it may not start on a red baseline.
+- **Changes:** none. There is no branch, claim or `[/]` marker, and TODO.md is untouched.
+- **Fix to run on the base:** `/todo-add "fix the failing baseline: tests.test_calc.CalcTest.test_add" --type fix --priority P0`
+- **Next workable node:** FEAT-001, once the baseline is green. The new P0 FIX node would run first.
+- **Suggestion:** clear context before the next run.
+
+**Ambiguities and contradictions in the skill text**
+
+1. **Which command counts as "the regression command".**
+   - Quoted text: "Run the regression command (`reference/verification.md`, protocol step 6)", and the README `Tests:` line "if there is one, otherwise the command `/todo-init` would detect".
+   - Resolution: I used the README `Tests:` command. I first tried `python3 -m unittest discover` with no `-s`, which reported "NO TESTS RAN". The skill doesn't say whether the README command or the detected one wins when they differ. I took the README line, as step 6 says.
+2. **"Red: a `FIX` node whose `Done when` runs at least one failing test may start with `baseline red`. Otherwise … stop."** This was clear for a FEAT node. It doesn't say whether a red baseline unrelated to the node's own files still blocks a FEAT, but "Otherwise" covers it, so I stopped.
+3. **Order of the checks.**
+   - Quoted text: "Ready check (new nodes only), in this order: Lint clean; … tree clean…", with Command safety applying "before running it in each invocation".
+   - Resolution: I read the test file and `calc.py` before running the command. That is the "read what it executes" rule. The skill doesn't say whether discovery-based `unittest` counts as a script to read.
+4. **"Stop after one invocation" against the skill's early-stop report.** Step 11 says the report applies "also on an early stop", so I wrote the short report. The skill doesn't say whether to repeat the full report fields (commit, branch) when nothing happened. I listed them as none.
+5. **Lint without `.todo/todo-lint.sh`.** "Otherwise check I1-I10 by reading." This is subjective for I3's "non-vacuous" test. I judged the `Done when` non-vacuous.
+6. **Minor:** step 3 says "suggest `/todo-add … --type fix --priority P0`" with "the failing test ids". The format of an id (dotted `tests.test_calc.CalcTest.test_add` against unittest's `test_add (test_calc.CalcTest.test_add)`) isn't specified. I used the dotted form that matches the `Done when` style.

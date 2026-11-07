@@ -1,0 +1,36 @@
+I ran `/todo-continue --merge` once. It completed FEAT-001.2 and merged it into FEAT-001, then stopped. FEAT-001 itself is not drained or merged into `main` yet.
+
+## Report
+
+**FEAT-001.2 · Add multiply with a test class MultiplyTest**
+- **Baseline:** `mvn -B test` passed with 2 tests on `todo/FEAT-001-add-subtract-multiply-calc`.
+- **Red:** `MultiplyTest.java` failed to compile with `cannot find symbol` for `multiply`, the expected reason.
+- **Done when:** `mvn -B test -Dtest=MultiplyTest -Dsurefire.failIfNoSpecifiedTests=true` ran 1 test and passed.
+- **Regression:** `mvn -B test` passed with 3 tests, against a baseline of 2, none deleted or skipped.
+- **Review:** self-review, 0 findings. I did not spawn a subagent.
+- **Documentation drift:** skipped, because `multiply` is a new method, not a changed interface. No Definition of Done or RTM exists.
+- **Files changed:** `Calc.java`, new `MultiplyTest.java` and `TODO.md` (marked `[x]`, State removed).
+- **Commits:** `0211bc0 chore(backlog): start FEAT-001.2`, then `feat(mini): add multiply to calc`, then `Merge FEAT-001.2 into FEAT-001`.
+- **Branch:** the child branch is deleted and `todo/FEAT-001-add-subtract-multiply-calc` is checked out.
+- **Children done/total:** 2/2.
+- **Root FEAT-001:** not drained or merged. `--merge` only acts when a root finishes, and that happens in the next invocation.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001, as an integration step. Running `/todo-continue --merge` again will run its Done when and the full suite, then drain it to `CHANGELOG.md` and merge it into `main`.
+- **Suggestion:** clear context before the next run.
+- **Warnings:** Git printed a "LF will be replaced by CRLF" warning on `MultiplyTest.java`. Nothing else.
+
+## Ambiguities and unclear instructions
+
+1. **`--merge` on a non-root run.** Step 10.3 says "Report and stop", while the `--merge` flag says "when a **root** finishes, also merge it into the base".
+   - I treated `--merge` as a no-op for a child node.
+   - Stopping after the child merge is consistent with "Completes at most one node per invocation". Still, a user who passes `--merge` may expect the whole tree to land, and the report has no line saying `--merge` was not used.
+2. **"Nothing but backlog files changes before this."** (step 5) and the state chain are not tied together. The leaf's branch is created at step 4, but the ancestors' `State:` lines are said to be "written in the leaf's start commit" (git-flow). Here the root already had `next: build children`. It does not say whether the root's State must change when its second child starts. I left it unchanged.
+3. **Slug rule.** "turn punctuation into spaces… drop the words a, an, the, to, of, and, for, with, keep the first 4 words".
+   - Applied to "Add multiply with a test class MultiplyTest", this gives `add multiply test class`, which is what I used.
+   - It does not say whether a word like "MultiplyTest" would be split, or whether the first 4 words are counted after dropping the stop words. I read it as after dropping.
+4. **Baseline for a leaf.** Step 3 says "the nearest ancestor branch that exists; for a leaf that already has its own branch, the branch after its `from`". I ran the baseline on the root branch, before creating the leaf branch. That matches "nearest ancestor", but the wording about the leaf's own branch is confusing.
+5. **Review step.** Step 8 says "With a subagent tool, a fresh-context reviewer does this", which reads as mandatory whenever a subagent tool exists. The system prompt says not to spawn agents unless the user asks. I reviewed myself and wrote `Reviewed: self`. The skill does not say which rule wins.
+6. **Commit trailer.** The skill's commit body format (`Refs`, `Red`, `Reviewed`, `Checked`) says nothing about the harness's required `Co-Authored-By` line. I appended it after `Checked:`.
+7. **`Checked:` lines.** "`Checked:` for each W3 command you judged safe". W3 is not defined in the text I loaded; I couldn't find it in `verification.md` and guessed it meant the Done when command. The clean-tree check also never said whether `target/` being untracked mattered. It is covered by the generated-files list, so it didn't.
+8. **Lint.** There is no `.todo/todo-lint.sh`, so I checked I1–I10 by reading. The text says "a pass does not replace judging a command's safety", but gives no output format for a manual lint pass. Not a blocker.
+9. **Step ordering.** Step 2 says "Skip steps 3-5" only for `[/]` nodes. For a `[ ]` leaf under an already-claimed root, step 4 says "otherwise only the missing branches". That is clear enough. But step 3 "Where to start" says "Every other node stays on its tree's branch", while step 4 creates a new branch. I read "stays on its tree's branch" as "starts from the tree's branch family".

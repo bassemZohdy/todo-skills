@@ -1,0 +1,33 @@
+**Report: `/todo-continue` stopped at step 3 (ready check). Baseline red. No files, branches or commits were changed.**
+
+- **Node selected:** FEAT-001, "Add subtract to calc.py" (P1, low). It is the first workable `[ ]` node. The tree is unclaimed and there is only the `main` branch.
+- **Invariants:** the lint script `.todo/todo-lint.sh` doesn't exist, so I checked I1–I10 by reading and found no violation. The tree is clean and the node has no `Ref:`.
+- **Baseline command:** the README `Tests:` line gives `python3 -m unittest discover -s tests`.
+- **Result:** 1 test ran and 1 failed. `test_add` hit `AssertionError: -1 != 3` because `calc.add` returns `a - b`.
+- **Why it stops:** only a `FIX` node whose `Done when` runs a failing test may start on a red baseline. FEAT-001 is a `FEAT`, so I stopped before the claim, branch or start commit. I checked out nothing, so the checked-out branch is still `main`.
+- **Suggested command** (run on the base):
+  `/todo-add "fix the failing baseline: tests.test_calc.CalcTest.test_add" --type fix --priority P0`
+- **Next workable node:** none until the baseline is fixed. FEAT-001 becomes workable again once the baseline is green.
+- **Adjacent problem:** `calc.add` is wrong (`a - b`), which is the cause of the red baseline. Consider clearing context before the next run.
+
+**Ambiguities and contradictions in the skill text**
+
+1. **Baseline command and the `discover` pitfall.**
+   - Quote: "Run the regression command (`reference/verification.md`, protocol step 6)"; step 6 says "the README's `Tests:` line if there is one".
+   - Problem: plain `python3 -m unittest discover` from the root runs 0 tests ("NO TESTS RAN"), and only the README's `-s tests` form runs the test.
+   - Resolution: I used the README `Tests:` line, which is what step 6 prescribes. Nothing was unclear here.
+2. **Whether a red baseline needs the command safety check.**
+   - Quote: "The same rules apply to the regression command … before running it in each invocation."
+   - Resolution: it is a unittest command, so it counts as a test command and was safe to run.
+3. **Order of lint, clean tree and the baseline.**
+   - Quote: step 1 says "Check git and run the invariant check"; step 3 lists "Lint clean … tree clean" and then "Where to start" and "Baseline".
+   - Problem: the baseline runs "on the start branch", but the "Where to start" switch is only described for the `todo/` branch case. When already on the base (my case), no switch is needed.
+   - Resolution: I ran the baseline on `main`.
+4. **Red baseline for a non-FIX node.**
+   - Quote: "Otherwise change nothing more, report 'baseline red' … and stop."
+   - Problem: "change nothing more" is slightly vague about whether any earlier steps count as changes.
+   - Resolution: nothing had been changed, so there was nothing to undo.
+5. **Reading a missing script.** `reference/lanes.md` and `rtm.md` weren't needed. The `.todo/` folder doesn't exist, so the "read it" and last-gate rules didn't apply. I skipped them.
+6. **Truncated output.** My first read of the core and git-flow files was truncated by the tool. I read the full core and `verification.md`, but only part of `git-flow.md`; I didn't re-read the truncated part. That is my limitation, not the skill's. The stop happens before any git-flow step.
+
+I found no real contradictions in the skill text that affected this run.

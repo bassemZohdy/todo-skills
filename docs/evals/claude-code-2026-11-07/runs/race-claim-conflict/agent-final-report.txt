@@ -1,0 +1,39 @@
+I lost the claim race on FEAT-001, so I stopped before the start commit. My claim branch is deleted and I'm on `main`. Here is the report.
+
+## (1) Report
+
+**Result:** Stopped at step 4 (branch first, tree claim). There is no `chore(backlog): start FEAT-001` commit.
+
+- **Node:** FEAT-001, "Add a subtract function to calc.py with a test". It was the only node, and it was workable.
+- **Invariants and ready check:** The invariants held by reading, since there is no `.todo/todo-lint.sh`. The tree was clean and there is no `Ref:`.
+- **Baseline:** `python3 -m unittest discover -s tests` gave 1 test, OK, so the baseline was 1 passing.
+- **Claim:**
+  1. I created `todo/FEAT-001-add-subtract-function-calc` from `main`.
+  2. I committed the claim as `718c7c8`.
+  3. `git merge --ff-only` into `main` failed with "Not possible to fast-forward".
+- **What happened:** `main` had moved to `092c3ac`, a rival claim: `State: branch todo/FEAT-001-rival from main; next: start FEAT-001`. It appeared when I switched to the new branch, apparently via the `post-checkout` hook. I read the hook and did not modify it.
+- **Cleanup:** My branch was a bare claim branch: one `claim` commit, only `TODO.md` changed, and only the `State:` line. So I deleted it with `git branch -D`, the one forced delete the skill allows. I did not rebase, because the root is claimed by someone else, not just the base moving.
+- **Current state:** I'm on `main`, the working tree is clean, and the rival branch `todo/FEAT-001-rival` exists in this clone.
+- **Files changed:** none.
+- **Resume hint:** if the rival branch is your own work, run `git switch todo/FEAT-001-rival` and rerun `/todo-continue`. If the claim is stale, run `/todo-update FEAT-001 --status ready` to release it.
+- **Next workable node:** none. FEAT-001 is claimed by `todo/FEAT-001-rival`.
+- **Adjacent problems:** none. I suggest clearing context.
+
+## (2) Ambiguities and contradictions
+
+1. **Quote:** "`next: read docs` … Commit `chore(backlog): start <ID>`" (step 5), against "Start commit on the node's branch" (git-flow).
+   - **Issue:** a lost race stops before step 5, which is correct. The skill doesn't say whether the report should name the rival's branch as the thing to resume.
+   - **Resolution:** I gave the resume hint from the core's "claimed by <branch>" wording.
+2. **Quote:** "**Lost:** the root's `State:` there names another branch. If your root branch is a bare claim branch, delete it…"
+   - **Issue:** the bare-claim definition says "that diff changes only the root's `State:` line". My diff against `main` showed only the `State:` line changing, but it showed that line differing from the rival's line, not being added.
+   - **Resolution:** I treated that as satisfying the definition.
+3. **Quote:** "Stop and report … Report who has the tree and stop, on the base."
+   - **Issue:** the skill doesn't say whether the failed claim attempt should leave the working tree on `main`. In this case it was already on `main`.
+   - **Resolution:** I stayed on `main`.
+4. **Quote:** "step 4 … **do not go on until it succeeded**" and step 2's "Select by status … claimed trees are skipped".
+   - **Issue:** the skill doesn't say what to do when the claim race is lost and nothing else is workable.
+   - **Resolution:** I reported "none" for the next workable node.
+5. **Quote:** "Lint clean" when there is no `.todo/todo-lint.sh`.
+   - **Issue:** "check I1-I10 by reading" is subjective for I3's "non-vacuous".
+   - **Resolution:** I judged the `Done when` command as running a specific test id.
+6. **Minor:** git printed LF/CRLF warnings on Windows, and the skill says nothing about line endings. I ignored them.

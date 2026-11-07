@@ -1,0 +1,7 @@
+ CHANGELOG.md                                   |  5 +++++
+ TODO.md                                        |  7 -------
+ core/src/main/java/mini/core/Calc.java         |  4 ++++
+ core/src/test/java/mini/core/SubtractTest.java | 12 ++++++++++++
+ text/src/main/java/mini/text/Text.java         |  4 ++++
+ text/src/test/java/mini/text/ShoutTest.java    | 12 ++++++++++++
+ 6 files changed, 37 insertions(+), 7 deletions(-)

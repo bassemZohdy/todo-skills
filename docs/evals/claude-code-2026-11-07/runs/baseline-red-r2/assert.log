@@ -1,0 +1,9 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  lint passes on the checked-out branch
+PASS  nothing changed: no branch, no commit, no edit
+
+7 passed, 0 failed

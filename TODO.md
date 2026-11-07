@@ -23,3 +23,12 @@
 - [ ] **TASK-024** · P1 · mid · Verify Codex skill discovery and slash-command behavior independently of the file-reading trial prompt
   - Done when: a fresh Codex session's actual skill invocation behavior and any unsupported slash-command behavior are recorded with reproducible evidence; `bash tests/trials/test-codex-invocation.sh`
   - Links: Ref: docs/agent-compatibility.md · Depends: TASK-018
+- [ ] **TASK-025** · P1 · low · Align the ts-lifecycle and java-lifecycle trial prompts with what their assertions require
+  - Done when: a fresh agent following the prompt reaches the state assert.sh requires for both scenarios, or the prompt states how many invocations are needed and a selftest check compares prompt wording with the assertion; `bash tests/trials/test-prompt-assert.sh`
+  - Links: Ref: docs/evals/claude-code-2026-11-07/summary.md
+- [ ] **TASK-026** · P2 · low · Make tests/trials/setup.sh independent of the platform default text encoding
+  - Done when: the selftest passes all 24 scenarios on Windows with Python's cp1252 default and no PYTHONUTF8 override; `bash tests/trials/selftest.sh`
+  - Links: Ref: docs/evals/claude-code-2026-11-07/summary.md
+- [ ] **TASK-027** · P2 · mid · Specify what an agent does when a Done when command cannot run for an environmental reason
+  - Done when: reference/verification.md says whether to stop and report or which scaffolding file may be added, and a fixture in tests/ asserts the rule text is present; `bash tests/run.sh`
+  - Links: Ref: docs/evals/claude-code-2026-11-07/summary.md

@@ -1,0 +1,13 @@
+*   37b735c  (HEAD -> todo/FEAT-001-add-subtract-multiply-calc) Merge FEAT-001.2 into FEAT-001
+|\  
+| * e96e904  feat(mini): add multiply to calc
+| * 0211bc0  chore(backlog): start FEAT-001.2
+|/  
+*   2251b59  Merge FEAT-001.1 into FEAT-001
+|\  
+| * 458e816  feat(mini): add subtract to calc
+| * d886a67  chore(backlog): start FEAT-001.1
+|/  
+* d9093b9  (main) chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* 9eb8364  init java project
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/java-lifecycle/repo  37b735c [todo/FEAT-001-add-subtract-multiply-calc]

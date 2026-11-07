@@ -1,0 +1,51 @@
+## HEAD
+10edfbfed311d88c3b6467cee02886d2677171cb
+## branch --show-current
+main
+## branches
+* main 10edfbf Merge FEAT-002 into main
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/lanes-clean-seq/repo  10edfbf [main]
+## tags
+## refs
+refs/heads/main 10edfbfed311d88c3b6467cee02886d2677171cb
+## log --all --graph
+*   10edfbf  (HEAD -> main) Merge FEAT-002 into main
+|\  
+| * ca698c2  chore(backlog): drain FEAT-002
+| *   194344e  Merge main into FEAT-002
+| |\  
+| |/  
+|/|   
+* |   9d7f73d  Merge FEAT-001 into main
+|\ \  
+| * | 45fd42c  chore(backlog): drain FEAT-001
+| * |   c0598d4  Merge main into FEAT-001
+| |\ \  
+| |/ /  
+|/| |   
+| * | 3ac4840  feat(calc): add subtract to calc.py
+| * | 76e53f9  chore(backlog): start FEAT-001
+| | * 2903ece  feat(text): add shout to text.py
+| | * c030c43  chore(backlog): start FEAT-002
+| |/  
+|/|   
+* | 5562483  chore(backlog): claim FEAT-002 on todo/FEAT-002-add-shout-text-py
+|/  
+* 99549f3  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+* e4ffb43  init with two lanes
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./__pycache__/text.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/__pycache__/test_text.cpython-313.pyc
+./tests/test_calc.py
+./tests/test_text.py
+./text.py

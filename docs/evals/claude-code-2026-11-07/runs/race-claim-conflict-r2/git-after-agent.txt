@@ -1,0 +1,27 @@
+## HEAD
+d9cebc0556e1704b4ec0aa4c77f7c2de7ad87bcc
+## branch --show-current
+main
+## branches
+* main                d9cebc0 chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+  todo/FEAT-001-rival d9cebc0 chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/race-claim-conflict-r2/repo  d9cebc0 [main]
+## tags
+## refs
+refs/heads/main d9cebc0556e1704b4ec0aa4c77f7c2de7ad87bcc
+refs/heads/todo/FEAT-001-rival d9cebc0556e1704b4ec0aa4c77f7c2de7ad87bcc
+## log --all --graph
+* d9cebc0  (HEAD -> main, todo/FEAT-001-rival) chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+* d384131  init with one free root
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

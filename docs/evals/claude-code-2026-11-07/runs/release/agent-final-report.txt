@@ -1,0 +1,28 @@
+## (1) Report
+
+**Released 0.2.0.** Commit `432da38` `chore(release): 0.2.0` changes only `CHANGELOG.md`. I did not tag or push.
+
+- **Preconditions:** git mode, on `main`, working tree clean. `TODO.md` is empty, so there is no `[/]` task or claim. There is no `.todo/todo-lint.sh`, so I checked the invariants by reading, before and after the edit. `[Unreleased]` had 2 entries.
+- **Version:** the previous version was 0.1.0. The `### Added` entry (FEAT-002) makes it a minor bump, so 0.2.0, which matches the confirmed version. The `v0.2.0` tag does not exist; only `v0.1.0` does.
+- **Section written:** `## [0.2.0] - 2026-11-07`, with a new empty `## [Unreleased]` above it.
+  - Headings in the new section: `### Added` (FEAT-002) and `### Fixed` (FIX-001).
+  - Link lines now read `[Unreleased]: …/compare/v0.2.0...HEAD` and `[0.2.0]: …/compare/v0.1.0...v0.2.0`.
+- **Version files:** none found that mention 0.1.0.
+
+To finish the release, run these yourself:
+```
+git tag -a v0.2.0 -m "0.2.0"
+git push --follow-tags
+```
+
+## (2) Ambiguities and problems in the skill text
+
+1. **Clean-tree wording.** Text: "`git status --porcelain` may list nothing but backlog files (core) and untracked files". It is unclear whether "untracked files" means all untracked files or only untracked backlog files. I took it as all untracked files being allowed. It did not matter here because the tree was clean.
+2. **Invariant check without the lint script.** Text: "otherwise check I1-I10 by reading". Step 5 says "run the invariant check again (it reads CHANGELOG.md for I5 and I7)". It is unclear what "again" means when the check is done by reading. I re-read `TODO.md` and `CHANGELOG.md` and found no ID overlap, since `TODO.md` is empty.
+3. **Missing blank line before the new heading.** Text: "put a new, empty `## [Unreleased]` (no subheadings) above it, with a blank line between". The text doesn't say whether the blank line between `[Unreleased]` and `## [0.2.0]` counts as the blank line before the next heading. I used exactly one blank line on each side.
+4. **Link references.** Text: "If the file ends with link references, take the base URL from the existing `[Unreleased]:` line". It doesn't say where `[0.2.0]` goes ("under it" is clear). It also doesn't say what to do if only some link lines exist. I placed it directly under `[Unreleased]`, above `[0.1.0]`. That is newest-first order and the file already follows it.
+5. **Step order against a stale tag.** Step 2 requires the new version to have "no local `vX.Y.Z` tag", but the previous-version check is on headings, not tags. I did not hit a mismatch. If `v0.1.0` had been missing, the compare link would still be written without any warning.
+6. **Date source.** Text: "(`date +%F`)". The skill doesn't say which time zone to use or what to do when the shell has no `date`. I used `date +%F`, which gave 2026-11-07 and matched the stated date.
+7. **Commit scope against an edit not yet staged.** Text: "`git commit -- CHANGELOG.md`". This form commits a modified tracked file without a prior `git add`, which is fine. The skill never says to unstage other staged files, and I had none. It also doesn't mention that git commits only the named path's changes and ignores the rest of the index; I treated that as intended.
+8. **Line endings (environment, not skill).** Git warned "LF will be replaced by CRLF". The skill says nothing about line endings or the final newline on Windows. I left the file as-is.
+9. **Hung shell command (my mistake, not the skill's).** I ran an empty `python3` heredoc that hung and was killed, then did the edits with the Edit tool. The skill's "Prefer native file tools" guidance covers this. No file was changed by the hung call.

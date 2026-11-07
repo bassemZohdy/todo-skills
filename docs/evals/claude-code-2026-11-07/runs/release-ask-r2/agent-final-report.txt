@@ -1,0 +1,55 @@
+**Report (stopped at step 2, waiting for your answer)**
+
+Preconditions pass:
+- Git mode, on `main` (the base branch).
+- `git status --porcelain` is clean.
+- The invariant check passes by reading. There is no `.todo/todo-lint.sh`, and `TODO.md` is an empty tree.
+- `[Unreleased]` has 2 entries: FEAT-002 under `### Added` and FIX-001 under `### Fixed`.
+- No `[/]` task and no claimed tree, so there is nothing to warn about.
+
+The previous version is `0.1.0`, and the local tag `v0.1.0` exists.
+
+**Proposed version: `0.2.0` (minor).** `[Unreleased]` has an `### Added` entry (FEAT-002, type feat). It has no BREAKING CHANGE, no `!` type and no `### Removed` entry.
+
+Do you confirm releasing **0.2.0**, or do you want a different version (for example `0.1.1`, or `1.0.0`)? I'll change nothing until you answer.
+
+If you confirm, I will:
+- Rename `[Unreleased]` to `## [0.2.0] - 2026-11-07` and add a new empty `[Unreleased]` above it.
+- Update the link lines: `[Unreleased]` pointing at `…/compare/v0.2.0...HEAD`, and a new `[0.2.0]: …/compare/v0.1.0...v0.2.0`.
+- Search for version files that mention `0.1.0`, without editing them.
+- Commit `CHANGELOG.md` only, as `chore(release): 0.2.0`.
+- Print the tag and push commands without running them.
+
+**Ambiguities and unclear instructions**
+
+1. **Cross-reference to step 1.**
+   - Text: "`git status --porcelain` may list nothing but backlog files (core) and untracked files".
+   - Problem: unclear whether untracked files in general are allowed or only untracked backlog files.
+   - Resolution: I read it as allowing any untracked file. It was moot here because the tree is clean.
+2. **Where the invariant check runs.**
+   - Text: "Check git and run the invariant check (core)".
+   - Problem: the core text says to use the lint script if it exists, and otherwise check by reading. It does not say who judges "pass" when there is no script.
+   - Resolution: I checked I1–I10 by reading.
+3. **Minor vs. major for a 0.x release.**
+   - Text: "`### Removed` entry → major (minor while the previous version is `0.x`); else any `### Added` entry … → minor".
+   - Problem: for a 0.x release, breaking and added changes both give minor. That is consistent, but a reader could wonder whether a breaking change should offer `1.0.0` as an option.
+   - Resolution: I proposed 0.2.0 and mentioned `1.0.0` as an alternative.
+4. **"Warn … `[/]` task … or a claimed tree".**
+   - Text: "`git show <base>:TODO.md` has a `[/]` task or a claimed tree".
+   - Problem: it doesn't say how to detect a claimed tree beyond core's "State names a branch".
+   - Resolution: I found none, because the tree is empty.
+5. **Step 3 link references.**
+   - Text: "If the file ends with link references, take the base URL from the existing `[Unreleased]:` line".
+   - Problem: it is unspecified what to do when link references exist but there is no `[Unreleased]:` line. The skill says to add no links and say so, which covers the case. Another case is unclear: link references that exist but whose `[Unreleased]` URL isn't in `/compare/` form.
+   - Resolution: not triggered here.
+6. **Step 4 "the previous one … must also be digits only".**
+   - Problem: it doesn't say what to do if the previous version isn't digits only, such as `0.1.0-rc1`. It should presumably refuse.
+   - Resolution: not triggered here, since `0.1.0` is digits only.
+7. **Step 5 commit scope.**
+   - Text: "commit `CHANGELOG.md` only (`git commit -- CHANGELOG.md`)".
+   - Problem: if `CHANGELOG.md` isn't already tracked or staged, `git commit -- <path>` works only for tracked files. It is tracked here.
+   - Resolution: none needed.
+8. **Core vs. skill wording on the user's confirmation.**
+   - Core guardrail 6: "the confirmed release commit".
+   - Skill step 2: "Do nothing until they answer".
+   - Problem: there is no conflict, but the skill doesn't say whether a "yes" to a different version than proposed counts as confirmation. I treat naming another valid version as confirmation of that version.

@@ -1,0 +1,9 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Makefile', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/api/calc.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/api/tests/test_calc.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/web/greet.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/web/tests/test_greet.py', LF will be replaced by CRLF the next time Git touches it
+ready: /c/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/monorepo/repo (monorepo) on branch main

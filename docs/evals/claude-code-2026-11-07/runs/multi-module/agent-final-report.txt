@@ -1,0 +1,81 @@
+## Report: `/todo-continue --all-lanes --merge`
+
+I ran this inline, without subagents. Lane 1 was `core`, lane 2 was `text`, and each ran in its own worktree one after the other. Both roots finished, were drained and were merged into `main`. I never pushed.
+
+**FEAT-001: Add subtract to the core module (lane `core`)**
+- **Red:** `SubtractTest` failed with `cannot find symbol: method subtract(int,int)`.
+- **Done when:** `mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true` passed, 1 test.
+- **Regression:** `mvn -B test` passed with 3 tests (baseline was 2).
+- **Files:** `Calc.java` and the new `SubtractTest.java`.
+- **Commits:** `bdb469d` for the feature, `1df3408` for the drain, and `47ae352` merging it into `main`. The branch and worktree are removed.
+
+**FEAT-002: Add shout to the text module (lane `text`)**
+- **Red:** `ShoutTest` failed with `cannot find symbol: method shout(java.lang.String)`.
+- **Done when:** `mvn -B test -pl text -Dtest=ShoutTest -Dsurefire.failIfNoSpecifiedTests=true` passed, 1 test.
+- **Refresh from base:** `TODO.md` conflicted. I kept the FEAT-002 block and dropped the already-drained FEAT-001, as the conflict rules say. The regression then passed with 4 tests (the base had 3).
+- **Files:** `Text.java` and the new `ShoutTest.java`.
+- **Commits:** `b9540ae` for the feature, `7e84572` for the base refresh, `7e0b694` for the drain, and `e46b3a7` merging it into `main`. The branch and worktree are removed.
+
+**Final state**
+- **Branch:** `main` is checked out and its working tree is clean.
+- **Backlog:** the TODO.md task tree is empty.
+- **CHANGELOG:** both entries are under `[Unreleased]` → `### Added`, FEAT-002 first.
+- **Reviews:** both were `Reviewed: self`, with 0 findings.
+- **Adjacent problems:** none.
+- **Next workable node:** none.
+
+**My own mistakes, fixed forward**
+- A bad awk edit wrote both `State:` lines into both nodes in the first claim commits.
+  - I fixed it with an extra commit on `main`, `a92658c` "correct claims", because hard resets are forbidden.
+  - This put a non-claim commit on the base, which guardrail 6 does not allow.
+- A bad sed did the same in the start commits, so I amended them. They were local and unpublished.
+- A stray heredoc made one shell call hang until I stopped it.
+- The extra commit `a92658c` stays in history.
+
+## Ambiguities and contradictions in the skill text
+
+1. **Subagents vs. no subagent tool**
+   - Quote: "Without a subagent tool, say so in the first line of your output and do everything below yourself" (lanes.md). I do have an `Agent` tool, but the harness says not to spawn without an explicit request. The skill requires "one subagent per lane".
+   - Resolution: I worked inline, which is the fallback path, and stated it at the top of this report. The skill doesn't say what to do when the tool exists but spawning is discouraged.
+
+2. **The `[/]` limit across lanes**
+   - Quote: "`[/]` active (at most one in the file)" (I1) against parallel lane agents that each mark a root `[/]`.
+   - Resolution: each marker lives only on its own branch, so I treated I1 as per branch. The base never held two. The text doesn't say this.
+
+3. **Claim State vs. start State**
+   - Quote: leaf-root claim "`next: start <ROOT-ID>`", and step 5 "replace `State:`". The claim's `State:` has no `attempts` or `baseline`, and `next: start <ID>` isn't a step that step 2 maps to resume.
+   - Resolution: it works, but `start <ID>` is never explained. The same goes for `next: drain` in a lane run: `State:` rule 1 says "attempts 0/3; baseline…; next: read docs", and the lane rule says "set it in its node commit" with no format.
+
+4. **Where the lane step order puts `--merge` and the drain**
+   - Quote: step 4 says drain "there (step 10, item 4, whose refresh is then already done...)".
+   - Resolution: for the second root the refresh brought a conflict and a new merge commit, so "already done" was not true for it. I re-ran the Done when and the regression after the merge, which fits 10.4.1 ("if that brought changes, rerun"). The wording is unclear on whether lanes.md or 10.4.1 governs.
+
+5. **Last-gate and lint with no `.todo/` folder**
+   - Quote: "if `.todo/check.sh` exists..." and lint "otherwise check I1-I10 by reading".
+   - Resolution: neither exists, so I skipped the gate and read the invariants by eye. This is fine but unstated for the empty-tree case.
+
+6. **Documentation drift trigger**
+   - Quote: "Only when the node changed a public interface (... renamed, removed or with a changed meaning)".
+   - Resolution: adding new public methods is not a change in that sense, so I did not grep. It is arguably unclear whether additions count.
+
+7. **Slug rule**
+   - Quote: "turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`), drop the words a, an, the, to, of, and, for, with, keep the first 4".
+   - Resolution: "Add subtract to the core module (Calc.java)" became `add-subtract-core-module`. The "keep 4" rule applies after dropping, which I assumed.
+
+8. **CHANGELOG entry parts**
+   - Quote: "`Validated:` (the root's `Done when` commands, each in backticks, without a `regression:` command)". The Done when "criteria; command" format means the criteria text is not a command.
+   - Resolution: I included only the backticked Done when command. A leaf root has no `Includes:`.
+
+9. **CRLF**
+   - The files have CRLF checkout settings, so git printed LF→CRLF warnings. I ignored them, and the skills don't mention line endings.
+
+10. **Step 3 "Base dependency", and step 3 baseline on a lane**
+    - Quote: lanes.md says "skips step 3 (the coordinator's baseline holds)".
+    - Resolution: I ran the baseline once on the base. The second lane's baseline was therefore taken before the first merged, and I used the base's current count only at the drain.
+
+11. **Ordering within lanes.md step 2**
+    - Quote: "create its root branch, make its tree claim commit and fast-forward the base ... then switch back to the base before the next root" against git-flow's "`git switch <root branch>` and go on".
+    - Resolution: followed lanes.md, which says it replaces git-flow.
+
+12. **Editing and unspecified details**
+    - The skill says to prefer Read/Edit/Write, but a Write needs a prior Read, which cost extra steps. It also gives no instruction for what to do after a bad claim commit when `reset --hard` is forbidden and the base may only get claims. I resolved this as described above.

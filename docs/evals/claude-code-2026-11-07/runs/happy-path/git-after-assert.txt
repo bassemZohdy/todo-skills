@@ -1,0 +1,33 @@
+## HEAD
+c10f7be89d8e26d31d5200cf19a95413fe3e0d95
+## branch --show-current
+main
+## branches
+* main c10f7be Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/happy-path/repo  c10f7be [main]
+## tags
+## refs
+refs/heads/main c10f7be89d8e26d31d5200cf19a95413fe3e0d95
+## log --all --graph
+*   c10f7be  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * 7466e4b  chore(backlog): drain FEAT-001
+| * ad560f4  feat(calc): add subtract
+| * ab4a468  chore(backlog): start FEAT-001
+|/  
+* 6150cfe  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+* 29d6a4b  init with one free root
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__init__.py
+./tests/__pycache__/__init__.cpython-313.pyc
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

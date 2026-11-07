@@ -1,0 +1,26 @@
+## HEAD
+37a8f48cff04c8665267a61b88c67aa5fe4b469b
+## branch --show-current
+main
+## branches
+* main 37a8f48 init
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/ci-local/repo  37a8f48 [main]
+## tags
+## refs
+refs/heads/main 37a8f48cff04c8665267a61b88c67aa5fe4b469b
+## log --all --graph
+* 37a8f48  (HEAD -> main) init
+## status --porcelain
+?? .todo/
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./.todo/check.sh
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

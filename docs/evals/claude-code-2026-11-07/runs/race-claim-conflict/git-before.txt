@@ -1,0 +1,22 @@
+## HEAD
+fe24a7cd12d181be646ce697d44c6ee017836acf
+## branch --show-current
+main
+## branches
+* main fe24a7c init with one free root
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/race-claim-conflict/repo  fe24a7c [main]
+## tags
+## refs
+refs/heads/main fe24a7cd12d181be646ce697d44c6ee017836acf
+## log --all --graph
+* fe24a7c  (HEAD -> main) init with one free root
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

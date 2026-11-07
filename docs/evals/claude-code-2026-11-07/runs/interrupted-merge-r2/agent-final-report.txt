@@ -1,0 +1,25 @@
+Lint by reading: I1–I10 hold (no `[/]`, unique IDs, valid fields, 10 lines, no ID in CHANGELOG, no `[x]` with open children, no forbidden commands).
+
+**Report (/todo-continue, stopped at step 2: interrupted merge)**
+- Node: FEAT-001.1 "Add subtract with a test". It was `[x]` on `todo/FEAT-001.1-subtract-test`, but that branch wasn't merged into `todo/FEAT-001-subtract-multiply`.
+- Action: ran `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001"` on the parent branch, which created commit `fe2c03e`. Then ran `git branch -d todo/FEAT-001.1-subtract-test`.
+- Tests: none run, as step 2 says. The parent's integration step runs them.
+- Lint: clean (read by hand; there is no `.todo/todo-lint.sh`).
+- Files brought in: `calc.py`, `tests/test_calc.py` and `TODO.md`.
+- Checked-out branch: `todo/FEAT-001-subtract-multiply`. The tree is clean.
+- Children done: 1/2. FEAT-001.2 is the next workable node.
+- Adjacent problems: none.
+- Suggestion: clear context, then run `/todo-continue` again.
+
+**Ambiguities**
+1. Step 2 says "finish it as step 10 item 3", but item 3 begins "Non-root node: switch to the parent's branch…".
+   - Resolution: I was already on the parent branch, so there was nothing to switch.
+   - The text doesn't say whether to run the ready check's clean-tree test first. I did not.
+2. Step 1 says "run the invariant check (core)", but no lint script exists here. The core says to check by reading, and I did.
+   - "Interrupted work comes first" says to list the tree's branches by pattern and read each branch's TODO.md. Step 2 doesn't say whether to do this from the root branch or from a child branch.
+   - I ran it from the root branch and found the child.
+3. Step 2 says "(on a `todo/` branch; …)". It doesn't say what to do if the unmerged `[x]` child is a different node's, or if several children are unmerged. I assumed one.
+4. Step 10.3 says "`git branch -d` the child (worktrees: git-flow "--worktree")". No worktree existed here, so I skipped that part.
+5. The step 2 text "No tests here; the parent's integration step runs them." reads as if the integration step is next. FEAT-001.2 is still open, so it comes later. Minor, but it could mislead.
+6. The step 2 stop for an interrupted merge doesn't say whether to print the "next workable node". Step 11 says to report it, so I did.
+7. Nothing was said about a merge commit needing a git identity. The configured identity was enough, so I passed the `-c` flags anyway.

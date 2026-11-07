@@ -1,0 +1,4 @@
+ TODO.md                | 3 ++-
+ src/calc.ts            | 4 ++++
+ tests/subtract.test.ts | 8 ++++++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)

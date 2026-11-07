@@ -1,0 +1,61 @@
+## (1) Report
+
+**Created:** `.todo/check.sh` (executable). Nothing else was created: `TODO.md` and `CHANGELOG.md` already existed in the right format.
+- `TODO.md` has `# Active Backlog` and an empty `## 🌳 Task Tree`.
+- `CHANGELOG.md` already has `## [Unreleased]`, so I changed nothing in it.
+
+**Mode:** git. The base branch is `main`, from the default order; the README has no `Base:` line, so I didn't offer to add one. Apart from the new untracked `.todo/`, the tree is clean.
+
+**Runtime and test command:** Python, no package manager.
+- The command is `python3 -m unittest discover -s tests`.
+- It comes from the README `Tests:` line, not from the marker table.
+- The README already states the command after `Tests:`, so I didn't offer to add a line.
+- No CI config exists, so there is no CI command to compare against and no mismatch.
+
+**Docs:** `README.md` is present. `docs/` is missing, and I did not create it. There is no `Definition of Done` heading in the README, CONTRIBUTING.md or `docs/`.
+
+**Backlog checks:**
+- `.todo/todo-lint.sh` does not exist, so `check.sh` has no lint line. Save `tools/todo-lint.sh` from https://github.com/bassemZohdy/todo-skills to `.todo/todo-lint.sh`, then add the line `bash .todo/todo-lint.sh TODO.md CHANGELOG.md` before the test line in `check.sh`. I did not download it.
+- I checked invariants I1–I10 by reading. They pass: the tree is empty, with no tasks, so there are no violations.
+- Tree summary: empty. There is no active node and nothing blocked.
+
+**`check.sh` result:** I ran it once and it passed (1 test, OK, exit 0). Its only command is `python3 -m unittest discover -s tests`. That counts as a test command under command safety, and I read `tests/test_calc.py` first.
+
+**CI:** local fallback. There is no CI file and no `origin` remote.
+- Writing `.git/hooks/pre-push` was refused by the environment, which treats files under `.git/` as sensitive.
+- I did not write it. Create it yourself with these two lines:
+  ```
+  #!/usr/bin/env bash
+  bash .todo/check.sh || exit 1
+  ```
+- Then run `chmod +x .git/hooks/pre-push`.
+
+**Pre-planning:** skipped. It only runs with `--plan`, or with a stated project goal and an empty tree, and neither applies.
+
+**Next step for you:** commit `.todo/` yourself, either on `main` or through a pull request. The new files are untracked and don't block `/todo-continue`. I made no commits.
+
+## (2) Ambiguities
+
+1. **Order of questions and report.**
+   - Quote: "Ask the questions of steps 8-9 first, then print the report once, after the answers."
+   - Step 9 also writes and runs the CI files and reports results (`reference/ci.md`'s Report: "Part of the single `/todo-init` report").
+   - I did the CI work first, then printed one report. It was unclear whether CI files should be written before the report or only asked about first.
+2. **Lint script missing.**
+   - Quote: "skip the lint line below until it exists".
+   - Under `--ci` the user "says yes to every offer", but the skill never downloads the script. I had no way to install it and just told the user how.
+3. **Test-command source.**
+   - Quote: "Precedence: the README `Tests:` line, then a command stated in README.md…" and "When the command comes from somewhere other than the table… name that source."
+   - The README has a `Tests:` line, which is also not a table row. I named the README as the source.
+4. **Hook write refused.**
+   - Quote: "If the hook cannot be written (… your environment refuses writes under `.git/`), print its two lines".
+   - This was clear, and it fit what happened. I did not try to get around the refusal.
+5. **Lint-free check script.**
+   - Quote: "Check that command against 'Command safety'… Otherwise run it once".
+   - Nothing says whether to read the test files when the command is only `unittest discover`. I read them anyway.
+6. **Core file truncated.**
+   - Quote: none.
+   - My first read of `todo/SKILL.md` was cut off in the middle by output truncation, so I read only the invariants section in full. This is a tooling issue, not a skill problem. The `--ci` trial did not need the git-flow content.
+7. **Missing Keep a Changelog header text.**
+   - The existing `CHANGELOG.md` lacks the "format is based on Keep a Changelog" lines.
+   - Quote: "add `## [Unreleased]`… and change nothing else, including its intro."
+   - I changed nothing.

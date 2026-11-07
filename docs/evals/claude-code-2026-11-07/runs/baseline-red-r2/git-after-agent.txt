@@ -1,0 +1,24 @@
+## HEAD
+e5caba548b8bdb57eb66579658be31138135a999
+## branch --show-current
+main
+## branches
+* main e5caba5 init with a red baseline
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/baseline-red-r2/repo  e5caba5 [main]
+## tags
+## refs
+refs/heads/main e5caba548b8bdb57eb66579658be31138135a999
+## log --all --graph
+* e5caba5  (HEAD -> main) init with a red baseline
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

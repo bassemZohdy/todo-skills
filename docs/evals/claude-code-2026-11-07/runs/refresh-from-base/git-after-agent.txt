@@ -1,0 +1,39 @@
+## HEAD
+b9144d4d73bf8ecd241fb53afa78f44914ee3e18
+## branch --show-current
+todo/FEAT-001-subtract
+## branches
+  main                   e4ad900 feat(extra): add twice
+* todo/FEAT-001-subtract b9144d4 chore(backlog): drain FEAT-001
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/refresh-from-base/repo  b9144d4 [todo/FEAT-001-subtract]
+## tags
+## refs
+refs/heads/main e4ad900c803fcc57376dee72ed88494d2ae2d453
+refs/heads/todo/FEAT-001-subtract b9144d4d73bf8ecd241fb53afa78f44914ee3e18
+## log --all --graph
+* b9144d4  (HEAD -> todo/FEAT-001-subtract) chore(backlog): drain FEAT-001
+*   a7b3b8c  Merge main into FEAT-001
+|\  
+| * e4ad900  (main) feat(extra): add twice
+* | 7f4e7a8  feat(calc): add subtract function
+* | 37606ab  chore(backlog): start FEAT-001
+|/  
+* 62f7749  init with claimed root
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./__pycache__/extra.cpython-313.pyc
+./calc.py
+./extra.py
+./tests/__init__.py
+./tests/__pycache__/__init__.cpython-313.pyc
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/__pycache__/test_extra.cpython-313.pyc
+./tests/test_calc.py
+./tests/test_extra.py

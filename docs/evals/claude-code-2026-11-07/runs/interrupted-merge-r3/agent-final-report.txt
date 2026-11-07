@@ -1,0 +1,29 @@
+Lint by reading (I1–I10): clean. Stopping per step 2.
+
+## Report
+- **Node:** FEAT-001.1 "Add subtract with a test". It was an interrupted merge. On its branch it was already `[x]`, committed as `ee6890b feat(calc): add subtract`, but it was not an ancestor of `todo/FEAT-001-subtract-multiply`.
+- **Action:** I ran `git merge --no-ff` with the message `Merge FEAT-001.1 into FEAT-001` (commit `2806ba6`) on the parent branch. Then I deleted `todo/FEAT-001.1-subtract-test` with `git branch -d`.
+- **Tests:** none run. Step 2 says the parent's integration step runs them. Baseline and regression comparison don't apply.
+- **Lint:** I checked it by reading, because there is no `.todo/todo-lint.sh`. It passes. FEAT-001.1 is `[x]` in TODO.md on the parent branch.
+- **Files changed:** `TODO.md`, `calc.py` and `tests/test_calc.py` came in through the merge.
+- **Checked-out branch:** `todo/FEAT-001-subtract-multiply`, working tree clean.
+- **Children done:** 1/2 for FEAT-001.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001.2 "Add multiply with a test". Clear context before rerunning `/todo-continue`.
+
+## Ambiguities
+1. **Interrupted merge: when to commit.**
+   - Text: "finish it as step 10 item 3, lint, report and stop."
+   - Step 10 item 3 starts with "switch to the parent's branch". I was already on it.
+   - Resolution: I treated the switch as a no-op and ran the merge directly.
+   - The merge message and `-d` are clear. Nothing says whether to also check that the child's own commit is complete. I assumed it was.
+2. **Lint wording.**
+   - Text: "lint, report and stop".
+   - Lint is "`.todo/todo-lint.sh` if it exists, otherwise check I1–I10 by reading". There is no script, so I checked by reading.
+   - The core says "a lint run after an edit that fails means the edit is wrong". It doesn't say whether a failure after the merge should be undone. A merge is not easily undone without `reset --hard`, which is forbidden. It didn't come up here.
+3. **Step 2 ordering vs. step 1.**
+   - Step 1 runs the invariant check before selecting. At that point the parent's `TODO.md` showed FEAT-001.1 as `[ ]`, while the branch showed `[x]`. The text doesn't say which to trust.
+   - Resolution: the core's "Interrupted work comes first" rule reads each branch's `TODO.md`, so I used the child branch's.
+4. **Git identity.** The skills don't say what to do when no identity is configured. I used the `-c user.email=t@t -c user.name=t` from the task and the merge succeeded. The "Co-Authored-By" attribution from the system reminder is a separate rule. I did not add it to the merge message, because the skill dictates the exact message `Merge <ID> into <PARENT-ID>`. The two instructions conflict mildly.
+5. **Clean-tree check.** Step 2 doesn't say whether the clean-tree check applies before an interrupted merge. The tree was clean, so it didn't matter.
+6. **"Interrupted merge (on a `todo/` branch)".** It doesn't say what happens if you run from the base or from a different `todo/` branch than the parent's. I was on the parent's branch, so I didn't have to resolve this.

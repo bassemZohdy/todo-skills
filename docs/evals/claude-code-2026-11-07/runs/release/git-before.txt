@@ -1,0 +1,24 @@
+## HEAD
+2dae0fccdac0fa93143544bc4a3b2758cb49da74
+## branch --show-current
+main
+## branches
+* main 2dae0fc init with a released 0.1.0 and unreleased work
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/release/repo  2dae0fc [main]
+## tags
+v0.1.0
+## refs
+refs/heads/main 2dae0fccdac0fa93143544bc4a3b2758cb49da74
+refs/tags/v0.1.0 2dae0fccdac0fa93143544bc4a3b2758cb49da74
+## log --all --graph
+* 2dae0fc  (HEAD -> main, tag: v0.1.0) init with a released 0.1.0 and unreleased work
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

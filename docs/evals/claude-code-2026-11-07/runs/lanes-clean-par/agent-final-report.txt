@@ -1,0 +1,57 @@
+Both lane agents are running: FEAT-001 in the math lane and FEAT-002 in the text lane. I'm waiting on their summaries before the coordinator steps (refresh, verify, drain, merge).
+FEAT-001 is finished and committed, stopped before its drain. I'm waiting on the FEAT-002 lane agent before I start the coordinator steps (refresh, re-verify, drain, merge) one root at a time.
+## (1) Report: `/todo-continue --all-lanes --merge`
+
+I used the Agent tool, so I ran the coordinator myself and started one subagent per lane in parallel. Both roots were finished, drained and merged into `main`.
+
+| Lane | Root | Result |
+|---|---|---|
+| math | FEAT-001, Add subtract to calc.py | Done. |
+| text | FEAT-002, Add shout to text.py | Done. |
+
+- **Baseline:** `python3 -m unittest discover -s tests` gave 1 passing on `main`. The README `Tests:` line names that command.
+- **Claims:** I made one claim commit per root and fast-forwarded `main` each time. I then created the worktrees `../repo.todo/FEAT-001` and `../repo.todo/FEAT-002`.
+- **FEAT-001:**
+  - Red: `AttributeError: module 'calc' has no attribute 'subtract'`.
+  - Its `Done when` command (`test_subtract`) passed (1 test).
+  - Regression: 2 passing.
+  - Commits: `ce45c11` start, `ffdca19` `feat(calc): add subtract to calc.py`, then merge `1a52dc0`, drain `24542bf` and `Merge FEAT-001 into main` `cfea526`.
+- **FEAT-002:**
+  - Red: `ModuleNotFoundError: No module named 'text'`.
+  - Its `Done when` command (`test_shout`) passed (1 test).
+  - Regression: 3 passing.
+  - Commits: `086aa53` start, `9c25957` `feat(text): add shout to text.py`, then the refresh merge, drain `385260e` and `Merge FEAT-002 into main`.
+- **Refresh from base:** FEAT-001 merged `main` cleanly. FEAT-002 had a `TODO.md` conflict, because the FEAT-001 block was already drained. I kept FEAT-002's block, dropped FEAT-001's, concluded the merge with `git commit --no-edit`, and re-ran `Done when` and the regression.
+- **Last gate:** there is no `.todo/check.sh`, so none ran. There is no lint script either, so I checked the invariants by reading.
+- **Merges:** `--merge` was set, so I merged both roots into `main` with `--no-ff`. I then removed both worktrees and deleted both branches with `git branch -d`.
+- **Final state:** `main` is checked out and clean, with no other branches or worktrees. The regression on `main` is 3 passing. The `TODO.md` task tree is empty, and `CHANGELOG.md` has entries for FEAT-002 and FEAT-001 under `### Added`.
+- **Adjacent problems:** none.
+- **Next workable node:** none.
+- **Suggestion:** clear context before the next run.
+
+## (2) Ambiguities and contradictions
+
+1. **Step order in lanes.md vs. the SKILL.md steps**
+   - Quoted text: lanes.md step 1 says "Run steps 1-3 for the first workable node of every lane", while step 2 says "create its root branch, make its tree claim commit and fast-forward the base… (`reference/git-flow.md`, steps 1-5)".
+   - Resolution: step 3's ready check includes a "Where to start" switch to the base and a base-dependency merge, which don't apply to a lane. I ran only the lint, the baseline and the workable check. I noted that "baseline 1 passing" would go into `State:`.
+2. **Where `next: drain` is set**
+   - Quoted text: the subagent rules say "a leaf root sets it in its node commit, step 10 item 2".
+   - Resolution: the start commit (step 5) already writes `next: read docs`, and no step says when `next:` becomes `build`. The agents set `drain` only in the node commit. Nothing else was needed.
+3. **Tree-claim commit in the lane worktree**
+   - Quoted text: "Then create each root's worktree… The main checkout stays on the base for the whole run (this replaces git-flow's 'switch back to the root branch' after each claim)".
+   - Resolution: I did the claims in the main checkout and added the worktrees afterwards. The first worktree's branch lacks the second root's claim, so the refresh merge was needed (harmless). Git-flow step 6 mentions a "node's branch" being created for a leaf root. The skill is silent on whether the lane start commit may predate the later claims, and I allowed it.
+4. **Repeated "refresh" in the coordinator and the drain**
+   - Quoted text: lanes.md step 4 says "(step 10, item 4, whose refresh is then already done…)"; step 10.4.1 says "Refresh from the base".
+   - Resolution: I refreshed once per root in the coordinator and did not repeat it in the drain. A lane agent also said it thought a refresh belonged to the drain stage. The wording is fine, but it is easy to double up.
+5. **"re-run Done when and the regression there against the base's current pass count (run the regression on the base first to get it)"**
+   - Resolution: for FEAT-001 the base count was 1 (the base had no new tests yet). For FEAT-002 I re-measured it on `main` after the FEAT-001 merge: 2. The wording does not say whether to re-measure per root, so I did.
+6. **CRLF handling**
+   - The skills don't address Windows line endings. Git warns "LF will be replaced by CRLF", and my first conflict-resolution script broke on non-ASCII text because of the shell code page. I switched to `sed`. This is an environment issue, not a skill defect.
+7. **CHANGELOG entry shape**
+   - Quoted text: "Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first".
+   - Resolution: the file had no `### Added` heading, so I created it with one blank line before and after. FEAT-002 then went first. Fine. An empty `[Unreleased]` with no preceding blank line was not specified; I added one.
+8. **The "Reply with the report the skill asks for" vs. step 11 and lanes.md step 5**
+   - Quoted text: lanes.md step 5 says "Report per lane, instead of `/todo-continue` step 11".
+   - Resolution: I used the lanes.md step 5 structure (finished, blocked, still open, merge commands, next workable root per lane). The lanes.md list does not mention "the checked-out branch" or "adjacent problems" from step 11. I included both anyway.
+9. **System-level conflict**
+   - The environment's general guidance says not to spawn subagents unless asked. The skill and the task text say to use one subagent per lane when a subagent tool is available. I followed the task.

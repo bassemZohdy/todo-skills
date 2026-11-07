@@ -1,0 +1,24 @@
+## HEAD
+487fe684524299dc2cddce465fe4e7da2e7c484d
+## branch --show-current
+main
+## branches
+* main                   487fe68 init with one claimed root
+  todo/FEAT-001-subtract 487fe68 init with one claimed root
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/claimed-elsewhere/repo  487fe68 [main]
+## tags
+## refs
+refs/heads/main 487fe684524299dc2cddce465fe4e7da2e7c484d
+refs/heads/todo/FEAT-001-subtract 487fe684524299dc2cddce465fe4e7da2e7c484d
+## log --all --graph
+* 487fe68  (HEAD -> main, todo/FEAT-001-subtract) init with one claimed root
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

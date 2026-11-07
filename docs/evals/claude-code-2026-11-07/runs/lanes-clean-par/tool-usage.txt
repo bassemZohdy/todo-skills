@@ -1,0 +1,3 @@
+     27 Bash
+      3 Read
+      2 Agent

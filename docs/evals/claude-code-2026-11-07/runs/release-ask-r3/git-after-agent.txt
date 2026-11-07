@@ -1,0 +1,24 @@
+## HEAD
+819e2463fb9b9653d2e947bd78812bd856933950
+## branch --show-current
+main
+## branches
+* main 819e246 init with a released 0.1.0 and unreleased work
+## worktrees
+C:/Users/<user>/AppData/Local/Temp/claude/43373cf458efadd4/ad895a3a-6f6e-4d92-ac56-e86ae85bfd98/scratchpad/eval/runs/release-ask-r3/repo  819e246 [main]
+## tags
+v0.1.0
+## refs
+refs/heads/main 819e2463fb9b9653d2e947bd78812bd856933950
+refs/tags/v0.1.0 819e2463fb9b9653d2e947bd78812bd856933950
+## log --all --graph
+* 819e246  (HEAD -> main, tag: v0.1.0) init with a released 0.1.0 and unreleased work
+## status --porcelain
+## stash
+## tree listing (tracked+untracked, excl .git/.claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

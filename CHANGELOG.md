@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **FEAT-008** (feat): Add optional Markdown RTM traceability with docs/RTM.md preferred and README.md `## RTM` fallback; plan, add, update and continue link and record requirements only when an RTM exists. Ref: skills/todo/reference/rtm.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/REFERENCE.md. Includes: FEAT-008.1, FEAT-008.2, FEAT-008.3, FEAT-008.4.
 - **TASK-004** Codex plugin support: `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`, version-checked against the Claude manifest in `tests/run.sh`. **TASK-005** Install and skill discovery verified on codex-cli 0.167.0; README states what was tested. **TASK-006** `npx skills add bassemZohdy/todo-skills` documented and verified to list all nine skills; `docs/distribution.md` records the channels.
 - Complexity level per task (`low`, `mid`, `high`, required) so agents can pick a model; optional README `Models:` mapping, `/todo-continue --delegate`, lane and reviewer routing, and escalation one tier per failed attempt. Sizes (`S`/`M`/`L`/`XL`) become optional after the complexity; `/todo-init` migrates the earlier format.
 
 ### Changed
 
+- **TASK-011** (docs): Documentation-drift check reports `<file>:<line>: <name>` references for changed interfaces only and never blocks unrelated nodes. Validated: `bash tests/run.sh`. **TASK-010** (test): Fixtures for interrupted resume, blocked verification and missing optional CI files. Validated: `bash tests/run.sh`. **TASK-009** (fix): Verification rejects zero-test runs, missing test targets and masked failures (`todo-verify.sh`, lint I3 and W4) without changing the task schema. Validated: `bash tests/run.sh`.
 - Wording fixes from a full trial re-run (all 11 scenarios pass; `ci-local` once more where the environment refused writes under `.git/hooks`): lost-claim flow ends on the base; interrupted-work check only on a tree branch; `--revise` re-points `Depends:` on dropped IDs and does not commit; the hook lines are printed when `.git/hooks` cannot be written; the core names the allowed shell commands and the optional `.todo/` checks.
 - Node commits record the review step: `Reviewed: <subagent|self>, <n> findings fixed` in the body.
 - This repository now uses its own `/todo-init --ci` setup (`.todo/check.sh`, `todo-check` workflow) and tracked FIX-003 with the skills end to end. `ci.md` says the user commits the CI files before the next `/todo-continue`; a Definition of Done needs a heading named exactly so, followed by a list.

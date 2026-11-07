@@ -47,8 +47,9 @@ The order of every node is the core's "Lifecycle by status".
    - No generated files, secrets or `.env` in the diff or in backlog text you wrote.
    - With a subagent tool, a fresh-context reviewer does this (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself (`Reviewed: self`).
 9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression; update `State:` after every cycle. All gates must pass:
-   - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail). Regression green, no fewer passing tests than the baseline, none deleted or skipped.
+   - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail), the command does not mask failures (`|| true`, `; exit 0`) and every test path it names exists; `todo-verify.sh` (core, optional) checks these. Regression green, no fewer passing tests than the baseline, none deleted or skipped.
    - Each item of the project's Definition of Done, if any.
+   - RTM (only if one exists; `reference/rtm.md`): when the node proves a requirement row, record its `Done when` test paths or ids in that row's Verification cell. It is committed with the node (step 10.2); no RTM, no step.
    - Documentation drift (below).
 10. **Complete, in this order.**
     1. **Non-root node:** no git: first copy its `files:`/`docs:` into the root's `State:`. Set `[x]`, delete `State:`, lint. (A root is never `[x]`; item 4 drains it.)
@@ -75,6 +76,7 @@ The order of every node is the core's "Lifecycle by status".
 ## Documentation drift
 
 - If the implementation must deviate from the `Ref` doc, stop and let the user choose: change the code, or update the doc in this node.
-- Before completing, `grep` README.md and `docs/` for any public command, flag, endpoint, config key or symbol the node changed. Update stale hits within the task line (`Docs: updated <file>` for the CHANGELOG entry; no git: the root's `State: docs:`); otherwise report them with the `/todo-add` command.
+- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, renamed, removed or with a changed meaning), search README.md and `docs/` (not `docs/plans/`) for each changed name with `grep -rnF -- '<name>' README.md docs`. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
+- Report every hit as an actionable reference, one line each: `<file>:<line>: <name> - <what to change>` (for example `docs/REFERENCE.md:48: --worktree - flag renamed to --tree`). Update the hits that fit within the task line (`Docs: updated <file>` for the CHANGELOG entry; no git: the root's `State: docs:`); give the rest as `/todo-add "update <file>:<line> for <name>" --type task --from <ID>` commands in the report. Only a hit the `Done when` or the Definition of Done names blocks the node. Uses grep only; no new tool.
 - Report README setup or test instructions that disagree with the commands that passed.
 - TODO.md never duplicates docs; spec-like text goes to `docs/` with a `Ref:`.

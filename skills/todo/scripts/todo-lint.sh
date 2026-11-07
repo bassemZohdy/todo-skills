@@ -2,7 +2,7 @@
 # todo-lint.sh - deterministic, read-only check of the todo invariants I1-I10.
 # Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 todo="${1:-TODO.md}"
 changelog="${2:-CHANGELOG.md}"
@@ -59,6 +59,8 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
     if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|])rm +-[A-Za-z]*[rRfF]/ || c ~ /(^|[ ;&|])rm +.*--(recursive|force)/ || c ~ /(curl|wget)[^|]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /git +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean( |$)/ || c ~ /(^|[;&|] *)(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-[a-z]*c/ || c ~ /python[0-9.]*( +-[A-Za-z]+)* +-[A-Za-z]*c( |$)/ || c ~ /-exec(dir)? +rm( |$)/ || c ~ /(ruby|perl) +-e/ || c ~ /php +-r/ || c ~ /node +(-[a-z]*[ep]( |$)|--eval|--print)/ || c ~ /chmod +-R/ || c ~ /(^|[ ;&|])mkfs([. ]|$)/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /(^| )-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|poetry|gem) +(npm +)?(publish|push)/ || c ~ /twine +upload/ || c ~ /(docker|podman) +push/ || c ~ /nuget +push/ || c ~ /mvnw? .*deploy( |$)/ || c ~ /[.]ssh\/|id_rsa|[.]aws\/credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
+    if (c ~ /(\|\| *(true|:|exit +0)|;[ ]*(true|:|exit +0)[ ]*$|&& *(true|:)[ ]*$)/) fail("I3", "line " NR ": " lab ": the command masks failures (|| true, ; true, ; exit 0): " c)
+    if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|rspec|mocha|dotnet test|(npm|yarn|pnpm|bun)( run)? test|bash tests?\/|make (test|check))[^|]*[|][^|]/ && c !~ /\|\|/) warn("W4", "line " NR ": " lab ": a test runner piped into another command hides its exit status unless pipefail is set; run the runner alone: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first
       if (c ~ /^(true|:|echo( .*)?|ls( .*)?|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c) }

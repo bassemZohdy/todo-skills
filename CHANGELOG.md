@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **TASK-015** (docs): Record Claude Code and Codex lifecycle evidence in docs/agent-compatibility.md; Codex stays install-verified only. Validated: `test -f docs/agent-compatibility.md`, `bash tests/run.sh`.
+- **TASK-013** (docs): Run lifecycle trials on TypeScript, Java and multi-module scratch projects and record them in docs/trials.md. Validated: `test -f docs/trials.md`, `bash tests/run.sh`.
 
 - **TASK-012** (feat): Opt-in `todo-verify.sh --strict` also rejects output with no recognizable passing count, unchecked pipes, `set +e` and `|| echo`; default mode is unchanged. Validated: `bash tests/run.sh`.
 - **TASK-014** (test): RTM check R3 (duplicate requirement rows) and fixtures for docs precedence, README fallback, missing RTM, duplicates and archived tasks. Validated: `bash tests/run.sh`.

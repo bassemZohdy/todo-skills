@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fills template.html with TODO.md, CHANGELOG.md, docs/plans/PROJECT.md and META lines, encoded so text cannot
 # break out of the page's script blocks (& -> &amp;, < -> &lt;; the page decodes them).
-# Usage, from the repository root:  bash <skill>/todo-report.sh < meta.txt > docs/status.html
+# Usage, from the repository root:  bash tools/todo-report.sh < meta.txt > docs/status.html
 #   meta.txt: one "key: value" per line (may be empty). Writes only to stdout. Needs bash and sed.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

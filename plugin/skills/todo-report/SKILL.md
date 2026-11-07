@@ -7,24 +7,13 @@ description: Generate an interactive HTML status page for the project at docs/st
 
 First load the `todo` core skill (tree format, lanes, git mode). If it is not a skill, read `../todo/SKILL.md`.
 
-Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that is renamed or removed) (ask before creating `docs/` if it is missing), from the template `template.html` in this skill's folder (filled by the optional `todo-report.sh`, which needs only bash and sed). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
+Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that is renamed or removed) (ask before creating `docs/` if it is missing), from the template `template.md` in this skill's folder (an HTML page inside a fenced block). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
 
 ## Steps
 
 1. If `TODO.md` is missing, say so, suggest `/todo-init` and stop. Check git (core "Git mode") and run the invariant check (core); report a violation in the page's `lint` line, never repair it. In git mode read claims from the base branch (`git show <base>:TODO.md`), as `/todo-status` does.
-2. Read `template.html`. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
-3. **Preferred:** if `todo-report.sh` exists in this skill's folder, run it from the repository root with the META lines (below) on stdin through a quoted heredoc, never inside a `printf` format (META values such as branch names are untrusted text):
-
-   ```bash
-   bash <skill folder>/todo-report.sh > docs/status.html.tmp <<'META'
-   project: <folder name>
-   base: <base branch>
-   META
-   ```
-
-   then, if it exited 0, `mv docs/status.html.tmp docs/status.html` (otherwise remove the `.tmp` file and report the error). A committed `docs/status.html` that this rewrites is a change the user commits; say so.
-
-   It does the encoding. **Otherwise** write `docs/status.html.tmp` by hand (then `mv` it) as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block:
+2. Read `template.md` and take the HTML in its fenced block. It has four placeholders, each inside a `<script type="text/plain">` block: `__META__`, `__TODO__`, `__CHANGELOG__`, `__PLAN__`. The page parses them itself.
+3. Write `docs/status.html.tmp` (then `mv docs/status.html.tmp docs/status.html`; on an error remove the `.tmp` file and report it) as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block. A committed `docs/status.html` that this rewrites is a change the user commits; say so. The optional `tools/todo-report.sh` in the todo-skills repository does the same encoding deterministically; the plugin does not ship it.
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.

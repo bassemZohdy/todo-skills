@@ -7,7 +7,7 @@ A ten-minute walkthrough on a scratch project. You need an agent that loads skil
 ```bash
 git clone https://github.com/bassemZohdy/todo-skills
 mkdir -p ~/.claude/skills
-cp -r todo-skills/skills/* ~/.claude/skills/
+cp -r todo-skills/plugin/skills/* ~/.claude/skills/
 ```
 
 Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills` (commands are then namespaced, for example `/todo-skills:todo-add`). Copy all nine folders; the command skills load the `todo` core skill and its `reference/` files.
@@ -68,7 +68,7 @@ Give roots a lane (`Links: Lane: api`) and run `/todo-continue --all-lanes --mer
 
 ## When something looks wrong
 
-- `bash ~/.claude/skills/todo/scripts/todo-lint.sh` from the repository root checks the backlog rules and tells you the line.
+- `bash tools/todo-lint.sh` from the repository root checks the backlog rules and tells you the line.
 - A session that died mid-task is recovered by the next `/todo-continue`: it finishes an unmerged `[x]` branch or resumes the `[/]` one first.
 - Not in a git repository? Everything still works, without branches or commits, after a one-time warning.
 

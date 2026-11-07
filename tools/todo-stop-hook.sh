@@ -5,7 +5,7 @@
 #
 # .claude/settings.json:
 #   { "hooks": { "Stop": [ { "hooks": [
-#       { "type": "command", "command": "bash .claude/skills/todo/scripts/todo-stop-hook.sh" }
+#       { "type": "command", "command": "bash tools/todo-stop-hook.sh" }
 #   ] } ] } }
 #
 # The hook receives JSON on stdin. It allows the stop (exit 0, no output) when

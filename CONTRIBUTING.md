@@ -9,8 +9,8 @@ The most useful contribution is a trial report. Run the skills on a real project
 ## Change the skills
 
 1. Fork, branch, and keep one change per pull request.
-2. Skills are plain Markdown in `skills/`. Keep each `SKILL.md` frontmatter (`name`, `description`, `argument-hint`) accurate, and keep wording short and literal: a model must be able to follow it step by step.
-3. If you change a rule, change it in one place and fix every mention (`grep` for the old wording). The core `skills/todo/SKILL.md` owns the schema, invariants and guardrails; command skills must not redefine them.
+2. Skills are plain Markdown in `plugin/skills/`. Keep each `SKILL.md` frontmatter (`name`, `description`, `argument-hint`) accurate, and keep wording short and literal: a model must be able to follow it step by step.
+3. If you change a rule, change it in one place and fix every mention (`grep` for the old wording). The core `plugin/skills/todo/SKILL.md` owns the schema, invariants and guardrails; command skills must not redefine them.
 4. If you change the lint, add a fixture in `tests/fixtures/` (`ok-*.md` must pass, `I<n>-*.md` must fail with that invariant, `W<n>-*.md` must warn).
 5. Run `bash tests/run.sh`. It needs only bash, awk, grep and sed, and must report `0 failed`.
 6. For behaviour changes, run the matching scenario in `tests/trials/README.md` with a fresh agent and check it with `tests/trials/assert.sh`.

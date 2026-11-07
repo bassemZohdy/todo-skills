@@ -5,8 +5,8 @@
 # Usage: bash tests/run.sh      Needs bash, awk, grep and sed. Creates no files.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-lint="$root/skills/todo/scripts/todo-lint.sh"
-hook="$root/skills/todo/scripts/todo-stop-hook.sh"
+lint="$root/tools/todo-lint.sh"
+hook="$root/tools/todo-stop-hook.sh"
 fx="$root/tests/fixtures"
 changelog="$fx/changelog/CHANGELOG.md"
 pass=0
@@ -30,7 +30,7 @@ for f in "$fx"/*.md; do
 done
 
 # The plugin version equals the newest released CHANGELOG version.
-pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.claude-plugin/plugin.json" | head -1)"
+pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugin/.claude-plugin/plugin.json" | head -1)"
 cv="$(sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/p' "$root/CHANGELOG.md" | head -1)"
 if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin version $pv matches the changelog (${cv:-no release yet})"; else bad "plugin.json version '$pv' does not match newest CHANGELOG version '$cv'"; fi
 
@@ -38,7 +38,7 @@ if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin versi
 if python3 -c 'import yaml' 2>/dev/null; then
   yamlbad="$(python3 - "$root" <<'PY'
 import sys, glob, yaml
-for f in sorted(glob.glob(sys.argv[1] + "/skills/*/SKILL.md")):
+for f in sorted(glob.glob(sys.argv[1] + "/plugin/skills/*/SKILL.md")):
     try: yaml.safe_load(open(f, encoding="utf-8").read().split("---")[1])
     except Exception: print(f)
 PY
@@ -47,38 +47,50 @@ PY
 fi
 
 # The Codex manifest parses and carries the same version as the Claude plugin manifest.
-cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.codex-plugin/plugin.json" | head -1)"
-if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
+cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugin/.codex-plugin/plugin.json" | head -1)"
+if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/plugin/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
 
 # The report template keeps its four placeholders.
-tpl="$root/skills/todo-report/template.html"
+tpl="$root/tools/template.html"
 if grep -q '>__META__<' "$tpl" && grep -q '>__TODO__<' "$tpl" && grep -q '>__CHANGELOG__<' "$tpl" && grep -q '>__PLAN__<' "$tpl"; then ok "report template placeholders"; else bad "report template placeholders missing"; fi
 
+# Directory policy: the plugin folder ships only Markdown, text, JSON, YAML and PNG/JPEG/GIF/WebP/ICO files, none starting with #!, none with a NUL byte.
+badtype="$(cd "$root/plugin" && find . -type f ! -name '*.md' ! -name '*.json' ! -name '*.yml' ! -name '*.yaml' ! -name '*.txt' ! -name '*.png' ! -name '*.jpg' ! -name '*.jpeg' ! -name '*.gif' ! -name '*.webp' ! -name '*.ico' ! -name LICENSE | head -5)"
+badshebang="$(cd "$root/plugin" && find . -type f \( -name '*.md' -o -name '*.json' -o -name '*.yml' -o -name '*.yaml' -o -name '*.txt' \) -exec sh -c 'head -c2 "$1" | grep -q "^#!" && echo "$1"' _ {} \; | head -5)"
+if [ -z "$badtype" ] && [ -z "$badshebang" ]; then ok "plugin folder ships only allowed file types and no #! files"; else bad "plugin folder has disallowed files: $badtype $badshebang"; fi
+if [ -f "$root/plugin/.claude-plugin/plugin.json" ] && grep -q '"source": "./plugin"' "$root/.claude-plugin/marketplace.json" && grep -q '"path": "./plugin"' "$root/.agents/plugins/marketplace.json"; then ok "marketplaces point at the plugin folder"; else bad "a marketplace does not point at ./plugin"; fi
+# The plugin folder has a README of at least 40 words outside code blocks (directory requirement).
+words="$(sed '/^```/,/^```/d' "$root/plugin/README.md" 2>/dev/null | wc -w)"
+if [ "${words:-0}" -ge 40 ]; then ok "plugin README has $words words"; else bad "plugin/README.md is missing or has fewer than 40 words"; fi
+# The report template embedded in the skill (Markdown) equals tools/template.html.
+emb="$(awk '/^````html$/{f=1;next} /^````$/{f=0} f' "$root/plugin/skills/todo-report/template.md")"
+if [ "$emb" = "$(cat "$root/tools/template.html")" ]; then ok "embedded report template equals tools/template.html"; else bad "plugin/skills/todo-report/template.md differs from tools/template.html: regenerate it"; fi
+
 # Every skill folder has a SKILL.md whose name matches the folder, and the core lists every command skill.
-for d in "$root"/skills/*/; do
+for d in "$root"/plugin/skills/*/; do
   n="$(basename "$d")"
   if grep -q "^name: $n\$" "$d/SKILL.md" 2>/dev/null; then ok "skill $n: name matches folder"; else bad "skill $n: SKILL.md missing or name mismatch"; fi
-  if [ "$n" != todo ]; then grep -q "/$n\b" "$root/skills/todo/SKILL.md" && grep -q "/$n\b" "$root/README.md" || bad "skill $n is not listed in the core commands table and README"; fi
+  if [ "$n" != todo ]; then grep -q "/$n\b" "$root/plugin/skills/todo/SKILL.md" && grep -q "/$n\b" "$root/README.md" || bad "skill $n is not listed in the core commands table and README"; fi
 done
 
 # The report generator encodes hostile text (no raw < from the data reaches the page).
-tmp_out="$(cd "$fx/report" && printf 'project: x\n' | bash "$root/skills/todo-report/todo-report.sh")"
+tmp_out="$(cd "$fx/report" && printf 'project: x\n' | bash "$root/tools/todo-report.sh")"
 if printf '%s' "$tmp_out" | grep -q '<img' || ! printf '%s' "$tmp_out" | grep -q '&lt;/Script>'; then bad "report generator does not encode the data"; else ok "report generator encodes hostile text"; fi
 
 # The report generator refuses to run without a TODO.md in the current directory (FIX-003).
-err="$(cd "$fx/changelog" && printf '' | bash "$root/skills/todo-report/todo-report.sh" 2>&1 >/dev/null)"
+err="$(cd "$fx/changelog" && printf '' | bash "$root/tools/todo-report.sh" 2>&1 >/dev/null)"
 rc=$?
 if [ "$rc" -eq 1 ] && [ "${err#todo-report:}" != "$err" ]; then ok "report generator exits 1 without TODO.md"; else bad "report generator without TODO.md: expected rc=1 and stderr starting 'todo-report:', got rc=$rc: $err"; fi
 
 # This repository's vendored lint (.todo/, from /todo-init --ci) stays identical to the core lint.
-if [ ! -f "$root/.todo/todo-lint.sh" ] || cmp -s "$root/.todo/todo-lint.sh" "$lint"; then ok "vendored .todo/todo-lint.sh matches the core lint"; else bad ".todo/todo-lint.sh differs from skills/todo/scripts/todo-lint.sh: copy it again"; fi
+if [ ! -f "$root/.todo/todo-lint.sh" ] || cmp -s "$root/.todo/todo-lint.sh" "$lint"; then ok "vendored .todo/todo-lint.sh matches tools/todo-lint.sh"; else bad ".todo/todo-lint.sh differs from skills/todo/scripts/todo-lint.sh: copy it again"; fi
 
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
 if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi
 
 # Optional RTM (FEAT-008): docs/RTM.md wins, else README "## RTM", else none; neither is required.
-rtm="$root/skills/todo/scripts/todo-rtm.sh"
+rtm="$root/tools/todo-rtm.sh"
 rx="$root/tests/fixtures-rtm"
 rtm_is() { out="$(bash "$rtm" "$rx/$1" 2>&1)"; rc=$?; if [ "$rc" -eq "$2" ] && [ "$(printf '%s\n' "$out" | head -1)" = "RTM: $3" ]; then ok "rtm $1: $3 (rc $2)"; else bad "rtm $1: expected 'RTM: $3' rc=$2, got rc=$rc: $out"; fi; }
 rtm_is docs-only 0 docs/RTM.md
@@ -100,10 +112,10 @@ out="$(bash "$rtm" "$rx/both" 2>&1)"
 if printf '%s\n' "$out" | head -1 | grep -q 'docs/RTM.md' && ! printf '%s' "$out" | grep -q 'README'; then ok "rtm: docs/RTM.md takes precedence over a README RTM section"; else bad "rtm precedence: $out"; fi
 out="$(bash "$rtm" "$fx/changelog" 2>&1)"
 if [ "$out" = "RTM: none" ]; then ok "rtm: a folder with no README or docs has no RTM"; else bad "rtm without files: $out"; fi
-if grep -q 'reference/rtm.md' "$root/skills/todo/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-plan/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-add/SKILL.md" && grep -q 'rtm.md' "$root/skills/todo-continue/SKILL.md" && [ -f "$root/skills/todo/reference/rtm.md" ]; then ok "plan, add and continue point at the RTM rules"; else bad "an RTM reference is missing from the core, plan, add or continue skill"; fi
+if grep -q 'reference/rtm.md' "$root/plugin/skills/todo/SKILL.md" && grep -q 'rtm.md' "$root/plugin/skills/todo-plan/SKILL.md" && grep -q 'rtm.md' "$root/plugin/skills/todo-add/SKILL.md" && grep -q 'rtm.md' "$root/plugin/skills/todo-continue/SKILL.md" && [ -f "$root/plugin/skills/todo/reference/rtm.md" ]; then ok "plan, add and continue point at the RTM rules"; else bad "an RTM reference is missing from the core, plan, add or continue skill"; fi
 
 # Verification classifier (TASK-009): zero-test runs, missing targets, masked failures; valid runners stay accepted.
-vf="$root/skills/todo/scripts/todo-verify.sh"
+vf="$root/tools/todo-verify.sh"
 vcase() { want="$1"; rc_in="$2"; cmd="$3"; text="$4"; out="$(cd "$root" && printf '%s\n' "$text" | bash "$vf" "$rc_in" "$cmd" 2>&1)"; if [ "${out%% *}" = "$want" ]; then ok "verify $want: $cmd [$text]"; else bad "verify expected $want for '$cmd' [$text], got: $out"; fi; }
 vcase ACCEPT 0 'bash tests/run.sh' '65 passed, 0 failed'
 vcase ACCEPT 0 'python3 -m unittest tests.test_calc' 'Ran 3 tests in 0.01s'
@@ -142,9 +154,9 @@ out="$(cd "$root" && printf 'done\n' | bash "$vf" 0 'make check' 2>&1)"
 if [ "$out" = "ACCEPT" ]; then ok "verify default mode still accepts a count-less runner"; else bad "default mode changed: $out"; fi
 
 # Optional independent design review (TASK-016): documented, optional, never required.
-pl="$root/skills/todo-plan/SKILL.md"
+pl="$root/plugin/skills/todo-plan/SKILL.md"
 if grep -q 'Independent design review (optional, never a required stage)' "$pl" && grep -q 'never block a plan on it' "$pl" && grep -q 'EGM' "$pl" && grep -q 'neither bundles nor requires' "$pl"; then ok "todo-plan documents an optional fresh-context or external design review"; else bad "todo-plan design review section missing or implies it is required"; fi
-if grep -q -- '--strict' "$root/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
+if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"
@@ -158,7 +170,7 @@ if [ -z "$out" ]; then ok "hook allows the stop when verification is blocked"; e
 if [ ! -d "$root/tests/fixtures-rtm/neither/.todo" ]; then ok "a project without .todo/ or CI files is a valid fixture (checks are optional)"; else bad "fixture unexpectedly has .todo/"; fi
 
 # Documentation drift (TASK-011): file:line references, interface changes only, never a new tool.
-dd="$root/skills/todo-continue/SKILL.md"
+dd="$root/plugin/skills/todo-continue/SKILL.md"
 if grep -q '<file>:<line>: <name>' "$dd" && grep -q 'grep -rnF' "$dd" && grep -q 'changed no interface skips this' "$dd" && grep -q 'never blocks it' "$dd"; then ok "documentation drift reports file:line references and does not block unrelated nodes"; else bad "todo-continue documentation drift rules are incomplete"; fi
 drift="$(grep -rnF -- 'todo-lint.sh' "$root/README.md" "$root/docs" 2>/dev/null | head -1)"
 if printf '%s' "$drift" | grep -Eq '^[^:]+:[0-9]+:'; then ok "the documented grep -rnF form yields file:line hits"; else bad "grep -rnF drift form gave no file:line: $drift"; fi

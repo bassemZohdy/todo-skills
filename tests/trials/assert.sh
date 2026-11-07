@@ -4,7 +4,7 @@
 set -u
 dir="${1:?usage: assert.sh <dir> <scenario>}"; scenario="${2:?scenario}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-lint="$root/skills/todo/scripts/todo-lint.sh"
+lint="$root/tools/todo-lint.sh"
 cd "$dir" || exit 1
 pass=0; fail=0
 chk() { if eval "$2" >/dev/null 2>&1; then pass=$((pass+1)); printf 'PASS  %s\n' "$1"; else fail=$((fail+1)); printf 'FAIL  %s\n' "$1"; fi; }
@@ -131,8 +131,8 @@ replan)
   ;;
 ci-github|ci-local)
   chk "check.sh exists and runs green" '[ -f .todo/check.sh ] && bash .todo/check.sh'
-  chk "check.sh runs the lint and the tests" 'grep -q "todo-lint.sh" .todo/check.sh && grep -q "unittest" .todo/check.sh'
-  chk "vendored lint equals the core lint" 'cmp -s .todo/todo-lint.sh .claude/skills/todo/scripts/todo-lint.sh'
+  chk "check.sh runs the tests (and the lint only if .todo/todo-lint.sh exists)" 'grep -q "unittest" .todo/check.sh && { [ -f .todo/todo-lint.sh ] || ! grep -q "todo-lint.sh" .todo/check.sh; }'
+  chk "a vendored lint, if present, equals tools/todo-lint.sh" '[ ! -f .todo/todo-lint.sh ] || cmp -s .todo/todo-lint.sh "$root/tools/todo-lint.sh"'
   chk "nothing committed (the user commits CI files)" 'unchanged'
   if [ "$scenario" = ci-github ]; then
     chk "GitHub workflow runs check.sh with python set up" 'grep -q "check.sh" .github/workflows/todo-check.yml && grep -q "setup-python" .github/workflows/todo-check.yml'

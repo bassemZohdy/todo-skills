@@ -28,6 +28,16 @@ bash tests/trials/score.sh /tmp/runs                       # trial score over a 
 
 | Scenario | Agent | Date | Result |
 |---|---|---|---|
-| `ts-lifecycle`, `java-lifecycle`, `multi-module` | Claude Code | not run | Harness self-test passes; no agent run has been recorded yet. |
+| `ts-lifecycle` | Claude (the interactive session that maintains this repo, following `plugin/skills/todo-continue/SKILL.md` and `todo/reference/git-flow.md` by hand) | 2026-11-07 | Pass: `assert.sh` 13/13. Plan tree FEAT-001 with 2 children; red (missing export), green, `--no-ff` merges, integration `npm test` 3 passing, drain, merge to main. |
+| `java-lifecycle` | same | 2026-11-07 | Pass: `assert.sh` 13/13. Red was a Maven compilation error (`cannot find symbol`), green via `-Dtest=...Test -Dsurefire.failIfNoSpecifiedTests=true`, reactor 3 tests passing. |
+| `multi-module` | same | 2026-11-07 | Pass: `assert.sh` 14/14. Two lanes (core, text) in separate worktrees, claims fast-forwarded on main, second lane refreshed from main after the first landed (no conflict), both drained, worktrees removed. |
+
+### Limits of these runs
+
+- The executor was not an independent fresh-context agent. Launching nested headless agents (`tests/trials/run-claude.sh`) was refused by the sandbox's permission policy, so the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path.
+- The Python scenarios (`interrupted-merge`, `baseline-red`, and the others listed above) remain the evidence for resume and regression-failure behaviour; the three new scenarios have no red-baseline or interrupted-run variant yet.
+- Parallel lanes ran sequentially by one executor (the documented no-subagent fallback), so concurrency itself was not exercised.
+- Slips made during the runs and corrected before the commit: a Java test file was first named `SubtractTestTest` (fixed and amended so the `Done when` id `SubtractTest` is the one that ran); the multi-module claim recorded `baseline 1 passing` although the reactor has 2 tests (not corrected in the scratch repo).
+- Reproduce with `bash tests/trials/setup.sh <dir> <scenario>`, follow `/todo-continue` (`--all-lanes --merge` for `multi-module`), then `bash tests/trials/assert.sh <dir> <scenario>`.
 
 An entry here is added only after a real run, with the agent, date, pass or fail and the ambiguities the agent reported. Nothing on this page claims a result that was not observed.

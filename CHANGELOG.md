@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **TASK-004** Codex plugin support: `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`, version-checked against the Claude manifest in `tests/run.sh`. **TASK-005** Install and skill discovery verified on codex-cli 0.167.0; README states what was tested. **TASK-006** `npx skills add bassemZohdy/todo-skills` documented and verified to list all nine skills; `docs/distribution.md` records the channels.
 - Complexity level per task (`low`, `mid`, `high`, required) so agents can pick a model; optional README `Models:` mapping, `/todo-continue --delegate`, lane and reviewer routing, and escalation one tier per failed attempt. Sizes (`S`/`M`/`L`/`XL`) become optional after the complexity; `/todo-init` migrates the earlier format.
 
 ### Changed
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Quote `argument-hint` in `todo-init`, `todo-plan`, `todo-continue` and `todo-status`: the unquoted brackets were invalid YAML, so strict loaders such as the skills CLI skipped four of the nine skills. `tests/run.sh` now checks every frontmatter.
 - Make the lint portable to macOS awk, recognize virtualenv and local tool runners, and warn for unknown local scripts. Document verification for non-code deliverables and infrastructure-dependent suites; run tests on macOS and Linux.
 
 - **FIX-003** (fix): Make todo-report.sh exit 1 with a stderr message starting "todo-report:" when TODO.md is missing in the current directory. Validated: `bash tests/run.sh`.

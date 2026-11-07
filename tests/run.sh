@@ -34,6 +34,22 @@ pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.clau
 cv="$(sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/p' "$root/CHANGELOG.md" | head -1)"
 if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin version $pv matches the changelog (${cv:-no release yet})"; else bad "plugin.json version '$pv' does not match newest CHANGELOG version '$cv'"; fi
 
+# Every SKILL.md frontmatter is valid YAML (strict loaders such as the skills CLI skip a skill that is not).
+if python3 -c 'import yaml' 2>/dev/null; then
+  yamlbad="$(python3 - "$root" <<'PY'
+import sys, glob, yaml
+for f in sorted(glob.glob(sys.argv[1] + "/skills/*/SKILL.md")):
+    try: yaml.safe_load(open(f, encoding="utf-8").read().split("---")[1])
+    except Exception: print(f)
+PY
+)"
+  if [ -z "$yamlbad" ]; then ok "SKILL.md frontmatter is valid YAML"; else bad "invalid YAML frontmatter: $yamlbad"; fi
+fi
+
+# The Codex manifest parses and carries the same version as the Claude plugin manifest.
+cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/.codex-plugin/plugin.json" | head -1)"
+if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
+
 # The report template keeps its four placeholders.
 tpl="$root/skills/todo-report/template.html"
 if grep -q '>__META__<' "$tpl" && grep -q '>__TODO__<' "$tpl" && grep -q '>__CHANGELOG__<' "$tpl" && grep -q '>__PLAN__<' "$tpl"; then ok "report template placeholders"; else bad "report template placeholders missing"; fi

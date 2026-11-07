@@ -1,7 +1,7 @@
 ---
 name: todo-init
 description: Bootstrap and report on the todo backlog workspace. Use for /todo-init [--plan] [--ci] or when the user wants to set up or check TODO.md and CHANGELOG.md. Scans README.md, docs/, TODO.md and CHANGELOG.md, creates the missing backlog files, detects git, runtime, package manager and test command, offers to migrate the old three-section format to the task tree, and reports the tree. Optionally asks pre-planning questions and sets up CI (or a local pre-push fallback) running the backlog lint and the tests. Idempotent.
-argument-hint: [--plan] [--ci]
+argument-hint: "[--plan] [--ci]"
 ---
 
 # /todo-init

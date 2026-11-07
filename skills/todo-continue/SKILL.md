@@ -1,7 +1,7 @@
 ---
 name: todo-continue
 description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works one root of that lane.
-argument-hint: [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]
+argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]"
 ---
 
 # /todo-continue

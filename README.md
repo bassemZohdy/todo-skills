@@ -55,7 +55,9 @@ All nine skill folders go together: the command skills load the `todo` core skil
 
 - **Claude Code skills:** copy `skills/*` to `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), as above.
 - **Claude Code plugin:** `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills`. Commands are namespaced, for example `/todo-skills:todo-add`.
-- **Other agents** (Codex, Cursor, and so on): the skills are plain Markdown. Copy `skills/` where your agent reads skills, or point its `AGENTS.md` at `skills/todo/SKILL.md`. Only git and bash are needed, and nothing is Claude-specific, but only Claude Code has been tested.
+- **Codex plugin:** `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add todo-skills@todo-skills`. Verified on codex-cli 0.167.0: the marketplace is read from `.agents/plugins/marketplace.json` and all nine skills install from `.codex-plugin/plugin.json`.
+- **Any agent via the skills CLI:** `npx skills add bassemZohdy/todo-skills` lists and installs the nine skills for the agents it supports. Add `--skill <name>` for one, but install all nine together: the command skills load the `todo` core skill.
+- **Other agents** (Cursor, and so on): the skills are plain Markdown. Copy `skills/` where your agent reads skills, or point its `AGENTS.md` at `skills/todo/SKILL.md`. Only git and bash are needed, and nothing is Claude-specific. Tested: Claude Code (full use) and Codex (installs and discovers the skills; the workflows were not run end to end there).
 
 Skills load when their description matches, so add this to `AGENTS.md` or `CLAUDE.md` for reliable use:
 

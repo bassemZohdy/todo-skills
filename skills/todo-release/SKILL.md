@@ -2,7 +2,7 @@
 name: todo-release
 description: Prepare a release from CHANGELOG.md. Use for /todo-release [--version X.Y.Z]. Proposes the next semantic version from the entries in [Unreleased], asks for confirmation, then turns [Unreleased] into a dated version section with a fresh empty [Unreleased], and prints the tag and push commands. Never tags, pushes or edits version files.
 disable-model-invocation: true
-argument-hint: [--version X.Y.Z]
+argument-hint: "[--version X.Y.Z]"
 ---
 
 # /todo-release

@@ -1,7 +1,7 @@
 ---
 name: todo-status
 description: Read-only view of the TODO.md task tree. Use for /todo-status [--search <text>] [--last <N>]. Shows the tree with markers and complexity, children done/total per root, the active node, the next workable node, blocked nodes with their reasons, and recently drained work from CHANGELOG.md. Searches TODO.md and CHANGELOG.md. Never changes any file.
-argument-hint: [--search <text>] [--last <N>]
+argument-hint: "[--search <text>] [--last <N>]"
 ---
 
 # /todo-status

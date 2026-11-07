@@ -1,7 +1,7 @@
 ---
 name: todo-plan
 description: Plan or re-plan the work in the TODO.md task tree. Use for /todo-plan [<goal>] [--revise [<reason>]]. Turns a goal into a plan doc (docs/plans/PROJECT.md) and a proposed tree with lanes, or revises the plan at any time when it no longer fits. Only open [ ] nodes are changed; started or finished work is never touched. Shows the change and waits for confirmation. Never starts work.
-argument-hint: [<goal>] [--revise [<reason>]]
+argument-hint: "[<goal>] [--revise [<reason>]]"
 ---
 
 # /todo-plan

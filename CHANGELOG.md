@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-07
+
 ### Added
 
 - Listing icon (a square PNG in the plugin manifest folder) and a disclosure of what the plugin runs, reads, writes and sends (README, SECURITY.md) for the directory submission.
 
 ### Changed
 
+- The plugin now lives in `plugin/` and ships Markdown only, as the directory accepts no scripts or HTML from unverified organizations: the optional scripts and the report generator moved to `tools/` (copy them into a project by hand), the report template is embedded in `plugin/skills/todo-report/template.md`, and `.todo/todo-lint.sh` is no longer written by `/todo-init --ci`. Both marketplaces point at `./plugin`; the install path for copied skills is `plugin/skills/*`.
 - **TASK-007** (chore): Submit to the Anthropic plugin directory and record it. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
 
 ## [0.3.0] - 2026-11-07
@@ -89,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bassemZohdy/todo-skills/releases/tag/v0.1.0

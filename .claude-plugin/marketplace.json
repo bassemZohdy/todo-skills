@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "todo-skills",
-      "source": "./",
+      "source": "./plugin",
       "description": "A lean, file-native backlog for coding agents: task tree in TODO.md, a branch per task, tests plus regression before merge, append-only CHANGELOG.md."
     }
   ]

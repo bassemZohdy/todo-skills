@@ -1,6 +1,6 @@
 # Reference
 
-The full format and rules of the todo-skills. The rules themselves live in [`skills/todo/SKILL.md`](../skills/todo/SKILL.md) (the model reads that file); this page is the human-readable version. New here? Start with [GETTING-STARTED.md](GETTING-STARTED.md).
+The full format and rules of the todo-skills. The rules themselves live in [`plugin/skills/todo/SKILL.md`](../plugin/skills/todo/SKILL.md) (the model reads that file); this page is the human-readable version. New here? Start with [GETTING-STARTED.md](GETTING-STARTED.md).
 
 ## Task tree
 
@@ -52,7 +52,7 @@ Each node: write the tests first, run `Done when` in full (target a test id or p
 
 ## Requirements traceability (optional)
 
-Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash skills/todo/scripts/todo-rtm.sh` prints the resolved location and flags stale task IDs (R1) and archived rows without verification (R2). Format and rules: `skills/todo/reference/rtm.md`.
+Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash skills/todo/scripts/todo-rtm.sh` prints the resolved location and flags stale task IDs (R1) and archived rows without verification (R2). Format and rules: `plugin/skills/todo/reference/rtm.md`.
 
 ## Project Definition of Done (optional)
 
@@ -60,21 +60,21 @@ Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `
 
 ## Optional enforcement
 
-The invariants I1-I10 (one active task, unique IDs, task fields, complexity and any sizes, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. Both scripts are read-only, need only bash, awk, grep, sed and tr, and are installed with the `todo` skill.
+The invariants I1-I10 (one active task, unique IDs, task fields, complexity and any sizes, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. The scripts are read-only, need only bash, awk, grep, sed and tr, and live in `tools/` of the todo-skills repository (the plugin itself ships Markdown only); copy the ones you want into your project.
 
 ```bash
-bash ~/.claude/skills/todo/scripts/todo-lint.sh          # from the repository root
+bash tools/todo-lint.sh          # from the repository root
 ```
 
 Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [
-  { "type": "command", "command": "bash .claude/skills/todo/scripts/todo-stop-hook.sh" }
+  { "type": "command", "command": "bash tools/todo-stop-hook.sh" }
 ] } ] } }
 ```
 
-With a user-level install (`~/.claude/skills`) use `bash ~/.claude/skills/todo/scripts/todo-stop-hook.sh` as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
+Use the path where you copied the script as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
 
 Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files.
 
@@ -84,7 +84,7 @@ A **lane** is a named track of root trees that one agent context works alone. Pu
 
 - `/todo-continue --lane <name>` takes only that lane's roots, in order.
 - `/todo-continue --all-lanes [--seq]` starts one subagent per lane, each in its own worktree. The main thread is the coordinator: it publishes the tree claims, then refreshes each finished root from the base, re-runs its tests, drains it and (with `--merge`) merges it, one root at a time. `--seq` runs the lanes one after another; without a subagent tool the lanes run sequentially anyway.
-- Order across lanes is `Depends:` only. Lanes work best when their trees touch different files; the second and later roots to land will usually conflict in `TODO.md` and `CHANGELOG.md`, which the coordinator resolves by the conflict rules in `skills/todo/reference/git-flow.md`.
+- Order across lanes is `Depends:` only. Lanes work best when their trees touch different files; the second and later roots to land will usually conflict in `TODO.md` and `CHANGELOG.md`, which the coordinator resolves by the conflict rules in `plugin/skills/todo/reference/git-flow.md`.
 
 ## Planning
 
@@ -96,14 +96,13 @@ Between build and verify, `/todo-continue` reads the whole diff against the task
 
 ## Status page
 
-`/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. The optional `skills/todo-report/todo-report.sh` (bash and sed) fills the template deterministically; without it the agent does the same encoding by hand. It renders text with `textContent` only and loads nothing from the network.
+`/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. The optional `tools/todo-report.sh` (bash and sed) fills the template deterministically; without it the agent does the same encoding by hand. It renders text with `textContent` only and loads nothing from the network.
 
 ## CI and the local fallback
 
-`/todo-init --ci` (rules in `skills/todo/reference/ci.md`) writes, each on your yes:
+`/todo-init --ci` (rules in `plugin/skills/todo/reference/ci.md`) writes, each on your yes:
 
-- `.todo/todo-lint.sh`, a copy of the lint, so CI needs no skills installed;
-- `.todo/check.sh`, which runs the lint and then the project's test command;
+- `.todo/check.sh`, which runs the project's test command and, when you have copied `tools/todo-lint.sh` to `.todo/todo-lint.sh` (so CI needs no skills installed; the skills never download it), the lint first;
 - a CI job that runs `bash .todo/check.sh`: `.github/workflows/todo-check.yml` (runtime set up from the project's marker files), a `todo-check` job for `.gitlab-ci.yml`, or the one line to add for other CI. If CI already runs the tests, the job only runs the lint.
 
 Fallback without CI: a git `pre-push` hook that runs the same check and refuses the push when it fails. In every case `/todo-continue` runs `.todo/check.sh` as the last gate before a root's drain, so the same lint and tests run whether or not CI exists. Commit `.todo/` and the workflow yourself; the skills never push.
@@ -116,7 +115,7 @@ This project follows [Semantic Versioning](https://semver.org/). The public inte
 - **MINOR** for a new command, flag, optional field, warning or script that existing valid files still pass.
 - **PATCH** for wording fixes, bug fixes and documentation.
 
-The version lives in `.claude-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this). Releases are cut with `/todo-release` and tagged by a person.
+The version lives in `plugin/.claude-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this). Releases are cut with `/todo-release` and tagged by a person.
 
 ## Design rules
 

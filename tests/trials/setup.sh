@@ -12,7 +12,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 [ ! -e "$dir" ] || [ -z "$(ls -A "$dir" 2>/dev/null)" ] || { echo "$dir must be new or empty"; exit 1; }
 mkdir -p "$dir/.claude/skills" "$dir/tests"
 dir="$(cd "$dir" && pwd)"
-cp -r "$root"/skills/* "$dir/.claude/skills/"
+cp -r "$root"/plugin/skills/* "$dir/.claude/skills/"
 cd "$dir"
 g() { git -c user.email=t@t -c user.name=t "$@"; }
 printf '__pycache__/\n' > .gitignore

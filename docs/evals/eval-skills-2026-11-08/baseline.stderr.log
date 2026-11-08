@@ -1,0 +1,499 @@
+test_feature_cell_change_leaves_scores_untouched (test_anchored.Anchored.test_feature_cell_change_leaves_scores_untouched) ... ok
+test_long_rationale_warns (test_anchored.Anchored.test_long_rationale_warns) ... ok
+test_missing_requirement_score_counts_zero_with_a_best_case (test_anchored.Anchored.test_missing_requirement_score_counts_zero_with_a_best_case) ... ok
+test_old_model_still_works (test_anchored.Anchored.test_old_model_still_works) ... ok
+test_priority_points_come_from_the_mapping (test_anchored.Anchored.test_priority_points_come_from_the_mapping) ... ok
+test_requirement_override_needs_a_reason (test_anchored.Anchored.test_requirement_override_needs_a_reason) ... ok
+test_requirement_score_change_leaves_features_md_untouched (test_anchored.Anchored.test_requirement_score_change_leaves_features_md_untouched) ... ok
+test_score_outside_zero_to_five_is_an_error (test_anchored.Anchored.test_score_outside_zero_to_five_is_an_error) ... ok
+test_scorer_rejects_features_inside_scores (test_anchored.Anchored.test_scorer_rejects_features_inside_scores) ... ok
+test_total_matches_an_independent_hand_calculation (test_anchored.Anchored.test_total_matches_an_independent_hand_calculation) ... ok
+test_weak_evidence_caps_a_requirement_at_two (test_anchored.Anchored.test_weak_evidence_caps_a_requirement_at_two) ... ok
+test_example_exports_html_and_xlsx_with_the_feature_table (test_anchored.AnchoredExport.test_example_exports_html_and_xlsx_with_the_feature_table) ... ok
+test_a_category_with_one_requirement_is_an_error (test_anchored.Hierarchy.test_a_category_with_one_requirement_is_an_error) ... ok
+test_a_requirement_in_two_categories_is_an_error (test_anchored.Hierarchy.test_a_requirement_in_two_categories_is_an_error) ... ok
+test_contribution_and_attainment_are_reported (test_anchored.Hierarchy.test_contribution_and_attainment_are_reported) ... ok
+test_fractional_weight_is_an_error (test_anchored.Hierarchy.test_fractional_weight_is_an_error) ... ok
+test_largest_remainder_sums_to_the_category_weight (test_anchored.Hierarchy.test_largest_remainder_sums_to_the_category_weight) ... ok
+test_requirement_shares_sum_to_each_category_weight (test_anchored.Hierarchy.test_requirement_shares_sum_to_each_category_weight) ... ok
+test_weights_must_sum_to_100 (test_anchored.Hierarchy.test_weights_must_sum_to_100) ... ok
+test_export_has_the_toggle_and_scores_are_untouched (test_anchored.ScopeTags.test_export_has_the_toggle_and_scores_are_untouched) ... /work/tests/test_anchored.py:220: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmphpzx32jg/eval/scores.json'>
+  before = open(os.path.join(self.d, "scores.json"), "rb").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_anchored.py:223: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphpzx32jg/out/report.html' mode='r' encoding='utf-8'>
+  page = open(os.path.join(out, "report.html"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_anchored.py:227: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmphpzx32jg/eval/scores.json'>
+  self.assertEqual(before, open(os.path.join(self.d, "scores.json"), "rb").read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_stands_alone_leaves_out_tagged_and_negative_rows (test_anchored.ScopeTags.test_stands_alone_leaves_out_tagged_and_negative_rows) ... /work/tests/test_anchored.py:239: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp8u8cqwin/out/report.html' mode='r' encoding='utf-8'>
+  page = open(os.path.join(out, "report.html"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unknown_tag_is_an_error (test_anchored.ScopeTags.test_unknown_tag_is_an_error) ... ok
+test_appends_next_free_id (test_eval_calc.AddEvidenceTest.test_appends_next_free_id) ... ok
+test_rejects_bad_input (test_eval_calc.AddEvidenceTest.test_rejects_bad_input) ... ok
+test_balanced_evidence_is_quiet (test_eval_calc.BalanceTest.test_balanced_evidence_is_quiet) ... ok
+test_option_with_thin_evidence_is_flagged (test_eval_calc.BalanceTest.test_option_with_thin_evidence_is_flagged) ... ok
+test_unknown_cells_do_not_count_as_evidence (test_eval_calc.BalanceTest.test_unknown_cells_do_not_count_as_evidence) ... ok
+test_all_vendor_evidence_is_called_out (test_eval_calc.BiasChecksTest.test_all_vendor_evidence_is_called_out) ... ok
+test_assumed_gate_warns_and_assumed_requirement_is_listed (test_eval_calc.BiasChecksTest.test_assumed_gate_warns_and_assumed_requirement_is_listed) ... ok
+test_cost_comparison_covering_some_options_only_is_called_out (test_eval_calc.BiasChecksTest.test_cost_comparison_covering_some_options_only_is_called_out) ... ok
+test_equal_independent_coverage_is_quiet (test_eval_calc.BiasChecksTest.test_equal_independent_coverage_is_quiet) ... ok
+test_fully_priced_or_fully_unpriced_cost_is_quiet (test_eval_calc.BiasChecksTest.test_fully_priced_or_fully_unpriced_cost_is_quiet) ... ok
+test_missing_providers_are_reported_not_hidden (test_eval_calc.BiasChecksTest.test_missing_providers_are_reported_not_hidden) ... ok
+test_provider_concentration_warns_when_most_options_share_a_provider (test_eval_calc.BiasChecksTest.test_provider_concentration_warns_when_most_options_share_a_provider) ... ok
+test_spread_of_providers_is_quiet (test_eval_calc.BiasChecksTest.test_spread_of_providers_is_quiet) ... ok
+test_two_options_are_too_few_to_judge_concentration (test_eval_calc.BiasChecksTest.test_two_options_are_too_few_to_judge_concentration) ... ok
+test_unequal_independent_coverage_is_called_out (test_eval_calc.BiasChecksTest.test_unequal_independent_coverage_is_called_out) ... ok
+test_basis_and_provider_are_validated (test_eval_calc.BiasFieldsTest.test_basis_and_provider_are_validated) ... ok
+test_score_writes_bias_checks_and_an_assumed_gate_warning (test_eval_calc.BiasFieldsTest.test_score_writes_bias_checks_and_an_assumed_gate_warning) ... ok
+test_evidence_class_is_validated (test_eval_calc.ConfidenceV2Test.test_evidence_class_is_validated) ... ok
+test_official_documentation_is_one_source_for_a_feature (test_eval_calc.ConfidenceV2Test.test_official_documentation_is_one_source_for_a_feature) ... ok
+test_official_documentation_plus_an_independent_source_is_high (test_eval_calc.ConfidenceV2Test.test_official_documentation_plus_an_independent_source_is_high) ... ok
+test_vendor_documentation_gives_medium_for_functional_requirements (test_eval_calc.ConfidenceV2Test.test_vendor_documentation_gives_medium_for_functional_requirements) ... ok
+test_assumed_component_needs_a_note_and_is_flagged (test_eval_calc.CostModelV2Test.test_assumed_component_needs_a_note_and_is_flagged) ... ok
+test_capacity_steps_change_the_scenario_totals (test_eval_calc.CostModelV2Test.test_capacity_steps_change_the_scenario_totals) ... ok
+test_capacity_steps_follow_the_driver (test_eval_calc.CostModelV2Test.test_capacity_steps_follow_the_driver) ... ok
+test_hourly_prices_convert_to_monthly (test_eval_calc.CostModelV2Test.test_hourly_prices_convert_to_monthly) ... ok
+test_per_is_validated (test_eval_calc.CostModelV2Test.test_per_is_validated) ... ok
+test_steps_must_end_with_null_and_need_a_driver (test_eval_calc.CostModelV2Test.test_steps_must_end_with_null_and_need_a_driver) ... ok
+test_all_prices_unknown_means_no_cheapest (test_eval_calc.CostTest.test_all_prices_unknown_means_no_cheapest) ... ok
+test_cheapest_option_flips_between_scenarios (test_eval_calc.CostTest.test_cheapest_option_flips_between_scenarios) ... ok
+test_cited_evidence_counts_toward_confidence (test_eval_calc.CostTest.test_cited_evidence_counts_toward_confidence) ... ok
+test_cost_json_required_before_compare (test_eval_calc.CostTest.test_cost_json_required_before_compare) ... ok
+test_every_profiled_option_needs_a_cost_model (test_eval_calc.CostTest.test_every_profiled_option_needs_a_cost_model) ... ok
+test_incomplete_options_are_never_ranked_cheapest (test_eval_calc.CostTest.test_incomplete_options_are_never_ranked_cheapest) ... ok
+test_priced_component_needs_evidence (test_eval_calc.CostTest.test_priced_component_needs_evidence) ... ok
+test_score_adds_cost_summary_and_features_table (test_eval_calc.CostTest.test_score_adds_cost_summary_and_features_table) ... ok
+test_tco_matches_hand_calculation (test_eval_calc.CostTest.test_tco_matches_hand_calculation) ... ok
+test_tiered_graduated_and_volume_modes (test_eval_calc.CostTest.test_tiered_graduated_and_volume_modes) ... ok
+test_tiers_must_end_with_null (test_eval_calc.CostTest.test_tiers_must_end_with_null) ... ok
+test_unknown_evidence_driver_and_option_are_rejected (test_eval_calc.CostTest.test_unknown_evidence_driver_and_option_are_rejected) ... ok
+test_unknown_price_marks_option_incomplete_and_is_not_guessed (test_eval_calc.CostTest.test_unknown_price_marks_option_incomplete_and_is_not_guessed) ... ok
+test_usage_included_free_and_quantity_driver (test_eval_calc.CostTest.test_usage_included_free_and_quantity_driver) ... ok
+test_weak_evidence_is_listed_as_a_gap (test_eval_calc.CostTest.test_weak_evidence_is_listed_as_a_gap) ... ok
+test_zero_weight_criterion_needs_no_rationale (test_eval_calc.CostTest.test_zero_weight_criterion_needs_no_rationale) ... ok
+test_cli (test_eval_calc.GapsTest.test_cli) ... ok
+test_excluded_options_and_limit (test_eval_calc.GapsTest.test_excluded_options_and_limit) ... ok
+test_lists_unknown_and_unsupported_most_important_first (test_eval_calc.GapsTest.test_lists_unknown_and_unsupported_most_important_first) ... ok
+test_cli (test_eval_calc.MatrixTest.test_cli) ... ok
+test_equal_weights_view (test_eval_calc.MatrixTest.test_equal_weights_view) ... ok
+test_rejects_tables_without_the_expected_columns (test_eval_calc.MatrixTest.test_rejects_tables_without_the_expected_columns) ... ok
+test_sensitivity_reports_flips_and_smallest_lead (test_eval_calc.MatrixTest.test_sensitivity_reports_flips_and_smallest_lead) ... ok
+test_totals_ranking_and_text_columns_are_ignored (test_eval_calc.MatrixTest.test_totals_ranking_and_text_columns_are_ignored) ... ok
+test_one_warning_per_option (test_eval_calc.MissingCellsWarningTest.test_one_warning_per_option) ... ok
+test_package_is_optional_and_must_be_text (test_eval_calc.PackageTest.test_package_is_optional_and_must_be_text) ... ok
+test_copied_rationale_is_flagged (test_eval_calc.QualityWarningsTest.test_copied_rationale_is_flagged) ... ok
+test_gate_pass_without_evidence_is_flagged (test_eval_calc.QualityWarningsTest.test_gate_pass_without_evidence_is_flagged) ... ok
+test_sample_has_no_gate_warnings (test_eval_calc.QualityWarningsTest.test_sample_has_no_gate_warnings) ... ok
+test_clear_margin_is_not_a_tie (test_eval_calc.RankTest.test_clear_margin_is_not_a_tie) ... ok
+test_gap_count_breaks_tie_first (test_eval_calc.RankTest.test_gap_count_breaks_tie_first) ... ok
+test_add_evidence_can_mark_scope (test_eval_calc.ScopeTest.test_add_evidence_can_mark_scope) ... ok
+test_cell_credited_only_from_out_of_scope_evidence_is_refused (test_eval_calc.ScopeTest.test_cell_credited_only_from_out_of_scope_evidence_is_refused) ... ok
+test_not_provided_with_out_of_scope_evidence_is_accepted (test_eval_calc.ScopeTest.test_not_provided_with_out_of_scope_evidence_is_accepted) ... ok
+test_one_in_scope_source_is_enough (test_eval_calc.ScopeTest.test_one_in_scope_source_is_enough) ... ok
+test_scope_value_is_validated (test_eval_calc.ScopeTest.test_scope_value_is_validated) ... ok
+test_confidence_test_flips_top_option (test_eval_calc.ScoreTest.test_confidence_test_flips_top_option) ... ok
+test_cost_separate_excludes_cost_from_total (test_eval_calc.ScoreTest.test_cost_separate_excludes_cost_from_total) ... ok
+test_failed_gate_is_excluded_even_if_not_flagged (test_eval_calc.ScoreTest.test_failed_gate_is_excluded_even_if_not_flagged) ... ok
+test_features_md_matches_committed_copy (test_eval_calc.ScoreTest.test_features_md_matches_committed_copy) ... ok
+test_half_up_rounding (test_eval_calc.ScoreTest.test_half_up_rounding) ... ok
+test_missing_cell_counts_as_unknown (test_eval_calc.ScoreTest.test_missing_cell_counts_as_unknown) ... ok
+test_must_summary_and_excluded (test_eval_calc.ScoreTest.test_must_summary_and_excluded) ... ok
+test_near_tie_is_reported_and_broken_by_top_criterion (test_eval_calc.ScoreTest.test_near_tie_is_reported_and_broken_by_top_criterion) ... ok
+test_override_applies_and_needs_reason (test_eval_calc.ScoreTest.test_override_applies_and_needs_reason) ... ok
+test_priority_weighting (test_eval_calc.ScoreTest.test_priority_weighting) ... ok
+test_scoring_is_deterministic (test_eval_calc.ScoreTest.test_scoring_is_deterministic) ... ok
+test_sensitivity_values (test_eval_calc.ScoreTest.test_sensitivity_values) ... ok
+test_totals_and_ranking (test_eval_calc.ScoreTest.test_totals_and_ranking) ... ok
+test_unverified_gate_blocks_ranking (test_eval_calc.ScoreTest.test_unverified_gate_blocks_ranking) ... ok
+test_unverified_only_evidence_caps_score (test_eval_calc.ScoreTest.test_unverified_only_evidence_caps_score) ... ok
+test_vendor_claimed_counts_as_gap (test_eval_calc.ScoreTest.test_vendor_claimed_counts_as_gap) ... ok
+test_waived_gate_is_ranked (test_eval_calc.ScoreTest.test_waived_gate_is_ranked) ... ok
+test_fast_moving_options_use_the_short_limit (test_eval_calc.StaleEvidenceTest.test_fast_moving_options_use_the_short_limit) ... ok
+test_old_evidence_is_flagged_and_dates_are_respected (test_eval_calc.StaleEvidenceTest.test_old_evidence_is_flagged_and_dates_are_respected) ... ok
+test_write_records_ids_and_marks_steps_stale (test_eval_calc.StaleEvidenceTest.test_write_records_ids_and_marks_steps_stale) ... /work/tests/test_eval_calc.py:931: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpn77a1w89/eval/status.json' mode='r' encoding='utf-8'>
+  status = json.load(open(os.path.join(self.d, "status.json"), encoding="utf-8"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_apply_weights_rejects_unknown_ids (test_eval_calc.StatusCommandsTest.test_apply_weights_rejects_unknown_ids) ... ok
+test_apply_weights_writes_rank_sum_and_zeroes_the_rest (test_eval_calc.StatusCommandsTest.test_apply_weights_writes_rank_sum_and_zeroes_the_rest) ... ok
+test_changed_marks_only_completed_dependents_in_order (test_eval_calc.StatusCommandsTest.test_changed_marks_only_completed_dependents_in_order) ... ok
+test_changed_rejects_unknown_topics (test_eval_calc.StatusCommandsTest.test_changed_rejects_unknown_topics) ... ok
+test_cli_commands (test_eval_calc.StatusCommandsTest.test_cli_commands) ... ok
+test_complete_creates_status_for_define_and_keeps_order (test_eval_calc.StatusCommandsTest.test_complete_creates_status_for_define_and_keeps_order) ... ok
+test_complete_refuses_to_skip_a_step (test_eval_calc.StatusCommandsTest.test_complete_refuses_to_skip_a_step) ... ok
+test_complete_without_define_is_refused (test_eval_calc.StatusCommandsTest.test_complete_without_define_is_refused) ... ok
+test_report_sets_the_report_date_and_clears_stale (test_eval_calc.StatusCommandsTest.test_report_sets_the_report_date_and_clears_stale) ... ok
+test_archived_evaluations_are_listed (test_eval_calc.StatusTest.test_archived_evaluations_are_listed) ... ok
+test_finished_evaluation (test_eval_calc.StatusTest.test_finished_evaluation) ... ok
+test_no_evaluation_starts_with_define (test_eval_calc.StatusTest.test_no_evaluation_starts_with_define) ... ok
+test_partial_evaluation_continues_at_first_missing_step (test_eval_calc.StatusTest.test_partial_evaluation_continues_at_first_missing_step) ... ok
+test_problems_are_surfaced (test_eval_calc.StatusTest.test_problems_are_surfaced) ... /work/tests/test_eval_calc.py:437: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpn34b5zei/eval/evidence.json' mode='w' encoding='utf-8'>
+  open(os.path.join(self.d, "evidence.json"), "w").write("{broken")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_stale_steps_rerun_earliest_first (test_eval_calc.StatusTest.test_stale_steps_rerun_earliest_first) ... ok
+test_bounds_and_overtaking (test_eval_calc.UnknownBoundsTest.test_bounds_and_overtaking) ... ok
+test_no_unknowns_means_no_overtaking (test_eval_calc.UnknownBoundsTest.test_no_unknowns_means_no_overtaking) ... ok
+test_bad_confidence_label (test_eval_calc.ValidateTest.test_bad_confidence_label) ... ok
+test_before_blocks_on_stale_steps (test_eval_calc.ValidateTest.test_before_blocks_on_stale_steps) ... ok
+test_before_requires_completed_steps (test_eval_calc.ValidateTest.test_before_requires_completed_steps) ... ok
+test_cost_requirement_required (test_eval_calc.ValidateTest.test_cost_requirement_required) ... ok
+test_duplicate_requirement_id (test_eval_calc.ValidateTest.test_duplicate_requirement_id) ... ok
+test_gate_needs_scope (test_eval_calc.ValidateTest.test_gate_needs_scope) ... ok
+test_missing_evidence_id (test_eval_calc.ValidateTest.test_missing_evidence_id) ... ok
+test_missing_status_file (test_eval_calc.ValidateTest.test_missing_status_file) ... ok
+test_sample_is_valid (test_eval_calc.ValidateTest.test_sample_is_valid) ... ok
+test_unknown_evidence_id_in_cell (test_eval_calc.ValidateTest.test_unknown_evidence_id_in_cell) ... ok
+test_weights_must_sum_to_100 (test_eval_calc.ValidateTest.test_weights_must_sum_to_100) ... ok
+test_always_sums_to_100 (test_eval_calc.WeightsTest.test_always_sums_to_100) ... ok
+test_rank_sum_five_largest_remainder (test_eval_calc.WeightsTest.test_rank_sum_five_largest_remainder) ... ok
+test_rank_sum_four_is_exact (test_eval_calc.WeightsTest.test_rank_sum_four_is_exact) ... ok
+test_rank_sum_three (test_eval_calc.WeightsTest.test_rank_sum_three) ... ok
+test_example_is_clean (test_evidence_rules.EvidenceRules.test_example_is_clean) ... ok
+test_latest_needs_a_source_date (test_evidence_rules.EvidenceRules.test_latest_needs_a_source_date) ... ok
+test_moving_branch_url_warns (test_evidence_rules.EvidenceRules.test_moving_branch_url_warns) ... ok
+test_same_document_at_two_pins_warns (test_evidence_rules.EvidenceRules.test_same_document_at_two_pins_warns) ... ok
+test_source_class_is_checked (test_evidence_rules.EvidenceRules.test_source_class_is_checked) ... ok
+test_sources_are_numbered_by_first_citation_one_per_document (test_evidence_rules.EvidenceRules.test_sources_are_numbered_by_first_citation_one_per_document) ... ok
+test_uncited_evidence_is_an_error_once_compare_is_done (test_evidence_rules.EvidenceRules.test_uncited_evidence_is_an_error_once_compare_is_done) ... ok
+test_unpinned_rows_warn_once (test_evidence_rules.EvidenceRules.test_unpinned_rows_warn_once) ... ok
+test_all_checked_does_not_warn (test_evidence_rules.OssInheritance.test_all_checked_does_not_warn) ... ok
+test_inherited_only_evidence_caps_confidence_at_medium (test_evidence_rules.OssInheritance.test_inherited_only_evidence_caps_confidence_at_medium) ... ok
+test_oss_base_needs_project_ref_and_source (test_evidence_rules.OssInheritance.test_oss_base_needs_project_ref_and_source) ... ok
+test_unchecked_option_next_to_an_oss_base_warns (test_evidence_rules.OssInheritance.test_unchecked_option_next_to_an_oss_base_warns) ... ok
+test_assumed_components_are_labelled_assumed (test_export.ExportTest.test_assumed_components_are_labelled_assumed) ... /work/tests/test_export.py:96: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp87_eqmjo/eval/cost.json' mode='r' encoding='utf-8'>
+  c = json.load(open(p, encoding="utf-8"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export.py:99: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp87_eqmjo/eval/cost.json' mode='w' encoding='utf-8'>
+  json.dump(c, open(p, "w", encoding="utf-8"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export.py:103: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp87_eqmjo/o/report.html' mode='r' encoding='utf-8'>
+  h = open(os.path.join(d, "o", "report.html"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bias_section_is_in_the_html (test_export.ExportTest.test_bias_section_is_in_the_html) ... ok
+test_html_contents (test_export.ExportTest.test_html_contents) ... ok
+test_html_escapes_content (test_export.ExportTest.test_html_escapes_content) ... /work/tests/test_export.py:41: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2h5096l4/eval/options.json' mode='r' encoding='utf-8'>
+  s = open(p, encoding="utf-8").read().replace("Alpha Queue", "Alpha <script>x</script>")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2h5096l4/eval/options.json' mode='w' encoding='utf-8'>
+  open(p, "w", encoding="utf-8").write(s)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export.py:44: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2h5096l4/o/report.html' mode='r' encoding='utf-8'>
+  h = open(os.path.join(d, "o", "report.html"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_markdown_converter (test_export.ExportTest.test_markdown_converter) ... ok
+test_pdf_is_produced (test_export.ExportTest.test_pdf_is_produced) ... skipped 'no Edge or Chrome installed'
+test_requires_computed_scores (test_export.ExportTest.test_requires_computed_scores) ... /work/tests/test_export.py:113: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpxs7_u7z3/eval/scores.json' mode='w' encoding='utf-8'>
+  open(os.path.join(d, "eval", "scores.json"), "w").write('{"cell_values": {}}')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unknown_format_rejected (test_export.ExportTest.test_unknown_format_rejected) ... ok
+test_xlsx_cost_sheet_has_editable_horizon_and_live_totals (test_export.ExportTest.test_xlsx_cost_sheet_has_editable_horizon_and_live_totals) ... ok
+test_xlsx_is_wellformed_with_live_formulas (test_export.ExportTest.test_xlsx_is_wellformed_with_live_formulas) ... ok
+test_xlsx_ranking_formulas_reference_scores_sheet (test_export.ExportTest.test_xlsx_ranking_formulas_reference_scores_sheet) ... ok
+test_a_total_missing_from_the_page_is_reported (test_export_check.ExportCheck.test_a_total_missing_from_the_page_is_reported) ... ok
+test_browser_checks_pass_on_the_example_and_catch_sideways_scroll (test_export_check.ExportCheck.test_browser_checks_pass_on_the_example_and_catch_sideways_scroll) ... skipped 'no Edge or Chrome'
+test_cli_check (test_export_check.ExportCheck.test_cli_check) ... ok
+test_rescoring_records_the_earlier_total_and_a_stale_number_is_caught (test_export_check.ExportCheck.test_rescoring_records_the_earlier_total_and_a_stale_number_is_caught) ... /work/tests/test_export_check.py:39: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9w0blc2c/eval/scores.json' mode='r' encoding='utf-8'>
+  old = json.load(open(os.path.join(self.d, "scores.json")))["totals"]["opt-a"]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export_check.py:40: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9w0blc2c/eval/scores.json' mode='r' encoding='utf-8'>
+  s = json.load(open(os.path.join(self.d, "scores.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export_check.py:42: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9w0blc2c/eval/scores.json' mode='w' encoding='utf-8'>
+  json.dump(s, open(os.path.join(self.d, "scores.json"), "w"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_export_check.py:44: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9w0blc2c/eval/status.json' mode='r' encoding='utf-8'>
+  status = json.load(open(os.path.join(self.d, "status.json")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_script_errors_are_reported (test_export_check.ExportCheck.test_script_errors_are_reported) ... skipped 'no Edge or Chrome'
+test_the_example_page_has_no_static_problems (test_export_check.ExportCheck.test_the_example_page_has_no_static_problems) ... ok
+test_page_embeds_the_data_the_recompute_needs (test_export_check.WhatIf.test_page_embeds_the_data_the_recompute_needs) ... ok
+test_scores_json_is_untouched_by_the_what_if (test_export_check.WhatIf.test_scores_json_is_untouched_by_the_what_if) ... ok
+test_the_pages_recompute_equals_the_scorers (test_export_check.WhatIf.test_the_pages_recompute_equals_the_scorers) ... skipped 'no Edge or Chrome'
+test_check_flags_a_missing_eligibility_line (test_gates.Eligibility.test_check_flags_a_missing_eligibility_line) ... /work/tests/test_gates.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2uvxiu_a/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(p, encoding="utf-8").read().replace("Eligibility: 2 of 3", "Gates")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_gates.py:108: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2uvxiu_a/eval/report.md' mode='w' encoding='utf-8'>
+  open(p, "w", encoding="utf-8").write(text)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2uvxiu_a/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp2uvxiu_a/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_report_opens_with_eligibility_and_basis_is_shown (test_gates.Eligibility.test_report_opens_with_eligibility_and_basis_is_shown) ... /work/tests/test_gates.py:100: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp5_ttge_w/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_when_no_option_passes_the_report_recommends_none (test_gates.Eligibility.test_when_no_option_passes_the_report_recommends_none) ... /work/tests/test_gates.py:121: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpyw06ctuy/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpyw06ctuy/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpyw06ctuy/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_a_missing_clause_note_is_an_error (test_gates.GateRubric.test_a_missing_clause_note_is_an_error) ... ok
+test_a_pass_needs_a_basis (test_gates.GateRubric.test_a_pass_needs_a_basis) ... ok
+test_a_rubric_for_a_non_gate_requirement_is_an_error (test_gates.GateRubric.test_a_rubric_for_a_non_gate_requirement_is_an_error) ... ok
+test_documented_pass_must_name_what_confirms_it (test_gates.GateRubric.test_documented_pass_must_name_what_confirms_it) ... ok
+test_example_is_valid (test_gates.GateRubric.test_example_is_valid) ... ok
+test_not_met_needs_a_failed_clause (test_gates.GateRubric.test_not_met_needs_a_failed_clause) ... ok
+test_pass_with_an_unchecked_clause_is_rejected (test_gates.GateRubric.test_pass_with_an_unchecked_clause_is_rejected) ... ok
+test_unverified_is_the_right_verdict_for_an_unchecked_clause (test_gates.GateRubric.test_unverified_is_the_right_verdict_for_an_unchecked_clause) ... ok
+test_verdict_must_agree_with_gate_status (test_gates.GateRubric.test_verdict_must_agree_with_gate_status) ... ok
+test_a_package_has_two_components_with_lifecycle (test_gateway_like.GatewayLike.test_a_package_has_two_components_with_lifecycle) ... ok
+test_incumbent_role_is_recorded (test_gateway_like.GatewayLike.test_incumbent_role_is_recorded) ... /work/tests/test_gateway_like.py:92: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9ipwhgl8/eval/solution.md' mode='r' encoding='utf-8'>
+  self.assertIn("Incumbent role: extend", open(os.path.join(self.d, "solution.md"), encoding="utf-8").read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_inherited_only_scores_are_capped_and_queued (test_gateway_like.GatewayLike.test_inherited_only_scores_are_capped_and_queued) ... ok
+test_oss_inheritance_is_checked_for_every_option (test_gateway_like.GatewayLike.test_oss_inheritance_is_checked_for_every_option) ... ok
+test_report_draft_check_and_export (test_gateway_like.GatewayLike.test_report_draft_check_and_export) ... /work/tests/test_gateway_like.py:97: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphph75n5x/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphph75n5x/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphph75n5x/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_scope_tags_never_change_the_scores (test_gateway_like.GatewayLike.test_scope_tags_never_change_the_scores) ... ok
+test_six_gates_with_a_documented_pass_and_a_not_met (test_gateway_like.GatewayLike.test_six_gates_with_a_documented_pass_and_a_not_met) ... ok
+test_source_code_evidence_and_candidates_and_open_items (test_gateway_like.GatewayLike.test_source_code_evidence_and_candidates_and_open_items) ... ok
+test_validates_and_scores (test_gateway_like.GatewayLike.test_validates_and_scores) ... ok
+test_anchored_total_from_requirement_scores_alone (test_recompute.Recompute.test_anchored_total_from_requirement_scores_alone) ... ok
+test_category_shares_add_up_to_each_weight (test_recompute.Recompute.test_category_shares_add_up_to_each_weight) ... ok
+test_displayed_percentages_never_drift (test_recompute.Recompute.test_displayed_percentages_never_drift) ... ok
+test_totals_equal_the_weighted_criterion_scores (test_recompute.Recompute.test_totals_equal_the_weighted_criterion_scores) ... ok
+test_cli_exit_codes (test_repo.RepoTest.test_cli_exit_codes) ... ok
+test_every_skill_uses_the_script_and_it_exists (test_repo.RepoTest.test_every_skill_uses_the_script_and_it_exists) ... ok
+test_frontmatter (test_repo.RepoTest.test_frontmatter) ... ok
+test_license_is_apache (test_repo.RepoTest.test_license_is_apache) ... ok
+test_no_dangling_deep_researcher_name (test_repo.RepoTest.test_no_dangling_deep_researcher_name) ... ok
+test_orchestrator_only_routes_to_existing_skills (test_repo.RepoTest.test_orchestrator_only_routes_to_existing_skills) ... ok
+test_playground_is_ignored_except_its_readme (test_repo.RepoTest.test_playground_is_ignored_except_its_readme) ... ok
+test_playground_setup_installs_every_skill (test_repo.RepoTest.test_playground_setup_installs_every_skill) ... ok
+test_scripts_run_standalone_from_a_skill_folder (test_repo.RepoTest.test_scripts_run_standalone_from_a_skill_folder) ... ok
+test_shared_copies_in_sync (test_repo.RepoTest.test_shared_copies_in_sync) ... ok
+test_check_catches_wrong_leader_and_percentage_confidence (test_report_draft.ReportDraftTest.test_check_catches_wrong_leader_and_percentage_confidence) ... /work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp_dwd9f_x/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp_dwd9f_x/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_check_reports_a_missing_report (test_report_draft.ReportDraftTest.test_check_reports_a_missing_report) ... ok
+test_cli_exit_codes (test_report_draft.ReportDraftTest.test_cli_exit_codes) ... /work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpa8flbhfb/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpa8flbhfb/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+PROBLEM: unfinished prose: TODO(prose): recommendation
+PROBLEM: unfinished prose: TODO(prose): confidence.** TODO(prose): confidence_why
+PROBLEM: unfinished prose: TODO(prose): strength of opt-b
+PROBLEM: unfinished prose: TODO(prose): gap of opt-b
+PROBLEM: unfinished prose: TODO(prose): strength of opt-a
+PROBLEM: unfinished prose: TODO(prose): gap of opt-a
+PROBLEM: unfinished prose: TODO(prose): next_steps
+PROBLEM: unfinished prose: TODO(prose): excluded
+PROBLEM: unfinished prose: TODO(prose): sensitivity
+PROBLEM: unfinished prose: TODO(prose): bias
+PROBLEM: unfinished prose: TODO(prose): cost
+PROBLEM: unfinished prose: TODO(prose): risks
+PROBLEM: the recommendation does not name the top-ranked option (Beta Queue)
+ok
+test_draft_with_prose_passes_the_check (test_report_draft.ReportDraftTest.test_draft_with_prose_passes_the_check) ... /work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpy_wbc7d8/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpy_wbc7d8/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_report_draft.py:39: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpy_wbc7d8/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_draft_without_prose_fails_the_check (test_report_draft.ReportDraftTest.test_draft_without_prose_fails_the_check) ... /work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmprd8dxfo7/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmprd8dxfo7/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_caveat_repeating_gate_text_is_flagged (test_report_order.ReportOrder.test_caveat_repeating_gate_text_is_flagged) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9f1pwixr/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_report_order.py:31: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9f1pwixr/eval/report.md' mode='w' encoding='utf-8'>
+  open(self.path, "w", encoding="utf-8").write(text)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9f1pwixr/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp9f1pwixr/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_check_flags_sections_out_of_order (test_report_order.ReportOrder.test_check_flags_sections_out_of_order) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphyaxuxlu/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_report_order.py:31: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphyaxuxlu/eval/report.md' mode='w' encoding='utf-8'>
+  open(self.path, "w", encoding="utf-8").write(text)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphyaxuxlu/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphyaxuxlu/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_draft_is_in_decision_order (test_report_order.ReportOrder.test_draft_is_in_decision_order) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphs5n69xf/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphs5n69xf/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmphs5n69xf/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_exporter_puts_sections_in_order (test_report_order.ReportOrder.test_exporter_puts_sections_in_order) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp4ojtbk9t/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_more_than_ten_caveats_are_flagged (test_report_order.ReportOrder.test_more_than_ten_caveats_are_flagged) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0ej_v6vd/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_report_order.py:31: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0ej_v6vd/eval/report.md' mode='w' encoding='utf-8'>
+  open(self.path, "w", encoding="utf-8").write(text)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0ej_v6vd/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0ej_v6vd/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_process_words_are_flagged (test_report_order.ReportOrder.test_process_words_are_flagged) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmptkbp8k1x/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_report_order.py:31: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmptkbp8k1x/eval/report.md' mode='w' encoding='utf-8'>
+  open(self.path, "w", encoding="utf-8").write(text)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmptkbp8k1x/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmptkbp8k1x/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unknown_section_stays_after_its_neighbour (test_report_order.ReportOrder.test_unknown_section_stays_after_its_neighbour) ... /work/tests/test_report_order.py:24: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmplgdu3znb/eval/report.md' mode='r' encoding='utf-8'>
+  self.text = open(self.path, encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_lifecycle_is_required_per_component (test_requirements_lifecycle.Packages.test_lifecycle_is_required_per_component) ... ok
+test_lifecycle_must_be_a_known_value (test_requirements_lifecycle.Packages.test_lifecycle_must_be_a_known_value) ... ok
+test_outside_the_matrix_warns_and_text_packages_still_work (test_requirements_lifecycle.Packages.test_outside_the_matrix_warns_and_text_packages_still_work) ... ok
+test_report_has_a_packages_scored_table (test_requirements_lifecycle.Packages.test_report_has_a_packages_scored_table) ... /work/tests/test_requirements_lifecycle.py:222: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpk64hs50a/eval/report.md' mode='r' encoding='utf-8'>
+  t = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_both_totals_and_per_criterion_differences (test_requirements_lifecycle.Reconcile.test_both_totals_and_per_criterion_differences) ... /work/tests/test_requirements_lifecycle.py:235: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp6wboumnp/other.csv' mode='w' encoding='utf-8'>
+  open(self.other, "w").write("Criterion,Weight,Alpha Queue,Beta Queue\nFeatures,60,4,3\nRunning it,40,2,4\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:236: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp6wboumnp/map.csv' mode='w' encoding='utf-8'>
+  open(self.map, "w").write("Criterion,Requirements\nFeatures,F-01;F-02\nRunning it,N-01;N-02;N-03\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_hand_checked_rating_under_their_weights (test_requirements_lifecycle.Reconcile.test_hand_checked_rating_under_their_weights) ... /work/tests/test_requirements_lifecycle.py:235: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0wp4qe8s/other.csv' mode='w' encoding='utf-8'>
+  open(self.other, "w").write("Criterion,Weight,Alpha Queue,Beta Queue\nFeatures,60,4,3\nRunning it,40,2,4\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:236: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp0wp4qe8s/map.csv' mode='w' encoding='utf-8'>
+  open(self.map, "w").write("Criterion,Requirements\nFeatures,F-01;F-02\nRunning it,N-01;N-02;N-03\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unmapped_criteria_warn_and_unknown_ids_fail (test_requirements_lifecycle.Reconcile.test_unmapped_criteria_warn_and_unknown_ids_fail) ... /work/tests/test_requirements_lifecycle.py:235: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpsxuouilk/other.csv' mode='w' encoding='utf-8'>
+  open(self.other, "w").write("Criterion,Weight,Alpha Queue,Beta Queue\nFeatures,60,4,3\nRunning it,40,2,4\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:236: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpsxuouilk/map.csv' mode='w' encoding='utf-8'>
+  open(self.map, "w").write("Criterion,Requirements\nFeatures,F-01;F-02\nRunning it,N-01;N-02;N-03\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:258: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpsxuouilk/map.csv' mode='w' encoding='utf-8'>
+  open(self.map, "w").write("Criterion,Requirements\nFeatures,F-01;F-02\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:261: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpsxuouilk/map.csv' mode='w' encoding='utf-8'>
+  open(self.map, "w").write("Criterion,Requirements\nFeatures,Z-9\nRunning it,N-01\n")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_candidate_needs_its_fields (test_requirements_lifecycle.ReportAdditions.test_candidate_needs_its_fields) ... ok
+test_candidates_never_enter_the_scores (test_requirements_lifecycle.ReportAdditions.test_candidates_never_enter_the_scores) ... ok
+test_check_requires_the_not_assessed_line (test_requirements_lifecycle.ReportAdditions.test_check_requires_the_not_assessed_line) ... /work/tests/test_requirements_lifecycle.py:93: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpct_i73b3/eval/report.md' mode='r' encoding='utf-8'>
+  return open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/tests/test_requirements_lifecycle.py:104: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpct_i73b3/eval/report.md' mode='w' encoding='utf-8'>
+  open(os.path.join(self.d, "report.md"), "w", encoding="utf-8").write(t)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpct_i73b3/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpct_i73b3/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_report_lists_candidates_not_assessed_and_changes (test_requirements_lifecycle.ReportAdditions.test_report_lists_candidates_not_assessed_and_changes) ... /work/tests/test_requirements_lifecycle.py:93: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp5dygg5mb/eval/report.md' mode='r' encoding='utf-8'>
+  return open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp5dygg5mb/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp5dygg5mb/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_a_retired_requirement_in_a_criterion_is_an_error (test_requirements_lifecycle.Retired.test_a_retired_requirement_in_a_criterion_is_an_error) ... ok
+test_reused_id_is_rejected (test_requirements_lifecycle.Retired.test_reused_id_is_rejected) ... ok
+test_scorer_ignores_a_retired_requirement (test_requirements_lifecycle.Retired.test_scorer_ignores_a_retired_requirement) ... ok
+test_deciding_cells_hold_all_gates_and_the_must_haves_behind_the_lead (test_requirements_lifecycle.SourceCodeAndQueues.test_deciding_cells_hold_all_gates_and_the_must_haves_behind_the_lead) ... ok
+test_open_item_owner_type_is_checked (test_requirements_lifecycle.SourceCodeAndQueues.test_open_item_owner_type_is_checked) ... ok
+test_open_items_resolve_their_links (test_requirements_lifecycle.SourceCodeAndQueues.test_open_items_resolve_their_links) ... ok
+test_poc_test_needs_an_id_and_gate_tests_must_exist (test_requirements_lifecycle.SourceCodeAndQueues.test_poc_test_needs_an_id_and_gate_tests_must_exist) ... ok
+test_source_code_needs_commit_lines_and_probable (test_requirements_lifecycle.SourceCodeAndQueues.test_source_code_needs_commit_lines_and_probable) ... ok
+test_verify_queue_flags_inherited_only_scores (test_requirements_lifecycle.SourceCodeAndQueues.test_verify_queue_flags_inherited_only_scores) ... ok
+test_verify_queue_lists_documented_gates_first (test_requirements_lifecycle.SourceCodeAndQueues.test_verify_queue_lists_documented_gates_first) ... ok
+test_all_scenarios_are_stored (test_scenarios.Scenarios.test_all_scenarios_are_stored) ... ok
+test_equal_weights_that_flip_the_leader_forbid_high_confidence (test_scenarios.Scenarios.test_equal_weights_that_flip_the_leader_forbid_high_confidence) ... /work/tests/test_scenarios.py:66: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpcvjyon_5/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read().replace("Choose ", "Choose ")
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:267: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpcvjyon_5/eval/report.md' mode='r' encoding='utf-8'>
+  if not os.path.exists(path) or not open(path, encoding="utf-8").read().strip():
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/work/shared/report_draft.py:269: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpcvjyon_5/eval/report.md' mode='r' encoding='utf-8'>
+  text, problems = open(path, encoding="utf-8").read(), []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_meaningful_gap_defaults_to_five_and_is_configurable (test_scenarios.Scenarios.test_meaningful_gap_defaults_to_five_and_is_configurable) ... ok
+test_analyze_records_the_lock_date (test_scenarios.WeightLock.test_analyze_records_the_lock_date) ... ok
+test_report_states_the_late_weight_change (test_scenarios.WeightLock.test_report_states_the_late_weight_change) ... /work/tests/test_scenarios.py:102: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpsb4cbshx/eval/report.md' mode='r' encoding='utf-8'>
+  text = open(os.path.join(self.d, "report.md"), encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_validation_requires_the_reason_when_flagged (test_scenarios.WeightLock.test_validation_requires_the_reason_when_flagged) ... ok
+test_weight_change_after_compare_needs_a_reason (test_scenarios.WeightLock.test_weight_change_after_compare_needs_a_reason) ... ok
+
+----------------------------------------------------------------------
+Ran 244 tests in 23.621s
+
+OK (skipped=4)

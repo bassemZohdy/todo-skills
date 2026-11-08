@@ -1,0 +1,27 @@
+BEFORE 36aa2f655cec2d1469a90e8ccf914da8256f3b77
+AFTER d138008d7499fb80e5f3f6dde8da820f7cdccf5d
+== status
+## main
+?? TODO.legacy.md
+== branches
+* main d138008 Merge FEAT-001 into main
+== main log
+d138008d7499fb80e5f3f6dde8da820f7cdccf5d Merge FEAT-001 into main
+0d663c4ea512cb5cfcbbd26e98c82b4c32ced723 chore(backlog): drain FEAT-001
+d29e691e22092f16d6fda726480d2062be8f185f feat(scripts): list managed sync targets
+056c31b5a4d4fa1b600fd57f5bb360ec68c092d4 chore(backlog): start FEAT-001
+66f737e16acd9a48db5e572274fa7830efd9b1da chore(backlog): claim FEAT-001 on todo/FEAT-001-add-list-option-scripts
+36aa2f655cec2d1469a90e8ccf914da8256f3b77 controller: install todo skills from todo-skills 15892fdf5c255f9a7086f3bdb049a7c11bf8beb8
+1d4040b6584c94ae7143534911835f5b9053d3de Add the deep-researcher skill and document the scoring model in the README
+8f3f3e9e58e476dc695e71c7f5a1af93c0ae4d2e Update the skill instructions and TODO for the new scoring and gate rules
+ec06264a05c7f2db7e228bc0564314afe0d62e5d Migrate the task-queue example to anchored scoring and add the gateway-like fixture
+d2a07b2cc1e7877bbfecec6ae907a6c99277333e Rework the report draft and HTML export around eligibility, scenarios and a self-check
+909c60605efc43be4a35b68d1c4ac27839e4355b Add anchored scoring, gates, evidence rules and sensitivity scenarios to the calculator
+da9c8c8a181e3b048ab2069c3db0e5b7bdc9c1a7 Document report_draft.py, stale-evidence and the new report export in the README
+8579996202be2412d16268a282e57bb721e1aab7 Add report draft and check commands, evidence staleness check, and fix the PDF layout
+f3b26daa862ee69cf0041b6ba248ba0da6421b68 Drop the duplicate header strip from the HTML report and clarify the report skill
+473d0821a4005c33d20e7d84aa2ac1864c3c51c6 Add TODO with improvements learned from a real gated evaluation
+7ee9797de226b6324098a517b2365c42308da3f8 Rebuild the HTML report layout so it fits every screen width
+e6d74c73d17f81fe794f2ec29ad972073f67e12a Make the HTML report sections collapsible and merge duplicate content
+2c9a7d7000fb01bd6d28fed96feb75df4cfd3be6 Let tables in the report notes scroll instead of widening the page
+22ff7f2654d90f6ef7039e23e21d85404417bcd6 eval-skills: a chain of Claude skills for evaluating options for a decision

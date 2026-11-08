@@ -1,0 +1,12 @@
+SOURCE TODO
+300227f640007c4da8dc3ae69cd7092b4cd198b1
+LEGACY TODO
+300227f640007c4da8dc3ae69cd7092b4cd198b1
+== diff --name-status 1d4040b6584c94ae7143534911835f5b9053d3de main (outside .agents)
+A	CHANGELOG.md
+M	README.md
+M	TODO.md
+M	scripts/sync_shared.py
+A	tests/test_sync_list.py
+== status
+?? TODO.legacy.md

@@ -87,6 +87,13 @@ if run seq STUB_WORK_FEAT_001=0.2 STUB_PRE_FEAT_002=2 STUB_WORK_FEAT_002=0.2; th
   [ "$(execution)" = sequential ] && ok "overlapping processes with disjoint tool activity: sequential" || bad "sequential case: $(execution) ($(cat "$ev/activity.txt"))"
 else bad "sequential run left no evidence"; fi
 
+# 2b. the same without bash 5's EPOCHREALTIME (macOS ships bash 3.2): sub-second activity is still recorded
+printf 'unset EPOCHREALTIME\n' > "$tmp/no-epochrealtime.sh"
+if run seq32 BASH_ENV="$tmp/no-epochrealtime.sh" STUB_WORK_FEAT_001=0.2 STUB_PRE_FEAT_002=2 STUB_WORK_FEAT_002=0.2; then
+  [ "$(awk '$3 ~ /[.][0-9]/ && $4 ~ /[.][0-9]/' "$ev/activity.txt" | wc -l | tr -d ' ')" = 2 ] && [ "$(execution)" = sequential ] \
+    && ok "without EPOCHREALTIME, 0.2 s of activity per worker is recorded and reads as sequential" || bad "no EPOCHREALTIME: $(execution) ($(cat "$ev/activity.txt"))"
+else bad "sequential run without EPOCHREALTIME left no evidence"; fi
+
 # 3. the coordinator writes no briefs: no worker starts, nothing is concurrent
 if run none STUB_NO_BRIEF=1; then
   [ ! -d "$ev/lanes/FEAT-001" ] && [ ! -s "$ev/activity.txt" ] && ok "without briefs no worker starts and no activity is recorded" || bad "no-brief case started workers"

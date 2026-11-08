@@ -5,7 +5,13 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [ -f "$here/windows-assert-exec.sh" ] || { echo 'FAIL  Windows verifier isolation is unavailable'; exit 1; }
 case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ;; *) echo 'INFRA_ERROR: native Windows is required'; exit 2 ;; esac
 command -v codex >/dev/null 2>&1 && command -v node >/dev/null 2>&1 || { echo 'INFRA_ERROR: Codex and Node are required'; exit 2; }
-tmp="$(mktemp -d)"; sentinel="$(mktemp "$here/.win-controller-probe.XXXXXX")"; trap 'rm -f "$sentinel"; rm -rf "$tmp"' EXIT
+if [ -n "${RUNNER_TEMP:-}" ]; then
+  trial_tmp="$(cygpath -u "$RUNNER_TEMP")"
+  tmp="$(mktemp -d "$trial_tmp/todo-windows-verifier.XXXXXX")"
+else
+  tmp="$(mktemp -d)"
+fi
+sentinel="$(mktemp "$here/.win-controller-probe.XXXXXX")"; trap 'rm -f "$sentinel"; rm -rf "$tmp"' EXIT
 printf 'controller-dummy\n' > "$sentinel"
 runs="$tmp/runs"; repo="$runs/happy-path/repo"
 mkdir -p "$runs/happy-path" "$runs/evidence" "$runs/login" "$runs/evaluator" "$runs/other"

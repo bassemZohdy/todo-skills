@@ -34,6 +34,31 @@ pv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugi
 cv="$(sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/p' "$root/CHANGELOG.md" | head -1)"
 if [ -n "$pv" ] && { [ -z "$cv" ] || [ "$pv" = "$cv" ]; }; then ok "plugin version $pv matches the changelog (${cv:-no release yet})"; else bad "plugin.json version '$pv' does not match newest CHANGELOG version '$cv'"; fi
 
+# TASK-054: README cannot drift from the release. Every version README states equals both manifests and the newest
+# CHANGELOG heading, every `cp -r todo-skills/<path>` install source exists and holds the nine skills, every relative link
+# resolves, and one line names each agent with recorded trials together with its evidence files.
+readme_bad="$(python3 - "$root" <<'PY'
+import json, os, re, sys
+root = sys.argv[1]
+readme = open(os.path.join(root, 'README.md'), encoding='utf-8').read()
+want = {json.load(open(os.path.join(root, 'plugin', d, 'plugin.json'), encoding='utf-8'))['version'] for d in ('.claude-plugin', '.codex-plugin')}
+cl = re.search(r'^## \[(\d+\.\d+\.\d+)\]', open(os.path.join(root, 'CHANGELOG.md'), encoding='utf-8').read(), re.M)
+if cl: want.add(cl.group(1))
+said = set(re.findall(r'(?i)\bversion (\d+\.\d+\.\d+)', readme))
+if len(want) != 1 or not said or said != want: print(f'versions: README {sorted(said)}, manifests and CHANGELOG {sorted(want)}')
+for src in re.findall(r'cp -r todo-skills/(\S+?)/?\*', readme):
+    d = os.path.join(root, src)
+    n = sum(os.path.isfile(os.path.join(d, s, 'SKILL.md')) for s in os.listdir(d)) if os.path.isdir(d) else 0
+    if n != 9: print(f'install path {src} holds {n} skills, not 9')
+for target in re.findall(r'\]\(([^)#\s]+)(?:#[^)]*)?\)', readme):
+    if not re.match(r'[a-z]+:', target) and not os.path.exists(os.path.join(root, target)): print(f'broken link {target}')
+line = next((l for l in readme.splitlines() if 'Agents with recorded trials:' in l), '')
+links = re.findall(r'\]\((docs/evals/[^)]+)\)', line)
+if not line or 'Claude Code' not in line or 'Codex' not in line or not links: print('no line names each agent with recorded trials and its evidence')
+PY
+)"
+if [ -z "$readme_bad" ]; then ok "README version, install path, links and agent evidence agree with the repository"; else bad "README drift: $readme_bad"; fi
+
 # Every SKILL.md frontmatter is valid YAML (strict loaders such as the skills CLI skip a skill that is not).
 if python3 -c 'import yaml' 2>/dev/null; then
   yamlbad="$(python3 - "$root" <<'PY'

@@ -60,6 +60,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - `todo-rtm.sh` resolution and R1-R3 on the RTM fixtures;
 - `todo-report.sh` encodes hostile text and exits 1 without a `TODO.md`;
 - the packaging rules above;
+- README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
 - that the skill text keeps rules other tests rely on (the RTM pointers, the optional design review, `--strict`, the "Done when cannot run" rule, the documentation-drift rules);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.
 

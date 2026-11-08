@@ -7,7 +7,8 @@ How this repository is laid out, what its tests check, and how it is released. F
 ```text
 plugin/                          The installable plugin: Markdown, JSON and the icon only
   .claude-plugin/plugin.json     Claude Code manifest (version) and icon.png
-  .codex-plugin/plugin.json      Codex manifest (same version; "skills": "./skills/")
+  .codex-plugin/plugin.json      Codex manifest (same version; "skills": "./skills/"; "interface": directory listing)
+  assets/icon.png                Codex listing logo and composer icon (a copy of .claude-plugin/icon.png)
   README.md                      The plugin's own short README
   skills/
     todo/SKILL.md                Core rules: layers, task format, IDs, git mode, invariants, guardrails
@@ -20,6 +21,7 @@ tools/                           Optional read-only scripts users copy into thei
   todo-lint.sh todo-verify.sh todo-rtm.sh todo-report.sh todo-stop-hook.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
+  build-codex-package.sh         Builds the OpenAI Plugins Directory archive from plugin/: --claude for the preferred Claude import, else the native Codex ZIP (docs/distribution.md)
   fixtures/                      Lint fixtures: ok-*.md pass, I<n>-*.md fail with I<n>, W<n>-*.md warn
   fixtures/changelog/, report/   A CHANGELOG for the lint fixtures; a hostile backlog for the report
   fixtures-rtm/                  RTM fixtures: docs-only, readme-only, both, neither, stale, duplicate, archived-ok

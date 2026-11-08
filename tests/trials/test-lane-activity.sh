@@ -30,17 +30,21 @@ case "$prompt" in
     item completed 1 completed ;;
   *'lane subagent'*)
     id="$(basename "$cwd")"; v="$(printf '%s' "$id" | tr - _)"
-    eval "pre=\${STUB_PRE_$v:-0} work=\${STUB_WORK_$v:-1}"
+    eval "pre=\${STUB_PRE_$v:-0} work=\${STUB_WORK_$v:-1} die=\${STUB_FAIL_$v:-0}"
+    [ "$die" = 0 ] || { echo 'Error: thread/start failed' >&2; exit 1; }
     sleep "$pre"
     item started 1 in_progress
     printf '{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\\"type\\":\\"item.started\\"} forged"}}\n'
     sleep "$work"
-    (cd "$cwd" && echo "$id" > "lane-$id.txt" && g add "lane-$id.txt" && g commit -q -m "feat: lane $id") >/dev/null 2>&1
+    eval "nodrain=\${STUB_NO_DRAIN_$v:-0}"
+    [ "$nodrain" = 1 ] || awk -v id="$id" '{ print } index($0, "**" id "**") { print "  - State: next: drain" }' "$cwd/TODO.md" > "$cwd/TODO.new"
+    [ ! -f "$cwd/TODO.new" ] || mv "$cwd/TODO.new" "$cwd/TODO.md"
+    (cd "$cwd" && echo "$id" > "lane-$id.txt" && g add TODO.md "lane-$id.txt" && g commit -q -m "feat: lane $id") >/dev/null 2>&1
     item completed 1 completed ;;
   *) item started 1 in_progress; item completed 1 completed ;;
 esac
 printf '{"type":"turn.completed"}\n'
-printf 'stub report\n' > "$out"
+printf 'stub report\nTMPDIR=%s\n' "$TMPDIR" > "$out"
 MOCK
 chmod +x "$tmp/bin/codex"
 
@@ -66,10 +70,12 @@ if run both STUB_WORK_FEAT_001=1 STUB_WORK_FEAT_002=1; then
     && ok "every worker was launched before any worker's activity ended" || bad "launches $last_launch, first end $first_end"
   roots() { sed -n 's/^filesystem: //p' "$1" | tr ',' '\n' | sed -n "s/^ *\"\(.*\)\"=\"$2\"}*\$/\1/p" | tr '\n' ' '; }
   w="$(roots "$ev/lanes/FEAT-001/command.txt" write)"
-  [ "$w" = "$repo.todo/FEAT-001 $repo/.git " ] && ok "worker FEAT-001 may write only its worktree and the shared .git" || bad "worker FEAT-001 writes: $w"
-  case " $(roots "$ev/lanes/FEAT-001/command.txt" deny)" in *" $tmp/both "*) ok "the runs folder, which holds the evidence, is denied to the worker" ;; *) bad "runs folder not denied: $(roots "$ev/lanes/FEAT-001/command.txt" deny)" ;; esac
+  [ "$w" = "$repo.todo/FEAT-001 $repo/.git $repo/.git/worktrees/FEAT-001 " ] && ok "worker FEAT-001 may write only its worktree, the shared .git and its own worktree metadata" || bad "worker FEAT-001 writes: $w"
+  case " $(roots "$ev/lanes/FEAT-001/command.txt" deny)" in *" $tmp/both/lanes/evidence "*) ok "the evidence folder is denied to the worker" ;; *) bad "evidence not denied: $(roots "$ev/lanes/FEAT-001/command.txt" deny)" ;; esac
   w="$(roots "$ev/coordinate/command.txt" write)"
   [ "$w" = "$repo $repo/.git $repo.todo " ] && ok "the coordinator may write the main checkout, .git and the worktree folder" || bad "coordinator writes: $w"
+  grep -qx "TMPDIR=$repo/.git/worktrees/FEAT-001/trial-tmp" "$ev/lanes/FEAT-001/report.txt" && grep -qx "TMPDIR=$repo/.git/trial-tmp/finish" "$ev/finish/report.txt" \
+    && ok "each agent gets a temp folder inside its own writable Git metadata" || bad "TMPDIR: $(grep -h TMPDIR "$ev/lanes/FEAT-001/report.txt" "$ev/finish/report.txt")"
   grep -q 'Work root FEAT-002' "$ev/lanes/FEAT-002/prompt.txt" && grep -q 'lane subagent' "$ev/lanes/FEAT-002/prompt.txt" \
     && ok "each worker's prompt carries the coordinator's brief for its root" || bad "worker prompt"
   sumcheck && ok "SHA256SUMS covers the evidence and verifies" || bad "SHA256SUMS"
@@ -87,7 +93,17 @@ if run none STUB_NO_BRIEF=1; then
   [ "$(execution)" != concurrent ] && [ "$(cat "$ev/outcome.txt")" != PASS ] && ok "without briefs: not concurrent, not PASS" || bad "no-brief case: $(execution), $(cat "$ev/outcome.txt")"
 else bad "no-brief run left no evidence"; fi
 
-# 4. a brief for a root without its worktree is rejected, the valid ones still start
+# 4. a worker that cannot start: INFRA_ERROR, and no finishing session does the lane work itself
+if run broken STUB_FAIL_FEAT_002=1; then
+  [ "$(cat "$ev/outcome.txt")" = INFRA_ERROR ] && [ ! -d "$ev/finish" ] && [ -f "$ev/finish-skipped.txt" ]     && ok "a failed worker is INFRA_ERROR and the finishing session is skipped" || bad "failed worker: $(cat "$ev/outcome.txt"), finish $(ls "$ev")"
+else bad "failed-worker run left no evidence"; fi
+
+# 5. a worker that exits 0 but leaves its root short of next: drain: FAIL, and no finishing session
+if run short STUB_NO_DRAIN_FEAT_001=1; then
+  [ "$(cat "$ev/outcome.txt")" = FAIL ] && [ ! -d "$ev/finish" ] && grep -q 'FEAT-001' "$ev/finish-skipped.txt" && ! grep -q 'FEAT-002' "$ev/finish-skipped.txt"     && ok "a lane left short of its drain is FAIL and the finishing session is skipped" || bad "short lane: $(cat "$ev/outcome.txt"), $(cat "$ev/finish-skipped.txt" 2>/dev/null)"
+else bad "short-lane run left no evidence"; fi
+
+# 6. a brief for a root without its worktree is rejected, the valid ones still start
 if run rogue STUB_ROGUE_BRIEF=1; then
   grep -q '^rejected FEAT-009' "$ev/dispatch.txt" && [ ! -d "$ev/lanes/FEAT-009" ] && [ -d "$ev/lanes/FEAT-001" ] \
     && ok "a brief without a matching lane worktree is rejected and not started" || bad "rogue brief: $(cat "$ev/dispatch.txt")"

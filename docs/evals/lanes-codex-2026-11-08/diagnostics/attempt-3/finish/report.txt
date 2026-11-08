@@ -1,0 +1,13 @@
+The lane run stopped at the coordinator’s verification step; neither root was drained or merged.
+
+- **core — FEAT-001, Add subtract:** ready to drain on `todo/FEAT-001-add-subtract-core-module` at `8768c59`. Its recorded baseline is 2 passing tests.
+- **text — FEAT-002, Add shout:** ready to drain on `todo/FEAT-002-add-shout-text-module` at `49e8ede`. Its recorded baseline is 2 passing tests.
+- The base regression, `mvn -B test`, passed 2 tests with no failures or skips. Maven also reported an attempted Jansi lock-file write under `/tmp`, outside the permitted folders. I stopped before running the remaining Maven checks because their default environment would access paths outside the permitted folders.
+- No files were intentionally changed, no commits or merges were made, and the main checkout remains on `main`. Both roots remain claimed and awaiting verification and drain; neither lane has a subsequent workable root.
+
+The run needs a Maven environment whose temporary files and dependency repository are within the permitted folders before it can safely continue. After that is available, rerun `/todo-continue --all-lanes --merge`; clearing context first may help.
+
+**Ambiguities and resolution**
+
+- The lane instructions say, “Without a subagent tool, say so in the first line of your output,” while a higher-priority instruction prohibited spawning subagents unless explicitly requested. I treated delegation as unavailable and used the sequential fallback; I stated that in my second commentary message.
+- The lane instructions say to “re-run `Done when` and the regression there against the base's current pass count,” while command safety says to “Refuse and block on anything that … touches paths outside the repo and its todo worktrees.” Maven’s attempted `/tmp` access made those instructions conflict with the folder restriction, so I stopped before further verification. I did not mark either node `[!]`, because no node verification failed and the constraint applies to the execution environment.

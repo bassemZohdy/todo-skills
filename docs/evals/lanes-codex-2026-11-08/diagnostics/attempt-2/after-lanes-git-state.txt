@@ -1,0 +1,55 @@
+## HEAD
+c981929645278428467cf2c6a87b0c5be58f3fef
+## current branch
+main
+## branches
+* main                                   c981929 chore(backlog): claim FEAT-002 on todo/FEAT-002-add-shout-text-module
++ todo/FEAT-001-add-subtract-core-module bff3c40 (/runs/multi-module/repo.todo/FEAT-001) chore(backlog): start FEAT-001
++ todo/FEAT-002-add-shout-text-module    710b24a (/runs/multi-module/repo.todo/FEAT-002) feat(text): add shout
+## worktrees
+/runs/multi-module/repo                c981929 [main]
+/runs/multi-module/repo.todo/FEAT-001  bff3c40 [todo/FEAT-001-add-subtract-core-module]
+/runs/multi-module/repo.todo/FEAT-002  710b24a [todo/FEAT-002-add-shout-text-module]
+## tags
+## refs
+refs/heads/main c981929645278428467cf2c6a87b0c5be58f3fef
+refs/heads/todo/FEAT-001-add-subtract-core-module bff3c4040abde2d556bd88f7aa365184f7eeb9e6
+refs/heads/todo/FEAT-002-add-shout-text-module 710b24a07c4beedeb20c24764e3d2ee98190c2ed
+## log --all --graph
+* 710b24a  (todo/FEAT-002-add-shout-text-module) feat(text): add shout
+* a66988d  chore(backlog): start FEAT-002
+* c981929  (HEAD -> main) chore(backlog): claim FEAT-002 on todo/FEAT-002-add-shout-text-module
+| * bff3c40  (todo/FEAT-001-add-subtract-core-module) chore(backlog): start FEAT-001
+|/  
+* 6658ae3  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-core-module
+* 19bd91c  init multi-module project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./core/pom.xml
+./core/src/main/java/mini/core/Calc.java
+./core/src/test/java/mini/core/AddTest.java
+./core/target/classes/mini/core/Calc.class
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./core/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./core/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./core/target/surefire-reports/TEST-mini.core.AddTest.xml
+./core/target/surefire-reports/mini.core.AddTest.txt
+./core/target/test-classes/mini/core/AddTest.class
+./pom.xml
+./text/pom.xml
+./text/src/main/java/mini/text/Text.java
+./text/src/test/java/mini/text/UpperTest.java
+./text/target/classes/mini/text/Text.class
+./text/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./text/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./text/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./text/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./text/target/surefire-reports/TEST-mini.text.UpperTest.xml
+./text/target/surefire-reports/mini.text.UpperTest.txt
+./text/target/test-classes/mini/text/UpperTest.class

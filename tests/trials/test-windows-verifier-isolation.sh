@@ -61,4 +61,12 @@ echo 'PASS  controller cannot be modified'
 grep -q '^token:hidden=true' "$repo/probe-result.txt" || { echo 'FAIL  dummy environment token exposed'; exit 1; }
 echo 'PASS  dummy environment token withheld'
 echo 'PASS  project-controlled test ran in scratch repository'
-echo '7 passed, 0 failed'
+mkdir -p "$runs/happy-path/evidence/session"
+printf 'baseline red: test_add; FIX suggested\n' > "$runs/happy-path/evidence/session/report.txt"
+TRIAL_REPORT="$runs/happy-path/evidence/session/report.txt" TRIAL_WINDOWS_ISOLATION=1 \
+  bash "$here/assert-exec.sh" "$repo" baseline-red > "$tmp/report-assert.log" 2>&1 || :
+grep -q '^PASS  an agent report was provided and is not empty' "$tmp/report-assert.log" && \
+  grep -q '^PASS  report says the baseline is red and names the failing test' "$tmp/report-assert.log" && \
+  grep -q '^PASS  report suggests a fix' "$tmp/report-assert.log" || { echo 'FAIL  baseline report inaccessible'; cat "$tmp/report-assert.log"; exit 1; }
+echo 'PASS  baseline report remains readable'
+echo '8 passed, 0 failed'

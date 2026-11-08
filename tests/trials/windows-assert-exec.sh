@@ -35,7 +35,7 @@ shopt -u nullglob
 fs="$fs}"
 report="${TRIAL_REPORT:-}"
 if [ -n "$report" ] && [ "$report" != /dev/null ]; then
-  report_dir="$(mktemp -d)" || exit 2
+  report_dir="$(mktemp -d "$(dirname "$runs")/trial-report.XXXXXXXX")" || exit 2
   trap 'rm -f "$report_dir/report.txt"; rmdir "$report_dir"' EXIT
   cp -- "$report" "$report_dir/report.txt" || exit 2
   report="$(cygpath -m "$report_dir/report.txt")"

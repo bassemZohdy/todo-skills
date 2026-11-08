@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **FIX-038** (fix): Keep shell scripts LF in Windows Git checkouts so copied optional tools run on Linux. Ref: README.md. Validated: `bash tests/trials/test-shell-line-endings.sh`.
 - **FIX-039** (fix): Run multi-node Codex trials with distinct fresh sessions, retained prompts, checksums and independent per-invocation assertions; Linux isolation remains provisional pending TASK-040. Ref: tests/trials/run-codex-multi.sh. Validated: `bash tests/trials/test-codex-fresh-invocations.sh`.
 - **FIX-037** (fix): Exclude batch evidence and metadata from trial scenario scores while retaining incomplete scenarios and all verdicts. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-score-layout.sh`, `bash tests/trials/test-score-outcomes.sh`.
 - **FIX-036** (fix): Report lane concurrency only with independent worker activity evidence; Git worktree events alone are unverified. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-lane-concurrency.sh`, `bash tests/trials/test-lane-evidence.sh`.

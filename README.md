@@ -84,6 +84,8 @@ The lifecycle of every node is: ready check → branch → claim `[/]` → red, 
 
 `bash tools/todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands; an optional Claude Code Stop hook runs it at the end of a session. The plugin folder ships Markdown only; these scripts live in [`tools/`](tools/) of this repository and you copy the ones you want into your project. Optional `tools/todo-verify.sh` rejects zero-test, masked or missing-target verification runs, and `tools/todo-rtm.sh` checks an optional requirements traceability matrix (`docs/RTM.md`, else a README `## RTM` section). All are read-only and need only bash, awk, grep, sed and tr. `bash tests/run.sh` runs the fixture and hook tests.
 
+Git preserves LF line endings for shell scripts in new checkouts, including Windows checkouts. If an older checkout or an already-copied script has CRLF endings, refresh it from a clean checkout or convert it to LF before copying it to Linux.
+
 Tests: `bash tests/run.sh`
 
 ## Security and disclosure

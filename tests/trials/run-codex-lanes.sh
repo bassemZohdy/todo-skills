@@ -56,8 +56,11 @@ mkdir -p "$todo"
 tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
 now() { local t="${EPOCHREALTIME:-}"; [ -n "$t" ] || t="$(date +%s)"; printf '%s' "${t/,/.}"; }
 stamp() { local l; while IFS= read -r l || [ -n "$l" ]; do printf '%s %s\n' "$(now)" "$l"; done; }
-agent() { # agent <dir> <cwd> <writable root>...: one fresh `codex exec --json` on <dir>/prompt.txt
-  local d="$1" cwd="$2" w code; shift 2
+agent() { # agent <dir> <cwd> <tmp> <writable root>...: one fresh `codex exec --json` on <dir>/prompt.txt
+  # <tmp> (inside a writable root's Git metadata) becomes TMPDIR and java.io.tmpdir, as assert-exec.sh does for the
+  # verifier: with /tmp read-only, Maven's Jansi lock file under /tmp made a coordinator stop its verification.
+  local d="$1" cwd="$2" tmpd="$3" w code; shift 3
+  mkdir -p "$tmpd"
   local fs="\":root\"=\"read\", \"$codex_home\"=\"deny\", \"$ctl\"=\"deny\"" p
   for p in "$runs"/* "$sd"/*; do
     case "$p" in "$sd"|"$repo"|"$todo") ;; *) [ ! -e "$p" ] || fs="$fs, \"$p\"=\"deny\"" ;; esac
@@ -66,19 +69,21 @@ agent() { # agent <dir> <cwd> <writable root>...: one fresh `codex exec --json` 
   local args=(exec --json --ephemeral --ignore-user-config -m "${TRIAL_CODEX_MODEL:-gpt-6.1-terra}"
     -c 'default_permissions="trial"' -c "permissions.trial.filesystem={$fs}" -c 'permissions.trial.network.enabled=false'
     -C "$cwd" -o "$d/report.txt" -)
-  { printf '%q ' codex "${args[@]}"; printf '< prompt.txt\nfilesystem: {%s}\n' "$fs"; } > "$d/command.txt"
-  ${tmo[@]+"${tmo[@]}"} codex "${args[@]}" < "$d/prompt.txt" 2> "$d/stderr.log" | stamp > "$d/events.log"
+  { printf 'TMPDIR=%q JAVA_TOOL_OPTIONS=%q ' "$tmpd" "-Djava.io.tmpdir=$tmpd"; printf '%q ' codex "${args[@]}"
+    printf '< prompt.txt\nfilesystem: {%s}\n' "$fs"; } > "$d/command.txt"
+  TMPDIR="$tmpd" JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Djava.io.tmpdir=$tmpd" \
+    ${tmo[@]+"${tmo[@]}"} codex "${args[@]}" < "$d/prompt.txt" 2> "$d/stderr.log" | stamp > "$d/events.log"
   code="${PIPESTATUS[0]}"
   printf '%s\n' "$code" > "$d/agent-exit.txt"
   [ -f "$d/report.txt" ] || : > "$d/report.txt"
   sed -n 's/^[^ ]* {"type":"thread\.started","thread_id":"\([^"]*\)".*/\1/p' "$d/events.log" | head -1 > "$d/session-id.txt"
 }
-real() { (cd "$1" 2>/dev/null && pwd -P); }
+real() { (cd "$1" 2>/dev/null && { pwd -W 2>/dev/null || pwd -P; }); }   # pwd -W: Git Bash, where /tmp and /c/... name one folder
 
 # 1. coordinate: claims, worktrees and one brief per lane
 mkdir "$ev/coordinate" "$ev/briefs" "$ev/lanes"
 TRIAL_LANE_PHASE=coordinate bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/coordinate/prompt.txt" || infra "no prompt"
-agent "$ev/coordinate" "$repo" "$repo" "$repo/.git" "$todo"
+agent "$ev/coordinate" "$repo" "$repo/.git/trial-tmp/coordinate" "$repo" "$repo/.git" "$todo"
 
 # 2. lanes: check every brief against git, then start all accepted workers at once
 : > "$ev/dispatch.txt"; : > "$ev/launches.txt"; : > "$ev/activity.txt"
@@ -118,7 +123,7 @@ for i in ${ids[@]+"${!ids[@]}"}; do
 done
 for i in ${ids[@]+"${!ids[@]}"}; do
   printf '%s %s launched\n' "$(now)" "${ids[$i]}" >> "$ev/launches.txt"
-  agent "$ev/lanes/${ids[$i]}" "${wts[$i]}" "${wts[$i]}" "$repo/.git" "${metas[$i]}" &
+  agent "$ev/lanes/${ids[$i]}" "${wts[$i]}" "${metas[$i]}/trial-tmp" "${wts[$i]}" "$repo/.git" "${metas[$i]}" &
   pids+=("$!")
 done
 for p in ${pids[@]+"${pids[@]}"}; do wait "$p"; done
@@ -148,7 +153,7 @@ elif [ -n "$unfinished" ]; then
 else
   mkdir "$ev/finish"
   bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/finish/prompt.txt" || infra "no prompt"
-  agent "$ev/finish" "$repo" "$repo" "$repo/.git" "$todo"
+  agent "$ev/finish" "$repo" "$repo/.git/trial-tmp/finish" "$repo" "$repo/.git" "$todo"
 fi
 
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches

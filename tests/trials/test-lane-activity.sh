@@ -44,7 +44,7 @@ case "$prompt" in
   *) item started 1 in_progress; item completed 1 completed ;;
 esac
 printf '{"type":"turn.completed"}\n'
-printf 'stub report\n' > "$out"
+printf 'stub report\nTMPDIR=%s\n' "$TMPDIR" > "$out"
 MOCK
 chmod +x "$tmp/bin/codex"
 
@@ -74,6 +74,8 @@ if run both STUB_WORK_FEAT_001=1 STUB_WORK_FEAT_002=1; then
   case " $(roots "$ev/lanes/FEAT-001/command.txt" deny)" in *" $tmp/both/lanes/evidence "*) ok "the evidence folder is denied to the worker" ;; *) bad "evidence not denied: $(roots "$ev/lanes/FEAT-001/command.txt" deny)" ;; esac
   w="$(roots "$ev/coordinate/command.txt" write)"
   [ "$w" = "$repo $repo/.git $repo.todo " ] && ok "the coordinator may write the main checkout, .git and the worktree folder" || bad "coordinator writes: $w"
+  grep -qx "TMPDIR=$repo/.git/worktrees/FEAT-001/trial-tmp" "$ev/lanes/FEAT-001/report.txt" && grep -qx "TMPDIR=$repo/.git/trial-tmp/finish" "$ev/finish/report.txt" \
+    && ok "each agent gets a temp folder inside its own writable Git metadata" || bad "TMPDIR: $(grep -h TMPDIR "$ev/lanes/FEAT-001/report.txt" "$ev/finish/report.txt")"
   grep -q 'Work root FEAT-002' "$ev/lanes/FEAT-002/prompt.txt" && grep -q 'lane subagent' "$ev/lanes/FEAT-002/prompt.txt" \
     && ok "each worker's prompt carries the coordinator's brief for its root" || bad "worker prompt"
   sumcheck && ok "SHA256SUMS covers the evidence and verifies" || bad "SHA256SUMS"

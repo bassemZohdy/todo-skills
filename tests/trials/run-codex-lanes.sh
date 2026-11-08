@@ -6,16 +6,21 @@
 #               worktrees) and, at step 3, writes each lane's subagent instructions to <repo>.todo/<ROOT-ID>.brief.md
 #   lanes       the controller accepts a brief only when <repo>.todo/<ROOT-ID> is a worktree of this repository on a
 #               todo/<ROOT-ID>-* branch whose TODO.md holds that root, one brief per lane, and starts one fresh `codex exec`
-#               per accepted brief at the same time; each may write only its own worktree and the shared .git
+#               per accepted brief at the same time; each may write only its own worktree, the shared .git and that
+#               worktree's own metadata folder .git/worktrees/<name> (Codex protects a writable root's Git metadata
+#               read-only unless it is granted explicitly, and Git cannot lock the worktree's index without it)
 #   finish      a fresh `codex exec` runs /todo-continue --all-lanes --merge again; its step 0 takes the roots at next: drain
-#               to step 4 (refresh, verify, drain, merge) and step 5 (report)
+#               to step 4 (refresh, verify, drain, merge) and step 5 (report). Skipped when a worker exited non-zero: the
+#               finishing coordinator would then do that lane's work itself, one lane after another
 # Activity (lane-evidence.sh's second argument): the controller stamps every line of each worker's `codex exec --json`
 # stream with its own clock as the line arrives. A worker is active from its first tool event (item.started of a command
 # or file change) to its last tool event (item.completed). These events are written by the Codex process, not by the
 # agent's commands (their output is quoted inside an event, never a line of its own), and activity.txt is written outside
 # every root the agents may write. Process lifetimes and worktree events are not used.
 # Permission profile (the Linux trial profile of codex-exec.sh, with the roots of each phase): read everything, deny the
-# Codex login, the controller checkout and the whole runs folder, write only the listed roots, no network. Run it where
+# Codex login, the controller checkout and everything in the runs folder except this scenario's repo and its worktree
+# folder (the evidence included), write only the listed roots, no network. Denying the whole runs folder stopped Codex
+# from starting a session in a worktree (its sandbox could not mount the worktree's Git metadata). Run it where
 # that profile is enforced (the Linux container of docs/evals/codex-linux-2026-11-08); TRIAL_LANE_WRITE adds writable roots
 # such as a dependency cache to every phase.
 # Evidence: <runs>/<scenario>/evidence/<UTC time>-<pid>[-label]/ with setup.log, coordinate/, briefs/, dispatch.txt,
@@ -52,7 +57,10 @@ now() { local t="${EPOCHREALTIME:-}"; [ -n "$t" ] || t="$(date +%s)"; printf '%s
 stamp() { local l; while IFS= read -r l || [ -n "$l" ]; do printf '%s %s\n' "$(now)" "$l"; done; }
 agent() { # agent <dir> <cwd> <writable root>...: one fresh `codex exec --json` on <dir>/prompt.txt
   local d="$1" cwd="$2" w code; shift 2
-  local fs="\":root\"=\"read\", \"$codex_home\"=\"deny\", \"$ctl\"=\"deny\", \"$runs\"=\"deny\""
+  local fs="\":root\"=\"read\", \"$codex_home\"=\"deny\", \"$ctl\"=\"deny\"" p
+  for p in "$runs"/* "$sd"/*; do
+    case "$p" in "$sd"|"$repo"|"$todo") ;; *) [ ! -e "$p" ] || fs="$fs, \"$p\"=\"deny\"" ;; esac
+  done
   for w in "$@" ${TRIAL_LANE_WRITE:-}; do fs="$fs, \"$w\"=\"write\""; done
   local args=(exec --json --ephemeral --ignore-user-config -m "${TRIAL_CODEX_MODEL:-gpt-6.1-terra}"
     -c 'default_permissions="trial"' -c "permissions.trial.filesystem={$fs}" -c 'permissions.trial.network.enabled=false'
@@ -73,7 +81,7 @@ agent "$ev/coordinate" "$repo" "$repo" "$repo/.git" "$todo"
 
 # 2. lanes: check every brief against git, then start all accepted workers at once
 : > "$ev/dispatch.txt"; : > "$ev/launches.txt"; : > "$ev/activity.txt"
-common="$(real "$repo/.git")"; ids=(); lanes=(); wts=()
+common="$(real "$repo/.git")"; ids=(); lanes=(); wts=(); metas=()
 for b in "$todo"/*.brief.md; do
   [ -f "$b" ] || continue
   rid="$(basename "$b" .brief.md)"; wt="$todo/$rid"
@@ -93,8 +101,13 @@ for b in "$todo"/*.brief.md; do
   if [ -z "$lane" ]; then printf 'rejected %s: not a root in the TODO.md of %s\n' "$rid" "$branch" >> "$ev/dispatch.txt"; continue; fi
   dup=0; for l in ${lanes[@]+"${lanes[@]}"}; do [ "$l" != "$lane" ] || dup=1; done
   if [ "$dup" = 1 ]; then printf 'rejected %s: lane %s already has a worker\n' "$rid" "$lane" >> "$ev/dispatch.txt"; continue; fi
+  gd="$(git -C "$wt" rev-parse --git-dir 2>/dev/null)"; case "$gd" in /*|?:*) ;; ?*) gd="$wt/$gd" ;; esac
+  meta="$repo/.git/worktrees/$(basename "$gd")"
+  if [ -z "$gd" ] || [ "$(real "$gd")" != "$(real "$meta")" ]; then
+    printf 'rejected %s: its Git metadata is not under %s/.git/worktrees\n' "$rid" "$repo" >> "$ev/dispatch.txt"; continue
+  fi
   printf 'accepted %s lane %s branch %s worktree %s\n' "$rid" "$lane" "$branch" "$wt" >> "$ev/dispatch.txt"
-  ids+=("$rid"); lanes+=("$lane"); wts+=("$wt")
+  ids+=("$rid"); lanes+=("$lane"); wts+=("$wt"); metas+=("$meta")
 done
 pids=()
 for i in ${ids[@]+"${!ids[@]}"}; do
@@ -104,7 +117,7 @@ for i in ${ids[@]+"${!ids[@]}"}; do
 done
 for i in ${ids[@]+"${!ids[@]}"}; do
   printf '%s %s launched\n' "$(now)" "${ids[$i]}" >> "$ev/launches.txt"
-  agent "$ev/lanes/${ids[$i]}" "${wts[$i]}" "${wts[$i]}" "$repo/.git" &
+  agent "$ev/lanes/${ids[$i]}" "${wts[$i]}" "${wts[$i]}" "$repo/.git" "${metas[$i]}" &
   pids+=("$!")
 done
 for p in ${pids[@]+"${pids[@]}"}; do wait "$p"; done
@@ -120,9 +133,15 @@ done
 bash "$here/snapshot-git.sh" "$repo" > "$ev/after-lanes-git-state.txt" 2>&1
 
 # 3. finish: a fresh coordinator drains and merges what the lanes left at next: drain
-mkdir "$ev/finish"
-bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/finish/prompt.txt" || infra "no prompt"
-agent "$ev/finish" "$repo" "$repo" "$repo/.git" "$todo"
+workers_ok=1
+for f in "$ev"/lanes/*/agent-exit.txt; do [ ! -f "$f" ] || [ "$(cat "$f")" = 0 ] || workers_ok=0; done
+if [ "$workers_ok" = 1 ]; then
+  mkdir "$ev/finish"
+  bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/finish/prompt.txt" || infra "no prompt"
+  agent "$ev/finish" "$repo" "$repo" "$repo/.git" "$todo"
+else
+  echo 'a lane worker exited non-zero: the finishing session was not started' > "$ev/finish-skipped.txt"
+fi
 
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches
 bash "$here/lane-evidence.sh" "$repo" "$ev/activity.txt" > "$ev/lane-evidence.txt" 2>&1

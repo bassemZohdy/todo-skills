@@ -18,8 +18,8 @@ to start inside MXC with `0xc0000142`. The elevated sandbox setup completed
 on that host, but an elevated sandbox command timed out; the hosted runners
 successfully ran Git Bash with the elevated sandbox. MXC was unavailable on
 both hosted runner versions. The host's elevated setup created Codex sandbox
-accounts and firewall rules. Host probe logs are in
-`%TEMP%/todo-fix041-mxc-probe` and are not durable published artifacts.
+accounts and firewall rules. Host probe logs are published with their checksums in
+[fix-evidence-2026-11-08/fix-041-probe](fix-evidence-2026-11-08/fix-041-probe/) (TASK-046).
 
 Limitations: the verifier is opt-in, permits general OS reads, denies the
 specified Codex home and existing siblings of the standard scratch layout,

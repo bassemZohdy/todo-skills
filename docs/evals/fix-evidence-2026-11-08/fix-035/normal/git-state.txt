@@ -1,0 +1,72 @@
+﻿STATUS
+## main
+HISTORY
+*   commit f52d44ee004102e181aa9215a762d13a9c48868b (HEAD -> main)
+|\  Merge: 07a5dc1 1e65a86
+| | Author:     t <t@t>
+| | AuthorDate: Sun Nov 8 00:21:23 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sun Nov 8 00:21:23 2026 +0000
+| | 
+| |     Merge FEAT-001 into main
+| | 
+| * commit 1e65a863b9629d2998d681ba8fb0c21afbf332be
+| | Author:     t <t@t>
+| | AuthorDate: Sun Nov 8 00:21:22 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sun Nov 8 00:21:22 2026 +0000
+| | 
+| |     chore(backlog): drain FEAT-001
+| |     
+| |     Refs: FEAT-001
+| | 
+| * commit 94b122a369ed68ed8cb6f063500398774fcff023
+| | Author:     t <t@t>
+| | AuthorDate: Sun Nov 8 00:21:06 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sun Nov 8 00:21:06 2026 +0000
+| | 
+| |     feat(calc): add subtraction
+| |     
+| |     Refs: FEAT-001
+| |     Red: AttributeError: module 'calc' has no attribute 'subtract'
+| |     Reviewed: self, 0 findings fixed
+| | 
+| * commit 89144889e30de6d183e7f0905f74b1b623189d79
+|/  Author:     t <t@t>
+|   AuthorDate: Sun Nov 8 00:20:39 2026 +0000
+|   Commit:     t <t@t>
+|   CommitDate: Sun Nov 8 00:20:39 2026 +0000
+|   
+|       chore(backlog): start FEAT-001
+| 
+* commit 07a5dc1a8bed23c92347788dbb0ae0f144160eb9
+| Author:     t <t@t>
+| AuthorDate: Sun Nov 8 00:20:30 2026 +0000
+| Commit:     t <t@t>
+| CommitDate: Sun Nov 8 00:20:30 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-b-calc
+| 
+* commit 9cfb9ab24660e60bae9cc3ae7f4a761ab36ab94d
+| Author:     t <t@t>
+| AuthorDate: Sun Nov 8 04:18:50 2026 +0400
+| Commit:     t <t@t>
+| CommitDate: Sun Nov 8 04:18:50 2026 +0400
+| 
+|     chore: prepare empty backlog
+| 
+* commit 45bf75119e9fb45f88d834970460d03474ce0d06
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 04:18:50 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 04:18:50 2026 +0400
+  
+      init with one free root
+BRANCHES
+* main f52d44e Merge FEAT-001 into main
+WORKTREES
+worktree %TEMP%/todo-fix035-20261108-041850/normal/repo
+HEAD f52d44ee004102e181aa9215a762d13a9c48868b
+branch refs/heads/main
+

@@ -1,0 +1,44 @@
+﻿probe (windows-2022)	Probe native sandbox and Git Bash	﻿2026-11-08T05:58:48.5385697Z ##[group]Run codex --version
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5386266Z ^[[36;1mcodex --version^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5386597Z ^[[36;1m[System.Environment]::OSVersion.Version^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5387402Z ^[[36;1mcodex -c windows.sandbox=mxc sandbox --include-managed-config --permission-profile :workspace -- cmd.exe /d /c echo MXC_OK^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5388412Z ^[[36;1mif ($LASTEXITCODE -ne 0) { throw "MXC command startup failed: $LASTEXITCODE" }^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5388972Z ^[[36;1m$gitBash = Join-Path $env:ProgramFiles 'Git/bin/bash.exe'^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5389686Z ^[[36;1mcodex -c windows.sandbox=mxc sandbox --include-managed-config --permission-profile :workspace -- $gitBash -c 'printf BASH_OK'^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5390608Z ^[[36;1mif ($LASTEXITCODE -ne 0) { throw "Git Bash under MXC failed: $LASTEXITCODE" }^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5447336Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:48.5447794Z ##[endgroup]
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.7918140Z codex-cli 0.167.0
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.8180476Z 
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.8674490Z ^[[32;1mMajor ^[[0m^[[32;1m Minor ^[[0m^[[32;1m Build ^[[0m^[[32;1m Revision^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.8675955Z ^[[32;1m----- ^[[0m ^[[32;1m----- ^[[0m ^[[32;1m----- ^[[0m ^[[32;1m--------^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.8676633Z 10     0      20348  0
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:52.9318095Z Error: failed to prepare MXC sandbox: native MXC is unavailable on this executor
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.1798379Z ^[[31;1mException: ^[[0mD:\a\_temp\edd2f3fd-9e53-4ddc-b794-c81d81161a53.ps1:5^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.1800278Z ^[[31;1m^[[0m^[[36;1mLine |^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.1802565Z ^[[31;1m^[[0m^[[36;1m^[[36;1m   5 | ^[[0m … EXITCODE -ne 0) { ^[[36;1mthrow "MXC command startup failed: $LASTEXITCODE"^[[0m }^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.1804207Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m     | ^[[31;1m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.1805900Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m^[[31;1m^[[31;1m^[[36;1m     | ^[[31;1mMXC command startup failed: 1^[[0m
+probe (windows-2022)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.2298122Z ##[error]Process completed with exit code 1.
+probe (windows-2025)	Probe native sandbox and Git Bash	﻿2026-11-08T05:58:49.9862443Z ##[group]Run codex --version
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9863175Z ^[[36;1mcodex --version^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9863876Z ^[[36;1m[System.Environment]::OSVersion.Version^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9864929Z ^[[36;1mcodex -c windows.sandbox=mxc sandbox --include-managed-config --permission-profile :workspace -- cmd.exe /d /c echo MXC_OK^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9865759Z ^[[36;1mif ($LASTEXITCODE -ne 0) { throw "MXC command startup failed: $LASTEXITCODE" }^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9866367Z ^[[36;1m$gitBash = Join-Path $env:ProgramFiles 'Git/bin/bash.exe'^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9867111Z ^[[36;1mcodex -c windows.sandbox=mxc sandbox --include-managed-config --permission-profile :workspace -- $gitBash -c 'printf BASH_OK'^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9867922Z ^[[36;1mif ($LASTEXITCODE -ne 0) { throw "Git Bash under MXC failed: $LASTEXITCODE" }^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9939394Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:49.9939985Z ##[endgroup]
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.8645627Z codex-cli 0.167.0
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.8926507Z 
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.9370794Z ^[[32;1mMajor ^[[0m^[[32;1m Minor ^[[0m^[[32;1m Build ^[[0m^[[32;1m Revision^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.9372319Z ^[[32;1m----- ^[[0m ^[[32;1m----- ^[[0m ^[[32;1m----- ^[[0m ^[[32;1m--------^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:53.9373005Z 10     0      26100  0
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.0284700Z Error: failed to prepare MXC sandbox: native MXC is unavailable on this executor
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2422171Z ^[[31;1mException: ^[[0mD:\a\_temp\7d17fde8-fa74-4d47-8c45-780cf0def60b.ps1:5^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2423660Z ^[[31;1m^[[0m^[[36;1mLine |^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2424594Z ^[[31;1m^[[0m^[[36;1m^[[36;1m   5 | ^[[0m … EXITCODE -ne 0) { ^[[36;1mthrow "MXC command startup failed: $LASTEXITCODE"^[[0m }^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2426018Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m     | ^[[31;1m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2429814Z ^[[31;1m^[[0m^[[36;1m^[[36;1m^[[0m^[[36;1m^[[0m^[[36;1m^[[31;1m^[[31;1m^[[36;1m     | ^[[31;1mMXC command startup failed: 1^[[0m
+probe (windows-2025)	Probe native sandbox and Git Bash	2026-11-08T05:58:54.2957783Z ##[error]Process completed with exit code 1.

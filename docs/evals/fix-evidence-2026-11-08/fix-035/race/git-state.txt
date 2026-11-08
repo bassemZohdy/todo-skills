@@ -1,0 +1,43 @@
+﻿STATUS
+## main
+HISTORY
+* commit 43307f2d2d8e83ca966bf14a64eaa0eba9567978 (todo/FEAT-001-add-subtract-calc-py)
+| Author:     t <t@t>
+| AuthorDate: Sun Nov 8 00:20:58 2026 +0000
+| Commit:     t <t@t>
+| CommitDate: Sun Nov 8 00:20:58 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+|   
+| * commit c30e94dd7de7d033d969320d479cf3e71a595761 (HEAD -> main, todo/FEAT-001-rival)
+|/  Author:     rival <r@r>
+|   AuthorDate: Sun Nov 8 00:20:50 2026 +0000
+|   Commit:     rival <r@r>
+|   CommitDate: Sun Nov 8 00:20:50 2026 +0000
+|   
+|       chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+| 
+* commit 39c4a30efedc07d3e267291fadce110bb54260bb
+| Author:     t <t@t>
+| AuthorDate: Sun Nov 8 04:20:25 2026 +0400
+| Commit:     t <t@t>
+| CommitDate: Sun Nov 8 04:20:25 2026 +0400
+| 
+|     chore: prepare empty backlog
+| 
+* commit 2dbfb9abcdab129033d2d72206aa7ec26c11e275
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 04:20:25 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 04:20:25 2026 +0400
+  
+      init with one free root
+BRANCHES
+* main                               c30e94d chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+  todo/FEAT-001-add-subtract-calc-py 43307f2 chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+  todo/FEAT-001-rival                c30e94d chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+WORKTREES
+worktree %TEMP%/todo-fix035-20261108-041850/race/repo
+HEAD c30e94dd7de7d033d969320d479cf3e71a595761
+branch refs/heads/main
+

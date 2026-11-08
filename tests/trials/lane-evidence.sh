@@ -1,38 +1,35 @@
 #!/usr/bin/env bash
-# Reads the lane event log that the lane scenarios' git hooks write and says how the lanes ran. Read-only.
-# Usage: bash tests/trials/lane-evidence.sh <repo>
-# setup.sh installs post-checkout and post-commit hooks in the `lanes` and `multi-module` scenarios. Each event is one line
-# in <git-common-dir>/trial-events:  <nanoseconds> <hook> <worktree top level> <branch>
-# Events whose top level is not the main checkout belong to a lane worktree. This evidence does not depend on the agent's
-# report or on how many worktrees are left at the end (a clean `git worktree list` proves nothing about how the lanes ran).
-# Output (key: value lines):
-#   worktrees: <n>        distinct lane worktrees that saw a checkout or commit
-#   events: <n>           events in lane worktrees
-#   execution: overlapping | sequential | none
-#     overlapping  two lane worktrees were active in intersecting time windows
-#     sequential   lane worktrees were used, but one finished before the next began
-#     none         no lane worktree was used (or no event log exists)
+# Git hooks establish worktree use, never concurrent worker execution.
+# Optional second argument: controller-owned activity evidence, one line per
+# distinct worker: <session-id> <lane> <active-start> <active-end>.
+# Times must be comparable numeric timestamps of independently observed active
+# work, not process or worktree lifetimes. The caller must establish provenance
+# and protect this file from the evaluated agent; this script cannot do so.
 set -u
-repo="${1:?usage: lane-evidence.sh <repo>}"
-common="$(git -C "$repo" rev-parse --git-common-dir 2>/dev/null)" || { echo "worktrees: 0"; echo "events: 0"; echo "execution: none"; exit 0; }
+repo="${1:?usage: lane-evidence.sh <repo> [controller-activity-file]}"
+activity="${2:-}"
+common="$(git -C "$repo" rev-parse --git-common-dir 2>/dev/null)" || { printf 'worktrees: 0\nevents: 0\nexecution: none\n'; exit 0; }
 case "$common" in /*|?:*) ;; *) common="$repo/$common" ;; esac
 main="$(git -C "$repo" rev-parse --show-toplevel)"
 log="$common/trial-events"
-[ -s "$log" ] || { echo "worktrees: 0"; echo "events: 0"; echo "execution: none"; exit 0; }
-awk -v main="$main" '
-  $3 != main { n++; t = $1 + 0
-    if (!($3 in first) || t < first[$3]) first[$3] = t
-    if (!($3 in last)  || t > last[$3])  last[$3]  = t
-    seen[$3] = 1 }
-  END {
-    w = 0; for (k in seen) { w++; key[w] = k }
-    over = 0
-    for (i = 1; i <= w; i++) for (j = i + 1; j <= w; j++) {
-      lo = (first[key[i]] > first[key[j]]) ? first[key[i]] : first[key[j]]
-      hi = (last[key[i]]  < last[key[j]])  ? last[key[i]]  : last[key[j]]
-      if (lo < hi) over = 1
-    }
-    print "worktrees: " w
-    print "events: " n + 0
-    print "execution: " (w == 0 ? "none" : (over ? "overlapping" : "sequential"))
-  }' "$log"
+if [ -s "$log" ]; then
+  awk -v main="$main" '$3 != main { n++; seen[$3]=1 } END { for (k in seen) w++; print "worktrees: " w+0; print "events: " n+0 }' "$log"
+else
+  printf 'worktrees: 0\nevents: 0\n'
+fi
+if [ -n "$activity" ] && [ -s "$activity" ]; then
+  awk '
+    NF != 4 || $3 !~ /^[0-9]+([.][0-9]+)?$/ || $4 !~ /^[0-9]+([.][0-9]+)?$/ || $3+0 >= $4+0 || seen[$1]++ { bad=1 }
+    { id[NR]=$1; lane[NR]=$2; start[NR]=$3+0; end[NR]=$4+0 }
+    END {
+      if (bad || NR < 2) { print "execution: unverified"; exit }
+      for (i=1; i<=NR; i++) for (j=i+1; j<=NR; j++)
+        if (lane[i] != lane[j] && start[i] < end[j] && start[j] < end[i]) concurrent=1
+      for (i=1; i<=NR; i++) for (j=i+1; j<=NR; j++) if (lane[i] != lane[j]) distinct=1
+      print "execution: " (concurrent ? "concurrent" : (distinct ? "sequential" : "unverified"))
+    }' "$activity"
+elif [ -s "$log" ] && awk -v main="$main" '$3 != main { found=1 } END { exit !found }' "$log"; then
+  echo 'execution: unverified'
+else
+  echo 'execution: none'
+fi

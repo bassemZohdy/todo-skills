@@ -30,7 +30,8 @@ for i in 1 2 3 4 5 6 7 8; do
   printf '%s\n' "$sid" >> "$controller/sessions.txt"
   case "$result" in
     PASS) if [ "$i" -ge 2 ]; then outcome=PASS; else outcome=UNVERIFIED; fi; break ;;
-    INFRA_ERROR|UNVERIFIED) outcome="$result"; break ;;
+    # Keep the invocation's environment signature as the controller's recorded cause (FIX-053).
+    INFRA_ERROR|UNVERIFIED) outcome="$result"; [ "$result" != INFRA_ERROR ] || [ ! -f "$ev/infra-signature.txt" ] || cp "$ev/infra-signature.txt" "$controller/infra-signature.txt"; break ;;
     FAIL) ;;
     *) outcome=UNVERIFIED; break ;;
   esac

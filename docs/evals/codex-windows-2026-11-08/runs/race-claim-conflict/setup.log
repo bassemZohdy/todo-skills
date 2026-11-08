@@ -1,0 +1,22 @@
+warning: in the working copy of '.claude/skills/todo-add/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-continue/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-init/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-plan/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-release/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-report/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-report/template.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-status/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo-update/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/reference/ci.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/reference/git-flow.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/reference/lanes.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/reference/rtm.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/todo/reference/verification.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'TODO.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'calc.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_calc.py', LF will be replaced by CRLF the next time Git touches it
+ready: /c/Users/<user>/todo-trials/win-20261108/runs2/race-claim-conflict/repo (race-claim-conflict) on branch main

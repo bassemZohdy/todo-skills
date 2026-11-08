@@ -85,7 +85,8 @@ Scripts that test the harness and the retained evidence. The scripts not marked 
 | `test-pending-root.sh` | A root added but not yet committed is claimed with its pending edits, and survives a competing claim (FIX-035) |
 | `test-codex-fresh-invocations.sh` | `run-codex-multi.sh`, with a fake `codex`: one new process and session per invocation, repeated session ids and cache failures are infrastructure errors |
 | `test-shell-line-endings.sh` | A shell tool copied from a Windows (autocrlf) checkout still runs on Linux (`.gitattributes` keeps `*.sh` LF; FIX-038) |
-| `test-codex-evidence.sh` | The Windows Codex evidence in `docs/evals/codex-2026-11-07` is complete, checksummed and consistent |
+| `test-codex-evidence.sh` | The Windows Codex evidence in `docs/evals/codex-2026-11-07` is complete, checksummed and consistent (a verifier exit other than 0 or 1 counts as an INFRA_ERROR reason) |
+| `test-windows-codex-evidence.sh` | The Windows Codex batch rerun with the isolated verifier (`docs/evals/codex-windows-2026-11-08`, TASK-045): the shared checks above, every assertion log from the elevated Windows verifier, a cause for every non-PASS verdict, the multi-node controllers and redacted paths |
 | `test-linux-codex-evidence.sh` | The Linux Codex evidence in `docs/evals/codex-linux-2026-11-08` is complete and its hashes, prompts and verdicts agree |
 | `test-existing-project-evidence.sh` | The existing-project rerun in `docs/evals/eval-skills-2026-11-08` (TASK-043): hashes, three fresh sessions, no commit between them, the claim, drain and merge, and the independent checks |
 | `test-linux-boundary.sh` | **By hand** (needs Docker and the `todo-codex-linux` image): dummy-sentinel probes of the Linux profile and of `assert-exec.sh` |

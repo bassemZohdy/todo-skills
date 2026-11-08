@@ -1,0 +1,15 @@
+INFO  verifier: windows-assert-exec.sh, elevated Windows sandbox, python C:\Users\<user>\AppData\Local\Programs\Python\Python313\python.exe
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+FAIL  subtract and its test on main
+FAIL  FEAT-001 drained on main with the core format
+FAIL  main history: claim, then the root merge
+FAIL  root branch has start, node commit and drain
+PASS  no todo branches left, on main, clean
+
+8 passed, 4 failed

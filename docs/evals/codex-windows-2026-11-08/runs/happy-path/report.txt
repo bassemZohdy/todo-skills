@@ -1,0 +1,16 @@
+Stopped at **step 4** for **FEAT-001 — Add subtract to calc.py**. Git could not create the task branch:
+
+```text
+fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-calc-py':
+unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-calc-py
+```
+
+The environment permits reading `.git` but not writing to it, so the required branch and claim could not be created. The checkout remains on `main`; no files were changed and no commit was made.
+
+- Baseline: `python3 -m unittest discover -s tests` passed, **1 test**.
+- Done when: not run; work did not start.
+- Adjacent problems: none identified.
+- Next workable node: **FEAT-001**, once Git can write its branch reference.
+- After addressing the Git permissions, clear context before the next invocation if useful.
+
+Ambiguities, contradictions, or unclear skill instructions encountered: **none**.

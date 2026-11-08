@@ -1,0 +1,11 @@
+PASS        baseline-red           10/10 checks
+INFRA_ERROR ci-local               agent exit 0, marked INFRA_ERROR
+INFRA_ERROR happy-path             agent exit 0, marked INFRA_ERROR
+INFRA_ERROR interrupted-merge      verifier exit 127
+INFRA_ERROR java-lifecycle         agent exit 0, marked INFRA_ERROR
+INFRA_ERROR multi-module           agent exit 0, marked INFRA_ERROR
+INFRA_ERROR race-claim-conflict    agent exit 0, marked INFRA_ERROR
+INFRA_ERROR ts-lifecycle           agent exit 0, marked INFRA_ERROR
+
+TRIAL SCORE 12.5% (1/8 scenarios pass); check rate 100.0% (10/10)
+PASS 1 FAIL 0 INFRA_ERROR 7 UNVERIFIED 0

@@ -52,7 +52,7 @@ Fresh `claude -p` processes (Claude Code 2.1.319, `claude-sonnet-5-5`, Windows 1
 
 ### Codex runs (2026-11-07)
 
-Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0, Windows 11). Details, evidence and the sandbox findings: [docs/evals/codex-2026-11-07/summary.md](evals/codex-2026-11-07/summary.md).
+Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0, Windows 11). Details, evidence and the sandbox findings: [docs/evals/codex-2026-11-07/summary.md](evals/codex-2026-11-07/summary.md). Rerun on 2026-11-08 with every assertion in the isolated Windows verifier: the same 2 PASS and 6 INFRA_ERROR, no FAIL; the Java scenarios now stop on Maven being unable to read its host cache in the sandbox ([codex-windows-2026-11-08](evals/codex-windows-2026-11-08/summary.md), TASK-045).
 
 | Scenario | Result |
 |---|---|

@@ -9,6 +9,9 @@
 #   - an access error on the scratch repo or its worktree folder: Access to the path '...' is denied
 #   - the agent itself reporting that .git or the session is read-only, or that the environment does not permit writing under .git
 #   - child processes the sandbox will not start:  Error: spawn EPERM (Node's test runner), Git Bash "CreateFileMapping ... Win32 error 5"
+#   - Windows refusing to start a program for the sandbox user (TASK-045, a Microsoft Store python3 alias):
+#       The system cannot execute the specified program. / python3.exe cannot be accessed by the system
+#   - Maven unable to create its local repository (TASK-045: Could not create local repository at C:\.m2\repository)
 # run-codex.sh uses this to write INFRA_ERROR instead of FAIL; it never hides a failed assertion that has no such signature.
 for f in "$@"; do
   [ -f "$f" ] || continue
@@ -20,6 +23,6 @@ for f in "$@"; do
     -e "\.git['\` ]+is read-only" \
     -e "\.git[^.]{0,80}read-only" \
     -e "read-only[^.]{0,40}\.git" \
-    -e "read-only access to \.git"     -e "does not permit writing under \.git"     -e "spawn EPERM"     -e "CreateFileMapping.*Win32 error 5" "$f" && exit 0
+    -e "read-only access to \.git"     -e "does not permit writ(e|es|ing) under [\`']?\.git"     -e "cannot execute the specified program" -e "cannot be accessed by the system"     -e "Could not create local repository at"     -e "spawn EPERM"     -e "CreateFileMapping.*Win32 error 5" "$f" && exit 0
 done
 exit 1

@@ -1,0 +1,1 @@
+bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trials/win-20261108/runs2/interrupted-merge/repo /c/Users/<user>/todo-trials/win-20261108/runs2/interrupted-merge/evidence/20261108T114419Z-345513/prompt.txt /c/Users/<user>/todo-trials/win-20261108/runs2/interrupted-merge/evidence/20261108T114419Z-345513/report.txt   # see codex-exec.sh for the codex flags

@@ -1,0 +1,20 @@
+warm java-lifecycle exit 0
+warm multi-module exit 0
+11:04:57Z start happy-path
+11:06:37Z end happy-path exit 0
+11:06:37Z start baseline-red
+11:07:06Z end baseline-red exit 0
+11:07:06Z start interrupted-merge
+11:08:57Z end interrupted-merge exit 0
+11:08:57Z start race-claim-conflict
+11:10:38Z end race-claim-conflict exit 0
+11:10:38Z start ci-local
+11:12:24Z end ci-local exit 0
+11:12:24Z start multi-module
+11:17:03Z end multi-module exit 0
+11:17:03Z start ts-lifecycle
+11:20:41Z end ts-lifecycle exit 0
+11:20:41Z start java-lifecycle
+11:24:18Z end java-lifecycle exit 0
+score exit 0
+done

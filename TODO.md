@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FIX-035** · P0 · high · Start a new uncommitted root on the base without losing backlog edits or racing another claim
-  - Done when: a root added by todo-add is claimed from the base without a separate backlog commit, and competing claims remain protected; `bash tests/trials/test-pending-root.sh`
-  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
-  - State: branch todo/FIX-035-start-new-uncommitted-root from main; next: start FIX-035
 - [ ] **FIX-036** · P1 · high · Distinguish concurrent lane execution from overlapping worktree lifetimes
   - Done when: interleaved sequential worktree events do not claim parallel agents, and verified concurrent workers are distinguishable; `bash tests/trials/test-lane-concurrency.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md

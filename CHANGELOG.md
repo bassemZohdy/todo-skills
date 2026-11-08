@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **FIX-035** (fix): Claim newly added uncommitted roots without a separate backlog commit, preserving pending edits if another claim wins. Ref: docs/evals/fix-035.md. Validated: `bash tests/trials/test-pending-root.sh`.
+
 ### Added
 - **TASK-028** (test): A fresh Linux Codex agent completed the Git lifecycle in an isolated scratch repository; the sandbox result is provisional pending an adversarial audit. Ref: docs/evals/codex-linux-2026-11-08/summary.md. Validated: `bash tests/trials/test-codex-evidence.sh`, `bash tests/trials/test-linux-codex-evidence.sh`.
 - **TASK-029** (test): Eight Linux Codex scenarios, including the six previously blocked on Windows, have prompts, independent assertions, logs, Git state and checksums; all eight passed. Ref: docs/evals/codex-linux-2026-11-08/summary.md. Validated: `bash tests/trials/test-codex-evidence.sh`, `bash tests/trials/test-linux-codex-evidence.sh`.

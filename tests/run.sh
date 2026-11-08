@@ -188,6 +188,9 @@ if [ "$rc" -eq 1 ] && printf '%s\n' "$out" | grep -q '^FAIL I1:' && printf '%s\n
 out="$(bash "$lint" --progress "$fx/ok-valid.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"
 if printf '%s\n' "$out" | grep -q '^Progress: \[.*\] [0-9]*/[0-9]* leaves .* 0 drained in \[Unreleased\]$'; then ok "lint --progress works without a CHANGELOG.md"; else bad "lint --progress without CHANGELOG.md: $out"; fi
 
+st="$root/plugin/skills/todo-status/SKILL.md"
+if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
+
 # Stop hook: valid backlog allows the stop (no output).
 out="$(printf '{"stop_hook_active": false}' | TODO_FILE="$fx/ok-valid.md" CHANGELOG_FILE="$changelog" bash "$hook")"
 if [ -z "$out" ]; then ok "hook allows stop on a valid backlog"; else bad "hook printed output on a valid backlog: $out"; fi

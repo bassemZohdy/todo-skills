@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **FEAT-056** (feat): Split the review verdict: one reviewer call checks spec compliance first, then quality, and node commits record `Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed` (the first round's verdicts) or `Reviewed: self, <n> findings fixed`. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated docs/GIT-FLOW.md, docs/VERIFICATION.md.
 - **FEAT-055** (feat): Add an arm-agnostic agent benchmark (`docs/evals/benchmark`): six scenarios, the arms todo-skills, lean-baseline and no-methodology, hidden acceptance tests scored by a trusted verifier on a copy of the agent's repository, PASS, FAIL, INFRA_ERROR or UNVERIFIED with checksummed evidence and one CSV row per run, tokens only from the CLI's own usage output, and median, mean and spread by `summarize.sh`. Tested with a stub agent; no real agent has run, so the results file holds only its header. Ref: docs/evals/update-review.md. Validated: `bash tests/trials/test-benchmark-harness.sh`. Docs: updated README.md, docs/evals/benchmark/README.md, tests/trials/README.md.
 
 ### Changed

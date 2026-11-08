@@ -5,10 +5,10 @@
   - Done when: every scenario is scored PASS, FAIL or INFRA_ERROR with its cause recorded, assertions ran through windows-assert-exec.sh, and the published evidence passes its checker; `bash tests/trials/test-windows-codex-evidence.sh`
   - Links: Ref: docs/evals/fix-041.md
   - State: branch todo/TASK-045-repeat-windows-codex-batch from main; next: start TASK-045
-- [ ] **TASK-049** · P1 · low · Document OpenAI Plugins Directory submission and security disclosures
+- [/] **TASK-049** · P1 · low · Document OpenAI Plugins Directory submission and security disclosures
   - Done when: docs/distribution.md records packaging, developer verification, permissions, skills-only limitations, portal checks and how to handle review findings; `test -f docs/distribution.md`; `bash tests/run.sh`
   - Links: Ref: docs/distribution.md · Depends: FEAT-048
-  - State: branch todo/TASK-049-document-openai-directory-submission from main; next: start TASK-049
+  - State: attempts 0/3; baseline 139 passing; branch todo/TASK-049-document-openai-directory-submission from main; next: read docs
 - [ ] **TASK-046** · P2 · mid · Publish durable, checksummed evidence for FIX-035 to FIX-041 and verify it in CI
   - Done when: docs/evals holds the evidence with SHA256SUMS and the Ubuntu and macOS CI jobs run its checker; `bash tests/trials/test-fix-evidence.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-08/ci-verification.md

@@ -1,0 +1,86 @@
+STATUS
+## todo/FEAT-001-add-subtract-multiply-calc
+HISTORY
+*   commit 9f750b387a77d2127a07391af4ccc943d613ed25 (HEAD -> todo/FEAT-001-add-subtract-multiply-calc)
+|\  Merge: 8ed3555 7a83ac2
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:37:27 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:37:27 2026 +0000
+| | 
+| |     Merge FEAT-001.2 into FEAT-001
+| | 
+| * commit 7a83ac287359cc0bdd640275ec5d3cdd33e4b2fe
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:37:26 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:37:26 2026 +0000
+| | 
+| |     feat(calc): add multiply
+| |     
+| |     Refs: FEAT-001.2
+| |     Red: cannot find symbol method multiply(int,int)
+| |     Reviewed: self, 0 findings fixed
+| |     Checked: mvn -B test -Dtest=MultiplyTest -Dsurefire.failIfNoSpecifiedTests=true
+| |     Checked: mvn -B test
+| | 
+| * commit bb1a28108a03e4b8765f5a1bbf31e4f3568c7750
+|/  Author:     t <t@t>
+|   AuthorDate: Sat Nov 7 23:36:32 2026 +0000
+|   Commit:     t <t@t>
+|   CommitDate: Sat Nov 7 23:36:32 2026 +0000
+|   
+|       chore(backlog): start FEAT-001.2
+|   
+*   commit 8ed355535e57d2ddbc88594d31514104cb5206eb
+|\  Merge: bca38da 81403c2
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:35:40 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:35:40 2026 +0000
+| | 
+| |     Merge FEAT-001.1 into FEAT-001
+| | 
+| * commit 81403c2f649025e98fe867ff0f80b63f4a965f55
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:35:40 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:35:40 2026 +0000
+| | 
+| |     feat(calc): add subtract
+| |     
+| |     Refs: FEAT-001.1
+| |     Red: cannot find symbol method subtract(int,int)
+| |     Reviewed: self, 0 findings fixed
+| | 
+| * commit 1f72cbc75a6beb02c9af225e89e12532ca957d6e
+|/  Author:     t <t@t>
+|   AuthorDate: Sat Nov 7 23:34:52 2026 +0000
+|   Commit:     t <t@t>
+|   CommitDate: Sat Nov 7 23:34:52 2026 +0000
+|   
+|       chore(backlog): start FEAT-001.1
+| 
+* commit bca38da20671b19db77ae4f7136dfc955ea81f38 (main)
+| Author:     t <t@t>
+| AuthorDate: Sat Nov 7 23:34:43 2026 +0000
+| Commit:     t <t@t>
+| CommitDate: Sat Nov 7 23:34:43 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+| 
+* commit e1644d4f37b235dcb1b825d4443cbedf03d1c809
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:34:00 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:34:00 2026 +0400
+  
+      init java project
+BRANCHES
+  main                                     bca38da chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* todo/FEAT-001-add-subtract-multiply-calc 9f750b3 Merge FEAT-001.2 into FEAT-001
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/java-lifecycle-retry/repo
+HEAD 9f750b387a77d2127a07391af4ccc943d613ed25
+branch refs/heads/todo/FEAT-001-add-subtract-multiply-calc
+

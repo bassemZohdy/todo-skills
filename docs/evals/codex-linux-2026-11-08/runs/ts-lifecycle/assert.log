@@ -1,0 +1,15 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+PASS  FEAT-001 drained into the changelog on main with the core format
+PASS  main TODO.md has no roots left
+PASS  subtract and multiply exist on main
+PASS  a test file per child exists on main
+PASS  no todo branches or extra worktrees left
+PASS  main checked out, tree clean, node_modules not tracked
+
+13 passed, 0 failed

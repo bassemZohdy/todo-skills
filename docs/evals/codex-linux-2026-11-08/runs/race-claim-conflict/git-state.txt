@@ -1,0 +1,26 @@
+STATUS
+## main
+HISTORY
+* commit d7b2d7fe7f1be32917ed24bc602a4765139fbb22 (HEAD -> main, todo/FEAT-001-rival)
+| Author:     rival <r@r>
+| AuthorDate: Sat Nov 7 23:29:12 2026 +0000
+| Commit:     rival <r@r>
+| CommitDate: Sat Nov 7 23:29:12 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+| 
+* commit 950698ffdcb45148ddccde660e327c3734e55728
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:28:46 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:28:46 2026 +0400
+  
+      init with one free root
+BRANCHES
+* main                d7b2d7f chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+  todo/FEAT-001-rival d7b2d7f chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/race-claim-conflict/repo
+HEAD d7b2d7fe7f1be32917ed24bc602a4765139fbb22
+branch refs/heads/main
+

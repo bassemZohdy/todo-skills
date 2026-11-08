@@ -1,0 +1,12 @@
+Both lanes finished and were merged into `main`. The backlog is empty, the working tree is clean, and the next workable root in each lane is **none**.
+
+- **core — FEAT-001:** Added `Calc.subtract` and its test. The targeted Maven test passed; the full regression passed with 3 tests against a baseline of 2. Node commit `b20a483`; merge commit `69c031e`.
+- **text — FEAT-002:** Added `Text.shout` and its test. The targeted Maven test passed; after refreshing from `main`, the full regression passed with 4 tests against the current base’s 3. Node commit `71f8172`; merge commit `21be00a`.
+
+Both changes were self-reviewed with no findings. The roots were drained into [CHANGELOG.md](/work/CHANGELOG.md), and their worktrees and branches were removed. No adjacent problems were identified. Clear context before the next backlog run.
+
+**Skill ambiguities and conflicts encountered**
+
+- The lane instructions say, “**Without a subagent tool, say so in the first line of your output and do everything below yourself**,” while this session exposes a subagent tool but prohibits spawning agents unless explicitly requested. I treated delegation as unavailable and used the sequential fallback; I reported that in the first progress update.
+- The review instructions say, “**With a subagent tool, a fresh-context reviewer does this**,” but the same session restriction prevented spawning one. I reviewed both changes myself and recorded `Reviewed: self`.
+- The lane instructions say, “**Lanes only work if their trees touch different files**,” yet every lane necessarily changes `TODO.md` and `CHANGELOG.md`. I treated this as referring to implementation files and followed the explicit backlog-conflict rules during refresh. The source changes were disjoint.

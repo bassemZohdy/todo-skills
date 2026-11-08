@@ -125,3 +125,8 @@ The version lives in `plugin/.claude-plugin/plugin.json` and must equal the newe
 - Backlog changes come only from a user command or a completed code transition. The agent never invents tasks. Adjacent findings are returned as ready-to-run `/todo-add ... --from <ID>` commands.
 - `Done when` commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
 - Nothing is required beyond Markdown. Git is used when present. The skills never tag, release, fetch, pull or push; sharing is git's job.
+
+## Issue reconciliation
+
+- [Issue #11](https://github.com/bassemZohdy/todo-skills/issues/11) asks for the TASK-007 submission date and reference. Both are recorded in [distribution.md](distribution.md); TASK-007 is archived in CHANGELOG.md. Recommend closing the issue as satisfied; the directory's automatic review remains pending.
+- [Issue #5](https://github.com/bassemZohdy/todo-skills/issues/5) proposes persisted progress bars in the backlog. Keep it open for discussion, but do not add derived progress state to TODO.md without a separate decision; `/todo-report` already provides a read-only view.

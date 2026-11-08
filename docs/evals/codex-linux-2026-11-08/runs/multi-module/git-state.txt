@@ -1,0 +1,136 @@
+STATUS
+## main
+HISTORY
+*   commit 21be00a0be3f6edd8ec577667325bcb856b861e4 (HEAD -> main)
+|\  Merge: 69c031e 5d28b8e
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:38:52 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:38:52 2026 +0000
+| | 
+| |     Merge FEAT-002 into main
+| | 
+| * commit 5d28b8e0ff89c0cb83e259530e128b3efff5d687
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:38:52 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:38:52 2026 +0000
+| | 
+| |     chore(backlog): drain FEAT-002
+| |     
+| |     Refs: FEAT-002
+| |   
+| *   commit 739acfbe9762fcb163e9cd9cd24b08e0caf0c1f8
+| |\  Merge: 71f8172 69c031e
+| |/  Author:     t <t@t>
+|/|   AuthorDate: Sat Nov 7 23:38:02 2026 +0000
+| |   Commit:     t <t@t>
+| |   CommitDate: Sat Nov 7 23:38:02 2026 +0000
+| |   
+| |       Merge main into FEAT-002
+| |       
+| |       # Conflicts:
+| |       #       TODO.md
+| |   
+* |   commit 69c031ea8fe530430ad3d071c7be28c201898ff3
+|\ \  Merge: 30cb1c6 f4330ef
+| | | Author:     t <t@t>
+| | | AuthorDate: Sat Nov 7 23:37:46 2026 +0000
+| | | Commit:     t <t@t>
+| | | CommitDate: Sat Nov 7 23:37:46 2026 +0000
+| | | 
+| | |     Merge FEAT-001 into main
+| | | 
+| * | commit f4330ef6e53e93767ca73382200813d7d1fb2a7a
+| | | Author:     t <t@t>
+| | | AuthorDate: Sat Nov 7 23:37:45 2026 +0000
+| | | Commit:     t <t@t>
+| | | CommitDate: Sat Nov 7 23:37:45 2026 +0000
+| | | 
+| | |     chore(backlog): drain FEAT-001
+| | |     
+| | |     Refs: FEAT-001
+| | |   
+| * |   commit b02c3398cfa18401ae0835ef203a9c84e8d010a8
+| |\ \  Merge: b20a483 30cb1c6
+| |/ /  Author:     t <t@t>
+|/| |   AuthorDate: Sat Nov 7 23:36:59 2026 +0000
+| | |   Commit:     t <t@t>
+| | |   CommitDate: Sat Nov 7 23:36:59 2026 +0000
+| | |   
+| | |       Merge main into FEAT-001
+| | | 
+| * | commit b20a483d5b8449a7093edefb60d891637e75fcc9
+| | | Author:     t <t@t>
+| | | AuthorDate: Sat Nov 7 23:35:55 2026 +0000
+| | | Commit:     t <t@t>
+| | | CommitDate: Sat Nov 7 23:35:55 2026 +0000
+| | | 
+| | |     feat(core): add subtract
+| | |     
+| | |     Refs: FEAT-001
+| | |     Red: cannot find symbol method subtract(int,int)
+| | |     Reviewed: self, 0 findings fixed
+| | |     Checked: mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true
+| | |     Checked: mvn -B test
+| | | 
+| * | commit 711d5942e67a478aed0095676244e7812236c1ce
+| | | Author:     t <t@t>
+| | | AuthorDate: Sat Nov 7 23:34:59 2026 +0000
+| | | Commit:     t <t@t>
+| | | CommitDate: Sat Nov 7 23:34:59 2026 +0000
+| | | 
+| | |     chore(backlog): start FEAT-001
+| | | 
+| | * commit 71f8172d6c92d819d5ae0e11f5bdbb61297d08c9
+| | | Author:     t <t@t>
+| | | AuthorDate: Sat Nov 7 23:36:58 2026 +0000
+| | | Commit:     t <t@t>
+| | | CommitDate: Sat Nov 7 23:36:58 2026 +0000
+| | | 
+| | |     feat(text): add shout
+| | |     
+| | |     Refs: FEAT-002
+| | |     Red: cannot find symbol method shout(java.lang.String)
+| | |     Reviewed: self, 0 findings fixed
+| | |     Checked: mvn -B test -pl text -Dtest=ShoutTest -Dsurefire.failIfNoSpecifiedTests=true
+| | |     Checked: mvn -B test
+| | | 
+| | * commit 7c12b36a70dce206c1a9acb9a862971ef21745bd
+| |/  Author:     t <t@t>
+|/|   AuthorDate: Sat Nov 7 23:36:04 2026 +0000
+| |   Commit:     t <t@t>
+| |   CommitDate: Sat Nov 7 23:36:04 2026 +0000
+| |   
+| |       chore(backlog): start FEAT-002
+| | 
+* | commit 30cb1c6b5b27873fdb0c8e0b56426c8e673a9129
+|/  Author:     t <t@t>
+|   AuthorDate: Sat Nov 7 23:34:40 2026 +0000
+|   Commit:     t <t@t>
+|   CommitDate: Sat Nov 7 23:34:40 2026 +0000
+|   
+|       chore(backlog): claim FEAT-002 on todo/FEAT-002-add-shout-text-module
+| 
+* commit 2e8d6ecf7041e509f48f0f5bc1ac3d86315b6bb0
+| Author:     t <t@t>
+| AuthorDate: Sat Nov 7 23:34:30 2026 +0000
+| Commit:     t <t@t>
+| CommitDate: Sat Nov 7 23:34:30 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-core-module
+| 
+* commit eaa86022ca7d84eb8619e7a63ac09c633995b9b2
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:33:42 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:33:42 2026 +0400
+  
+      init multi-module project
+BRANCHES
+* main 21be00a Merge FEAT-002 into main
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/multi-module-retry2/repo
+HEAD 21be00a0be3f6edd8ec577667325bcb856b861e4
+branch refs/heads/main
+

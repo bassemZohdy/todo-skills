@@ -1,0 +1,12 @@
+docker : /evaluator/tests/trials/assert.sh: line 4: set: -
+At line:2 char:207
++ ... le-retry2'; docker run --rm --network none --env MAVEN_OPTS=-Dmaven.r ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (/evaluator/test... line 4: set: -:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+: invalid option
+set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
+/evaluator/tests/trials/assert.sh: line 11: syntax error near unexpected token `newline'
+/evaluator/tests/trials/assert.sh: line 11: `case "$gd" in ""|/*|?:*) ;; *) gd="$dir/$gd" ;; esac
+'

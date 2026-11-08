@@ -1,0 +1,14 @@
+**FEAT-001 — Add subtract and multiply to `src/calc.ts`** completed and merged into `main`. Both children were complete (2/2).
+
+- `npm test` passed for the baseline, Done when, and regression: 3 tests passed each time.
+- The root was drained to `CHANGELOG.md` in commit `840b5bd` and merged as `f2447a2`.
+- Changed files: `src/calc.ts`, `tests/subtract.test.ts`, `tests/multiply.test.ts`, `TODO.md`, and `CHANGELOG.md`.
+- The checked-out branch is `main`, with a clean working tree. The next workable node is **none**. No adjacent problems were identified.
+
+Ambiguities and conflicts encountered:
+
+- The skill says, “**With a subagent tool, a fresh-context reviewer does this**,” while the session instruction says, “**Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work.**” I treated the latter as governing delegation and reviewed the change myself.
+- The skill says to “**update `State:` after every cycle**,” but does not specify what to write after a successful verification cycle. I left the successful state unchanged before draining it.
+- The skill references “**the next workable node (or "none")**” after each invocation. The backlog is empty after this invocation, so I reported none. The session controller required exactly one invocation, so I did not run another to confirm that result.
+
+Consider clearing context before starting a new task.

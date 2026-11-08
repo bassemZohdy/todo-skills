@@ -1,0 +1,14 @@
+**FEAT-001 — Add subtract to calc.py** is complete and merged into `main` as commit `41fe630`. The task branch was deleted, and the checkout is clean.
+
+- The specified test passed: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` — 1 test.
+- Regression passed: `python3 -m unittest discover -s tests` — 2 tests, up from the baseline of 1.
+- Changed [calc.py](/work/calc.py), [tests/test_calc.py](/work/tests/test_calc.py), [tests/__init__.py](/work/tests/__init__.py), [TODO.md](/work/TODO.md), and [CHANGELOG.md](/work/CHANGELOG.md).
+- Review: self, with no findings. The task branch commit was `e66c152`; the drain commit was `d1fca15`.
+
+The empty `tests/__init__.py` makes the specified dotted test path resolve. There are no adjacent problems to add and no next workable node. Consider clearing context before the next task.
+
+**Skill ambiguities and conflicts encountered:**
+
+- The skill says, “With a subagent tool, a fresh-context reviewer does this,” while the session instructions prohibit spawning agents unless the user explicitly requests delegation or parallel agent work. I followed the session instruction and reviewed the change myself.
+- The skill says to search `README.md` and `docs/` with `grep -rnF`, but this repository has no `docs/` directory. I ran the specified search; it found no README hit and reported the missing directory.
+- The verification reference says to add an empty package file “if one empty or declarative file inside the node's own test or source folders makes the command resolve.” It does not say whether to first demonstrate the resolution failure. I added the empty file before the red run so the exact required test path could run.

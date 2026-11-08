@@ -1,0 +1,17 @@
+STATUS
+## main
+HISTORY
+* commit c48760bbf1e1049ca0d651a365f34c8143d8f90e (HEAD -> main)
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:30:14 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:30:14 2026 +0400
+  
+      init multi-module project
+BRANCHES
+* main c48760b init multi-module project
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/multi-module/repo
+HEAD c48760bbf1e1049ca0d651a365f34c8143d8f90e
+branch refs/heads/main
+

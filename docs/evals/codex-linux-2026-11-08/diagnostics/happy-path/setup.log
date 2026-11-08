@@ -1,0 +1,13 @@
+bash.exe : warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+At line:2 char:192
++ ... | Out-Null; & 'C:\Program Files\Git\bin\bash.exe' tests/trials/setup. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'TODO.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'calc.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_calc.py', LF will be replaced by CRLF the next time Git touches it
+ready: /tmp/todo-linux-codex-20261108/happy-path/repo (happy-path) on branch main

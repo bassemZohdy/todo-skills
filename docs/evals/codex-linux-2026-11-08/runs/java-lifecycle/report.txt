@@ -1,0 +1,11 @@
+**FEAT-001 — Add subtract and multiply to Calc.java** is complete and merged into `main`. Both children were complete (2/2), and the backlog is empty.
+
+- `mvn -B test` passed for both acceptance and regression: 3 tests passed, matching the baseline.
+- The root was drained into [CHANGELOG.md](/work/CHANGELOG.md), and its subtree was removed from [TODO.md](/work/TODO.md). The merged implementation includes `Calc.java` and the subtract and multiply tests.
+- Drain commit: `a046db7`; merge commit: `d853a02`. The root branch was deleted, and `main` is checked out with a clean working tree.
+- Adjacent problems: none. Next workable node: none. You can clear context.
+
+Ambiguities and instruction conflicts encountered:
+
+- The skill says, **“With a subagent tool, a fresh-context reviewer does this”**; the session instructions prohibit spawning one unless the user explicitly requests it. I reviewed the integration diff myself.
+- The skill says to **“update `State:` after every cycle”** but does not define what to update after a successful cycle. I retained the start state until the root drain removed it.

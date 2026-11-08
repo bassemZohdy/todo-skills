@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-057** · P1 · mid · Offer an optional fresh-context review of a high-risk root's whole diff before it drains
+- [/] **FEAT-057** · P1 · mid · Offer an optional fresh-context review of a high-risk root's whole diff before it drains
   - Done when: high, security, migration, concurrency or public-interface roots are offered one review of the whole root diff, plan doc and Ref, low and mid roots never are, and without a subagent a new-session review is offered; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-057-optional-root-review from main; next: start FEAT-057
+  - State: attempts 0/3; baseline 143 passing; branch todo/FEAT-057-optional-root-review from main; next: read docs
 - [ ] **FEAT-058** · P1 · mid · Add an ambiguity checklist and three stop triggers to /todo-plan and /todo-add
   - Done when: a reference checklist and the stop triggers apply only to unclear requests, keep the 3-question cap, and send open questions to the plan doc or a blocked node, never a new TODO.md section; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

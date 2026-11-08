@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-056** · P1 · mid · Split the review verdict into spec compliance and quality in one reviewer call
-  - Done when: todo-continue, git-flow and the docs record Reviewed: subagent, spec ok|fail quality ok|fail, n findings fixed, and keep Reviewed: self for the fallback; `bash tests/run.sh`
-  - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-056-two-verdict-review from main; next: start FEAT-056
 - [ ] **FEAT-057** · P1 · mid · Offer an optional fresh-context review of a high-risk root's whole diff before it drains
   - Done when: high, security, migration, concurrency or public-interface roots are offered one review of the whole root diff, plan doc and Ref, low and mid roots never are, and without a subagent a new-session review is offered; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

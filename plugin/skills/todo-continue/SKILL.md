@@ -41,11 +41,10 @@ The order of every node is the core's "Lifecycle by status".
    - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`). `TASK` refactors get characterization tests.
    - **Green:** implement only the task line. Adjacent findings go to the report, not into the code or TODO.md. No new `TODO`/`FIXME`. No git: list touched files in `State: files:`.
    - **Refactor** with tests green. **Integration step** (a parent): `reference/verification.md`, protocol step 8; no feature code.
-8. **Review** the whole change (`git diff`; no git: each file in `State: files:`) against the task line and `Done when`:
-   - Every hunk traces to the task line; no debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
-   - The tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name.
-   - No generated files, secrets or `.env` in the diff or in backlog text you wrote.
-   - With a subagent tool, a fresh-context reviewer does this (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself (`Reviewed: self`).
+8. **Review** the whole change (`git diff`; no git: each file in `State: files:`), spec compliance first, then quality:
+   - **Spec:** every hunk traces to the task line and nothing it asks for is missing; the tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name.
+   - **Quality:** no debug output, commented-out code, new `TODO`/`FIXME`, unrelated reformatting, generated files, secrets or `.env` in the diff or in backlog text you wrote.
+   - With a subagent tool, a fresh-context reviewer does both in one call (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff, and returns a verdict for each, `ok` or `fail`, with its findings; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself.
 9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression; update `State:` after every cycle. All gates must pass:
    - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail), the command does not mask failures (`|| true`, `; exit 0`) and every test path it names exists; `todo-verify.sh` (core, optional) checks these. Regression green, no fewer passing tests than the baseline, none deleted or skipped.
    - Each item of the project's Definition of Done, if any.
@@ -53,7 +52,7 @@ The order of every node is the core's "Lifecycle by status".
    - Documentation drift (below).
 10. **Complete, in this order.**
     1. **Non-root node:** no git: first copy its `files:`/`docs:` into the root's `State:`. Set `[x]`, delete `State:`, lint. (A root is never `[x]`; item 4 drains it.)
-    2. Commit the node's files and any changed `TODO.md` by path (skip if nothing changed): `<type>(<scope>): <title>` with body `Refs: <ID>`, `Red: <first failing assertion>` (leaves that started red), `Reviewed: <subagent|self>, <n> findings fixed`, and `Checked: <command>` for each W3 command you judged safe (`reference/git-flow.md`, "Commits").
+    2. Commit the node's files and any changed `TODO.md` by path (skip if nothing changed): `<type>(<scope>): <title>` with body `Refs: <ID>`, `Red: <first failing assertion>` (leaves that started red), `Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed` (the first round's verdicts) or `Reviewed: self, <n> findings fixed`, and `Checked: <command>` for each W3 command you judged safe (`reference/git-flow.md`, "Commits").
     3. **Non-root node:** switch to the parent's branch, `git merge --no-ff` with `Merge <ID> into <PARENT-ID>`, `git branch -d` the child (worktrees: git-flow "--worktree"). Report and stop; the node stays `[x]` until its root drains.
     4. **Root** (a leaf root, or its integration step just passed):
        1. Refresh from the base (`reference/git-flow.md`); if that brought changes, rerun `Done when` and the regression.

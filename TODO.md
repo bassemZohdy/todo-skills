@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **TASK-043** · P1 · mid · Rerun the eval-skills feature trial without the FIX-035 workaround
+- [/] **TASK-043** · P1 · mid · Rerun the eval-skills feature trial without the FIX-035 workaround
   - Done when: a fresh Codex process runs /todo-add then /todo-continue on a scratch clone of bassemZohdy/eval-skills with no backlog commit in between, and the published evidence passes its checker; `bash tests/trials/test-existing-project-evidence.sh`
   - Links: Ref: docs/evals/fix-035.md
-  - State: branch todo/TASK-043-rerun-eval-skills-feature-trial from main; next: start TASK-043
+  - State: attempts 0/3; baseline 136 passing; branch todo/TASK-043-rerun-eval-skills-feature-trial from main; next: read docs
 - [ ] **TASK-044** · P1 · high · Record genuinely simultaneous Codex lane execution
   - Done when: lane-evidence.sh reports execution: concurrent from independent worker activity records for the multi-module lanes; `bash tests/trials/test-lane-concurrency-evidence.sh`
   - Links: Ref: tests/trials/README.md

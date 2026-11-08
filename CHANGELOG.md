@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-08
+
 ### Added
 
-- **FEAT-060** · Lint warning W5: an open `high` node, or one whose title names a security subject, warns when its criteria name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid); a wording heuristic that never changes the exit code, documented with guidance to add the case as a criterion or a child node. Validated: `bash tests/run.sh`
+- **FEAT-060** (feat): Warn (W5) when an open `high` node, or one whose title names a security subject, has criteria that name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid). A wording heuristic that never changes the exit code; the guidance is to add the case as a criterion or a child node. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md, docs/TOOLS.md, docs/VERIFICATION.md.
 - **FEAT-059** (feat): Optionally replay the `Validated:` commands of newly drained roots: `tools/todo-replay.sh [--run] <rev>` takes the CHANGELOG entries added since a revision, checks each command with the lint as a `Done when` (I3, I10, W3, W4), shows and refuses the rest without running them (exit 3), and fails on a failing replay (exit 1). An opt-in `.todo/check.sh` line does nothing unless `TODO_REPLAY_FROM` is set. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/DEVELOPMENT.md, docs/FILES.md, docs/TOOLS.md.
 - **FEAT-058** (feat): Add an ambiguity pass for unclear requests: `reference/clarify.md`, read by `/todo-plan` and `/todo-add` only then, holds a checklist and three stop triggers (a missing business rule, incompatible implementations, unstated authorization) that halt before anything is written; questions are numbered with trade-offs, at most 3 per round, and a question that must wait goes to the plan doc's Open questions or a `[!]` node, never a new TODO.md section. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated docs/COMMANDS.md.
 - **FEAT-057** (feat): Offer an optional root review before a high-risk root drains: for a `high` root, or one touching security, data migration, concurrency or a public interface, `/todo-continue` asks once whether a fresh-context reviewer (or a new session) should read the whole root diff, the plan doc and the `Ref`; never required, never offered for other roots. The design review moves with it into `reference/review.md`, loaded only for such roots. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated docs/COMMANDS.md, docs/DEVELOPMENT.md, docs/PLANNING.md.
@@ -18,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **TASK-061** · `tests/run.sh` prints the bytes and words each command always loads and fails when one is over its budget in the new Load budget table of `docs/DEVELOPMENT.md` (the 2026-11-08 measurement plus about 5%), when a listed file is missing, or when a `SKILL.md` is in no row. Validated: `bash tests/run.sh`
+- **TASK-062** (chore): Release 0.5.0 once the update items landed: both plugin manifests, the README and the distribution checklist's current version say 0.5.0. Not tagged or pushed. Validated: `grep -q '^## \[0.5.0\] - ' CHANGELOG.md`. Docs: updated README.md, docs/distribution.md.
+- **TASK-061** (test): Report the bytes and words each command always loads, and fail when one is over its budget in the new Load budget table of docs/DEVELOPMENT.md (the 2026-11-08 measurement plus about 5%), when a listed file is missing, or when a `SKILL.md` is in no row. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md.
 - **TASK-054** (docs): Record the update review (`docs/evals/update-review.md`: findings F1-F9 with evidence, existing coverage, the lean-prompt lint experiment and rulings) and guard README against drift: `tests/run.sh` checks that README's versions equal both manifests and the newest CHANGELOG heading, that the install source holds the nine skills, that relative links resolve, and that README names each agent with recorded trials and its evidence. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/DEVELOPMENT.md, docs/evals/update-review.md.
 - **TASK-050** (docs): Record the OpenAI Plugins Directory package for 0.4.0: the Claude import and native Codex archives were built and checked, and the submission is recorded as blocked on the owner, whose OpenAI account the portal upload needs. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
 
@@ -166,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...v0.3.0

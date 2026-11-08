@@ -188,6 +188,13 @@ if [ "$rc" -eq 1 ] && printf '%s\n' "$out" | grep -q '^FAIL I1:' && printf '%s\n
 out="$(bash "$lint" --progress "$fx/ok-valid.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"
 if printf '%s\n' "$out" | grep -q '^Progress: \[.*\] [0-9]*/[0-9]* leaves .* 0 drained in \[Unreleased\]$'; then ok "lint --progress works without a CHANGELOG.md"; else bad "lint --progress without CHANGELOG.md: $out"; fi
 
+# The status page computes the same line (its progressLine function, run under node when node is installed).
+if command -v node >/dev/null 2>&1; then
+  js="$(sed -n '/^\/\/ ---- progress/,/^\/\/ ---- end progress/p' "$root/tools/template.html")"
+  got="$(cd "$pf" && printf '%s\n%s\n' "$js" 'const fs=require("fs");process.stdout.write(progressLine(fs.readFileSync("TODO.md","utf8"),fs.readFileSync("CHANGELOG.md","utf8")))' | node 2>&1)"
+  if [ -n "$js" ] && [ "$got" = "$want" ]; then ok "status page progressLine matches lint --progress"; else bad "status page progressLine: expected '$want', got '$got'"; fi
+  grep -q "\$('progress').textContent=progressLine(" "$root/tools/template.html" && ok "status page shows the progress line" || bad "status page does not render the progress line"
+fi
 st="$root/plugin/skills/todo-status/SKILL.md"
 if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
 

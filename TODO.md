@@ -11,5 +11,5 @@
     - Done when: the todo-status skill defines the bars, the blocked cells and the drained count; `bash tests/run.sh`
   - [x] **FEAT-042.3** · mid · Add the overall progress line to the docs/status.html KPIs
     - Done when: the template's progress function gives the lint's line for the fixture under node; `bash tests/run.sh`
-  - [ ] **FEAT-042.4** · low · Document the progress views and the issue 5 decision
+  - [x] **FEAT-042.4** · low · Document the progress views and the issue 5 decision
     - Done when: COMMANDS, TOOLS and REFERENCE describe --progress and the bars; `bash tests/run.sh`

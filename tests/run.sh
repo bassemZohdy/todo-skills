@@ -197,6 +197,9 @@ if command -v node >/dev/null 2>&1; then
 fi
 st="$root/plugin/skills/todo-status/SKILL.md"
 if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
+# FEAT-042.4: the docs describe the three progress views and the issue 5 decision.
+d="$root/docs"
+if grep -qF 'todo-lint.sh --progress' "$d/TOOLS.md" && grep -qF 'drained in [Unreleased]' "$d/TOOLS.md" && grep -qF -- '--progress' "$d/COMMANDS.md" && grep -q 'progress line' "$d/COMMANDS.md" && grep -q 'Issue #5.*FEAT-042' "$d/REFERENCE.md" && grep -q 'never written to `TODO.md`' "$d/REFERENCE.md"; then ok "docs describe the progress views and the issue 5 decision"; else bad "docs do not describe the progress views or the issue 5 decision"; fi
 
 # Stop hook: valid backlog allows the stop (no output).
 out="$(printf '{"stop_hook_active": false}' | TODO_FILE="$fx/ok-valid.md" CHANGELOG_FILE="$changelog" bash "$hook")"

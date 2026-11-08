@@ -127,8 +127,8 @@ Manual changes to one node. Dotted IDs (`FEAT-002.1`) are allowed. With neither 
 
 Read-only: no edits, no bootstrapping, no git writes. Without a `TODO.md` it suggests `/todo-init`.
 
-- **Lint** result in one line.
-- **Tree** grouped by lane: each root with marker, complexity, title, `children done/total`, priority and, when claimed, `claimed by <branch>` with the branch's last commit date (stale when the branch is gone). Claims are read from the base branch, so a tree branch also sees other trees as claimed. Finished subtrees collapse to a count.
+- **Lint** result in one line, followed by the overall progress line (from `todo-lint.sh --progress` when `.todo/todo-lint.sh` exists, else computed by the same definition; see [TOOLS.md](TOOLS.md#todo-lintsh)).
+- **Tree** grouped by lane, with a progress bar per lane: each root with marker, complexity, title, its own progress bar of done/total leaves, priority and, when claimed, `claimed by <branch>` with the branch's last commit date (stale when the branch is gone). Claims are read from the base branch, so a tree branch also sees other trees as claimed. Finished subtrees collapse to a count.
 - **Active:** the `[/]` node, its ancestors, its `State:`, and in git mode the checked-out branch and whether it has changes.
 - **Next:** `resume <ID>`, or the first workable node with its `Done when`, or what blocks the tree.
 - **Blocked:** each `[!]` node with its reason and the action required.
@@ -136,9 +136,11 @@ Read-only: no edits, no bootstrapping, no git writes. Without a `TODO.md` it sug
 
 `--search <text>` prints only matching task lines and CHANGELOG entries (case-insensitive) from those two files.
 
+The progress bars use 10 cells: `#` done, `!` blocked, `-` the rest. They are shown, never written to `TODO.md`.
+
 ## `/todo-report`
 
-Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs, lanes with progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan. Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
+Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs and the overall progress line (the same line as `todo-lint.sh --progress`, with a bar), lanes with progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan. Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
 
 ## `/todo-release [--version X.Y.Z]`
 

@@ -7,7 +7,7 @@ The skills never download these scripts. Copy the ones you want into your projec
 ## `todo-lint.sh`
 
 ```bash
-bash .todo/todo-lint.sh [TODO.md] [CHANGELOG.md]     # from the repository root
+bash .todo/todo-lint.sh [--progress] [TODO.md] [CHANGELOG.md]     # from the repository root
 ```
 
 Checks the invariants I1-I10 deterministically and prints one `FAIL I<n>: line <n>: …` line per violation, plus `WARN W<n>: …` lines that never change the result ([REFERENCE.md](REFERENCE.md#invariants)).
@@ -19,6 +19,22 @@ Checks the invariants I1-I10 deterministically and prints one `FAIL I<n>: line <
 | 2 | `TODO.md` not found |
 
 When `.todo/todo-lint.sh` exists, every command runs it instead of checking by reading, and its failures win over the agent's own reading. A missing `CHANGELOG.md` is fine. Use it also as a pre-commit hook or a CI step.
+
+`todo-lint.sh --progress` also prints one read-only progress line after the lint result, whether the lint passed or failed. The exit code doesn't change, so a CI log can show progress without a separate step:
+
+```text
+Progress: [######!---] 6/9 leaves · 1 active · 1 blocked · 2 roots open · 2 drained in [Unreleased]
+```
+
+| Part | Meaning |
+|---|---|
+| leaves | Tasks without children. Done counts the `[x]` leaves in `TODO.md`, plus the leaves of roots drained into `## [Unreleased]` in `CHANGELOG.md`. For an entry with `Includes:`, those leaves are the included IDs that are not the parent of another included ID; without `Includes:`, the entry itself counts. Entries without an ID and released versions don't count |
+| bar | 10 cells: `#` for done (rounded down), `!` for blocked leaves (rounded, at least one when any leaf is blocked), `-` for the rest |
+| active, blocked | `[/]` nodes at any depth; `[!]` leaves |
+| roots open | Roots still in `TODO.md` |
+| drained in [Unreleased] | CHANGELOG entries with an ID under `## [Unreleased]` |
+
+`/todo-status` and `docs/status.html` use the same definition, and `tests/run.sh` checks that all three give the same line for `tests/fixtures/progress/`. The line is never written to `TODO.md`.
 
 ## `todo-verify.sh`
 
@@ -53,7 +69,7 @@ Exit 0 when there is no matrix or no problem, 1 otherwise. Tables in README outs
 bash tools/todo-report.sh < meta.txt > docs/status.html     # from the repository root
 ```
 
-Fills `template.html` (it must sit next to the script) with `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md` and the `key: value` lines of `meta.txt` (`project`, `generated`, `base`, `branch`, `mode`, `tests`, `lint`, `Definition of Done`, `claim`, `branches`, `version`; any may be left out). Text is encoded (`&` → `&amp;`, `<` → `&lt;`) so it cannot break out of the page's script blocks. It writes only to standard output and exits 1 without a `TODO.md` in the current directory. `/todo-report` does the same encoding itself when the script is absent; the skill carries the same template in `plugin/skills/todo-report/template.md`.
+Fills `template.html` (it must sit next to the script) with `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md` and the `key: value` lines of `meta.txt` (`project`, `generated`, `base`, `branch`, `mode`, `tests`, `lint`, `Definition of Done`, `claim`, `branches`, `version`; any may be left out). Text is encoded (`&` → `&amp;`, `<` → `&lt;`) so it cannot break out of the page's script blocks. It writes only to standard output and exits 1 without a `TODO.md` in the current directory. `/todo-report` does the same encoding itself when the script is absent; the skill carries the same template in `plugin/skills/todo-report/template.md`. The page's `progressLine` function, set apart by `// ---- progress` markers, computes the same line as `todo-lint.sh --progress`; `tests/run.sh` runs it under node when node is installed.
 
 ## `todo-stop-hook.sh`
 

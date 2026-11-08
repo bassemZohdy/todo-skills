@@ -1,14 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **TASK-044** · P1 · high · Record genuinely simultaneous Codex lane execution
-  - Done when: lane-evidence.sh reports execution: concurrent from independent worker activity records for the multi-module lanes; `bash tests/trials/test-lane-concurrency-evidence.sh`
-  - Links: Ref: tests/trials/README.md
-  - State: branch todo/TASK-044-record-simultaneous-codex-lanes from main; next: build children
-  - [ ] **TASK-044.1** · mid · Make the lane runner start one fresh Codex process per lane at the same time and record each worker's own start and end
-    - Done when: a stubbed two-lane run writes one activity line per worker that lane-evidence.sh reads as concurrent; `bash tests/trials/test-lane-activity.sh`
-  - [ ] **TASK-044.2** · mid · Run the multi-module batch with the lane runner and publish its evidence
-    - Done when: the published evidence has two distinct worker sessions with overlapping activity and passing assertions; `bash tests/trials/test-lane-concurrency-evidence.sh`
 - [ ] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier
   - Done when: every scenario is scored PASS, FAIL or INFRA_ERROR with its cause recorded, assertions ran through windows-assert-exec.sh, and the published evidence passes its checker; `bash tests/trials/test-windows-codex-evidence.sh`
   - Links: Ref: docs/evals/fix-041.md

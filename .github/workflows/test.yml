@@ -20,9 +20,10 @@ jobs:
       - name: Trial harness self-test
         run: bash tests/trials/selftest.sh
       - name: Trial harness tests
-        # test-codex-isolation.sh and test-codex-invocation.sh need a logged-in Codex; they are run by hand
+        # test-codex-isolation.sh and test-codex-invocation.sh need a logged-in Codex, and test-linux-boundary.sh needs Docker with
+        # the locally built todo-codex-linux image; they are run by hand
         run: |
           for t in tests/trials/test-*.sh; do
-            case "$t" in *test-codex-isolation.sh|*test-codex-invocation.sh) continue ;; esac
+            case "$t" in *test-codex-isolation.sh|*test-codex-invocation.sh|*test-linux-boundary.sh) continue ;; esac
             bash "$t" || exit 1
           done

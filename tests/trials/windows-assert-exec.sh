@@ -19,7 +19,20 @@ bash_w="$(cygpath -m "$(command -v bash)")"
 for item in "$repo_w" "$runs_w" "$here_w" "$auth_w"; do
   case "$item" in *'"'*|*'\'*) echo 'INFRA_ERROR: unsupported path characters' >&2; exit 2 ;; esac
 done
-fs="{\":root\"=\"read\", \"$runs_w\"=\"deny\", \"$repo_w\"=\"write\", \"$repo_w/.git\"=\"write\", \"$auth_w\"=\"deny\"}"
+# Node and other native programs inspect ancestor directories; denying the
+# entire batch prevents them from resolving even an allowed repository. Deny
+# the existing batch and scenario siblings instead, and keep ancestors read-only.
+fs="{\":root\"=\"read\", \"$repo_w\"=\"write\", \"$repo_w/.git\"=\"write\", \"$auth_w\"=\"deny\""
+scenario_dir="$(cd "$repo/.." && pwd -P)"
+shopt -s nullglob
+for item in "$runs"/* "$scenario_dir"/*; do
+  [ "$item" != "$scenario_dir" ] && [ "$item" != "$repo" ] || continue
+  item_w="$(cygpath -m "$item")"
+  case "$item_w" in *'"'*|*'\'*) echo 'INFRA_ERROR: unsupported path characters' >&2; exit 2 ;; esac
+  fs="$fs, \"$item_w\"=\"deny\""
+done
+shopt -u nullglob
+fs="$fs}"
 report="${TRIAL_REPORT:-}"
 if [ -n "$report" ] && [ "$report" != /dev/null ]; then
   report_dir="$(mktemp -d)" || exit 2

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Native Windows verifier boundary test. Requires provisioned elevated Codex sandbox.
+# Native Windows verifier boundary test (FIX-041). Requires provisioned elevated Codex sandbox.
+# The first probe sets no TRIAL_WINDOWS_ISOLATION: on native Windows the isolated verifier is the default.
 set -eu
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [ -f "$here/windows-assert-exec.sh" ] || { echo 'FAIL  Windows verifier isolation is unavailable'; exit 1; }
@@ -48,7 +49,7 @@ chmod +x "$repo/.probe-bin/npm"
 export PATH="$repo/.probe-bin:$PATH"
 node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({root:process.argv[2], controller:process.argv[3]}))' "$repo/probe-input.json" "$(cygpath -w "$runs")" "$(cygpath -w "$sentinel")"
 export TRIAL_DUMMY_TOKEN=dummy-only
-TRIAL_WINDOWS_ISOLATION=1 bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/assert.log" 2>&1 || :
+env -u TRIAL_WINDOWS_ISOLATION bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/assert.log" 2>&1 || :
 [ -s "$repo/probe-result.txt" ] || { echo 'INFRA_ERROR: sandboxed project test did not run'; cat "$repo/probe-start.txt" "$repo/probe-debug.txt" 2>/dev/null || :; tail -20 "$tmp/assert.log"; exit 2; }
 grep -q '^PASS  tests pass on the checked-out branch' "$tmp/assert.log" || { echo 'FAIL  sandboxed project test did not pass'; cat "$tmp/assert.log"; exit 1; }
 for name in evidence login evaluator other; do
@@ -61,6 +62,10 @@ echo 'PASS  controller cannot be modified'
 grep -q '^token:hidden=true' "$repo/probe-result.txt" || { echo 'FAIL  dummy environment token exposed'; exit 1; }
 echo 'PASS  dummy environment token withheld'
 echo 'PASS  project-controlled test ran in scratch repository'
+rm -f "$repo/probe-result.txt"
+rc=0; TRIAL_WINDOWS_SANDBOX=unavailable bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/closed.log" 2>&1 || rc=$?
+[ "$rc" = 2 ] && grep -q '^INFRA_ERROR' "$tmp/closed.log" && [ ! -e "$repo/probe-result.txt" ] || { echo "FAIL  unusable sandbox did not fail closed (exit $rc)"; cat "$tmp/closed.log"; exit 1; }
+echo 'PASS  an unusable sandbox fails closed, nothing runs unisolated'
 mkdir -p "$runs/happy-path/evidence/session"
 printf 'baseline red: test_add; FIX suggested\n' > "$runs/happy-path/evidence/session/report.txt"
 TRIAL_REPORT="$runs/happy-path/evidence/session/report.txt" TRIAL_WINDOWS_ISOLATION=1 \
@@ -69,4 +74,4 @@ grep -q '^PASS  an agent report was provided and is not empty' "$tmp/report-asse
   grep -q '^PASS  report says the baseline is red and names the failing test' "$tmp/report-assert.log" && \
   grep -q '^PASS  report suggests a fix' "$tmp/report-assert.log" || { echo 'FAIL  baseline report inaccessible'; cat "$tmp/report-assert.log"; exit 1; }
 echo 'PASS  baseline report remains readable'
-echo '8 passed, 0 failed'
+echo '9 passed, 0 failed'

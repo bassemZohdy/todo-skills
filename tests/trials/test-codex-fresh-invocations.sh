@@ -2,6 +2,7 @@
 # Exercises controller behavior with a fake Codex executable, not an agent trial.
 set -eu
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export TRIAL_WINDOWS_ISOLATION=0   # stub-only bookkeeping test: no sandbox needed on Windows hosts
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 for scenario in ts-lifecycle java-lifecycle; do
   TRIAL_ONE_INVOCATION=1 bash "$here/prompt.sh" /work "$scenario" > "$tmp/$scenario"

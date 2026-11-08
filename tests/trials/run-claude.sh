@@ -6,7 +6,8 @@
 # invocation continues the same repo). Every invocation writes its own folder <runs-dir>/<scenario>/evidence/<UTC time>-<pid>[-label]/
 # with setup.log, prompt.txt, command.txt, agent.log, agent-exit.txt, report.txt, assert.log, assert-exit.txt, outcome.txt and
 # SHA256SUMS. A new folder is created with mkdir (never -p), so nothing earlier is overwritten; nothing is deleted.
-# outcome.txt is PASS, FAIL, INFRA_ERROR (agent exit not 0, for example 124 after the timeout) or UNVERIFIED (no report).
+# outcome.txt is PASS, FAIL, INFRA_ERROR (agent exit not 0, for example 124 after the timeout, or a verifier that failed) or
+# UNVERIFIED (no report). Assertions run through assert-exec.sh, isolated by default on native Windows.
 # The agent runs shell commands and edits files without asking, so run it in a throwaway environment you control.
 set -u
 runs="${1:?usage: run-claude.sh <runs-dir> <scenario> [model]}"; scenario="${2:?scenario}"; model="${3:-}"
@@ -34,13 +35,14 @@ code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"
 cp "$ev/agent.log" "$ev/report.txt"
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches
-TRIAL_REPORT="$ev/report.txt" bash "$here/assert.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1
+TRIAL_REPORT="$ev/report.txt" bash "$here/assert-exec.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1
 arc=$?
 printf '%s\n' "$arc" > "$ev/assert-exit.txt"
 if [ "$code" != 0 ]; then outcome=INFRA_ERROR
 elif [ ! -s "$ev/report.txt" ]; then outcome=UNVERIFIED
 elif [ "$arc" = 0 ]; then outcome=PASS
-else outcome=FAIL; fi
+elif [ "$arc" = 1 ]; then outcome=FAIL
+else outcome=INFRA_ERROR; fi   # the verifier itself failed or timed out (FIX-041)
 printf '%s\n' "$outcome" > "$ev/outcome.txt"
 ( cd "$ev" && if command -v sha256sum >/dev/null 2>&1; then sha256sum -- * > SHA256SUMS; else shasum -a 256 -- * > SHA256SUMS; fi )
 tail -3 "$ev/assert.log"; echo "outcome: $outcome ($ev)"

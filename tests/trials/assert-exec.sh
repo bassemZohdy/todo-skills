@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# Run controller assertions; isolate project test code in the Linux trial profile.
+# Run controller assertions; isolate project test code. On native Windows the isolated verifier (windows-assert-exec.sh)
+# is the default and fails closed; TRIAL_WINDOWS_ISOLATION=0 opts out explicitly (unisolated, for stub-only harness tests).
+# Elsewhere TRIAL_LINUX_ISOLATION=1 selects the Linux trial profile. Exit 0 or 1 is the assertions' verdict; any other
+# exit (2 setup refused, 124 timeout) is an infrastructure error.
 set -u
 repo="${1:?repository}"; scenario="${2:?scenario}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ "${TRIAL_WINDOWS_ISOLATION:-0}" = 1 ]; then
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) windows_default=1 ;; *) windows_default=0 ;; esac
+if [ "${TRIAL_WINDOWS_ISOLATION:-$windows_default}" = 1 ]; then
   exec bash "$here/windows-assert-exec.sh" "$repo" "$scenario"
 fi
 if [ "${TRIAL_LINUX_ISOLATION:-0}" != 1 ]; then

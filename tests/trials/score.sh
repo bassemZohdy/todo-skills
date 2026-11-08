@@ -67,7 +67,7 @@ for d in "$runs"/*/; do
   if [ -z "$report" ]; then
     printf '%-11s %-22s agent exit 0 but no report\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
-  out="$(bash "$here/assert.sh" "$repo" "$s" 2>&1 | grep -E '^(PASS|FAIL)  ')"
+  out="$(bash "$here/assert-exec.sh" "$repo" "$s" 2>&1 | grep -E '^(PASS|FAIL)  ')"
   if [ -n "$skip" ]; then
     printf '%s\n' "$out" | grep -E "^(PASS|FAIL)  .*($skip)" | sed "s/^/    SKIP /"
     out="$(printf '%s\n' "$out" | grep -Ev "^(PASS|FAIL)  .*($skip)")"

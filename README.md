@@ -63,7 +63,7 @@ All nine skill folders go together: the command skills load the `todo` core skil
 | Plans | `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-<slug>.md` | Goal, scope, lanes, decisions, revisions | `/todo-init --plan`, `/todo-plan`, `/todo-add` for a long request, `/todo-update --status drop` (a Revisions line), each on your yes |
 | Traceability (optional) | `docs/RTM.md`, else a `## RTM` section in README | Which requirement a task implements | Only when it exists: `/todo-plan` and `/todo-add` on your yes, `/todo-continue` fills Verification |
 | Status page | `docs/status.html` | | `/todo-report` |
-| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, `.github/workflows/todo-check.yml`, a job in `.gitlab-ci.yml`, `.git/hooks/pre-push` | The lint before each command, the check before a root lands | `/todo-init --ci`, each on your yes (you copy `todo-lint.sh` yourself) |
+| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, `.todo/todo-replay.sh`, `.github/workflows/todo-check.yml`, a job in `.gitlab-ci.yml`, `.git/hooks/pre-push` | The lint before each command, the check before a root lands | `/todo-init --ci`, each on your yes (you copy `todo-lint.sh` yourself) |
 | Code | The task's source and test files | Only what the task needs | `/todo-continue`, within the task line |
 | Detection only | `package.json`, `pom.xml`, `pyproject.toml`, `go.mod`, `Makefile`, CI config and other marker files | Runtime, package manager and test command | Never |
 | Git | Branches `todo/<ID>-<slug>`, worktrees in `../<repo>.todo/`, commits | Claims, interrupted work | `/todo-continue`, `/todo-update`, `/todo-release` (never tags, fetches, pulls or pushes) |
@@ -100,7 +100,7 @@ Every node of the tree goes through the same steps: ready check → branch (the 
 
 ## Optional tools and CI
 
-The plugin ships Markdown only. Read-only helper scripts live in [`tools/`](tools/) of this repository, and you copy the ones you want into your project: `todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands, `todo-verify.sh` rejects zero-test, masked or missing-target verification runs, `todo-rtm.sh` checks the optional requirements matrix, `todo-report.sh` fills the status page deterministically, and `todo-stop-hook.sh` is a Claude Code Stop hook that runs the lint. They need only bash, awk, grep, sed and tr.
+The plugin ships Markdown only. Read-only helper scripts live in [`tools/`](tools/) of this repository, and you copy the ones you want into your project: `todo-lint.sh` checks the backlog rules (I1-I10) and warns about weak test commands, `todo-verify.sh` rejects zero-test, masked or missing-target verification runs, `todo-rtm.sh` checks the optional requirements matrix, `todo-replay.sh` re-runs the `Validated:` commands of newly drained entries (refusing any the lint does not accept), `todo-report.sh` fills the status page deterministically, and `todo-stop-hook.sh` is a Claude Code Stop hook that runs the lint. They need only bash, awk, grep, sed and tr.
 
 `/todo-init --ci` writes `.todo/check.sh` (the lint, once you have copied `tools/todo-lint.sh` to `.todo/todo-lint.sh`, plus your test command) and a CI job that runs it, or a git `pre-push` hook when the project has no CI. `/todo-continue` runs the same check as the last gate before a root lands. Usage, exit codes and the CI choices are in [docs/TOOLS.md](docs/TOOLS.md).
 

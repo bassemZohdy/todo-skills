@@ -387,5 +387,37 @@ if [ -z "$out" ]; then ok "hook honours stop_hook_active"; else bad "hook ignore
 out="$(printf '{}' | TODO_FILE="$fx/does-not-exist.md" CHANGELOG_FILE="$changelog" bash "$hook")"
 if [ -z "$out" ]; then ok "hook is silent without a TODO.md"; else bad "hook printed output without TODO.md: $out"; fi
 
+# Replaying newly drained Validated commands (FEAT-059): todo-replay.sh lists, and with --run runs, the Validated commands
+# of CHANGELOG entries added since a revision. A command that fails the lint's I3/I10 rules or is an unknown runner (W3) is
+# shown and refused, never run (exit 3); a failing replay fails (exit 1); without a revision or new entries nothing runs.
+replay="$root/tools/todo-replay.sh"; rt="$(mktemp -d)"
+if [ -f "$replay" ]; then
+  ( cd "$rt" && git init -q && git config user.email t@example.invalid && git config user.name t && git config core.autocrlf false
+    mkdir tests && printf 'exit 0\n' > tests/ok.sh && printf 'exit 1\n' > tests/bad.sh
+    printf '# Changelog\n\n## [Unreleased]\n\n### Added\n\n- **FEAT-001** (feat): Old. Validated: `bash tests/bad.sh`.\n' > CHANGELOG.md
+    git add -A && git commit -qm base ) >/dev/null 2>&1
+  cl_add() { printf '%s\n' "$1" >> "$rt/CHANGELOG.md"; }
+  rp() { (cd "$rt" && bash "$replay" "$@" 2>&1); }
+  out="$(rp HEAD)"; rc=$?
+  [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q 'nothing to replay' && ok "replay: no entry added since the revision runs nothing" || bad "replay without new entries: rc=$rc $out"
+  out="$(rp)"; rc=$?
+  [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q 'nothing to replay' && ok "replay: without a revision it is a no-op" || bad "replay without a revision: rc=$rc $out"
+  cl_add '- **FEAT-002** (feat): New. Ref: docs/x.md. Validated: `bash tests/ok.sh`. Docs: updated README.md.'
+  out="$(rp HEAD)"; rc=$?
+  [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q 'SAFE  FEAT-002: bash tests/ok.sh' && ! printf '%s' "$out" | grep -q 'FEAT-001' && ok "replay: lists only the new entry's Validated command, without running it" || bad "replay listing: rc=$rc $out"
+  out="$(rp --run HEAD)"; rc=$?
+  [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q 'PASS  FEAT-002: bash tests/ok.sh' && ok "replay --run: a passing command passes" || bad "replay run: rc=$rc $out"
+  cl_add '- **FIX-003** (fix): Broke. Validated: `bash tests/bad.sh`.'
+  out="$(rp --run HEAD)"; rc=$?
+  [ "$rc" -eq 1 ] && printf '%s' "$out" | grep -q 'FAIL  FIX-003: bash tests/bad.sh' && ok "replay --run: a failing Validated command fails the check (exit 1)" || bad "replay failure: rc=$rc $out"
+  sed -i.bak '/FIX-003/d' "$rt/CHANGELOG.md"
+  cl_add '- **TASK-004** (chore): Unsafe. Validated: `sudo touch ran-sudo`; `touch ran-unknown`; `python3 -m unittest x | tail -1`.'
+  out="$(rp --run HEAD)"; rc=$?
+  [ "$rc" -eq 3 ] && [ "$(printf '%s\n' "$out" | grep -c '^REFUSED  TASK-004')" -eq 3 ] && [ ! -e "$rt/ran-sudo" ] && [ ! -e "$rt/ran-unknown" ] && printf '%s' "$out" | grep -q 'PASS  FEAT-002' \
+    && ok "replay: forbidden, unknown-runner and piped commands are shown and refused, never run (exit 3); safe ones still run" || bad "replay refusal: rc=$rc $out"
+fi
+[ -f "$replay" ] || bad "tools/todo-replay.sh is missing"
+rm -rf "$rt"
+
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

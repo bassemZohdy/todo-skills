@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-059** · P1 · high · Let .todo/check.sh optionally replay the Validated commands of newly drained roots
-  - Done when: safe Validated commands added since a revision run and their failure fails the check, while a command that breaks the lint safety rules or uses an unknown runner is shown and refused, never run; `bash tests/run.sh`
-  - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-059-replay-validated-commands from main; next: start FEAT-059
 - [ ] **FEAT-060** · P1 · mid · Warn (W5) when a high or security-titled node's Done when names no negative case
   - Done when: such a node without rejects, denies, fails, refuses, raises, unauthorized or invalid gets W5, one with them or an ordinary node gets none, and warnings never change the exit code; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

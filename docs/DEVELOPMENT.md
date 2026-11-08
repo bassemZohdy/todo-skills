@@ -58,6 +58,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - the Stop hook: allows a valid, resumable or blocked-verification backlog, blocks an invalid one, honors `stop_hook_active`, is silent without a `TODO.md`;
 - `todo-verify.sh` in default and `--strict` mode on accepting and rejecting runs;
 - `todo-rtm.sh` resolution and R1-R3 on the RTM fixtures;
+- `todo-replay.sh` in a scratch repository: only new entries, list-only by default, a passing and a failing replay, and forbidden, unknown-runner and piped commands refused and never run;
 - `todo-report.sh` encodes hostile text and exits 1 without a `TODO.md`;
 - the packaging rules above;
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;

@@ -13,7 +13,7 @@ The backlog itself is two files, `TODO.md` (the active task tree) and `CHANGELOG
 | Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` changes, by a root drain and the confirmed `/todo-release`; `/todo-init` creates the file or adds a missing `[Unreleased]` |
 | Traceability (optional) | `docs/RTM.md`, else the `## RTM` section of `README.md` | Requirement → task → test links | Edited only when it already exists; never created by a skill |
 | Report | `docs/status.html` | A snapshot page for people | Written only by `/todo-report` |
-| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, a CI job, a `pre-push` hook | Lint + tests, run by CI, the hook and `/todo-continue` | `/todo-init --ci` on your yes; you commit them |
+| Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, `.todo/todo-replay.sh`, a CI job, a `pre-push` hook | Lint + tests, run by CI, the hook and `/todo-continue` | `/todo-init --ci` on your yes; you commit them |
 | Version store | git | A branch (or worktree) per task; claims on the base branch | See [GIT-FLOW.md](GIT-FLOW.md) |
 
 ## Every file
@@ -31,6 +31,7 @@ The backlog itself is two files, `TODO.md` (the active task tree) and `CHANGELOG
 | `docs/status.html` | The interactive status page | | `/todo-report`, through `docs/status.html.tmp`, which is renamed or removed |
 | `.todo/check.sh` | One entrypoint: the backlog lint and the project's tests | `/todo-init`, `/todo-continue` (last gate before a root lands) | `/todo-init --ci` on your yes |
 | `.todo/todo-lint.sh` | The lint the skills and CI run instead of checking by reading | Every command, when it exists | You: copy `tools/todo-lint.sh` from this repository. The skills never download it |
+| `.todo/todo-replay.sh` | Optional: re-runs the `Validated:` commands of newly drained entries in CI, refusing any the lint does not accept | `.todo/check.sh`, when you added its line | You: copy `tools/todo-replay.sh` next to `.todo/todo-lint.sh` |
 | `.github/workflows/todo-check.yml` | A GitHub Actions job running the lint (or the whole check) | | `/todo-init --ci` on your yes |
 | `.gitlab-ci.yml` | A `todo-check` job | `/todo-init` (test command detection) | `/todo-init --ci`, shown first and added on your yes |
 | `.git/hooks/pre-push` | Local fallback: runs `.todo/check.sh` and refuses the push when it fails | | `/todo-init --ci` on your yes, when there is no CI; never overwrites an existing hook |

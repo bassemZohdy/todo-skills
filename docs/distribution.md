@@ -5,7 +5,7 @@
 | Claude Code plugin marketplace (this repo) | Available | `/plugin marketplace add bassemZohdy/todo-skills` |
 | Codex plugin marketplace (this repo) | Available, verified on codex-cli 0.167.0 | `codex plugin marketplace add bassemZohdy/todo-skills` |
 | skills CLI | Available (discovery of all nine skills verified from the repository root and from `plugin/`, 2026-11-07) | `npx skills add bassemZohdy/todo-skills` |
-| OpenAI Plugins Directory (Codex) | Package ready, not submitted | `bash tests/build-codex-package.sh todo-skills-codex.zip`, then an owner upload at platform.openai.com/plugins |
+| OpenAI Plugins Directory (Codex) | Not submitted; Claude skills-only import preferred | Upload a ZIP of `plugin/` containing `.claude-plugin/plugin.json` and `skills/`; let OpenAI convert its manifest. Native Codex ZIP remains an alternative. |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
 Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
@@ -29,6 +29,21 @@ Prepared from the repository; the portal's own fields may differ, so check them 
 - [ ] Install check from a clean client: `/plugin marketplace add bassemZohdy/todo-skills`, then confirm the nine skills (todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update) are listed.
 - [ ] Security notes for the reviewer: no network access by the skills, no required tooling beyond git/bash, see SECURITY.md.
 - [ ] After submitting, record below: `Submitted: <YYYY-MM-DD> · Reference: <id or URL from the portal>`, and set the table row above to "Submitted".
+
+## OpenAI Plugins Directory: preferred Claude-plugin import
+
+Official guidance: https://developers.openai.com/plugins/guides/submit-claude-plugin
+Submission instructions: https://developers.openai.com/plugins/deploy/submission
+
+Because `todo-skills` already distributes a working Claude Code skills-only plugin, prefer the direct Claude archive upload instead of maintaining a second hand-authored public submission format:
+
+1. Prepare an archive whose root (or single top-level directory) is the existing `plugin/` folder. It must contain `.claude-plugin/plugin.json` with a nonempty description, and all nine `skills/<name>/SKILL.md` files with their required references and assets. Verify the archive has no credentials, hooks or MCP configuration and run `bash tests/run.sh` before packaging. This is distinct from the existing native Codex ZIP built by `tests/build-codex-package.sh`.
+2. In the OpenAI Plugins submission portal, choose **Create plugin → Skills only** and upload the Claude archive. Review the automatically converted `.codex-plugin/plugin.json`, including generated interface defaults, descriptions, skills and any icons. Provide missing listing assets only when the portal requires them; do not duplicate skills.
+3. Test the imported skills in a clean supported environment. Check that relative references resolve, nine skills are discoverable, and local Git/filesystem operations work where supported. Local execution is an environment-dependent capability, not guaranteed for every ChatGPT surface.
+4. Finish verified developer identity and required organization permissions. Resolve Metadata & Skills scan findings and submit for review; Claude marketplace approval does not transfer to OpenAI.
+5. Record the submitted package version, tested source commit, submission date, actual portal reference, and review status here. If blocked by account verification, platform policy or environment support, document the exact blocker without claiming submission.
+
+The existing native Codex package remains a tested **fallback** for manual distribution or a portal conversion problem. It does not need to be deleted or rebuilt solely for this import path. Follow the portal's current requirements instead of assuming its generated defaults will always satisfy final publication checks.
 
 ## OpenAI Plugins Directory package
 

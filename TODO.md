@@ -5,7 +5,7 @@
   - Done when: lane-evidence.sh reports execution: concurrent from independent worker activity records for the multi-module lanes; `bash tests/trials/test-lane-concurrency-evidence.sh`
   - Links: Ref: tests/trials/README.md
   - State: branch todo/TASK-044-record-simultaneous-codex-lanes from main; next: build children
-  - [ ] **TASK-044.1** · mid · Make the lane runner start one fresh Codex process per lane at the same time and record each worker's own start and end
+  - [x] **TASK-044.1** · mid · Make the lane runner start one fresh Codex process per lane at the same time and record each worker's own start and end
     - Done when: a stubbed two-lane run writes one activity line per worker that lane-evidence.sh reads as concurrent; `bash tests/trials/test-lane-activity.sh`
   - [ ] **TASK-044.2** · mid · Run the multi-module batch with the lane runner and publish its evidence
     - Done when: the published evidence has two distinct worker sessions with overlapping activity and passing assertions; `bash tests/trials/test-lane-concurrency-evidence.sh`

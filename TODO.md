@@ -3,6 +3,7 @@
 ## 🌳 Task Tree
 - [ ] **FIX-036** · P1 · high · Distinguish concurrent lane execution from overlapping worktree lifetimes
   - Done when: interleaved sequential worktree events do not claim parallel agents, and verified concurrent workers are distinguishable; `bash tests/trials/test-lane-concurrency.sh`
+  - State: branch todo/FIX-036-distinguish-concurrent-lane-execution from main; next: start FIX-036
   - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
 - [ ] **FIX-037** · P1 · mid · Exclude a batch evidence folder from the trial scenario score
   - Done when: score.sh counts every scenario but does not count the batch evidence directory as an extra scenario; `bash tests/trials/test-score-layout.sh`

@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-060** · P1 · mid · Warn (W5) when a high or security-titled node's Done when names no negative case
+- [/] **FEAT-060** · P1 · mid · Warn (W5) when a high or security-titled node's Done when names no negative case
   - Done when: such a node without rejects, denies, fails, refuses, raises, unauthorized or invalid gets W5, one with them or an ordinary node gets none, and warnings never change the exit code; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-060-lint-w5-negative-case from main; next: start FEAT-060
+  - State: attempts 0/3; baseline 151 passing; branch todo/FEAT-060-lint-w5-negative-case from main; next: read docs
 - [ ] **TASK-061** · P2 · low · Report the bytes and words each command loads and fail over the documented budget
   - Done when: tests/run.sh prints each command's loaded bytes and words and fails when one exceeds its budget in docs/DEVELOPMENT.md; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

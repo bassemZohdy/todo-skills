@@ -1,0 +1,12 @@
+**Stopped at step 3, baseline.** FEAT-001.1, “Add subtract with a test class SubtractTest,” could not start because `mvn -B test` exited 1 before running tests: Maven could not create its local repository at `C:\.m2\repository` (“Access is denied”). The skill treats a broken test setup as a red-baseline stop.
+
+- Regression baseline: unavailable; no tests ran.
+- Files changed: none. No branch or commit was created.
+- Checked-out branch: `main`, at `9891e84`.
+- Next workable node: FEAT-001.1, once the Maven environment is fixed.
+- Adjacent follow-up commands: none.
+- Clear context before the next invocation, as the skill suggests.
+
+Instruction ambiguity encountered:
+
+- The continuation skill says **“Run the regression command (`reference/verification.md`, protocol step 6)”** under **“Baseline”**, while the verification reference labels step 1 **“Baseline”** and step 6 **“Regression.”** I used step 6 to identify the regression command and step 1 to determine how to handle its failure.

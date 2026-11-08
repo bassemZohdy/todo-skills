@@ -1,0 +1,19 @@
+INFO  verifier: windows-assert-exec.sh, elevated Windows sandbox, python C:\Users\<user>\AppData\Local\Programs\Python\Python313\python.exe
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+PASS  child branch merged into the root branch
+FAIL  merged child branch deleted
+PASS  root branch has subtract
+PASS  FEAT-001.1 is [x] on the root branch
+PASS  FEAT-001.2 untouched (still [ ], no branch)
+PASS  main untouched (no merge, no work)
+PASS  merge commit is --no-ff with the skill message
+PASS  still on the root branch, tree clean
+PASS  exactly one new commit (the merge)
+
+15 passed, 1 failed

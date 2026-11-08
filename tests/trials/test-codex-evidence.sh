@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Checks the recorded Codex lifecycle evidence (docs/evals/codex-2026-11-07 by default): the eight scenarios are all there, each from
 # its own fresh session, with the controller's assertion output, exit codes, Git state and verifying checksums, and every verdict
-# agrees with its own evidence (an infrastructure error is never counted as a skill failure or a pass). It runs no agent.
+# agrees with its own evidence (an infrastructure error is never counted as a skill failure or a pass; a verifier exit other than 0 or 1
+# is one, FIX-041). It runs no agent.
 # Usage: bash tests/trials/test-codex-evidence.sh [<evidence-dir>]
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,7 +30,7 @@ for s in $scenarios; do
   case "$out" in
     PASS)        npass=$((npass + 1)); [ "$ae" = 0 ] && [ "$as" = 0 ] && ok "$s: PASS has agent exit 0 and assert exit 0" || bad "$s: PASS with agent exit $ae, assert exit $as" ;;
     FAIL)        nfail=$((nfail + 1)); [ "$ae" = 0 ] && [ "$as" != 0 ] && [ "$sig" = no ] && ok "$s: FAIL is an assertion failure with no environment signature" || bad "$s: FAIL with agent exit $ae, assert exit $as, environment signature: $sig" ;;
-    INFRA_ERROR) ninfra=$((ninfra + 1)); { [ "$ae" != 0 ] || { [ "$sig" = yes ] && [ -s "$d/infra-signature.txt" ]; }; } && ok "$s: INFRA_ERROR has a non-zero agent exit or a recorded environment signature" || bad "$s: INFRA_ERROR without a reason" ;;
+    INFRA_ERROR) ninfra=$((ninfra + 1)); { [ "$ae" != 0 ] || { [ "$as" != 0 ] && [ "$as" != 1 ]; } || { [ "$sig" = yes ] && [ -s "$d/infra-signature.txt" ]; }; } && ok "$s: INFRA_ERROR has a non-zero agent exit, a failed verifier (exit $as) or a recorded environment signature" || bad "$s: INFRA_ERROR without a reason" ;;
     UNVERIFIED)  nunv=$((nunv + 1)); ok "$s: UNVERIFIED (not counted as a pass)" ;;
     *)           bad "$s: unknown outcome '$out'" ;;
   esac

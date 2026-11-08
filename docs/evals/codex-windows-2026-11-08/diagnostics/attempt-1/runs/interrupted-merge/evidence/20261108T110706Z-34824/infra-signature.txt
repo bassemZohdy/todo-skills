@@ -1,0 +1,1 @@
+error: could not delete reference refs/heads/todo/FEAT-001.1-subtract-test: cannot lock ref 'refs/heads/todo/FEAT-001.1-subtract-test': Unable to create 'C:/Users/<user>/todo-trials/win-20261108/runs/interrupted-merge/repo/.git/refs/heads/todo/FEAT-001.1-subtract-test.lock': Permission denied

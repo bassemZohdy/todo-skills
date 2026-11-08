@@ -1,6 +1,6 @@
 # Agent compatibility
 
-What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-08, against version 0.3.1 plus the unreleased changes in `CHANGELOG.md`.
+What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-08, against version 0.4.0.
 
 | Check | Claude Code | Codex |
 |---|---|---|

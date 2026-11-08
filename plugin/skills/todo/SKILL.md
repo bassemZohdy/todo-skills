@@ -180,6 +180,7 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | `reference/rtm.md` | Optional RTM: `docs/RTM.md` first, else README `## RTM`, else none; format and rules | `/todo-plan`, `/todo-add`, `/todo-continue`, only when an RTM exists |
 | `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
 | `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
+| `reference/clarify.md` | Ambiguity checklist, stop triggers, where open questions go | `/todo-plan`, `/todo-add`, only for an unclear request |
 | `reference/review.md` | Optional independent reviews: design review before the build, root review before the drain | `/todo-plan`, `/todo-continue`, only for a `high` or risky root |
 
 ## Invariants (every todo-* skill checks these first)

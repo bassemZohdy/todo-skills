@@ -306,6 +306,15 @@ done
 grep -qF 'reference/review.md' "$pl" || rr_bad="$rr_bad todo-plan(pointer)"
 grep -qF 'reference/review.md' "$ct" && grep -qF 'root review' "$ct" || rr_bad="$rr_bad todo-continue(pointer)"
 grep -qF '`reference/review.md`' "$root/plugin/skills/todo/SKILL.md" || rr_bad="$rr_bad core(reference table)"
+# Ambiguity pass and stop triggers (FEAT-058): one reference, loaded only for an unclear request, with the checklist, the
+# three stop triggers, the 3-question cap per round, and parking in the plan doc or a [!] node, never a new TODO.md section.
+cl="$root/plugin/skills/todo/reference/clarify.md"; cl_bad=""
+for s in 'Undefined terms' 'acceptance criteria' 'actors' 'Error and boundary cases' 'Out of scope' 'business rule' 'incompatible implementations' 'authorization' 'at most 3' 'trade-off' 'Skip this' '**Open questions**' '`[!]`' 'never a new section'; do
+  grep -qF -- "$s" "$cl" 2>/dev/null || cl_bad="$cl_bad clarify.md('$s')"
+done
+for f in todo-plan todo-add; do grep -qF 'reference/clarify.md' "$root/plugin/skills/$f/SKILL.md" || cl_bad="$cl_bad $f(pointer)"; done
+grep -qF '`reference/clarify.md`' "$root/plugin/skills/todo/SKILL.md" || cl_bad="$cl_bad core(reference table)"
+if [ -z "$cl_bad" ]; then ok "an unclear request gets the ambiguity checklist and stop triggers from reference/clarify.md"; else bad "ambiguity pass:$cl_bad"; fi
 if [ -z "$rr_bad" ]; then ok "optional design and root reviews share reference/review.md, offered only for high or risky roots"; else bad "optional reviews:$rr_bad"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 # A Done when that cannot run for an environmental reason (TASK-027).

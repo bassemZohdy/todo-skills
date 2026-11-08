@@ -22,7 +22,7 @@ Prepared from the repository; the portal's own fields may differ, so check them 
 
 - [ ] Sign in at claude.ai/directory/manage and accept the directory terms.
 - [ ] Plugin: `todo-skills`, manifest `plugin/.claude-plugin/plugin.json`, license MIT, author Bassem Zohdy, homepage https://github.com/bassemZohdy/todo-skills.
-- [ ] Version: the newest release in CHANGELOG.md (0.2.0 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
+- [ ] Version: the newest release in CHANGELOG.md (0.3.1 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
 - [ ] `bash tests/run.sh` passes on the commit you submit.
 - [ ] Short description: "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md."
 - [ ] Install check from a clean client: `/plugin marketplace add bassemZohdy/todo-skills`, then confirm the nine skills (todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update) are listed.

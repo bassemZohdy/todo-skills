@@ -12,6 +12,11 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
 | Regression failure | `baseline-red` | Python |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
+| Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
+| Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
+| Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |
+
+The expected end state of every scenario is in the table in [tests/trials/README.md](../tests/trials/README.md).
 
 `ts-lifecycle` (TypeScript, `node:test`, no dependencies), `java-lifecycle` (Maven, JUnit 5) and `multi-module` (two Maven modules, two lanes, one reactor build as the regression suite) were added after 0.3.0 so the skills are exercised outside Python. Scratch projects are built from plain files, so nothing is downloaded except JUnit and the Maven plugins on a first Maven run.
 
@@ -19,10 +24,11 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 
 ```bash
 bash tests/trials/run-claude.sh /tmp/runs ts-lifecycle     # fresh Claude Code agent, then assert.sh
+bash tests/trials/run-codex.sh ~/todo-trials baseline-red  # fresh Codex agent (keep the folder outside the Windows temp folder)
 bash tests/trials/score.sh /tmp/runs                       # trial score over a batch
 ```
 
-`run-claude.sh` starts `claude -p` with edits accepted and the Bash, Read, Write, Edit, Glob and Grep tools allowed, so run it only in a throwaway environment. To use another agent, run `setup.sh`, give that agent the output of `prompt.sh`, then run `assert.sh`.
+`run-claude.sh` starts `claude -p` with edits accepted and the Bash, Read, Write, Edit, Glob and Grep tools allowed, so run it only in a throwaway environment. `run-codex.sh` is the Codex twin and confines the agent's writes to the scratch repository. To use another agent, run `setup.sh`, give that agent the output of `prompt.sh`, then run `assert.sh`. Each scenario ends in one verdict: PASS, FAIL, INFRA_ERROR (the environment stopped the agent) or UNVERIFIED (no record that an agent ran); only PASS counts in the score. The harness checks that need no agent are listed in [tests/trials/README.md](../tests/trials/README.md#harness-checks); CI runs them.
 
 ## Results
 
@@ -55,7 +61,7 @@ Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0,
 
 ### Linux Codex runs (2026-11-08)
 
-Fresh Codex CLI 0.167.0 sessions using `gpt-6.1-terra` in Linux containers passed all eight scenarios (105/105 final assertions). TypeScript and Java used a fresh session per node. The multi-module lanes ran sequentially; the event heuristic's `overlapping` output is not proof of concurrent agents. Clean installations with and without optional tools passed, and a scratch clone of an existing project completed a feature after an explicit backlog-commit workaround. Results are provisional because the sandbox boundary has not had a full adversarial audit. Prompts, logs, exit codes, Git state, failures and checksums are in [the Linux evidence](evals/codex-linux-2026-11-08/summary.md); the [independent CI verification](evals/codex-linux-2026-11-08/ci-verification.md) checked the retained evidence on Ubuntu and macOS.
+Fresh Codex CLI 0.167.0 sessions using `gpt-6.1-terra` in Linux containers passed all eight scenarios (105/105 final assertions). TypeScript and Java used a fresh session per node. The multi-module lanes ran sequentially; the event heuristic reported `overlapping`, which is not proof of concurrent agents, and `lane-evidence.sh` has since been changed to report `unverified` for worktree events alone (FIX-036). Clean installations with and without optional tools passed, and a scratch clone of an existing project completed a feature after an explicit backlog-commit workaround (the underlying `/todo-add` then `/todo-continue` gap is fixed in the unreleased skill text, [FIX-035](evals/fix-035.md), and re-checked on a scratch project only). Results are provisional because the sandbox boundary has not had a full adversarial audit. Prompts, logs, exit codes, Git state, failures and checksums are in [the Linux evidence](evals/codex-linux-2026-11-08/summary.md); the [independent CI verification](evals/codex-linux-2026-11-08/ci-verification.md) checked the retained evidence on Ubuntu and macOS, and [how to reproduce the batch](evals/codex-linux-2026-11-08/reproduce.md) is kept beside it.
 
 ### Limits of the earlier by-hand runs
 

@@ -65,7 +65,7 @@ After CI integration (`/todo-init --ci`: `.todo/check.sh` in CI or a pre-push ho
 
 ## Evidence levels for todo-skills after 0.3.0
 
-The scores above mix three kinds of evidence. For todo-skills, as of this change:
+The scores above mix three kinds of evidence. For todo-skills, as of 2026-11-08 (version 0.3.1 plus the unreleased changes):
 
 - **Source-backed** (a file or test in this repository shows it): machine-checked backlog invariants (`todo-lint.sh`, I1-I10), an opt-in strict verification classifier (`todo-verify.sh --strict`), optional RTM checks with duplicate and stale detection (`todo-rtm.sh`, R1-R3), plugin manifests for Claude Code and Codex, and a self-testing trial harness. `bash tests/run.sh` covers these.
 - **Estimates** (a judgement, not a measurement): maturity and evidence, team and parallel work, planning depth, and every score for the other tools on this page. The weights are unchanged from the table above; they were not re-derived.

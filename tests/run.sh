@@ -132,6 +132,38 @@ PY
 else zbad="the build failed: $(head -3 "$zt/err")"; fi
 rm -rf "$zt"
 if [ -z "$zbad" ]; then ok "the Codex directory ZIP holds the manifest, nine skills, the icon and README only, reproducibly"; else bad "codex directory ZIP: $zbad"; fi
+# TASK-049: `--claude` builds the preferred import archive: the Claude manifest with a description, its icon, README and
+# the nine skills, and nothing the import guide refuses (hooks, commands, agents, MCP, app or settings files, CLAUDE.md,
+# a Codex manifest), byte-identical on a rebuild.
+zt="$(mktemp -d)"
+if bash "$root/tests/build-codex-package.sh" --claude "$zt/a.zip" >/dev/null 2>"$zt/err" && bash "$root/tests/build-codex-package.sh" --claude "$zt/b.zip" >/dev/null 2>&1; then
+  cbad="$(python3 - "$root/plugin" "$zt/a.zip" "$zt/b.zip" <<'PY' 2>&1
+import json, os, re, sys, zipfile
+root, a, b = sys.argv[1:]; e = []
+z = zipfile.ZipFile(a); names = z.namelist()
+want = {'.claude-plugin/plugin.json', '.claude-plugin/icon.png', 'README.md'}
+for d, _, files in os.walk(os.path.join(root, 'skills')):
+    want |= {os.path.relpath(os.path.join(d, f), root).replace(os.sep, '/') for f in files}
+if set(names) != want or len(names) != len(want): e.append(f'entries differ: extra {sorted(set(names) - want)}, missing {sorted(want - set(names))}')
+if len({n.split('/')[1] for n in names if re.fullmatch(r'skills/[^/]+/SKILL\.md', n)}) != 9: e.append('expected 9 skills')
+if not str(json.loads(z.read('.claude-plugin/plugin.json')).get('description', '')).strip(): e.append('empty description')
+for n in names:
+    if re.search(r'(^|/)(hooks|commands|agents|bin)(/|$)|(^|/)(\.mcp\.json|\.app\.json|settings[^/]*\.json|CLAUDE\.md|marketplace\.json)$|^\.codex-plugin/', n): e.append(f'{n} is not for a skills-only import')
+    if n.endswith(('.md', '.json')) and re.search(rb'(sk-[A-Za-z0-9]{20}|ghp_[A-Za-z0-9]{20}|-----BEGIN [A-Z ]*PRIVATE KEY)', z.read(n)): e.append(f'{n} looks like it holds a secret')
+if open(a, 'rb').read() != open(b, 'rb').read(): e.append('a rebuild is not byte-identical')
+print('; '.join(e))
+PY
+)"
+else cbad="the build failed: $(head -3 "$zt/err")"; fi
+rm -rf "$zt"
+if [ -z "$cbad" ]; then ok "the Claude import archive holds the Claude manifest, icon, README and nine skills only, reproducibly"; else bad "claude import archive: $cbad"; fi
+# TASK-049: the OpenAI guide documents the preferred Claude import, the automatic manifest conversion, the native ZIP
+# fallback, identity checks, scan findings and limitations, and where to record the submission.
+dmiss=""
+for h in "### Preferred: Claude plugin import" "### Automatic Codex manifest conversion" "### Fallback: native Codex ZIP" "### Identity and permissions" "### Scan and review findings" "### Limitations" "### Submission record"; do
+  sed -n '/^## OpenAI Plugins Directory submission/,/^## [^O]/p' "$root/docs/distribution.md" | grep -qxF "$h" || dmiss="$dmiss '$h'"
+done
+if [ -z "$dmiss" ]; then ok "docs/distribution.md has the OpenAI Plugins Directory submission guide"; else bad "docs/distribution.md OpenAI submission guide lacks:$dmiss"; fi
 
 # The report template keeps its four placeholders.
 tpl="$root/tools/template.html"

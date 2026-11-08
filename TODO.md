@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-055** · P0 · high · Add an arm-agnostic agent benchmark with six scenarios, hidden acceptance tests and a trusted verifier
+- [/] **FEAT-055** · P0 · high · Add an arm-agnostic agent benchmark with six scenarios, hidden acceptance tests and a trusted verifier
   - Done when: a stub agent on every scenario and arm gets PASS, FAIL, INFRA_ERROR or UNVERIFIED with hashed evidence and one CSV row, and an agent that edits the hidden tests or verifier cannot change its verdict; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-055-agent-benchmark-harness from main; next: start FEAT-055
+  - State: attempts 0/3; baseline 142 passing; branch todo/FEAT-055-agent-benchmark-harness from main; next: read docs
 - [ ] **FEAT-056** · P1 · mid · Split the review verdict into spec compliance and quality in one reviewer call
   - Done when: todo-continue, git-flow and the docs record Reviewed: subagent, spec ok|fail quality ok|fail, n findings fixed, and keep Reviewed: self for the fallback; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

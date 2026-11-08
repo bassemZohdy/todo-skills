@@ -33,12 +33,15 @@ for fixture in valid invalid; do
 done
 echo '3 passed, 0 failed'
 VERIFY
-if [ "$(uname -s)" = Linux ]; then
+image="${TRIAL_AUDIT_IMAGE:-todo-codex-linux:0.167.0}"
+if [ "$(uname -s)" = Linux ] || ! command -v docker >/dev/null 2>&1 || ! docker image inspect "$image" >/dev/null 2>&1; then
+  # On Linux, or where the Linux image is not available (macOS runners, hosts without Docker), run the same checks locally:
+  # the script must have no CR after the autocrlf checkout and must lint exactly like the LF control copy.
   # The verification script uses /trial to match the isolated Linux container.
   sed "s|cd /trial|cd '$tmp'|" "$tmp/verify.sh" > "$tmp/verify-local.sh"
   bash "$tmp/verify-local.sh"
 else
   src="$tmp"; if command -v cygpath >/dev/null 2>&1; then src="$(cygpath -m "$tmp")"; fi
   MSYS_NO_PATHCONV=1 docker run --rm --network none --mount "type=bind,src=$src,dst=/trial" \
-    --entrypoint /bin/bash "${TRIAL_AUDIT_IMAGE:-todo-codex-linux:0.167.0}" /trial/verify.sh
+    --entrypoint /bin/bash "$image" /trial/verify.sh
 fi

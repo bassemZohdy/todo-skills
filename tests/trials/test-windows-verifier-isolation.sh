@@ -23,8 +23,8 @@ JSON
 cat > "$repo/probe.js" <<'JS'
 const fs = require('fs');
 const path = require('path');
-fs.writeFileSync('probe-start.txt', JSON.stringify({root: process.env.TRIAL_PROBE_ROOT || null, controller: process.env.TRIAL_PROBE_CONTROLLER || null}));
-const root = process.env.TRIAL_PROBE_ROOT;
+const input = JSON.parse(fs.readFileSync('probe-input.json'));
+const root = input.root;
 const results = [];
 for (const name of ['evidence', 'login', 'evaluator', 'other']) {
   const file = path.join(root, name, 'sentinel');
@@ -34,21 +34,20 @@ for (const name of ['evidence', 'login', 'evaluator', 'other']) {
   results.push(`${name}:read=${readDenied}:write=${writeDenied}`);
 }
 let controllerDenied = false;
-try { fs.appendFileSync(process.env.TRIAL_PROBE_CONTROLLER, 'changed'); } catch (_) { controllerDenied = true; }
+try { fs.appendFileSync(input.controller, 'changed'); } catch (_) { controllerDenied = true; }
 results.push(`controller:write=${controllerDenied}`);
+const tokenHidden = !('TRIAL_DUMMY_TOKEN' in process.env);
+results.push(`token:hidden=${tokenHidden}`);
 fs.writeFileSync('probe-result.txt', results.join('\n') + '\n');
-if (results.slice(0, 4).some(line => !line.includes('read=true:write=true')) || !controllerDenied) process.exitCode = 1;
+if (results.slice(0, 4).some(line => !line.includes('read=true:write=true')) || !controllerDenied || !tokenHidden) process.exitCode = 1;
 JS
 mkdir -p "$repo/.probe-bin"
-export TRIAL_REAL_NPM="$(command -v npm)"
-cat > "$repo/.probe-bin/npm" <<'SH'
-#!/usr/bin/env bash
-"$TRIAL_REAL_NPM" "$@" > probe-debug.txt 2>&1
-SH
+real_npm="$(command -v npm)"
+printf '#!/usr/bin/env bash\n"%s" "$@" > probe-debug.txt 2>&1\n' "$real_npm" > "$repo/.probe-bin/npm"
 chmod +x "$repo/.probe-bin/npm"
 export PATH="$repo/.probe-bin:$PATH"
-export TRIAL_PROBE_ROOT="$(cygpath -w "$runs")"
-export TRIAL_PROBE_CONTROLLER="$(cygpath -w "$sentinel")"
+node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({root:process.argv[2], controller:process.argv[3]}))' "$repo/probe-input.json" "$(cygpath -w "$runs")" "$(cygpath -w "$sentinel")"
+export TRIAL_DUMMY_TOKEN=dummy-only
 TRIAL_WINDOWS_ISOLATION=1 bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/assert.log" 2>&1 || :
 [ -s "$repo/probe-result.txt" ] || { echo 'INFRA_ERROR: sandboxed project test did not run'; cat "$repo/probe-start.txt" "$repo/probe-debug.txt" 2>/dev/null || :; tail -20 "$tmp/assert.log"; exit 2; }
 grep -q '^PASS  tests pass on the checked-out branch' "$tmp/assert.log" || { echo 'FAIL  sandboxed project test did not pass'; cat "$tmp/assert.log"; exit 1; }
@@ -59,5 +58,7 @@ for name in evidence login evaluator other; do
 done
 grep -q '^controller:write=true' "$repo/probe-result.txt" && [ "$(cat "$sentinel")" = controller-dummy ] || { echo 'FAIL  controller boundary'; exit 1; }
 echo 'PASS  controller cannot be modified'
+grep -q '^token:hidden=true' "$repo/probe-result.txt" || { echo 'FAIL  dummy environment token exposed'; exit 1; }
+echo 'PASS  dummy environment token withheld'
 echo 'PASS  project-controlled test ran in scratch repository'
-echo '6 passed, 0 failed'
+echo '7 passed, 0 failed'

@@ -46,5 +46,6 @@ mode="${TRIAL_WINDOWS_SANDBOX:-elevated}"
 case "$mode" in elevated|mxc) ;; *) echo 'INFRA_ERROR: unsupported Windows sandbox mode' >&2; exit 2 ;; esac
 timeout 180 codex -c "windows.sandbox=$mode" -c 'default_permissions="verify"' \
   -c "permissions.verify.filesystem=$fs" -c 'permissions.verify.network.enabled=false' \
+  -c 'shell_environment_policy.inherit="core"' -c 'shell_environment_policy.ignore_default_excludes=false' \
   sandbox -P verify -C "$repo_w" -- "$bash_w" -c \
   'export TRIAL_REPORT="$1"; source "$2" "$3" "$4"' _ "$report" "$here_w/assert.sh" "$repo_w" "$scenario"

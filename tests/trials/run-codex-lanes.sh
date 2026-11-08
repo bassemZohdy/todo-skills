@@ -54,8 +54,15 @@ else
 fi
 mkdir -p "$todo"
 tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
-now() { local t="${EPOCHREALTIME:-}"; [ -n "$t" ] || t="$(date +%s)"; printf '%s' "${t/,/.}"; }
-stamp() { local l; while IFS= read -r l || [ -n "$l" ]; do printf '%s %s\n' "$(now)" "$l"; done; }
+# The controller clock: bash 5's EPOCHREALTIME, else Perl's Time::HiRes (macOS ships bash 3.2), else whole seconds.
+hires=; [ -n "${EPOCHREALTIME:-}" ] || ! perl -MTime::HiRes -e1 2>/dev/null || hires=perl
+now() {
+  local t="${EPOCHREALTIME:-}"
+  if [ -z "$t" ] && [ -n "$hires" ]; then t="$(perl -MTime::HiRes=time -e 'printf "%.6f", time')"; fi
+  [ -n "$t" ] || t="$(date +%s)"; printf '%s' "${t/,/.}"; }
+stamp() {
+  if [ -n "$hires" ]; then perl -MTime::HiRes=time -ne 'BEGIN { $| = 1 } chomp; printf "%.6f %s\n", time, $_'; return; fi
+  local l; while IFS= read -r l || [ -n "$l" ]; do printf '%s %s\n' "$(now)" "$l"; done; }
 agent() { # agent <dir> <cwd> <tmp> <writable root>...: one fresh `codex exec --json` on <dir>/prompt.txt
   # <tmp> (inside a writable root's Git metadata) becomes TMPDIR and java.io.tmpdir, as assert-exec.sh does for the
   # verifier: with /tmp read-only, Maven's Jansi lock file under /tmp made a coordinator stop its verification.

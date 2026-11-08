@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W4) must pass with "WARN W<n>:".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W5) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
@@ -20,7 +20,7 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ]; then
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ]; then
     if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
   elif [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi
@@ -316,6 +316,11 @@ for f in todo-plan todo-add; do grep -qF 'reference/clarify.md' "$root/plugin/sk
 grep -qF '`reference/clarify.md`' "$root/plugin/skills/todo/SKILL.md" || cl_bad="$cl_bad core(reference table)"
 if [ -z "$cl_bad" ]; then ok "an unclear request gets the ambiguity checklist and stop triggers from reference/clarify.md"; else bad "ambiguity pass:$cl_bad"; fi
 if [ -z "$rr_bad" ]; then ok "optional design and root reviews share reference/review.md, offered only for high or risky roots"; else bad "optional reviews:$rr_bad"; fi
+# Negative-case warning (FEAT-060): documented where the warnings and the Done when guidance live.
+w5_bad=""
+grep -qE '^\| W5 \|' "$root/docs/REFERENCE.md" || w5_bad="$w5_bad REFERENCE(row)"
+for f in plugin/skills/todo/reference/verification.md docs/VERIFICATION.md docs/TOOLS.md; do grep -qF 'W5' "$root/$f" || w5_bad="$w5_bad $f"; done
+if [ -z "$w5_bad" ]; then ok "W5 (no negative case on a high or security node) is documented"; else bad "W5 docs:$w5_bad"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 # A Done when that cannot run for an environmental reason (TASK-027).
 vr="$root/plugin/skills/todo/reference/verification.md"

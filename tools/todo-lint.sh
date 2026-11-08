@@ -7,7 +7,7 @@
 #   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
 #   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 progress=0
 if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi
@@ -86,6 +86,15 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
   if (n > 0 && pres == n) warn("W1", "line " NR ": " lab ": Done when only checks that text or files exist; add a command that runs the behavior")
   if (filt > 0) warn("W2", "line " NR ": " lab ": Done when selects tests by name filter; some runners exit 0 when nothing matches, so target a test id or path that errors when missing")
 }
+# W5 (a heuristic, FEAT-060): an open high-complexity node, or one whose title names a security subject, whose criteria
+# (the text before the first command) name no negative case. Known false positives: "author" and "tokenizer" match.
+function checkneg(i, s, lab,   p) {
+  if (nmark[i] == "x") return
+  if (ncx[i] != "high" && ntitle[i] !~ /(^|[^a-z])(auth|login|password|passwd|token|secret|credential|permission|session)|crypt/) return
+  p = index(s, "`"); if (p > 0) s = substr(s, 1, p - 1)
+  if (tolower(s) ~ /reject|den(y|ies|ied)|fail|refus|rais|unauthori[sz]ed|invalid/) return
+  warn("W5", "line " NR ": " lab ": the Done when of a high or security node names no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid); add one as a criterion or a child node")
+}
 BEGIN { cur = 0; prevlvl = -1; nn = 0 }
 { sub(/\r$/, "") }
 /^[ \t]*$/ { next }
@@ -121,6 +130,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
   else if (sz != "low" && sz != "mid" && sz != "high") fail("I3", "line " NR ": " id ": complexity must be low, mid or high (found: " sz ")")
   nn++
   nid[nn] = id; nmark[nn] = mk; nsz[nn] = size; nlvl[nn] = lvl; nline[nn] = NR; nlines[nn] = 1
+  ncx[nn] = sz; ntitle[nn] = tolower(title)
   if (id in idx) fail("I2", "line " NR ": duplicate ID " id)
   else idx[id] = nn
   d = id; dots = gsub(/\./, ".", d)
@@ -153,7 +163,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
   if (ind != 2 * nlvl[cur] + 2) fail("I3", "line " NR ": " id ": field " key " must be indented " (2 * nlvl[cur] + 2) " spaces")
   nlines[cur]++
   if (seenkey[cur, key]++) fail("I3", "line " NR ": " id ": duplicate field " key)
-  if (key == "Done when") { ndw[cur] = 1; checkcmds(cur, val, id) }
+  if (key == "Done when") { ndw[cur] = 1; checkcmds(cur, val, id); checkneg(cur, val, id) }
   else if (key == "Links") {
     m = split(val, lp, " · ")
     for (k = 1; k <= m; k++) {

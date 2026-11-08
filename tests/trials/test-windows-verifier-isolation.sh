@@ -17,6 +17,7 @@ JSON
 cat > "$repo/probe.js" <<'JS'
 const fs = require('fs');
 const path = require('path');
+fs.writeFileSync('probe-start.txt', JSON.stringify({root: process.env.TRIAL_PROBE_ROOT || null, controller: process.env.TRIAL_PROBE_CONTROLLER || null}));
 const root = process.env.TRIAL_PROBE_ROOT;
 const results = [];
 for (const name of ['evidence', 'login', 'evaluator', 'other']) {
@@ -32,10 +33,18 @@ results.push(`controller:write=${controllerDenied}`);
 fs.writeFileSync('probe-result.txt', results.join('\n') + '\n');
 if (results.slice(0, 4).some(line => !line.includes('read=true:write=true')) || !controllerDenied) process.exitCode = 1;
 JS
+mkdir -p "$repo/.probe-bin"
+export TRIAL_REAL_NPM="$(command -v npm)"
+cat > "$repo/.probe-bin/npm" <<'SH'
+#!/usr/bin/env bash
+"$TRIAL_REAL_NPM" "$@" > probe-debug.txt 2>&1
+SH
+chmod +x "$repo/.probe-bin/npm"
+export PATH="$repo/.probe-bin:$PATH"
 export TRIAL_PROBE_ROOT="$(cygpath -w "$runs")"
 export TRIAL_PROBE_CONTROLLER="$(cygpath -w "$sentinel")"
 TRIAL_WINDOWS_ISOLATION=1 bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/assert.log" 2>&1 || :
-[ -s "$repo/probe-result.txt" ] || { echo 'INFRA_ERROR: sandboxed project test did not run'; tail -20 "$tmp/assert.log"; exit 2; }
+[ -s "$repo/probe-result.txt" ] || { echo 'INFRA_ERROR: sandboxed project test did not run'; cat "$repo/probe-start.txt" "$repo/probe-debug.txt" 2>/dev/null || :; tail -20 "$tmp/assert.log"; exit 2; }
 grep -q '^PASS  tests pass on the checked-out branch' "$tmp/assert.log" || { echo 'FAIL  sandboxed project test did not pass'; cat "$tmp/assert.log"; exit 1; }
 for name in evidence login evaluator other; do
   grep -q "^$name:read=true:write=true" "$repo/probe-result.txt" || { echo "FAIL  $name boundary"; exit 1; }

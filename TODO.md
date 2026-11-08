@@ -8,6 +8,7 @@
 - [ ] **FEAT-048** · P1 · mid · Prepare the existing skills-only Codex plugin for OpenAI public-directory submission
   - Done when: the native Codex package includes valid public listing metadata and assets without MCP, hooks or duplicated skills; `bash tests/run.sh`
   - Links: Ref: docs/distribution.md
+  - State: branch todo/FEAT-048-prepare-codex-directory-package from main; next: start FEAT-048.1
   - [ ] **FEAT-048.1** · mid · Add required Codex interface metadata to the existing plugin manifest
     - Done when: interface defines displayName, shortDescription, longDescription, developerName, category and capabilities with documented limits; `bash tests/run.sh`
   - [ ] **FEAT-048.2** · mid · Package referenced listing logo and composer icon with minimal assets

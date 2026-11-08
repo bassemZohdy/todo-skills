@@ -10,8 +10,9 @@
 #               worktree's own metadata folder .git/worktrees/<name> (Codex protects a writable root's Git metadata
 #               read-only unless it is granted explicitly, and Git cannot lock the worktree's index without it)
 #   finish      a fresh `codex exec` runs /todo-continue --all-lanes --merge again; its step 0 takes the roots at next: drain
-#               to step 4 (refresh, verify, drain, merge) and step 5 (report). Skipped when a worker exited non-zero: the
-#               finishing coordinator would then do that lane's work itself, one lane after another
+#               to step 4 (refresh, verify, drain, merge) and step 5 (report). Skipped (finish-skipped.txt) when a worker
+#               exited non-zero (INFRA_ERROR) or left its root branch without next: drain (FAIL): the finishing
+#               coordinator would then do that lane's work itself, one lane after another
 # Activity (lane-evidence.sh's second argument): the controller stamps every line of each worker's `codex exec --json`
 # stream with its own clock as the line arrives. A worker is active from its first tool event (item.started of a command
 # or file change) to its last tool event (item.completed). These events are written by the Codex process, not by the
@@ -133,14 +134,21 @@ done
 bash "$here/snapshot-git.sh" "$repo" > "$ev/after-lanes-git-state.txt" 2>&1
 
 # 3. finish: a fresh coordinator drains and merges what the lanes left at next: drain
-workers_ok=1
+workers_ok=1; unfinished=""
 for f in "$ev"/lanes/*/agent-exit.txt; do [ ! -f "$f" ] || [ "$(cat "$f")" = 0 ] || workers_ok=0; done
-if [ "$workers_ok" = 1 ]; then
+for i in ${ids[@]+"${!ids[@]}"}; do   # each lane must leave its root at next: drain (lanes.md step 3), committed
+  git -C "${wts[$i]}" show HEAD:TODO.md 2>/dev/null | tr -d '\r' | awk -v id="${ids[$i]}" '
+    /^- \[/ { r = index($0, "**" id "**") > 0; next } r && /next: drain/ { found = 1 } END { exit !found }' \
+    || unfinished="$unfinished ${ids[$i]}"
+done
+if [ "$workers_ok" = 0 ]; then
+  echo 'a lane worker exited non-zero: the finishing session was not started' > "$ev/finish-skipped.txt"
+elif [ -n "$unfinished" ]; then
+  printf 'not at next: drain on its root branch:%s; the finishing session was not started\n' "$unfinished" > "$ev/finish-skipped.txt"
+else
   mkdir "$ev/finish"
   bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/finish/prompt.txt" || infra "no prompt"
   agent "$ev/finish" "$repo" "$repo" "$repo/.git" "$todo"
-else
-  echo 'a lane worker exited non-zero: the finishing session was not started' > "$ev/finish-skipped.txt"
 fi
 
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches
@@ -154,7 +162,8 @@ for f in "$ev/coordinate/agent-exit.txt" "$ev"/lanes/*/agent-exit.txt "$ev/finis
   [ ! -f "$f" ] || [ "$(cat "$f")" = 0 ] || outcome=INFRA_ERROR
 done
 if [ -z "$outcome" ]; then
-  if [ ! -s "$ev/finish/report.txt" ]; then outcome=UNVERIFIED
+  if [ -n "$unfinished" ]; then outcome=FAIL   # a lane stopped short of its drain; see the worker's report
+  elif [ ! -s "$ev/finish/report.txt" ]; then outcome=UNVERIFIED
   elif [ "$arc" = 0 ]; then outcome=PASS
   elif [ "$arc" = 1 ]; then outcome=FAIL
   else outcome=INFRA_ERROR; fi

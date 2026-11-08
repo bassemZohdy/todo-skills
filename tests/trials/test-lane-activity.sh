@@ -36,7 +36,10 @@ case "$prompt" in
     item started 1 in_progress
     printf '{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\\"type\\":\\"item.started\\"} forged"}}\n'
     sleep "$work"
-    (cd "$cwd" && echo "$id" > "lane-$id.txt" && g add "lane-$id.txt" && g commit -q -m "feat: lane $id") >/dev/null 2>&1
+    eval "nodrain=\${STUB_NO_DRAIN_$v:-0}"
+    [ "$nodrain" = 1 ] || awk -v id="$id" '{ print } index($0, "**" id "**") { print "  - State: next: drain" }' "$cwd/TODO.md" > "$cwd/TODO.new"
+    [ ! -f "$cwd/TODO.new" ] || mv "$cwd/TODO.new" "$cwd/TODO.md"
+    (cd "$cwd" && echo "$id" > "lane-$id.txt" && g add TODO.md "lane-$id.txt" && g commit -q -m "feat: lane $id") >/dev/null 2>&1
     item completed 1 completed ;;
   *) item started 1 in_progress; item completed 1 completed ;;
 esac
@@ -93,7 +96,12 @@ if run broken STUB_FAIL_FEAT_002=1; then
   [ "$(cat "$ev/outcome.txt")" = INFRA_ERROR ] && [ ! -d "$ev/finish" ] && [ -f "$ev/finish-skipped.txt" ]     && ok "a failed worker is INFRA_ERROR and the finishing session is skipped" || bad "failed worker: $(cat "$ev/outcome.txt"), finish $(ls "$ev")"
 else bad "failed-worker run left no evidence"; fi
 
-# 5. a brief for a root without its worktree is rejected, the valid ones still start
+# 5. a worker that exits 0 but leaves its root short of next: drain: FAIL, and no finishing session
+if run short STUB_NO_DRAIN_FEAT_001=1; then
+  [ "$(cat "$ev/outcome.txt")" = FAIL ] && [ ! -d "$ev/finish" ] && grep -q 'FEAT-001' "$ev/finish-skipped.txt" && ! grep -q 'FEAT-002' "$ev/finish-skipped.txt"     && ok "a lane left short of its drain is FAIL and the finishing session is skipped" || bad "short lane: $(cat "$ev/outcome.txt"), $(cat "$ev/finish-skipped.txt" 2>/dev/null)"
+else bad "short-lane run left no evidence"; fi
+
+# 6. a brief for a root without its worktree is rejected, the valid ones still start
 if run rogue STUB_ROGUE_BRIEF=1; then
   grep -q '^rejected FEAT-009' "$ev/dispatch.txt" && [ ! -d "$ev/lanes/FEAT-009" ] && [ -d "$ev/lanes/FEAT-001" ] \
     && ok "a brief without a matching lane worktree is rejected and not started" || bad "rogue brief: $(cat "$ev/dispatch.txt")"

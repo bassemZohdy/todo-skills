@@ -34,8 +34,4 @@ Use when the user thinks the plan is not proper, at any time, even mid-tree.
 
 ## Independent design review (optional, never a required stage)
 
-For a `high` complexity root, or one that touches security, data migration, concurrency or a public interface, the user may ask for a design review before the first build node starts ("review this plan", `--review`, or a line in the plan doc's **Open questions**). Offer it once for such roots; never ask for it on `low` or `mid` roots and never block a plan on it.
-
-- **Fresh-context reviewer.** With a subagent tool, give a new agent only the plan doc, the root and its children as written in `TODO.md`, and the `Ref` path. It reads and comments; it never edits files or runs tests. Without a subagent tool, say so and offer to review in a new session started from those same files.
-- **External tool.** If the project already uses a design-review skill or tool (for example EGM), run it on the same inputs instead. This repository neither bundles nor requires one.
-- **Outcome.** Findings the user accepts go through `--revise` (so they land in **Revisions** with the reason). Declined or unresolved findings are recorded as a bullet under **Open questions**. No review means the plan simply proceeds.
+For a `high` root, or one that touches security, data migration, concurrency or a public interface, offer once a design review before the first build node starts; read `../todo/reference/review.md` ("Design review") only then. Never ask for it on other roots and never block a plan on it.

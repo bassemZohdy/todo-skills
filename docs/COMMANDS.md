@@ -51,7 +51,7 @@ Turns a goal into a plan doc and a proposed tree, or changes the plan when it no
 
 **Revise (`--revise [<reason>]`).** Usable at any time, even mid-tree. Only `[ ]` nodes change; `[/]`, `[x]`, `[!]` and drained work are never edited, and a node with any descendant that is not `[ ]` is not dropped, merged or moved. The change is shown as a diff (nodes added, dropped, split, merged, re-rated, re-ordered or moved to another lane, plan-doc lines changed). IDs are kept; a dropped ID is never reused, and every `Depends:`/`From:` on it is removed or re-pointed in the same diff. On your yes it applies the change, appends `- <date> · <your reason> · <what changed>` under **Revisions**, and lints.
 
-**Design review (optional).** For a `high` root, or one touching security, data migration, concurrency or a public interface, it offers once a review by a fresh-context subagent (or an external design-review tool the project already uses). It never blocks a plan on it. Accepted findings go through `--revise`; the rest are recorded under **Open questions**.
+**Design review (optional).** For a `high` root, or one touching security, data migration, concurrency or a public interface, it offers once a review by a fresh-context subagent (or an external design-review tool the project already uses). It never blocks a plan on it. Accepted findings go through `--revise`; the rest are recorded under **Open questions**. `/todo-continue` offers the matching root review before such a root drains ([PLANNING.md](PLANNING.md#root-review-optional)).
 
 New roots, and changes to unclaimed trees, are written only on the base branch. Nodes of a claimed tree can change only from that tree's branch; elsewhere they are listed as locked.
 

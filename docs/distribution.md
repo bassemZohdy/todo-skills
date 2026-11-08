@@ -5,7 +5,7 @@
 | Claude Code plugin marketplace (this repo) | Available | `/plugin marketplace add bassemZohdy/todo-skills` |
 | Codex plugin marketplace (this repo) | Available, verified on codex-cli 0.167.0 | `codex plugin marketplace add bassemZohdy/todo-skills` |
 | skills CLI | Available (discovery of all nine skills verified from the repository root and from `plugin/`, 2026-11-07) | `npx skills add bassemZohdy/todo-skills` |
-| OpenAI Plugins Directory (Codex) | Not submitted; Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
+| OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0, upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
 Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
@@ -131,7 +131,9 @@ One line per upload (TASK-050):
 
 `Submitted: <YYYY-MM-DD> · Path: <Claude import | native ZIP> · Reference: <portal id or URL> · Version: <x.y.z> · Source commit: <sha> · Archive SHA-256: <hash> · Status: <in review | approved | rejected: reason | blocked: reason>`
 
-Not submitted yet.
+Checked: 2026-11-08 · Path: Claude import · Reference: none · Version: 0.4.0 · Source commit: 8b5a2fd (last change under `plugin/`) · Archive SHA-256: e1141ebebaa342563d1088c8ec0c621a48eee61f24e1178661892d7614aee75d · Status: blocked: the upload needs the owner's OpenAI account at the portal, which an agent must not use
+
+What was checked (TASK-050): `bash tests/build-codex-package.sh --claude` gives 18 entries, the nine skills and a `.claude-plugin/plugin.json` with a description at version 0.4.0; the native ZIP (SHA-256 `7dd71ccb02cd8a769567f745e6d728f8a762dc17b4948f0b22ac600d3a2d5f1d`) has the same skills and a `.codex-plugin/plugin.json` within the listing limits. Neither has scripts, hooks, MCP or app files. The portal's converted manifest can only be checked after the owner's upload; record that upload as a `Submitted:` line above this one.
 
 ## Directory policy refusal of v0.3.0
 

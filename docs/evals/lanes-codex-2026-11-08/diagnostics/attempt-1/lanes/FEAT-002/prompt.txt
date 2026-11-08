@@ -1,0 +1,20 @@
+You are a trial agent testing a set of agent skills. Your ONLY working folder is /runs/multi-module/repo.todo/FEAT-002 (cd there with an absolute path in every shell call). Do not read or write outside it, except the worktrees the skills create at ../<repo>.todo/.
+
+The skills are in .claude/skills/<name>/SKILL.md inside that folder (core rules: .claude/skills/todo/SKILL.md and .claude/skills/todo/reference/*.md). Slash commands are not available: to run /todo-x, read .claude/skills/todo-x/SKILL.md and follow it literally, loading what it tells you to load. Never push or fetch, never use git add -A or git add ., never tag. If git needs an identity, use git -c user.email=t@t -c user.name=t.
+
+Task: You are the lane subagent for one root, started by the coordinator of `/todo-continue --all-lanes --merge` (step 3 of .claude/skills/todo/reference/lanes.md). Your working folder is this lane's worktree. Follow the coordinator's instructions below, then stop and return your summary. Do not modify or remove git hooks.
+
+Reply with (1) the report the skill asks for, and (2) every ambiguity, contradiction or unclear instruction you hit in the skill text, each with the exact quoted text and how you resolved it ("none" if none).
+
+The coordinator's instructions for FEAT-002:
+
+Root ID: FEAT-002
+Worktree: /runs/multi-module/repo.todo/FEAT-002
+Baseline: 2 passing (mvn -B test)
+Ref paths: none
+
+Read first, within your worktree: .claude/skills/todo-continue/SKILL.md, .claude/skills/todo/SKILL.md, .claude/skills/todo/reference/verification.md (including Command safety), and .claude/skills/todo/reference/git-flow.md.
+
+Work only inside your worktree. Child branches are switched inside the lane worktree. Skip step 3 (the coordinator's baseline holds) and the tree claim in step 4 (already done). Run steps 1, 2, 4-9 and step 10 items 1-3 (complete and merge into the parent) for each node of this one root depth-first, including the root's own integration step if it is a parent, with everything committed. Stop before the root's drain (step 10 item 4), leaving the root [/] with next: drain in its State, committed in the leaf root's node commit or parent root's integration commit, never a separate commit.
+
+Stay inside the task lines; never edit another lane's nodes, Done when, or the base branch; never merge to base; never drain; never push. Return a summary per node (ID, commands and results, commit). Never fetch or tag, use git add -A or git add ., or modify or remove git hooks. If git needs an identity, use git -c user.email=t@t -c user.name=t.

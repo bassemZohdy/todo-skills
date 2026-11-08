@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [/] **FIX-037** · P1 · mid · Exclude a batch evidence folder from the trial scenario score
-  - Done when: score.sh counts every scenario but does not count the batch evidence directory as an extra scenario; `bash tests/trials/test-score-layout.sh`
-  - State: attempts 0/3; baseline 129 passing; branch todo/FIX-037-exclude-batch-evidence from main; next: build
-  - Links: Ref: tests/trials/README.md
 - [ ] **FIX-039** · P1 · mid · Run multi-node Codex trials with a fresh process for every skill invocation
   - Done when: TypeScript and Java trials retain the exact generated prompt and independent evidence for distinct sessions through root completion; `bash tests/trials/test-codex-fresh-invocations.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md

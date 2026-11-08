@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **FIX-037** (fix): Exclude batch evidence and metadata from trial scenario scores while retaining incomplete scenarios and all verdicts. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-score-layout.sh`, `bash tests/trials/test-score-outcomes.sh`.
 - **FIX-036** (fix): Report lane concurrency only with independent worker activity evidence; Git worktree events alone are unverified. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-lane-concurrency.sh`, `bash tests/trials/test-lane-evidence.sh`.
 - **FIX-035** (fix): Claim newly added uncommitted roots without a separate backlog commit, preserving pending edits if another claim wins. Ref: docs/evals/fix-035.md. Validated: `bash tests/trials/test-pending-root.sh`.
 

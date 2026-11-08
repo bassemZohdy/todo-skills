@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **TASK-050** (docs): Record the OpenAI Plugins Directory package for 0.4.0: the Claude import and native Codex archives were built and checked, and the submission is recorded as blocked on the owner, whose OpenAI account the portal upload needs. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
+
 ### Fixed
 
 - **FIX-053** (fix): Keep the cause of a multi-node INFRA_ERROR in the controller evidence: when an invocation is scored INFRA_ERROR by its environment signature, `run-codex-multi.sh` copies that `infra-signature.txt` to the controller (the Ubuntu CI job failed on this since TASK-045). Ref: tests/trials/run-codex-multi.sh. Validated: `bash tests/trials/test-codex-fresh-invocations.sh`.

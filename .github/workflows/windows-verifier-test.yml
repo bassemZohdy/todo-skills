@@ -1,7 +1,8 @@
 name: Windows verifier isolation
 on:
   push:
-    branches: [todo/FIX-041-isolate-native-windows]
+    branches: [main, 'todo/**']
+  pull_request:
 permissions:
   contents: read
 jobs:

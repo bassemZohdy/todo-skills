@@ -44,7 +44,7 @@ Turns a goal into a plan doc and a proposed tree, or changes the plan when it no
 **Plan (default).**
 
 1. Reads README, `docs/`, `TODO.md`, `CHANGELOG.md` and `docs/plans/PROJECT.md`.
-2. Asks at most 3 short questions the repo does not answer: the goal and its done-state, what is out of scope, which parts can run in parallel.
+2. Asks at most 3 short questions the repo does not answer: the goal and its done-state, what is out of scope, which parts can run in parallel. For an unclear request it also runs the ambiguity checklist (undefined terms, acceptance criteria, actors, error and boundary cases, scope) and stops before writing anything when a business rule is missing, incompatible implementations fit, or authorization is unstated; questions are numbered with their trade-offs, at most 3 per round, and a question that must wait goes to the plan doc's Open questions or a `[!]` node.
 3. Drafts `docs/plans/PROJECT.md` (sections Goal, Scope, Out of scope, Lanes, Decisions, Open questions, Revisions), or proposes edits when it exists. It asks before creating `docs/`.
 4. Proposes the tree by the `/todo-add` rules: each root gets `Ref: docs/plans/PROJECT.md` and, outside lane `main`, a `Lane:`. Independent lanes do not depend on each other. With an existing tree it proposes only new roots (and children under open roots of unclaimed trees). A tree that would pass 120 lines is proposed as roots and first levels with `next: decompose`. With an RTM, it links roots to requirements and shows the row changes.
 5. Waits for your confirmation, writes only what you confirmed, and lints. Nothing is committed.
@@ -70,7 +70,7 @@ Adds work to the tree. It never starts work.
 | `--clarify` | Always asks one round of questions first |
 
 1. Resolves `--ref`, an RTM link (only when an RTM exists), `--from` and `--parent`.
-2. Asks one message of at most 3 short questions when the behavior, the target module or the verification command cannot be derived. It never guesses to avoid asking.
+2. Asks one message of at most 3 short questions when the behavior, the target module or the verification command cannot be derived. It never guesses to avoid asking. For an unclear request it also runs the ambiguity checklist (undefined terms, acceptance criteria, actors, error and boundary cases, scope) and stops before writing anything when a business rule is missing, incompatible implementations fit, or authorization is unstated; questions are numbered with their trade-offs, at most 3 per round, and a question that must wait goes to the plan doc's Open questions or a `[!]` node.
 3. Searches the code and tests to check the work is not already done; if it seems done, it asks.
 4. Splits and rates: every leaf is one change that fits one context window and touches at most 5 files; at most 3 levels; each node gets a complexity and a `Done when` with a runnable command that targets a test id or path ([VERIFICATION.md](VERIFICATION.md#writing-a-done-when)). Containers get their own `Done when`. No size unless the tree already uses sizes or you ask.
 5. A request that needs more than 6 nodes or more detail than 4 lines: offers a plan file `docs/plans/<ROOT-ID>-<slug>.md` linked with `Ref:`.

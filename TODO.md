@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FEAT-058** · P1 · mid · Add an ambiguity checklist and three stop triggers to /todo-plan and /todo-add
-  - Done when: a reference checklist and the stop triggers apply only to unclear requests, keep the 3-question cap, and send open questions to the plan doc or a blocked node, never a new TODO.md section; `bash tests/run.sh`
-  - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/FEAT-058-ambiguity-stop-triggers from main; next: start FEAT-058
 - [ ] **FEAT-059** · P1 · high · Let .todo/check.sh optionally replay the Validated commands of newly drained roots
   - Done when: safe Validated commands added since a revision run and their failure fails the check, while a command that breaks the lint safety rules or uses an unknown runner is shown and refused, never run; `bash tests/run.sh`
   - Links: Ref: docs/evals/update-review.md

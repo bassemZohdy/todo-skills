@@ -7,7 +7,8 @@ How this repository is laid out, what its tests check, and how it is released. F
 ```text
 plugin/                          The installable plugin: Markdown, JSON and the icon only
   .claude-plugin/plugin.json     Claude Code manifest (version) and icon.png
-  .codex-plugin/plugin.json      Codex manifest (same version; "skills": "./skills/")
+  .codex-plugin/plugin.json      Codex manifest (same version; "skills": "./skills/"; "interface": directory listing)
+  assets/icon.png                Codex listing logo and composer icon (a copy of .claude-plugin/icon.png)
   README.md                      The plugin's own short README
   skills/
     todo/SKILL.md                Core rules: layers, task format, IDs, git mode, invariants, guardrails

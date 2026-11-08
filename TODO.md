@@ -11,7 +11,7 @@
   - State: branch todo/FEAT-048-prepare-codex-directory-package from main; next: build children
   - [x] **FEAT-048.1** · mid · Add required Codex interface metadata to the existing plugin manifest
     - Done when: interface defines displayName, shortDescription, longDescription, developerName, category and capabilities with documented limits; `bash tests/run.sh`
-  - [ ] **FEAT-048.2** · mid · Package referenced listing logo and composer icon with minimal assets
+  - [x] **FEAT-048.2** · mid · Package referenced listing logo and composer icon with minimal assets
     - Done when: manifest logo and composerIcon paths resolve to permitted image assets inside plugin/ and the package excludes scripts and hooks; `bash tests/run.sh`
   - [ ] **FEAT-048.3** · mid · Build and validate a skills-only ZIP from the current plugin directory
     - Done when: clean ZIP contains the manifest, all nine skills and assets, excludes credentials, passes local regression and records any portal-only checks; `bash tests/run.sh`

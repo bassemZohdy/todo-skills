@@ -33,6 +33,8 @@
       "Add a task to the backlog for this bug",
       "Continue with the next task in TODO.md"
     ],
-    "brandColor": "#115E59"
+    "brandColor": "#115E59",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
   }
 }

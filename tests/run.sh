@@ -80,6 +80,28 @@ print('; '.join(e))
 PY
 )"
 if [ -z "$cxbad" ]; then ok "codex manifest carries listing metadata within the directory limits"; else bad "codex listing metadata: $cxbad"; fi
+# FEAT-048: logo and composerIcon are ./-relative paths to square PNGs inside plugin/ (48 to 4096 px, at most 5 MiB), and
+# the package has nothing the directory refuses: no hooks, no MCP server or app configuration.
+cxicon="$(python3 - "$root/plugin" <<'PY' 2>&1
+import json, os, struct, sys
+root = os.path.realpath(sys.argv[1]); e = []
+i = json.load(open(os.path.join(root, '.codex-plugin', 'plugin.json'), encoding='utf-8')).get('interface') or {}
+for k in ('logo', 'composerIcon'):
+    p = i.get(k)
+    if not isinstance(p, str) or not p.startswith('./'): e.append(f'{k}: a ./-relative path is required'); continue
+    f = os.path.realpath(os.path.join(root, p))
+    if not f.startswith(root + os.sep) or not os.path.isfile(f): e.append(f'{k}: {p} is not a file inside plugin/'); continue
+    head = open(f, 'rb').read(24)
+    if head[:8] != b'\x89PNG\r\n\x1a\n' or head[12:16] != b'IHDR': e.append(f'{k}: {p} is not a PNG'); continue
+    w, h = struct.unpack('>II', head[16:24])
+    if w != h or not 48 <= w <= 4096 or os.path.getsize(f) > 5 * 1024 * 1024: e.append(f'{k}: {p} is {w}x{h}, {os.path.getsize(f)} bytes')
+for d, dirs, files in os.walk(root):
+    for n in dirs + files:
+        if n in ('hooks', 'hooks.json', '.mcp.json', '.app.json'): e.append(f'{os.path.relpath(os.path.join(d, n), root)} is not allowed')
+print('; '.join(e))
+PY
+)"
+if [ -z "$cxicon" ]; then ok "codex logo and composer icon are square PNGs in the plugin; no hooks, MCP or app files"; else bad "codex listing assets: $cxicon"; fi
 
 # The report template keeps its four placeholders.
 tpl="$root/tools/template.html"

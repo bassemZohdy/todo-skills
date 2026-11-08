@@ -11,7 +11,6 @@ case "$scenario" in
   release-ask)        task='Run `/todo-release`. When the skill tells you to ask the user something, STOP there and end your turn with the question.' ;;
   release)            task='Run `/todo-release`. The user has already answered your version question with: "0.2.0, confirmed".' ;;
   monorepo)           task='Run, in order, `/todo-init`, then `/todo-add "add a power function to the api package"`, then `/todo-continue --merge`. Accept every proposal and confirm every confirmation.' ;;
-  lanes)              task='Run `/todo-continue --all-lanes --merge`. If you have no subagent tool, follow what the skill says for that case. Do not modify or remove git hooks.' ;;
   replan)             task='Run `/todo-plan --revise "FEAT-003 (web dashboard) is out of scope, drop it"`. The user confirms the proposed diff: "yes, apply it".' ;;
   ci-github|ci-local) task='Run `/todo-init --ci`. The user says yes to every offer and confirmation.' ;;
   happy-path)         task='Run `/todo-continue --merge`. Stop after one invocation.' ;;
@@ -29,7 +28,13 @@ case "$scenario" in
     else
       task='Run `/todo-continue --merge`. It executes one node per invocation, so run it again after each report until the skill says nothing is left to continue and the root is merged into main.'
     fi ;;
-  multi-module)       task='Run `/todo-continue --all-lanes --merge`. If you have no subagent tool, follow what the skill says for that case. Do not modify or remove git hooks.' ;;
+  lanes|multi-module)
+    # TRIAL_LANE_PHASE is set only by run-codex-lanes.sh, where the controller is the coordinator's subagent tool.
+    case "${TRIAL_LANE_PHASE:-}" in
+      coordinate) task='Run `/todo-continue --all-lanes --merge` as the coordinator. You have a subagent tool: the trial controller, which starts one fresh agent per lane, all at once. At step 3 of .claude/skills/todo/reference/lanes.md do no lane work yourself. Instead write each lane subagent'"'"'s complete instructions (everything step 3 says it gets, its rules included) to ../<repo>.todo/<ROOT-ID>.brief.md, one file per lane, where <ROOT-ID> is the root of that lane and ../<repo>.todo/<ROOT-ID> its worktree. Then stop and report. After the lane agents return, a fresh coordinator session runs steps 4 and 5. Do not modify or remove git hooks.' ;;
+      worker) task='You are the lane subagent for one root, started by the coordinator of `/todo-continue --all-lanes --merge` (step 3 of .claude/skills/todo/reference/lanes.md). Your working folder is this lane'"'"'s worktree. Follow the coordinator'"'"'s instructions below, then stop and return your summary. Do not modify or remove git hooks.' ;;
+      *) task='Run `/todo-continue --all-lanes --merge`. If you have no subagent tool, follow what the skill says for that case. Do not modify or remove git hooks.' ;;
+    esac ;;
   *) echo "unknown scenario: $scenario" >&2; exit 1 ;;
 esac
 cat <<EOF

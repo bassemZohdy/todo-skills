@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [/] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier
-  - Done when: every scenario is scored PASS, FAIL or INFRA_ERROR with its cause recorded, assertions ran through windows-assert-exec.sh, and the published evidence passes its checker; `bash tests/trials/test-windows-codex-evidence.sh`
-  - Links: Ref: docs/evals/fix-041.md
-  - State: attempts 0/3; baseline 136 passing; branch todo/TASK-045-repeat-windows-codex-batch from main; next: read docs
 - [ ] **TASK-046** · P2 · mid · Publish durable, checksummed evidence for FIX-035 to FIX-041 and verify it in CI
   - Done when: docs/evals holds the evidence with SHA256SUMS and the Ubuntu and macOS CI jobs run its checker; `bash tests/trials/test-fix-evidence.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-08/ci-verification.md

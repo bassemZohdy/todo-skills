@@ -5,7 +5,7 @@
 | Claude Code plugin marketplace (this repo) | Available | `/plugin marketplace add bassemZohdy/todo-skills` |
 | Codex plugin marketplace (this repo) | Available, verified on codex-cli 0.167.0 | `codex plugin marketplace add bassemZohdy/todo-skills` |
 | skills CLI | Available (discovery of all nine skills verified from the repository root and from `plugin/`, 2026-11-07) | `npx skills add bassemZohdy/todo-skills` |
-| OpenAI Plugins Directory (Codex) | Not submitted; Claude skills-only import preferred | Upload a ZIP of `plugin/` containing `.claude-plugin/plugin.json` and `skills/`; let OpenAI convert its manifest. Native Codex ZIP remains an alternative. |
+| OpenAI Plugins Directory (Codex) | Not submitted; Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
 Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
@@ -30,42 +30,108 @@ Prepared from the repository; the portal's own fields may differ, so check them 
 - [ ] Security notes for the reviewer: no network access by the skills, no required tooling beyond git/bash, see SECURITY.md.
 - [ ] After submitting, record below: `Submitted: <YYYY-MM-DD> · Reference: <id or URL from the portal>`, and set the table row above to "Submitted".
 
-## OpenAI Plugins Directory: preferred Claude-plugin import
+## OpenAI Plugins Directory submission
 
-Official guidance: https://developers.openai.com/plugins/guides/submit-claude-plugin
-Submission instructions: https://developers.openai.com/plugins/deploy/submission
+Official guidance: [submit a Claude plugin](https://developers.openai.com/plugins/guides/submit-claude-plugin), the
+[submission instructions](https://developers.openai.com/plugins/deploy/submission) and [building Codex plugins](https://developers.openai.com/codex/plugins/build),
+read on 2026-11-08. The owner submits at platform.openai.com/plugins; nothing in this repository uploads anything. Follow the
+portal's current fields where they differ from this page.
 
-Because `todo-skills` already distributes a working Claude Code skills-only plugin, prefer the direct Claude archive upload instead of maintaining a second hand-authored public submission format:
+### Preferred: Claude plugin import
 
-1. Prepare an archive whose root (or single top-level directory) is the existing `plugin/` folder. It must contain `.claude-plugin/plugin.json` with a nonempty description, and all nine `skills/<name>/SKILL.md` files with their required references and assets. Verify the archive has no credentials, hooks or MCP configuration and run `bash tests/run.sh` before packaging. This is distinct from the existing native Codex ZIP built by `tests/build-codex-package.sh`.
-2. In the OpenAI Plugins submission portal, choose **Create plugin → Skills only** and upload the Claude archive. Review the automatically converted `.codex-plugin/plugin.json`, including generated interface defaults, descriptions, skills and any icons. Provide missing listing assets only when the portal requires them; do not duplicate skills.
-3. Test the imported skills in a clean supported environment. Check that relative references resolve, nine skills are discoverable, and local Git/filesystem operations work where supported. Local execution is an environment-dependent capability, not guaranteed for every ChatGPT surface.
-4. Finish verified developer identity and required organization permissions. Resolve Metadata & Skills scan findings and submit for review; Claude marketplace approval does not transfer to OpenAI.
-5. Record the submitted package version, tested source commit, submission date, actual portal reference, and review status here. If blocked by account verification, platform policy or environment support, document the exact blocker without claiming submission.
+`todo-skills` already ships a working Claude Code skills-only plugin, so upload that instead of maintaining a second
+hand-authored submission format:
 
-The existing native Codex package remains a tested **fallback** for manual distribution or a portal conversion problem. It does not need to be deleted or rebuilt solely for this import path. Follow the portal's current requirements instead of assuming its generated defaults will always satisfy final publication checks.
+1. Release first (`/todo-release`), so both manifests carry the version you submit, then on that commit run
+   `bash tests/run.sh` and `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`. Keep the printed SHA-256.
+   The archive root is the plugin root: `.claude-plugin/plugin.json` (with its nonempty `description`) and `icon.png`,
+   `README.md`, and all nine `skills/<name>/SKILL.md` with their `reference/` files and the report template. `tests/run.sh`
+   checks that it holds nothing else: no hooks, commands, agents, `bin/`, MCP, app or settings files, `CLAUDE.md`, marketplace
+   file or credential-like content, and that a rebuild gives the same bytes. The Codex manifest is left out on purpose (see
+   the next section).
+2. In the portal choose **Create plugin → Skills only** and upload the archive.
+3. Review the converted manifest (next section), complete the listing and review fields, and provide listing assets only
+   when the portal asks for them; do not duplicate skills.
+4. Test the imported skills in a clean supported environment: all nine are discoverable, relative references resolve, and
+   local Git and file operations work where the surface supports local execution. Local execution depends on the
+   environment; it is not guaranteed on every ChatGPT surface.
+5. Resolve every scan result, submit for review and record the result below. Approval in the Claude directory does not
+   transfer to OpenAI.
 
-## OpenAI Plugins Directory package
+### Automatic Codex manifest conversion
 
-`bash tests/build-codex-package.sh <out.zip>` builds the skills-only ZIP from `plugin/` and prints its SHA-256. The ZIP root is
-the plugin root: `.codex-plugin/plugin.json`, `README.md`, the nine `skills/` and `assets/icon.png` (the manifest's `logo`
-and `composerIcon`). The Claude manifest, scripts, hooks, MCP and app files are not in it. Text files are stored with LF
-endings, sorted, with a fixed date, so the same commit gives the same bytes on every OS. `tests/run.sh` builds it twice and
-checks the entries, the nine skills, the referenced icon, that nothing looks like a credential, and that both builds match;
-it also checks the manifest's `interface` against the limits the submission page documents (read 2026-11-08: display name and
-short description at most 30 characters, long description at most 4000, developer name at most 80, at most 20 capabilities
-of 120 characters, at most 3 starter prompts of 128 characters, HTTPS URLs, `#RRGGBB` brand color with 2:1 contrast on
-white, square icons of 48 to 4096 px and at most 5 MiB). A throwaway Codex home installed all nine skills from the
-extracted ZIP (codex-cli 0.167.0).
+The portal converts `.claude-plugin/plugin.json` into `.codex-plugin/plugin.json`, "adds missing interface defaults and
+normalizes text fields". The guide does not list which fields it generates, and does not say what it does with an
+archive that already holds a `.codex-plugin/plugin.json`, so the `--claude` archive has none. Compare the generated
+`interface` with the hand-checked one in `plugin/.codex-plugin/plugin.json`, which is within the documented limits
+(`tests/run.sh` checks them):
 
-Checks only the portal can make, so record their result at submission:
+| Field | Ours | Limit |
+|---|---|---|
+| `displayName` | Todo Skills | 30 characters |
+| `shortDescription` | File-native backlog for agents | 30 characters |
+| `longDescription` | the nine skills, who they are for, and their limits | 4000 characters |
+| `developerName` | Bassem Zohdy | 80 characters; must match the verified identity |
+| `category` | Developer Tools | a category title the dashboard offers; no published list |
+| `capabilities` | Interactive, Read, Write | at most 20 of 120 characters; allowed values not published |
+| `defaultPrompt` | three starter prompts | at most 3 of 128 characters, no @mentions |
+| `brandColor` | `#115E59` | `#RRGGBB`, at least 2:1 contrast on white |
+| `logo`, `composerIcon` | `./assets/icon.png`, 1024 px | square PNG/JPEG/WebP/SVG, 48 to 4096 px, at most 5 MiB |
 
-- the automated Metadata scan and the Skills scan run on upload;
-- `category` must match a category title the dashboard offers (`Developer Tools` is the documented example; there is no
-  published list), and the allowed `capabilities` values are not published (the bundled OpenAI plugins use `Interactive`,
-  `Read` and `Write`);
-- the developer name must match a verified individual or business identity of the submitting organization;
-- the policy attestations and the review itself (skills-only plugins need no test cases or demo recording).
+If a generated value is wrong or empty, correct it in the portal using the values above.
+
+### Fallback: native Codex ZIP
+
+`bash tests/build-codex-package.sh todo-skills-codex.zip` builds the native Codex package (FEAT-048), for manual
+distribution or for a conversion problem: `.codex-plugin/plugin.json` with the listing `interface`, `README.md`, the nine
+skills and `assets/icon.png`; no Claude manifest, scripts, hooks, MCP or app files. Text is stored with LF endings,
+sorted, with a fixed date, so a commit gives the same bytes on every OS. `tests/run.sh` builds it twice and checks the
+entries, skills, icon and the absence of credentials. A throwaway Codex home installed all nine skills from the extracted
+ZIP (codex-cli 0.167.0). It does not need to be rebuilt just for the import path.
+
+### Identity and permissions
+
+- **Submitter:** the organization owner, or a member with "Apps Management" write access, in the owning OpenAI organization.
+- **Identity:** complete individual or business identity verification first. The listing's developer name (`Bassem Zohdy`)
+  must match the identity it is published under; if not, change `interface.developerName` and rebuild.
+- **What the plugin does** (the same disclosure as [SECURITY.md](../SECURITY.md#what-it-runs-reads-writes-and-sends)), for the
+  review form and the `Interactive`, `Read`, `Write` capabilities: it runs `git` (branch, commit, merge, worktree; never
+  fetch, pull, push, tag, reset hard or clean) and the project's own test, lint and build commands; it reads the backlog,
+  docs, project marker and CI files and the source a task needs, never credentials, tokens, `~/.ssh` or `~/.aws`; it writes
+  `TODO.md`, `CHANGELOG.md`, a task's source and tests and, only after the user agrees, README lines, plan docs, CI files and
+  a `pre-push` hook; it sends nothing. The skills limit `Done when` to test, lint, typecheck and build commands and refuse
+  deletes, `sudo`, downloaded code, pushes, deploys, paths outside the repository and credential reads. These are
+  instructions the agent follows, not a sandbox: say so in the review form.
+
+### Scan and review findings
+
+- The upload runs the Metadata and Skills scans; fix every finding before submitting. Every plugin then goes through
+  OpenAI review, and only one review can be active per plugin.
+- Record each finding as a backlog task (`/todo-add "<finding>" --type fix`) with the finding's wording, and work it like
+  any other task. A change to the skills, a manifest or the icon needs a new version and a new archive.
+- Findings that need no change (for example a hold on a name resemblance) are answered in the portal; a rejection can be
+  appealed by replying to the rejection email. Record the answer below.
+
+### Limitations
+
+- Skills only: no MCP server, app or hook, so no review test cases, demo recording or reviewer credentials are needed, and
+  the website, support, privacy and terms URLs are optional. The optional Stop hook and scripts in `tools/` are not
+  packaged; users copy them by hand ([TOOLS.md](TOOLS.md)).
+- The skills need a Git repository with a working test command and local execution; without them they stop and say so. The
+  guide asks to contact an OpenAI partner first when a plugin's core value needs local execution or arbitrary file access,
+  which this one does: raise it with the submission if the portal flags it.
+- In `codex exec`, `/todo-*` is not a guaranteed entry point; `$todo-status` (an explicit skill mention) and plain language
+  are ([evidence](evals/codex-2026-11-07/summary.md)). Inside Codex's Windows sandbox, Git may be unable to create branches,
+  so lifecycle runs there can stop at the claim step ([evidence](evals/codex-2026-11-07/summary.md)).
+- The skills never name Claude, so the guide's request for provider-neutral wording needs no change.
+
+### Submission record
+
+One line per upload (TASK-050):
+
+`Submitted: <YYYY-MM-DD> · Path: <Claude import | native ZIP> · Reference: <portal id or URL> · Version: <x.y.z> · Source commit: <sha> · Archive SHA-256: <hash> · Status: <in review | approved | rejected: reason | blocked: reason>`
+
+Not submitted yet.
 
 ## Directory policy refusal of v0.3.0
 

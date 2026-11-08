@@ -2,7 +2,7 @@
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
 # A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W4) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
-# Usage: bash tests/run.sh      Needs bash, awk, grep and sed. Creates no files.
+# Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/tools/todo-lint.sh"
@@ -102,6 +102,36 @@ print('; '.join(e))
 PY
 )"
 if [ -z "$cxicon" ]; then ok "codex logo and composer icon are square PNGs in the plugin; no hooks, MCP or app files"; else bad "codex listing assets: $cxicon"; fi
+# FEAT-048: tests/build-codex-package.sh builds the directory ZIP from plugin/: the Codex manifest at its root, the nine
+# skills, the icon it references and the README, nothing else (no Claude manifest, scripts or credentials), byte-identical
+# on a rebuild. Built in a temporary folder that is removed again.
+zt="$(mktemp -d)"
+if bash "$root/tests/build-codex-package.sh" "$zt/a.zip" >/dev/null 2>"$zt/err" && bash "$root/tests/build-codex-package.sh" "$zt/b.zip" >/dev/null 2>&1; then
+  zbad="$(python3 - "$root/plugin" "$zt/a.zip" "$zt/b.zip" <<'PY' 2>&1
+import json, os, re, sys, zipfile
+root, a, b = sys.argv[1:]; e = []
+z = zipfile.ZipFile(a); names = z.namelist()
+want = {'.codex-plugin/plugin.json', 'README.md', 'assets/icon.png'}
+for d, _, files in os.walk(os.path.join(root, 'skills')):
+    want |= {os.path.relpath(os.path.join(d, f), root).replace(os.sep, '/') for f in files}
+if set(names) != want or len(names) != len(want): e.append(f'entries differ: extra {sorted(set(names) - want)}, missing {sorted(want - set(names))}')
+skills = {n.split('/')[1] for n in names if re.fullmatch(r'skills/[^/]+/SKILL\.md', n)}
+if len(skills) != 9: e.append(f'{len(skills)} skills, expected 9')
+m = json.loads(z.read('.codex-plugin/plugin.json'))
+if z.read('.codex-plugin/plugin.json') != open(os.path.join(root, '.codex-plugin', 'plugin.json'), 'rb').read().replace(b'\r\n', b'\n'): e.append('manifest differs from plugin/')
+for k in ('logo', 'composerIcon'):
+    if m['interface'][k][2:] not in names: e.append(f'{k} not in the ZIP')
+for n in names:
+    if re.search(r'(^|/)(\.env|auth\.json|credentials|id_rsa|[^/]*\.pem|[^/]*\.key)$', n) or n.startswith('/') or '..' in n.split('/'): e.append(f'unsafe entry {n}')
+    if n.endswith(('.md', '.json')) and re.search(rb'(sk-[A-Za-z0-9]{20}|ghp_[A-Za-z0-9]{20}|-----BEGIN [A-Z ]*PRIVATE KEY)', z.read(n)): e.append(f'{n} looks like it holds a secret')
+if z.testzip() is not None: e.append('corrupt entry')
+if open(a, 'rb').read() != open(b, 'rb').read(): e.append('a rebuild is not byte-identical')
+print('; '.join(e))
+PY
+)"
+else zbad="the build failed: $(head -3 "$zt/err")"; fi
+rm -rf "$zt"
+if [ -z "$zbad" ]; then ok "the Codex directory ZIP holds the manifest, nine skills, the icon and README only, reproducibly"; else bad "codex directory ZIP: $zbad"; fi
 
 # The report template keeps its four placeholders.
 tpl="$root/tools/template.html"

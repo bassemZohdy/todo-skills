@@ -21,6 +21,7 @@ tools/                           Optional read-only scripts users copy into thei
   todo-lint.sh todo-verify.sh todo-rtm.sh todo-report.sh todo-stop-hook.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
+  build-codex-package.sh         Builds the OpenAI Plugins Directory ZIP from plugin/ (docs/distribution.md)
   fixtures/                      Lint fixtures: ok-*.md pass, I<n>-*.md fail with I<n>, W<n>-*.md warn
   fixtures/changelog/, report/   A CHANGELOG for the lint fixtures; a hostile backlog for the report
   fixtures-rtm/                  RTM fixtures: docs-only, readme-only, both, neither, stale, duplicate, archived-ok

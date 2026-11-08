@@ -2,7 +2,7 @@
 
 The plugin is Markdown only and needs nothing installed. This repository also keeps optional, read-only helper scripts in [`tools/`](../tools/), and `/todo-init --ci` can wire a check into CI or a git hook. Nothing on this page is required: without any of it the agent checks the invariants by reading and runs the tests itself.
 
-The skills never download these scripts. Copy the ones you want into your project yourself (most projects put the lint in `.todo/`), and copy them again when you upgrade: `tests/run.sh` in this repository checks that its own `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and your copy should stay in step the same way. Every script needs only bash and standard tools (awk, grep, sed, tr), never touches the network and never edits files.
+The skills never download these scripts. Copy the ones you want into your project yourself (most projects put the lint in `.todo/`), and copy them again when you upgrade: `tests/run.sh` in this repository checks that its own `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and your copy should stay in step the same way. Every script needs only bash and standard tools (awk, grep, sed, tr), never touches the network and never edits files; `todo-replay.sh --run` also runs the Validated commands it accepts, which may do whatever your tests do.
 
 ## `todo-lint.sh`
 
@@ -71,6 +71,14 @@ bash tools/todo-report.sh < meta.txt > docs/status.html     # from the repositor
 
 Fills `template.html` (it must sit next to the script) with `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md` and the `key: value` lines of `meta.txt` (`project`, `generated`, `base`, `branch`, `mode`, `tests`, `lint`, `Definition of Done`, `claim`, `branches`, `version`; any may be left out). Text is encoded (`&` → `&amp;`, `<` → `&lt;`) so it cannot break out of the page's script blocks. It writes only to standard output and exits 1 without a `TODO.md` in the current directory. `/todo-report` does the same encoding itself when the script is absent; the skill carries the same template in `plugin/skills/todo-report/template.md`. The page's `progressLine` function, set apart by `// ---- progress` markers, computes the same line as `todo-lint.sh --progress`; `tests/run.sh` runs it under node when node is installed.
 
+## `todo-replay.sh` (optional, FEAT-059)
+
+```bash
+bash .todo/todo-replay.sh [--run] <rev> [CHANGELOG.md]       # from the repository root; todo-lint.sh must sit next to it
+```
+
+Replays the `Validated:` commands of the CHANGELOG entries added since `<rev>` (entries whose ID is not in `git show <rev>:CHANGELOG.md`), so CI re-proves what a newly landed root claimed. Without `--run` it only lists them. Each command first goes through the lint as a `Done when`: anything the lint fails (I3 vacuous or masked, I10 forbidden) or flags as an unfamiliar runner (W3) or a piped runner (W4) is printed as `REFUSED` and never run. Review those and run them yourself if they are safe. A command that runs a script (`bash <file>`, `make <target>`, `npm test`) runs whatever that file holds, which the lint does not read, so read those scripts as you read `check.sh`. No revision (an unset variable) or no new entry means nothing runs. Exit 0 when nothing was replayed or everything passed, 1 when a replayed command failed, 2 on a usage or git error, 3 when commands were refused.
+
 ## `todo-stop-hook.sh`
 
 A Claude Code Stop hook that keeps a session from ending on a corrupted backlog. Copy it next to `todo-lint.sh` (it calls the lint from its own folder) and add it to `.claude/settings.json`, using the path where you put it:
@@ -98,6 +106,8 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
    bash .todo/todo-lint.sh TODO.md CHANGELOG.md   # only when .todo/todo-lint.sh exists
    <test command>
    ```
+
+   **Optional replay** (FEAT-059, only on your yes and when you have copied `tools/todo-replay.sh` to `.todo/`): one more line, `bash .todo/todo-replay.sh --run "${TODO_REPLAY_FROM:-}"`, re-runs the Validated commands of entries added since `TODO_REPLAY_FROM`. Locally the variable is unset, so the line does nothing. In GitHub Actions, set it to `${{ github.event.before }}` on `push` (or `origin/${{ github.base_ref }}` on `pull_request`) and check out with `fetch-depth: 0`. A refused command fails the job until you review it.
 
 3. **CI**, by the first row that matches:
 

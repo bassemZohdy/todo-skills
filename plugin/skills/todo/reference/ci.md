@@ -21,6 +21,8 @@ Create `.todo/` with `mkdir -p` and write each file with the native file tools (
    ```
 
    No test command known: write only the lint line and say so.
+
+   **Optional replay** (offer only when `.todo/todo-replay.sh` exists, which the user copies from `tools/` like the lint; write only on a yes): add `bash .todo/todo-replay.sh --run "${TODO_REPLAY_FROM:-}"` as the last line, and in a GitHub workflow set `TODO_REPLAY_FROM: ${{ github.event.before }}` on push (`origin/${{ github.base_ref }}` on pull requests) with `fetch-depth: 0`. Unset, the line replays nothing. It runs a newly drained entry's `Validated:` commands only when the lint accepts each as a safe `Done when`, and shows and refuses the rest.
 3. **CI**, by the first row that matches (no git: write only `.todo/` and say CI and the hook need git):
 
    | Found | Do |

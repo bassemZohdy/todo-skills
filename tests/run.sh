@@ -2,7 +2,7 @@
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
 # A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W4) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
-# Usage: bash tests/run.sh      Needs bash, awk, grep and sed. Creates no files.
+# Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/tools/todo-lint.sh"
@@ -49,6 +49,89 @@ fi
 # The Codex manifest parses and carries the same version as the Claude plugin manifest.
 cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugin/.codex-plugin/plugin.json" | head -1)"
 if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/plugin/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
+# FEAT-048: the Codex manifest carries the public-directory listing metadata within the documented limits
+# (developers.openai.com/plugins/deploy/submission, read 2026-11-08) and declares no MCP servers, apps or hooks.
+cxbad="$(python3 - "$root/plugin/.codex-plugin/plugin.json" <<'PY' 2>&1
+import json, re, sys
+m = json.load(open(sys.argv[1], encoding='utf-8')); i = m.get('interface') or {}; e = []
+def text(k, n, d=i):
+    v = d.get(k)
+    if not isinstance(v, str) or not v.strip() or len(v) > n: e.append(f'{k}: required, at most {n} characters')
+text('displayName', 30); text('shortDescription', 30); text('longDescription', 4000); text('developerName', 80); text('category', 80)
+c = i.get('capabilities')
+if not isinstance(c, list) or len(c) > 20 or not all(isinstance(x, str) and 0 < len(x) <= 120 for x in c): e.append('capabilities: at most 20 strings of at most 120 characters')
+p = i.get('defaultPrompt', [])
+p = [p] if isinstance(p, str) else p
+if not isinstance(p, list) or len(p) > 3 or len(set(p)) != len(p) or not all(isinstance(x, str) and 0 < len(x) <= 128 and '@' not in x for x in p): e.append('defaultPrompt: at most 3 unique prompts of at most 128 characters, no @mentions')
+for k in ('websiteURL', 'supportURL', 'privacyPolicyURL', 'termsOfServiceURL'):
+    if k in i and not (isinstance(i[k], str) and i[k].startswith('https://') and len(i[k]) <= 1024): e.append(f'{k}: HTTPS, at most 1024 characters')
+b = i.get('brandColor')
+if b is not None:
+    if not (isinstance(b, str) and re.fullmatch(r'#[0-9A-Fa-f]{6}', b)): e.append('brandColor: #RRGGBB')
+    else:
+        lin = lambda v: v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+        L = sum(w * lin(int(b[k:k + 2], 16) / 255) for w, k in ((0.2126, 1), (0.7152, 3), (0.0722, 5)))
+        if 1.05 / (L + 0.05) < 2: e.append('brandColor: contrast against white below 2:1')
+if not re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)*', m.get('name', '')) or len(m['name']) > 64: e.append('name: at most 64 lowercase letters, digits and single hyphens')
+text('description', 4000, m)
+for k in ('hooks', 'mcpServers', 'apps'):
+    if k in m: e.append(f'{k}: a skills-only package declares none')
+print('; '.join(e))
+PY
+)"
+if [ -z "$cxbad" ]; then ok "codex manifest carries listing metadata within the directory limits"; else bad "codex listing metadata: $cxbad"; fi
+# FEAT-048: logo and composerIcon are ./-relative paths to square PNGs inside plugin/ (48 to 4096 px, at most 5 MiB), and
+# the package has nothing the directory refuses: no hooks, no MCP server or app configuration.
+cxicon="$(python3 - "$root/plugin" <<'PY' 2>&1
+import json, os, struct, sys
+root = os.path.realpath(sys.argv[1]); e = []
+i = json.load(open(os.path.join(root, '.codex-plugin', 'plugin.json'), encoding='utf-8')).get('interface') or {}
+for k in ('logo', 'composerIcon'):
+    p = i.get(k)
+    if not isinstance(p, str) or not p.startswith('./'): e.append(f'{k}: a ./-relative path is required'); continue
+    f = os.path.realpath(os.path.join(root, p))
+    if not f.startswith(root + os.sep) or not os.path.isfile(f): e.append(f'{k}: {p} is not a file inside plugin/'); continue
+    head = open(f, 'rb').read(24)
+    if head[:8] != b'\x89PNG\r\n\x1a\n' or head[12:16] != b'IHDR': e.append(f'{k}: {p} is not a PNG'); continue
+    w, h = struct.unpack('>II', head[16:24])
+    if w != h or not 48 <= w <= 4096 or os.path.getsize(f) > 5 * 1024 * 1024: e.append(f'{k}: {p} is {w}x{h}, {os.path.getsize(f)} bytes')
+for d, dirs, files in os.walk(root):
+    for n in dirs + files:
+        if n in ('hooks', 'hooks.json', '.mcp.json', '.app.json'): e.append(f'{os.path.relpath(os.path.join(d, n), root)} is not allowed')
+print('; '.join(e))
+PY
+)"
+if [ -z "$cxicon" ]; then ok "codex logo and composer icon are square PNGs in the plugin; no hooks, MCP or app files"; else bad "codex listing assets: $cxicon"; fi
+# FEAT-048: tests/build-codex-package.sh builds the directory ZIP from plugin/: the Codex manifest at its root, the nine
+# skills, the icon it references and the README, nothing else (no Claude manifest, scripts or credentials), byte-identical
+# on a rebuild. Built in a temporary folder that is removed again.
+zt="$(mktemp -d)"
+if bash "$root/tests/build-codex-package.sh" "$zt/a.zip" >/dev/null 2>"$zt/err" && bash "$root/tests/build-codex-package.sh" "$zt/b.zip" >/dev/null 2>&1; then
+  zbad="$(python3 - "$root/plugin" "$zt/a.zip" "$zt/b.zip" <<'PY' 2>&1
+import json, os, re, sys, zipfile
+root, a, b = sys.argv[1:]; e = []
+z = zipfile.ZipFile(a); names = z.namelist()
+want = {'.codex-plugin/plugin.json', 'README.md', 'assets/icon.png'}
+for d, _, files in os.walk(os.path.join(root, 'skills')):
+    want |= {os.path.relpath(os.path.join(d, f), root).replace(os.sep, '/') for f in files}
+if set(names) != want or len(names) != len(want): e.append(f'entries differ: extra {sorted(set(names) - want)}, missing {sorted(want - set(names))}')
+skills = {n.split('/')[1] for n in names if re.fullmatch(r'skills/[^/]+/SKILL\.md', n)}
+if len(skills) != 9: e.append(f'{len(skills)} skills, expected 9')
+m = json.loads(z.read('.codex-plugin/plugin.json'))
+if z.read('.codex-plugin/plugin.json') != open(os.path.join(root, '.codex-plugin', 'plugin.json'), 'rb').read().replace(b'\r\n', b'\n'): e.append('manifest differs from plugin/')
+for k in ('logo', 'composerIcon'):
+    if m['interface'][k][2:] not in names: e.append(f'{k} not in the ZIP')
+for n in names:
+    if re.search(r'(^|/)(\.env|auth\.json|credentials|id_rsa|[^/]*\.pem|[^/]*\.key)$', n) or n.startswith('/') or '..' in n.split('/'): e.append(f'unsafe entry {n}')
+    if n.endswith(('.md', '.json')) and re.search(rb'(sk-[A-Za-z0-9]{20}|ghp_[A-Za-z0-9]{20}|-----BEGIN [A-Z ]*PRIVATE KEY)', z.read(n)): e.append(f'{n} looks like it holds a secret')
+if z.testzip() is not None: e.append('corrupt entry')
+if open(a, 'rb').read() != open(b, 'rb').read(): e.append('a rebuild is not byte-identical')
+print('; '.join(e))
+PY
+)"
+else zbad="the build failed: $(head -3 "$zt/err")"; fi
+rm -rf "$zt"
+if [ -z "$zbad" ]; then ok "the Codex directory ZIP holds the manifest, nine skills, the icon and README only, reproducibly"; else bad "codex directory ZIP: $zbad"; fi
 
 # The report template keeps its four placeholders.
 tpl="$root/tools/template.html"

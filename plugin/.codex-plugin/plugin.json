@@ -2,10 +2,39 @@
   "name": "todo-skills",
   "version": "0.3.1",
   "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
-  "author": { "name": "Bassem Zohdy" },
+  "author": {
+    "name": "Bassem Zohdy"
+  },
   "homepage": "https://github.com/bassemZohdy/todo-skills",
   "repository": "https://github.com/bassemZohdy/todo-skills",
   "license": "MIT",
-  "keywords": ["backlog", "todo", "agent-skills", "changelog"],
-  "skills": "./skills/"
+  "keywords": [
+    "backlog",
+    "todo",
+    "agent-skills",
+    "changelog"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Todo Skills",
+    "shortDescription": "File-native backlog for agents",
+    "longDescription": "Todo Skills gives Codex a lean backlog that lives in your repository: a task tree in TODO.md, one Git branch per task, a failing test and the regression suite before anything merges, and an append-only CHANGELOG.md. Nine skills cover setting up a project (todo-init), planning and adding work (todo-plan, todo-add), building the next task end to end (todo-continue), editing tasks (todo-update), status and an offline HTML report (todo-status, todo-report) and releases (todo-release). It is for developers who want an agent's work tracked in plain files and Git history rather than in an external service.\n\nLimitations: the skills are instructions only. They work in a Git repository with a test command, run git and the project's own test, lint and build commands locally, and read and write files in the repository and its ../<repo>.todo/ worktrees. They never fetch, push, tag or publish, ship no MCP server, app or hook, and send nothing over the network. Review TODO.md like code: an agent runs the Done when commands it names.",
+    "developerName": "Bassem Zohdy",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bassemZohdy/todo-skills",
+    "supportURL": "https://github.com/bassemZohdy/todo-skills/issues",
+    "defaultPrompt": [
+      "Set up a TODO.md backlog for this repository",
+      "Add a task to the backlog for this bug",
+      "Continue with the next task in TODO.md"
+    ],
+    "brandColor": "#115E59",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  }
 }

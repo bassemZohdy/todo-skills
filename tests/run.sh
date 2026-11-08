@@ -293,9 +293,20 @@ vstrict REJECT 0 'bash tests/run.sh || true' '65 passed'
 out="$(cd "$root" && printf 'done\n' | bash "$vf" 0 'make check' 2>&1)"
 if [ "$out" = "ACCEPT" ]; then ok "verify default mode still accepts a count-less runner"; else bad "default mode changed: $out"; fi
 
-# Optional independent design review (TASK-016): documented, optional, never required.
-pl="$root/plugin/skills/todo-plan/SKILL.md"
-if grep -q 'Independent design review (optional, never a required stage)' "$pl" && grep -q 'never block a plan on it' "$pl" && grep -q 'EGM' "$pl" && grep -q 'neither bundles nor requires' "$pl"; then ok "todo-plan documents an optional fresh-context or external design review"; else bad "todo-plan design review section missing or implies it is required"; fi
+# Optional independent reviews (TASK-016 design review, FEAT-057 root review): one shared reference, optional, never
+# required, offered only for high or risky roots; the root review gets the whole root diff, the plan doc and the Ref, and
+# without a subagent tool a new-session review is offered. todo-plan and todo-continue point to it; the core lists it.
+pl="$root/plugin/skills/todo-plan/SKILL.md"; rvw="$root/plugin/skills/todo/reference/review.md"; ct="$root/plugin/skills/todo-continue/SKILL.md"
+rr_bad=""
+[ -f "$rvw" ] || rr_bad="$rr_bad review.md(missing)"
+for s in 'never a required stage' 'never block a plan on it' 'EGM' 'neither bundles nor requires' '## Design review' '## Root review' \
+         'whole root diff' 'git diff <base>...<root branch>' 'the plan doc' 'never offered for a `low` or `mid` root' 'new session'; do
+  grep -qF -- "$s" "$rvw" 2>/dev/null || rr_bad="$rr_bad review.md('$s')"
+done
+grep -qF 'reference/review.md' "$pl" || rr_bad="$rr_bad todo-plan(pointer)"
+grep -qF 'reference/review.md' "$ct" && grep -qF 'root review' "$ct" || rr_bad="$rr_bad todo-continue(pointer)"
+grep -qF '`reference/review.md`' "$root/plugin/skills/todo/SKILL.md" || rr_bad="$rr_bad core(reference table)"
+if [ -z "$rr_bad" ]; then ok "optional design and root reviews share reference/review.md, offered only for high or risky roots"; else bad "optional reviews:$rr_bad"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 # A Done when that cannot run for an environmental reason (TASK-027).
 vr="$root/plugin/skills/todo/reference/verification.md"

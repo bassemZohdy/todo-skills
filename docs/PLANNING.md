@@ -62,6 +62,10 @@ For a `high` root, or one that touches security, data migration, concurrency or 
 - **External tool:** a design-review skill or tool the project already uses runs on the same inputs instead. This repository neither bundles nor requires one.
 - Accepted findings go through `--revise`; declined or open ones are recorded under Open questions.
 
+## Root review (optional)
+
+For the same kind of root, `/todo-continue` asks once, after the root is refreshed from the base and before its last gate and drain, whether to review the whole root. A fresh-context reviewer (or a new session, without a subagent tool) gets the whole root diff (`git diff <base>...<root branch>`), the plan doc and the root's `Ref`, and returns spec compliance and quality findings. Valid findings inside the root's task line are fixed on the root branch before the drain, after which `Done when` and the regression run again. Findings outside it become `/todo-add --from <ROOT-ID>` suggestions. Declined findings go under the plan doc's Open questions. It is never required and never offered for other roots. Both reviews are described in `plugin/skills/todo/reference/review.md`.
+
 ## Lanes
 
 A **lane** is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) goes in a root's `Links:`; children inherit it, and a root without it is in lane `main`. A lane can hold one root or many. Order across lanes is expressed only with `Depends:`; work that depends on another lane's open node is not workable, and that lane stops there.

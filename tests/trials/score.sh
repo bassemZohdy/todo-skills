@@ -6,7 +6,8 @@
 # Only names listed by setup.sh are scenario folders; each is counted even if incomplete.
 #   PASS         the agent ran (exit 0, a report) and every check in assert.sh passes
 #   FAIL         the agent ran and at least one check fails
-#   INFRA_ERROR  the agent exited non-zero (for example 124, a timeout), or evidence/<id>/outcome.txt says INFRA_ERROR
+#   INFRA_ERROR  the agent exited non-zero (for example 124, a timeout), evidence/<id>/outcome.txt says INFRA_ERROR, or the
+#                verifier (assert-exec.sh) exited with anything but 0 or 1
 #                (written by whoever saw a permission denial or sandbox block)
 #   UNVERIFIED   there is no repo, or no record that an agent ran. A repo that satisfies the checks without an agent run
 #                (the read-only scenarios do) is never a PASS
@@ -67,7 +68,11 @@ for d in "$runs"/*/; do
   if [ -z "$report" ]; then
     printf '%-11s %-22s agent exit 0 but no report\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
-  out="$(bash "$here/assert-exec.sh" "$repo" "$s" 2>&1 | grep -E '^(PASS|FAIL)  ')"
+  out="$(bash "$here/assert-exec.sh" "$repo" "$s" 2>&1)"; arc=$?
+  if [ "$arc" != 0 ] && [ "$arc" != 1 ]; then   # the verifier failed or was killed: partial output never counts (FIX-041)
+    printf '%-11s %-22s verifier exit %s\n' INFRA_ERROR "$s" "$arc"; ninfra=$((ninfra + 1)); continue
+  fi
+  out="$(printf '%s\n' "$out" | grep -E '^(PASS|FAIL)  ')"
   if [ -n "$skip" ]; then
     printf '%s\n' "$out" | grep -E "^(PASS|FAIL)  .*($skip)" | sed "s/^/    SKIP /"
     out="$(printf '%s\n' "$out" | grep -Ev "^(PASS|FAIL)  .*($skip)")"
@@ -77,7 +82,7 @@ for d in "$runs"/*/; do
   if [ $((p + f)) -eq 0 ]; then
     printf '%-11s %-22s no checks ran\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
-  if [ "$f" = 0 ] && [ "$multi" != FAIL ]; then ok=$((ok + 1)); v=PASS; else nfail=$((nfail + 1)); v=FAIL; fi
+  if [ "$f" = 0 ] && [ "$arc" = 0 ] && [ "$multi" != FAIL ]; then ok=$((ok + 1)); v=PASS; else nfail=$((nfail + 1)); v=FAIL; fi
   printf '%-11s %-22s %d/%d checks\n' "$v" "$s" "$p" $((p + f))
   printf '%s\n' "$out" | grep '^FAIL' | sed 's/^FAIL  /       - /'
 done

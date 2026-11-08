@@ -36,7 +36,8 @@ printf '%s\n' "$arc" > "$ev/assert-exit.txt"
 if [ "$code" != 0 ]; then outcome=INFRA_ERROR
 elif [ ! -s "$ev/report.txt" ]; then outcome=UNVERIFIED
 elif [ "$arc" = 0 ]; then outcome=PASS
-else outcome=FAIL; fi
+elif [ "$arc" = 1 ]; then outcome=FAIL
+else outcome=INFRA_ERROR; fi   # the verifier itself failed or timed out (FIX-041)
 # a block by the sandbox or the host is not a skill failure: say INFRA_ERROR and keep the matching line as the reason
 if [ "$outcome" != PASS ] && sig="$(bash "$here/infra-signature.sh" "$ev/report.txt" "$ev/session.log")"; then
   outcome=INFRA_ERROR; printf '%s\n' "$sig" > "$ev/infra-signature.txt"

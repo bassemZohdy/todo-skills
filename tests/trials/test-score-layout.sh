@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export TRIAL_WINDOWS_ISOLATION=0   # stub-only bookkeeping test: no sandbox needed on Windows hosts
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/runs/evidence/session" "$tmp/runs/notes/repo" "$tmp/runs/happy-path" "$tmp/runs/baseline-red"
 out="$(bash "$here/score.sh" "$tmp/runs")"

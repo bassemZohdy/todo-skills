@@ -3,6 +3,7 @@
 # Usage: bash tests/trials/test-evidence-retention.sh    Works in a temporary directory that it removes at the end.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export TRIAL_WINDOWS_ISOLATION=0   # stub-only bookkeeping test: no sandbox needed on Windows hosts
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 pass=0; fail=0
 ok()  { pass=$((pass + 1)); printf 'PASS  %s\n' "$1"; }

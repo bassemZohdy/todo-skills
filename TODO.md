@@ -1,8 +1,8 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [/] **FIX-052** · P1 · low · Keep the host's Python user site out of the isolated Windows verifier
-  - Done when: a Python project test run by windows-assert-exec.sh sees no user site-packages, so a host package cannot shadow the scenario's tests; `bash tests/trials/test-windows-verifier-isolation.sh`
+- [/] **FIX-052** · P1 · low · Run Python scenario assertions in the isolated Windows verifier
+  - Done when: a Python project test passes in windows-assert-exec.sh without the host user site, and a Microsoft Store python3 alias without TRIAL_PYTHON fails closed; `bash tests/trials/test-windows-verifier-isolation.sh`
   - Links: Ref: tests/trials/windows-assert-exec.sh
   - State: attempts 0/3; baseline 136 passing; branch todo/FIX-052-hide-python-user-site-from-verifier from main; next: read docs
 - [ ] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier

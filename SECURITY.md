@@ -4,6 +4,8 @@
 
 The plugin (`plugin/`) is Markdown instructions only, plus one HTML page template embedded in a Markdown file. Optional read-only shell scripts (the lint, the stop hook, `todo-verify.sh`, `todo-rtm.sh`, `todo-report.sh`) live in `tools/` of the repository and are not part of the plugin. They are written to never touch the network, tag, push, or run destructive commands. An agent still runs the `Done when` and test commands found in a repository, so review `TODO.md` the way you review code: a task from an untrusted source can name any command. The lint rejects an obvious set (`sudo`, `rm -r`, `git push`, download-to-shell and similar); it is a safety net, not a sandbox.
 
+The trial harness in `tests/trials/` is a developer tool, not part of the plugin. `run-claude.sh` and `run-codex.sh` start a real agent with file edits accepted and shell access, so run them only in a throwaway environment. Codex's sandbox on Windows confines writes but cannot deny reads (`docs/evals/codex-2026-11-07/summary.md`), and the Linux isolation is provisional until audited (`docs/evals/codex-linux-2026-11-08/summary.md`).
+
 `/todo-init --ci` writes `.todo/check.sh`, which runs your test command in CI and in the `pre-push` hook. Review changes to it like any CI script.
 
 `/todo-report` writes `docs/status.html`, which renders text from `TODO.md` and `CHANGELOG.md` with `textContent` only and loads nothing from the network.

@@ -35,11 +35,11 @@ The marker is the status, and every command acts only as that status allows. The
 
 `[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
 
-See [docs/LIFECYCLE.md](docs/LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
+See [LIFECYCLE.md](LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
 
 ## Claims: no tree runs twice
 
-When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. A claim is a local commit. Worktrees of one repository see it at once; how it reaches other clones is left to git (push, pull request, your usual flow), and a clash shows up as a normal merge conflict.
+When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. A root you have just added and not yet committed is claimable: the claim commit carries those pending backlog edits, and if another claim wins the race (or a root with the same ID appears on the base) they stay on your branch for you to restore. A claim is a local commit. Worktrees of one repository see it at once; how it reaches other clones is left to git (push, pull request, your usual flow), and a clash shows up as a normal merge conflict.
 
 ## Verification
 
@@ -52,7 +52,7 @@ Each node: write the tests first, run `Done when` in full (target a test id or p
 
 ## Requirements traceability (optional)
 
-Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash skills/todo/scripts/todo-rtm.sh` prints the resolved location and flags stale task IDs (R1) and archived rows without verification (R2). Format and rules: `plugin/skills/todo/reference/rtm.md`.
+Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash tools/todo-rtm.sh` (an optional script from this repository, copied into your project) prints the resolved location and flags stale task IDs (R1), archived rows without verification (R2) and duplicate requirement rows (R3). Format and rules: `plugin/skills/todo/reference/rtm.md`.
 
 ## Project Definition of Done (optional)
 
@@ -66,7 +66,7 @@ The invariants I1-I10 (one active task, unique IDs, task fields, complexity and 
 bash tools/todo-lint.sh          # from the repository root
 ```
 
-Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
+Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner, W4 for a test runner piped into another command, which hides its exit status unless `pipefail` is set. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [
@@ -76,7 +76,7 @@ Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the r
 
 Use the path where you copied the script as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
 
-Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files.
+Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files. The agent trials and their harness tests are described in [trials.md](trials.md).
 
 ## Lanes and parallel work
 
@@ -115,7 +115,7 @@ This project follows [Semantic Versioning](https://semver.org/). The public inte
 - **MINOR** for a new command, flag, optional field, warning or script that existing valid files still pass.
 - **PATCH** for wording fixes, bug fixes and documentation.
 
-The version lives in `plugin/.claude-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this). Releases are cut with `/todo-release` and tagged by a person.
+The version lives in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this; Codex caches an install by version, so bump it on every release). Releases are cut with `/todo-release` and tagged by a person.
 
 ## Design rules
 

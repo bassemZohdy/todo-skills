@@ -1,6 +1,6 @@
 # Getting started
 
-A ten-minute walkthrough on a scratch project. You need an agent that loads skills (Claude Code is the one that has been tested), git, and a project with a test command.
+A ten-minute walkthrough on a scratch project. You need an agent that loads skills (Claude Code and Codex have been tested; see [agent compatibility](agent-compatibility.md)), git, and a project with a test command.
 
 ## 1. Install
 
@@ -11,6 +11,8 @@ cp -r todo-skills/plugin/skills/* ~/.claude/skills/
 ```
 
 Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills` (commands are then namespaced, for example `/todo-skills:todo-add`). Copy all nine folders; the command skills load the `todo` core skill and its `reference/` files.
+
+Codex: `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add todo-skills@todo-skills`, or copy the folders to `<project>/.agents/skills/` (Codex does not read `.claude/skills`). Start a skill with `$todo-add ...` or plain language.
 
 ## 2. Set up the backlog
 
@@ -43,7 +45,7 @@ For a bigger goal use `/todo-plan "<goal>"` instead: it writes a short plan doc,
 /todo-continue
 ```
 
-Per task, the agent: checks the tree is clean and the test suite is green (the baseline), creates the branch `todo/FIX-001-reject-expired-jwts`, marks the task `[/]`, writes the failing test first, implements, **reviews its own diff**, runs `Done when` and the full regression, commits, drains the task into `CHANGELOG.md` under `[Unreleased]`, and refreshes from the base branch. A root task is merged into `main` only if you add `--merge`; otherwise it prints the two commands and stops. Run `/clear` and `/todo-continue` again for the next one.
+Per task, the agent: checks the tree is clean (a root you have just added and not committed is fine: the first claim commits it with the other pending backlog edits) and the test suite is green (the baseline), creates the branch `todo/FIX-001-reject-expired-jwts`, marks the task `[/]`, writes the failing test first, implements, **reviews its own diff**, runs `Done when` and the full regression, commits, drains the task into `CHANGELOG.md` under `[Unreleased]`, and refreshes from the base branch. A root task is merged into `main` only if you add `--merge`; otherwise it prints the two commands and stops. Run `/clear` and `/todo-continue` again for the next one.
 
 If a test fails it makes at most three diagnosed attempts, then marks the task `[!]` with the failing command, the error and what you need to do. Unblock it with `/todo-update FIX-001 --status ready`.
 
@@ -68,7 +70,7 @@ Give roots a lane (`Links: Lane: api`) and run `/todo-continue --all-lanes --mer
 
 ## When something looks wrong
 
-- `bash tools/todo-lint.sh` from the repository root checks the backlog rules and tells you the line.
+- The backlog lint checks the rules and tells you the line. It is an optional script from this repository, not part of the plugin: copy `tools/todo-lint.sh` into your project (for example as `.todo/todo-lint.sh`) and run `bash .todo/todo-lint.sh`.
 - A session that died mid-task is recovered by the next `/todo-continue`: it finishes an unmerged `[x]` branch or resumes the `[/]` one first.
 - Not in a git repository? Everything still works, without branches or commits, after a one-time warning.
 

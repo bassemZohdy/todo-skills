@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Checks that the lane evidence tells overlapping lane runs from sequential ones and from no worktree use at all,
+# Checks that the lane evidence records worktree use without inferring worker concurrency,
 # without an agent: it drives git by hand in the `lanes` scenario's repo, whose hooks write the event log.
 # Usage: bash tests/trials/test-lane-evidence.sh    Works in a temporary directory that it removes at the end.
 set -u
@@ -25,7 +25,7 @@ step "$tmp/over.todo/a" a1; step "$tmp/over.todo/b" b1; step "$tmp/over.todo/a" 
 g -C "$tmp/over" worktree remove --force "$tmp/over.todo/a"; g -C "$tmp/over" worktree remove --force "$tmp/over.todo/b"
 [ "$(g -C "$tmp/over" worktree list | wc -l | tr -d ' ')" = 1 ] && ok "overlap case ends with a clean worktree list" || bad "overlap case worktree list"
 [ "$(ev "$tmp/over" worktrees)" = 2 ] && ok "overlapping lanes: 2 worktrees seen after both were removed" || bad "overlapping: worktrees=$(ev "$tmp/over" worktrees)"
-[ "$(ev "$tmp/over" execution)" = overlapping ] && ok "interleaved commits in two worktrees: overlapping" || bad "overlapping: execution=$(ev "$tmp/over" execution)"
+[ "$(ev "$tmp/over" execution)" = unverified ] && ok "interleaved commits in two worktrees: unverified" || bad "overlapping: execution=$(ev "$tmp/over" execution)"
 
 # 2. sequential: lane a finishes before lane b starts
 fresh seq || exit 1
@@ -35,7 +35,7 @@ g -C "$tmp/seq" worktree add -q "$tmp/seq.todo/b" -b todo/b >/dev/null 2>&1
 step "$tmp/seq.todo/b" b1; step "$tmp/seq.todo/b" b2
 g -C "$tmp/seq" worktree remove --force "$tmp/seq.todo/a"; g -C "$tmp/seq" worktree remove --force "$tmp/seq.todo/b"
 [ "$(ev "$tmp/seq" worktrees)" = 2 ] && ok "sequential lanes: 2 worktrees seen" || bad "sequential: worktrees=$(ev "$tmp/seq" worktrees)"
-[ "$(ev "$tmp/seq" execution)" = sequential ] && ok "one lane finished before the next began: sequential" || bad "sequential: execution=$(ev "$tmp/seq" execution)"
+[ "$(ev "$tmp/seq" execution)" = unverified ] && ok "worktree event order alone: unverified" || bad "sequential: execution=$(ev "$tmp/seq" execution)"
 
 # 3. no worktree: branches checked out in the main checkout only; the final worktree count looks identical
 fresh none || exit 1

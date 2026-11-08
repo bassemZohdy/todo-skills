@@ -336,7 +336,7 @@ XML
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac
 # The lane scenarios log every checkout and commit with its worktree and a nanosecond time to <git-common-dir>/trial-events,
-# so lane-evidence.sh can tell separate worktrees and overlapping lanes from sequential work (the agent's report is not evidence).
+# so lane-evidence.sh can record separate worktrees (these events cannot prove worker concurrency).
 case "$scenario" in lanes|multi-module)
   cat > .git/hooks/post-checkout <<'HOOK'
 #!/bin/sh

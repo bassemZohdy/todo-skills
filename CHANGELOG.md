@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TASK-054** (docs): Record the update review (`docs/evals/update-review.md`: findings F1-F9 with evidence, existing coverage, the lean-prompt lint experiment and rulings) and guard README against drift: `tests/run.sh` checks that README's versions equal both manifests and the newest CHANGELOG heading, that the install source holds the nine skills, that relative links resolve, and that README names each agent with recorded trials and its evidence. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/DEVELOPMENT.md, docs/evals/update-review.md.
 - **TASK-050** (docs): Record the OpenAI Plugins Directory package for 0.4.0: the Claude import and native Codex archives were built and checked, and the submission is recorded as blocked on the owner, whose OpenAI account the portal upload needs. Ref: docs/distribution.md. Validated: `test -f docs/distribution.md`.
 
 ### Fixed

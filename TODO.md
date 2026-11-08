@@ -1,10 +1,6 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **TASK-054** · P0 · low · Record the update review and guard the README version, install path and agent evidence against drift
-  - Done when: README's version equals both plugin manifests and the newest CHANGELOG heading, the README install path exists, and README names each evidenced agent with its evidence file; `bash tests/run.sh`
-  - Links: Ref: docs/evals/update-review.md
-  - State: branch todo/TASK-054-update-review-drift-guards from main; next: start TASK-054
 - [ ] **FEAT-055** · P0 · high · Add an arm-agnostic agent benchmark with six scenarios, hidden acceptance tests and a trusted verifier
   - Done when: a stub agent on every scenario and arm gets PASS, FAIL, INFRA_ERROR or UNVERIFIED with hashed evidence and one CSV row, and an agent that edits the hidden tests or verifier cannot change its verdict; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Ref: docs/evals/update-review.md

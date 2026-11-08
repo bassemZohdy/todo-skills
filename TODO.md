@@ -5,7 +5,7 @@
   - Done when: todo-lint.sh --progress, /todo-status and docs/status.html use one progress definition and agree on the fixture; `bash tests/run.sh`
   - Links: Ref: docs/REFERENCE.md#issue-reconciliation
   - State: branch todo/FEAT-042-show-backlog-progress-bars from main; next: build children
-  - [ ] **FEAT-042.1** · mid · Print the overall progress line with todo-lint.sh --progress
+  - [x] **FEAT-042.1** · mid · Print the overall progress line with todo-lint.sh --progress
     - Done when: --progress prints the expected line for tests/fixtures/progress and keeps the lint exit code; `bash tests/run.sh`
   - [ ] **FEAT-042.2** · low · Show per-root, per-lane and overall progress bars in /todo-status
     - Done when: the todo-status skill defines the bars, the blocked cells and the drained count; `bash tests/run.sh`

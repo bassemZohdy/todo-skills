@@ -178,6 +178,16 @@ if grep -q '<file>:<line>: <name>' "$dd" && grep -q 'grep -rnF' "$dd" && grep -q
 drift="$(grep -rnF -- 'todo-lint.sh' "$root/README.md" "$root/docs" 2>/dev/null | head -1)"
 if printf '%s' "$drift" | grep -Eq '^[^:]+:[0-9]+:'; then ok "the documented grep -rnF form yields file:line hits"; else bad "grep -rnF drift form gave no file:line: $drift"; fi
 
+# Progress line (FEAT-042): leaves are the unit, roots drained into [Unreleased] count as done, 10 cells (# done, ! blocked).
+pf="$fx/progress"
+want='Progress: [######!---] 6/9 leaves · 1 active · 1 blocked · 2 roots open · 2 drained in [Unreleased]'
+out="$(cd "$pf" && bash "$lint" --progress TODO.md CHANGELOG.md 2>&1)"; rc=$?
+if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q '^OK: invariants' && printf '%s\n' "$out" | grep -qxF "$want"; then ok "lint --progress prints the progress line"; else bad "lint --progress: expected rc=0 and '$want', got rc=$rc: $out"; fi
+out="$(bash "$lint" --progress "$fx/I1-two-active.md" "$changelog" 2>&1)"; rc=$?
+if [ "$rc" -eq 1 ] && printf '%s\n' "$out" | grep -q '^FAIL I1:' && printf '%s\n' "$out" | grep -q '^Progress: \['; then ok "lint --progress keeps the lint exit code"; else bad "lint --progress on an invalid backlog: rc=$rc: $out"; fi
+out="$(bash "$lint" --progress "$fx/ok-valid.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"
+if printf '%s\n' "$out" | grep -q '^Progress: \[.*\] [0-9]*/[0-9]* leaves .* 0 drained in \[Unreleased\]$'; then ok "lint --progress works without a CHANGELOG.md"; else bad "lint --progress without CHANGELOG.md: $out"; fi
+
 # Stop hook: valid backlog allows the stop (no output).
 out="$(printf '{"stop_hook_active": false}' | TODO_FILE="$fx/ok-valid.md" CHANGELOG_FILE="$changelog" bash "$hook")"
 if [ -z "$out" ]; then ok "hook allows stop on a valid backlog"; else bad "hook printed output on a valid backlog: $out"; fi

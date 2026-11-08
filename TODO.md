@@ -8,6 +8,7 @@
 - [ ] **TASK-049** · P1 · low · Document OpenAI Plugins Directory submission and security disclosures
   - Done when: docs/distribution.md records packaging, developer verification, permissions, skills-only limitations, portal checks and how to handle review findings; `test -f docs/distribution.md`; `bash tests/run.sh`
   - Links: Ref: docs/distribution.md · Depends: FEAT-048
+  - State: branch todo/TASK-049-document-openai-directory-submission from main; next: start TASK-049
 - [ ] **TASK-046** · P2 · mid · Publish durable, checksummed evidence for FIX-035 to FIX-041 and verify it in CI
   - Done when: docs/evals holds the evidence with SHA256SUMS and the Ubuntu and macOS CI jobs run its checker; `bash tests/trials/test-fix-evidence.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-08/ci-verification.md

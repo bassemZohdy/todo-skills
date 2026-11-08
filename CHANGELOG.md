@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-08
+
 ### Added
 
 - **FEAT-060** · Lint warning W5: an open `high` node, or one whose title names a security subject, warns when its criteria name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid); a wording heuristic that never changes the exit code, documented with guidance to add the case as a criterion or a child node. Validated: `bash tests/run.sh`
@@ -166,7 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...v0.3.0

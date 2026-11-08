@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier
+- [/] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier
   - Done when: every scenario is scored PASS, FAIL or INFRA_ERROR with its cause recorded, assertions ran through windows-assert-exec.sh, and the published evidence passes its checker; `bash tests/trials/test-windows-codex-evidence.sh`
   - Links: Ref: docs/evals/fix-041.md
-  - State: branch todo/TASK-045-repeat-windows-codex-batch from main; next: start TASK-045
+  - State: attempts 0/3; baseline 136 passing; branch todo/TASK-045-repeat-windows-codex-batch from main; next: read docs
 - [ ] **FEAT-048** · P1 · mid · Prepare the existing skills-only Codex plugin for OpenAI public-directory submission
   - Done when: the native Codex package includes valid public listing metadata and assets without MCP, hooks or duplicated skills; `bash tests/run.sh`
   - Links: Ref: docs/distribution.md

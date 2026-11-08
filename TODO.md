@@ -1,10 +1,10 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **FIX-051** · P1 · low · Keep the lane runner's controller clock sub-second on macOS bash 3.2
+- [/] **FIX-051** · P1 · low · Keep the lane runner's controller clock sub-second on macOS bash 3.2
   - Done when: a stubbed sequential lanes run without EPOCHREALTIME still records both workers' activity and reads as sequential; `bash tests/trials/test-lane-activity.sh`
   - Links: Ref: tests/trials/run-codex-lanes.sh
-  - State: branch todo/FIX-051-keep-lane-clock-sub-second from main; next: start FIX-051
+  - State: attempts 0/3; baseline 136 passing; branch todo/FIX-051-keep-lane-clock-sub-second from main; next: read docs
 - [ ] **TASK-045** · P1 · mid · Repeat the Windows Codex lifecycle batch with the default isolated verifier
   - Done when: every scenario is scored PASS, FAIL or INFRA_ERROR with its cause recorded, assertions ran through windows-assert-exec.sh, and the published evidence passes its checker; `bash tests/trials/test-windows-codex-evidence.sh`
   - Links: Ref: docs/evals/fix-041.md

@@ -203,5 +203,5 @@ The version lives in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plug
 
 ## Issue reconciliation
 
-- [Issue #11](https://github.com/bassemZohdy/todo-skills/issues/11) asks for the TASK-007 submission date and reference. Both are recorded in [distribution.md](distribution.md); TASK-007 is archived in CHANGELOG.md. Recommend closing the issue as satisfied; the directory's automatic review remains pending.
+- [Issue #11](https://github.com/bassemZohdy/todo-skills/issues/11) asks for the TASK-007 submission date and reference. Both are recorded in [distribution.md](distribution.md); TASK-007 is archived in CHANGELOG.md. Closed as satisfied. Review comments from the directory become new backlog tasks when they arrive.
 - [Issue #5](https://github.com/bassemZohdy/todo-skills/issues/5) proposed progress bars in the backlog. Decided and built as FEAT-042: the bars appear only in the read-only views (`todo-lint.sh --progress`, `/todo-status` and the `docs/status.html` KPIs), and progress is never written to `TODO.md`. The format, I6 and the invariants are unchanged, and no new invariant is added. Progress counts leaves; `!` cells mark blocked leaves; the overall line also counts the roots drained into `[Unreleased]`. The definition is in [TOOLS.md](TOOLS.md#todo-lintsh).

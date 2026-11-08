@@ -3,6 +3,9 @@
 set -u
 repo="${1:?repository}"; scenario="${2:?scenario}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ "${TRIAL_WINDOWS_ISOLATION:-0}" = 1 ]; then
+  exec bash "$here/windows-assert-exec.sh" "$repo" "$scenario"
+fi
 if [ "${TRIAL_LINUX_ISOLATION:-0}" != 1 ]; then
   exec bash "$here/assert.sh" "$repo" "$scenario"
 fi

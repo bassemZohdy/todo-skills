@@ -24,6 +24,6 @@ jobs:
         # the locally built todo-codex-linux image; they are run by hand
         run: |
           for t in tests/trials/test-*.sh; do
-            case "$t" in *test-codex-isolation.sh|*test-codex-invocation.sh|*test-linux-boundary.sh) continue ;; esac
+            case "$t" in *test-codex-isolation.sh|*test-codex-invocation.sh|*test-linux-boundary.sh|*test-windows-verifier-isolation.sh) continue ;; esac
             bash "$t" || exit 1
           done

@@ -1,0 +1,31 @@
+name: Windows verifier isolation
+on:
+  push:
+    branches: [todo/FIX-041-isolate-native-windows]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned Codex CLI
+        shell: pwsh
+        run: npm install --global @openai/codex@0.167.0
+      - name: Provision sandbox on disposable runner
+        shell: pwsh
+        run: |
+          codex sandbox setup --elevated --current-user
+          if ($LASTEXITCODE -ne 0) { throw "Provisioning failed: $LASTEXITCODE" }
+      - name: Test the actual verifier with dummy sentinels
+        shell: pwsh
+        run: |
+          & "$env:ProgramFiles/Git/bin/bash.exe" tests/trials/test-windows-verifier-isolation.sh
+          if ($LASTEXITCODE -ne 0) { throw "Verifier boundary failed: $LASTEXITCODE" }

@@ -1,0 +1,177 @@
+{
+  "agent": "codex-cli 0.167.0",
+  "model": "gpt-6.1-terra",
+  "project_commit": "3a8b215ef3fc1b06ec2759d700151ee944000043",
+  "working_tree_change": "tests/run.sh CRLF comparison fix",
+  "trust": "provisional",
+  "scenarios": [
+    {
+      "scenario": "happy-path",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 12,
+      "assertions_failed": 0,
+      "session_id": "01a1b862-1dc1-7a82-aa33-2a0196a5327d",
+      "session_ids": [
+        "01a1b862-1dc1-7a82-aa33-2a0196a5327d"
+      ],
+      "initial_commit": "abca5f0bb16fb828606eaabfc422e3143f73b5b5",
+      "log_created_utc": "2026-11-07T23:39:59.333445+00:00",
+      "log_modified_utc": "2026-11-07T23:41:16.779362+00:00"
+    },
+    {
+      "scenario": "baseline-red",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 10,
+      "assertions_failed": 0,
+      "session_id": "01a1b864-1cac-7473-8fd1-fbe18d66c7c6",
+      "session_ids": [
+        "01a1b864-1cac-7473-8fd1-fbe18d66c7c6"
+      ],
+      "initial_commit": "12aedc7df8b1abde0ad3944fb081404da9552cea",
+      "log_created_utc": "2026-11-07T23:42:10.359696+00:00",
+      "log_modified_utc": "2026-11-07T23:42:31.066664+00:00"
+    },
+    {
+      "scenario": "interrupted-merge",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 16,
+      "assertions_failed": 0,
+      "session_id": "01a1b864-7ca4-7e00-97b0-3d7532f45a34",
+      "session_ids": [
+        "01a1b864-7ca4-7e00-97b0-3d7532f45a34"
+      ],
+      "initial_commit": "dd0e9ade74b5b1948c76db45a50efe9c38e1207c",
+      "log_created_utc": "2026-11-07T23:42:34.758420+00:00",
+      "log_modified_utc": "2026-11-07T23:43:00.220588+00:00"
+    },
+    {
+      "scenario": "race-claim-conflict",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 13,
+      "assertions_failed": 0,
+      "session_id": "01a1b857-db88-7560-8133-7b63dd77b891",
+      "session_ids": [
+        "01a1b857-db88-7560-8133-7b63dd77b891"
+      ],
+      "initial_commit": "950698ffdcb45148ddccde660e327c3734e55728",
+      "log_created_utc": "2026-11-07T23:28:47.127306+00:00",
+      "log_modified_utc": "2026-11-07T23:29:48.070823+00:00"
+    },
+    {
+      "scenario": "ts-lifecycle",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 13,
+      "assertions_failed": 0,
+      "session_id": "01a1b85c-bb89-7d92-bf2d-cf6e22a60758",
+      "session_ids": [
+        "01a1b85a-5327-7731-9d2a-8ed66dfba64c",
+        "01a1b85b-93f9-7a23-95b9-0ac7fe4331e9",
+        "01a1b85c-bb89-7d92-bf2d-cf6e22a60758"
+      ],
+      "initial_commit": "2118f7e56198020d781e3a3842cd1ac16e33501e",
+      "log_created_utc": "2026-11-07T23:34:07.041965+00:00",
+      "log_modified_utc": "2026-11-07T23:35:05.390819+00:00"
+    },
+    {
+      "scenario": "java-lifecycle",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 13,
+      "assertions_failed": 0,
+      "session_id": "01a1b860-03e2-7bc3-9fca-8c9686b219ed",
+      "session_ids": [
+        "01a1b85c-a77d-74f2-9f59-28a7f019a434",
+        "01a1b85e-607a-7281-9876-67f4ecc49fd9",
+        "01a1b860-03e2-7bc3-9fca-8c9686b219ed"
+      ],
+      "initial_commit": "e1644d4f37b235dcb1b825d4443cbedf03d1c809",
+      "log_created_utc": "2026-11-07T23:37:42.125122+00:00",
+      "log_modified_utc": "2026-11-07T23:39:05.524153+00:00"
+    },
+    {
+      "scenario": "multi-module",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 15,
+      "assertions_failed": 0,
+      "session_id": "01a1b85c-6050-7a92-99ea-bd865e85a5a2",
+      "session_ids": [
+        "01a1b85c-6050-7a92-99ea-bd865e85a5a2"
+      ],
+      "initial_commit": "eaa86022ca7d84eb8619e7a63ac09c633995b9b2",
+      "log_created_utc": "2026-11-07T23:33:43.850122+00:00",
+      "log_modified_utc": "2026-11-07T23:39:03.245897+00:00"
+    },
+    {
+      "scenario": "ci-local",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 13,
+      "assertions_failed": 0,
+      "session_id": "01a1b858-d650-78b1-b1f9-2d2642252ef9",
+      "session_ids": [
+        "01a1b858-d650-78b1-b1f9-2d2642252ef9"
+      ],
+      "initial_commit": "48386852a4ee501cb534485a54f7bb1eb446917e",
+      "log_created_utc": "2026-11-07T23:29:51.403737+00:00",
+      "log_modified_utc": "2026-11-07T23:30:38.145728+00:00"
+    }
+  ],
+  "installation_trials": [
+    {
+      "mode": "without-tools",
+      "outcome": "PASS",
+      "assertions_passed": 12,
+      "assertions_failed": 0
+    },
+    {
+      "mode": "with-tools-lf-retry",
+      "outcome": "PASS",
+      "assertions_passed": 12,
+      "assertions_failed": 0
+    },
+    {
+      "mode": "with-tools-crlf-initial",
+      "outcome": "INFRA_ERROR",
+      "reason": "copied CRLF shell script failed in Linux"
+    }
+  ],
+  "representative_project": {
+    "repository": "https://github.com/bassemZohdy/eval-skills",
+    "source_commit": "1d4040b6584c94ae7143534911835f5b9053d3de",
+    "scratch_merge_commit": "ceb81962dea68bc980b6420e4772f43ef2a5b2c3",
+    "feature": "List the 14 managed synchronization targets without changing files",
+    "outcome": "PASS_WITH_WORKAROUND",
+    "initial_regression": {
+      "tests": 244,
+      "skipped": 4,
+      "exit": 0
+    },
+    "final_regression": {
+      "tests": 246,
+      "skipped": 4,
+      "exit": 0
+    },
+    "independent_behavior_check_exit": 0,
+    "legacy_backlog_blob": "300227f640007c4da8dc3ae69cd7092b4cd198b1",
+    "sessions": {
+      "init": "01a1b869-d3ed-7df1-b297-04a52d9bc7ca",
+      "add": "01a1b86a-b47c-7463-ba8e-dc4e612332b2",
+      "continue": "01a1b86b-84ae-7b53-83c7-9cb4808622f8",
+      "continue-retry": "01a1b86c-2eb9-7143-9a15-684f5e3aee86"
+    }
+  }
+}

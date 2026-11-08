@@ -63,8 +63,8 @@ if [ -f "$root/plugin/.claude-plugin/plugin.json" ] && grep -q '"source": "./plu
 words="$(sed '/^```/,/^```/d' "$root/plugin/README.md" 2>/dev/null | wc -w)"
 if [ "${words:-0}" -ge 40 ]; then ok "plugin README has $words words"; else bad "plugin/README.md is missing or has fewer than 40 words"; fi
 # The report template embedded in the skill (Markdown) equals tools/template.html.
-emb="$(awk '/^````html$/{f=1;next} /^````$/{f=0} f' "$root/plugin/skills/todo-report/template.md")"
-if [ "$emb" = "$(cat "$root/tools/template.html")" ]; then ok "embedded report template equals tools/template.html"; else bad "plugin/skills/todo-report/template.md differs from tools/template.html: regenerate it"; fi
+emb="$(awk '{ sub(/\r$/, "") } /^````html$/{f=1;next} /^````$/{f=0} f' "$root/plugin/skills/todo-report/template.md")"
+if [ "$emb" = "$(sed 's/\r$//' "$root/tools/template.html")" ]; then ok "embedded report template equals tools/template.html"; else bad "plugin/skills/todo-report/template.md differs from tools/template.html: regenerate it"; fi
 
 # Every skill folder has a SKILL.md whose name matches the folder, and the core lists every command skill.
 for d in "$root"/plugin/skills/*/; do

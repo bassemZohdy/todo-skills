@@ -1,0 +1,13 @@
+`/todo-init --ci` completed. The backlog is empty, and the local check passed.
+
+- **Git:** repository on base branch `main`. The tree was clean before setup; `.todo/check.sh` is now untracked.
+- **Runtime and tests:** Python 3; package manager not identified. The test command is `python3 -m unittest discover -s tests`, from the `Tests:` sentence in [README.md](/work/README.md). It passed one test.
+- **Documents:** README.md, TODO.md and CHANGELOG.md exist; `docs/` is missing. No Definition of Done checklist was found.
+- **Tree and invariants:** empty tree; no active or blocked nodes. No invariant violations found by inspection.
+- **CI:** no CI configuration or GitHub origin was found, so the local fallback was installed. [.todo/check.sh](/work/.todo/check.sh) and the executable `.git/hooks/pre-push` hook were created. No CI test command exists to compare.
+- **Lint:** `.todo/todo-lint.sh` is missing, so the check currently runs tests only. To enable lint, save `tools/todo-lint.sh` from the [todo-skills repository](https://github.com/bassemZohdy/todo-skills) as `.todo/todo-lint.sh`, then rerun `/todo-init --ci`.
+- **Next step:** commit `.todo/` yourself on the base branch or through a pull request. The hook is local and is not versioned.
+
+Ambiguities and resolutions:
+
+- The init skill says, **“If README does not state the command after `Tests:` (on its own line or in a sentence), offer to add a `Tests:` line”**, while the core describes **“the README `Tests:` line.”** The README already states the command after `Tests:` in a sentence, so I treated that as satisfying the init instruction and did not add a duplicate line.

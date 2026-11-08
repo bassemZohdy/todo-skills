@@ -1,0 +1,17 @@
+STATUS
+## main
+HISTORY
+* commit 771aa8ddd58f3a376aef1cebdde886dbd46fb190 (HEAD -> main)
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:32:40 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:32:40 2026 +0400
+  
+      init java project
+BRANCHES
+* main 771aa8d init java project
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/java-lifecycle/repo
+HEAD 771aa8ddd58f3a376aef1cebdde886dbd46fb190
+branch refs/heads/main
+

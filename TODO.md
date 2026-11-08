@@ -1,23 +1,21 @@
 # Active Backlog
 
 ## 🌳 Task Tree
-- [ ] **TASK-028** · P0 · mid · Validate Codex Git lifecycle in an isolated WSL2 or Linux runner
-  - Done when: fresh Codex completes happy-path with branch, implementation, checks and merge, or records a reproducible infrastructure blocker; `bash tests/trials/test-codex-evidence.sh`
-  - Links: Ref: docs/evals/codex-2026-11-07/summary.md
-- [ ] **TASK-029** · P0 · mid · Re-run the six previously blocked Codex scenarios and publish independent verdicts
-  - Done when: all six scenarios have fresh execution logs, verifier results, exit codes, hashes and explicit PASS/FAIL/INFRA_ERROR/UNVERIFIED verdicts without silent skips; `bash tests/trials/test-codex-evidence.sh`
-  - Links: Ref: docs/evals/codex-2026-11-07/summary.md · Depends: TASK-028
-- [ ] **TASK-030** · P1 · mid · Independently validate evaluation evidence using a separate CI runner
-  - Done when: a CI verification run checks pinned source, assertion logs and evidence hashes without giving the tested agent write access to the verifier, and records the result; `bash tests/run.sh`
-  - Links: Ref: docs/trials.md
-- [ ] **TASK-031** · P1 · low · Trial clean Markdown-only plugin installation with and without optional tools
-  - Done when: a fresh install discovers all nine skills, documents optional-tool setup and completes a basic task with the expected verification behavior; `bash tests/run.sh`
-  - Links: Ref: docs/agent-compatibility.md
-- [ ] **TASK-032** · P1 · mid · Run a reproducible end-to-end trial on a representative existing project
-  - Done when: a fresh agent completes a scoped feature in a non-fixture project and records regression results, Git history, independent assertions and limitations; `test -f docs/trials.md`; `bash tests/run.sh`
-  - Links: Ref: docs/trials.md
-- [ ] **TASK-033** · P2 · low · Reconcile README and evaluation reports with current verified support
-  - Done when: README, docs/trials.md, docs/agent-compatibility.md and docs/COMPARISON.md consistently distinguish passed trials from infrastructure errors and historical scores; `bash tests/run.sh`
-  - Links: Ref: docs/agent-compatibility.md · Depends: TASK-029
-- [ ] **TASK-034** · P2 · low · Reconcile open GitHub issues with the completed backlog
-  - Done when: issue #11 is checked against its recorded completion and issue #5 has a documented keep-or-close decision without adding redundant progress state; `test -f docs/REFERENCE.md`
+- [ ] **FIX-035** · P0 · high · Start a new uncommitted root on the base without losing backlog edits or racing another claim
+  - Done when: a root added by todo-add is claimed from the base without a separate backlog commit, and competing claims remain protected; `bash tests/trials/test-pending-root.sh`
+  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
+- [ ] **FIX-036** · P1 · high · Distinguish concurrent lane execution from overlapping worktree lifetimes
+  - Done when: interleaved sequential worktree events do not claim parallel agents, and verified concurrent workers are distinguishable; `bash tests/trials/test-lane-concurrency.sh`
+  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
+- [ ] **FIX-037** · P1 · mid · Exclude a batch evidence folder from the trial scenario score
+  - Done when: score.sh counts every scenario but does not count the batch evidence directory as an extra scenario; `bash tests/trials/test-score-layout.sh`
+  - Links: Ref: tests/trials/README.md
+- [ ] **FIX-039** · P1 · mid · Run multi-node Codex trials with a fresh process for every skill invocation
+  - Done when: TypeScript and Java trials retain the exact generated prompt and independent evidence for distinct sessions through root completion; `bash tests/trials/test-codex-fresh-invocations.sh`
+  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
+- [ ] **TASK-040** · P1 · high · Audit Linux trial isolation against read and write boundary escapes
+  - Done when: independent probes exercise the login, evaluator, evidence, scratch Git and network boundaries and record their limitations; `bash tests/trials/test-linux-boundary.sh`
+  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md
+- [ ] **FIX-038** · P2 · mid · Keep optional shell tools usable when installed from a Windows checkout into Linux
+  - Done when: a copied optional lint script runs under Linux after a Windows checkout and retains equivalent lint behavior; `bash tests/trials/test-shell-line-endings.sh`
+  - Links: Ref: docs/evals/codex-linux-2026-11-08/summary.md

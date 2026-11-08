@@ -1,0 +1,65 @@
+STATUS
+## main
+HISTORY
+*   commit 41fe630da63bc5fab402d4a464ee71aa3d50dfe4 (HEAD -> main)
+|\  Merge: 13d24cd d1fca15
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:41:08 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:41:08 2026 +0000
+| | 
+| |     Merge FEAT-001 into main
+| | 
+| * commit d1fca1588d0dbef16924ca5f9f47d610ec1507ae
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:41:07 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:41:07 2026 +0000
+| | 
+| |     chore(backlog): drain FEAT-001
+| |     
+| |     Refs: FEAT-001
+| | 
+| * commit e66c152728a100cd0320c3e1abce48461e406eac
+| | Author:     t <t@t>
+| | AuthorDate: Sat Nov 7 23:40:54 2026 +0000
+| | Commit:     t <t@t>
+| | CommitDate: Sat Nov 7 23:40:54 2026 +0000
+| | 
+| |     feat(calc): add subtract
+| |     
+| |     Refs: FEAT-001
+| |     Red: AttributeError: module calc has no attribute subtract
+| |     Reviewed: self, 0 findings fixed
+| |     Added tests/__init__.py to resolve the specified test path.
+| | 
+| * commit 5065dd8a41e8ce10344478da5e7d9bf57faa8d54
+|/  Author:     t <t@t>
+|   AuthorDate: Sat Nov 7 23:40:33 2026 +0000
+|   Commit:     t <t@t>
+|   CommitDate: Sat Nov 7 23:40:33 2026 +0000
+|   
+|       chore(backlog): start FEAT-001
+| 
+* commit 13d24cdec3cdaa5f28def20c26966a0b51e9cbc0
+| Author:     t <t@t>
+| AuthorDate: Sat Nov 7 23:40:24 2026 +0000
+| Commit:     t <t@t>
+| CommitDate: Sat Nov 7 23:40:24 2026 +0000
+| 
+|     chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+| 
+* commit abca5f0bb16fb828606eaabfc422e3143f73b5b5
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:39:59 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:39:59 2026 +0400
+  
+      init with one free root
+BRANCHES
+* main 41fe630 Merge FEAT-001 into main
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/happy-path-final/repo
+HEAD 41fe630da63bc5fab402d4a464ee71aa3d50dfe4
+branch refs/heads/main
+

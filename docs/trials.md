@@ -53,9 +53,13 @@ Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0,
 | `baseline-red`, `interrupted-merge` | Pass (10/10, 16/16) |
 | `happy-path`, `race-claim-conflict`, `ts-lifecycle`, `java-lifecycle`, `multi-module`, `ci-local` | INFRA_ERROR: the sandbox blocked Git branch creation, Node child processes or `.git/hooks`; the cause is recorded per run and none is counted as a skill failure |
 
+### Linux Codex runs (2026-11-08)
+
+Fresh Codex CLI 0.167.0 sessions using `gpt-6.1-terra` in Linux containers passed all eight scenarios (105/105 final assertions). TypeScript and Java used a fresh session per node. The multi-module lanes ran sequentially; the event heuristic's `overlapping` output is not proof of concurrent agents. Clean installations with and without optional tools passed, and a scratch clone of an existing project completed a feature after an explicit backlog-commit workaround. Results are provisional because the sandbox boundary has not had a full adversarial audit. Prompts, logs, exit codes, Git state, failures and checksums are in [the Linux evidence](evals/codex-linux-2026-11-08/summary.md); the [independent CI verification](evals/codex-linux-2026-11-08/ci-verification.md) checked the retained evidence on Ubuntu and macOS.
+
 ### Limits of the earlier by-hand runs
 
-- The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above supersede them for Claude Code; Codex still has no recorded run.
+- The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.
 - The Python scenarios (`interrupted-merge`, `baseline-red`, and the others listed above) remain the evidence for resume and regression-failure behaviour; the three new scenarios have no red-baseline or interrupted-run variant yet.
 - Parallel lanes ran sequentially by one executor (the documented no-subagent fallback), so concurrency itself was not exercised.
 - Slips made during the runs and corrected before the commit: a Java test file was first named `SubtractTestTest` (fixed and amended so the `Done when` id `SubtractTest` is the one that ran); the multi-module claim recorded `baseline 1 passing` although the reactor has 2 tests (not corrected in the scratch repo).

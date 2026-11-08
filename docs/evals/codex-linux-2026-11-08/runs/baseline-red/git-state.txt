@@ -1,0 +1,17 @@
+STATUS
+## main
+HISTORY
+* commit 12aedc7df8b1abde0ad3944fb081404da9552cea (HEAD -> main)
+  Author:     t <t@t>
+  AuthorDate: Sun Nov 8 03:42:09 2026 +0400
+  Commit:     t <t@t>
+  CommitDate: Sun Nov 8 03:42:09 2026 +0400
+  
+      init with a red baseline
+BRANCHES
+* main 12aedc7 init with a red baseline
+WORKTREES
+worktree [USER]/AppData/Local/Temp/todo-linux-codex-20261108/baseline-red/repo
+HEAD 12aedc7df8b1abde0ad3944fb081404da9552cea
+branch refs/heads/main
+

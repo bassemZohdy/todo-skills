@@ -1,0 +1,8 @@
+docker : bwrap: No permissions to create a new namespace, likely because the kernel does not allow non-privileged user 
+namespaces. On e.g. debian this can be enabled with 'sysctl kernel.unprivileged_userns_clone=1'.
+At line:2 char:104
++ ... -probe.sh'; docker run --rm --mount "type=bind,source=$p,target=/prob ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (bwrap: No permi...serns_clone=1'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

@@ -1,56 +1,59 @@
 # Task lifecycle
 
-The marker on each task in `TODO.md` is its status. Every command reads the marker first and does only what that status allows. The git branch is created **before** the status changes, and nothing reaches the base branch until a whole tree is verified.
+The marker on each task in `TODO.md` is its status. Every command reads the marker first and does only what that status allows. The git branch is created **before** the status changes, and nothing reaches the base branch until a whole tree is verified. "Claim" means the tree claim published on the base branch; marking a node `[/]` is its start.
 
 ```text
-        ready check            branch first       review + verify           complete
- [ ] ───────────────► [ ] ───────────────► [/] ───────────────► [/] ───────────────► [x] ──► merged into parent
- Ready   workable?    create branch,      In progress    tests + regression    marker, commit,     (root: drained to
-         baseline     switch, then        (claim commit) pass, gates pass      merge --no-ff        CHANGELOG, merged
-         green        set [/]                                                  into parent branch   into base on --merge)
-                                              │ 3 failed cycles / red baseline / outside scope
-                                              ▼
-                                             [!] Blocked ── /todo-update --status ready ──► [ ]
+       ready check           branch first              build + review + verify        complete
+ [ ] ──────────────► [ ] ──────────────────► [/] ───────────────────────────► [/] ─────────────► [x] ──► merged into parent
+ Ready  workable?    tree claim on the base  In progress   red, green, refactor,    marker, commit,    (root: refreshed from base,
+        baseline     (first node), branch,   (start        review, Done when +      merge --no-ff      last gate, drained to
+        green        then set [/]            commit)       regression, gates        into parent        CHANGELOG, merged with --merge)
+                                                   │ 3 failed attempts / failure outside scope / review or DoD gate
+                                                   ▼
+                                                  [!] Blocked ── /todo-update <ID> --status ready ──► [ ]
 ```
 
 ## Statuses
 
 | Marker | Status | Meaning |
 |---|---|---|
-| `[ ]` | Ready | Defined, not started. May still wait for children or dependencies |
-| `[/]` | In progress | Its branch exists and is checked out. At most one in the file |
-| `[!]` | Blocked | Stopped with a reason, the failing command and the action a human must take |
+| `[ ]` | Open | Defined, not started. It may still wait for children, dependencies or another branch's claim |
+| `[/]` | In progress | Its branch exists and holds its work. At most one in the file |
+| `[!]` | Blocked | Stopped with a reason, the failing command and the action a person must take |
 | `[x]` | Done | Verified, committed and merged into its parent's branch. A root is never `[x]`: it is drained |
 
-Ancestors of the active node keep `[ ]`. They count as in progress implicitly, and `/todo-status` shows them that way.
+Ancestors of the active node keep `[ ]`. They count as in progress implicitly, and `/todo-status` shows them that way. `[/]`, `[x]` and the children's `State:` live on the tree's branches; the base branch shows only the claim until the root lands.
 
 ## The steps
 
-| # | Step | Status before → after | What happens |
+| # | Step | Status | What happens |
 |---|---|---|---|
-| 1 | **Ready check** | `[ ]` | Lint passes, the node is workable, its `Ref:` (if any) exists, its `Done when` is a runnable command, the working tree is clean, and the regression baseline is green |
-| 2 | **Branch** | `[ ]` | Create `todo/<ID>-<slug>`, creating any missing ancestor branches top-down first (root from the base branch, each child from its parent). Switch to it |
-| 2b | **Tree claim** (first node of a tree) | `[ ]` | Claim-only commit on the root branch (`State: branch …` on the root, plus pending backlog edits), then the base branch is fast-forwarded to it. The base now shows the tree as claimed with its branch name. A root added but not yet committed is claimed the same way; if another claim wins first, the pending edits stay on the branch |
-| 3 | **Claim** | `[ ]` → `[/]` | On the new branch set `[/]`, write `State:`, commit `chore(backlog): start <ID>`. The backlog files travel with the branch |
-| 4 | **Build** | `[/]` | Red: write the tests, see them fail for the right reason. Green: implement what the task line says. Refactor: clean up with tests green. Update docs |
-| 5 | **Review** | `[/]` | After build, before the verify run: read the whole diff against the task line and `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). A fresh-context reviewer subagent does this when one exists |
-| 5b | **Verify** | `[/]` | `Done when` in full, then the regression run against the baseline, then the gates |
-| 6 | **Complete** | `[/]` → `[x]` | Set the marker, delete `State:`, lint, then commit the node's files |
-| 7 | **Merge** | `[x]` | `git merge --no-ff` into the parent's branch, then `git branch -d` the child branch |
-| 8 | **Integrate** (parents) | `[ ]` → `[/]` → `[x]` | Once every child is `[x]` the parent is workable. Same steps, but build is a cross-child integration check |
-| 8b | **Refresh from base** (roots) | | Merge the base branch into the root branch. If anything came in, rerun `Done when` and the full regression on the merged result. Blocks on failure |
-| 9 | **Drain** (roots) | tree removed | One CHANGELOG entry with `Includes:`, subtree deleted from TODO.md, commit |
-| 10 | **Merge to base** | | Only with `--merge`. Otherwise two options are printed and left to you: the local `git merge --no-ff`, or push the branch and open a pull request with the CHANGELOG entry as its body |
+| 1 | **Select** | | Interrupted work first (an unmerged `[x]` branch, an uncommitted drain, a `[/]` node), then the first workable `[ ]` node in order |
+| 2 | **Ready check** | `[ ]` | Lint passes, the node is workable, its `Ref:` exists, its `Done when` has a runnable command, the tree is clean, and the regression baseline is green (or `none`, or red for a `FIX` node that targets the failure) |
+| 3 | **Tree claim** (first node of a tree) | `[ ]` | Root branch from the base, a claim-only commit (the root's `State:` names the branch, plus pending backlog edits), then the base is fast-forwarded to it. Others now skip the tree |
+| 4 | **Branch** | `[ ]` | Missing ancestor branches top-down, then `todo/<ID>-<slug>` for the node |
+| 5 | **Start** | `[ ]` → `[/]` | On the node's branch: set `[/]`, write `State:`, commit `chore(backlog): start <ID>` |
+| 6 | **Read** | `[/]` | The `Ref:` doc and the governing docs, then only the code the node needs. With `--plan`: a plan, committed, and a stop for your approval |
+| 7 | **Build** | `[/]` | Red: tests first, failing for the expected reason. Green: implement only the task line. Refactor with tests green |
+| 8 | **Review** | `[/]` | The whole diff against the task line and `Done when`, by a fresh-context reviewer when a subagent tool exists |
+| 9 | **Verify** | `[/]` | `Done when` in full, the regression against the baseline, the Definition of Done, the RTM, documentation drift |
+| 10 | **Complete** | `[/]` → `[x]` | Set the marker, delete `State:`, lint, commit the node's files |
+| 11 | **Merge** | `[x]` | `git merge --no-ff` into the parent's branch, delete the child branch |
+| 12 | **Integrate** (parents) | `[ ]` → `[/]` → `[x]` | Once every child is `[x]` the parent is workable: the same steps, with an integration check instead of feature code |
+| 13 | **Refresh** (roots) | | Merge the base into the root branch; if anything came in, rerun `Done when` and the full regression |
+| 14 | **Last gate** (roots) | | `.todo/check.sh`, when it exists |
+| 15 | **Drain** (roots) | tree removed | One CHANGELOG entry with `Includes:`, the subtree deleted from `TODO.md`, commit `chore(backlog): drain <ID>` |
+| 16 | **Merge to base** | | Only with `--merge`. Otherwise the local `git merge --no-ff` commands and the push-and-pull-request alternative are printed for you |
 
-If a session dies mid-way, the next `/todo-continue` first scans the tree's branches: an unmerged `[x]` branch gets its merge finished, an unmerged `[/]` branch is resumed.
+`/todo-continue` completes one node per invocation (lane runs excepted): a child stops after its merge into the parent, a root after its drain. Run it again, ideally with a cleared context, for the next node. A session that dies mid-way is recovered by the next `/todo-continue`, which finishes an unmerged `[x]` branch or resumes the `[/]` node first.
 
-Any step that fails after three cycles, finds a red baseline, or needs something outside the task line ends in `[!]`.
+Any step that finds a red baseline stops before anything changes. A failure outside the task line, a missing Definition of Done item, review findings still valid after two rounds, or a third failed attempt ends in `[!]` ([VERIFICATION.md](VERIFICATION.md#test-failures-and-blocking)).
 
 ## What each command does by status
 
 | Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` | `/todo-status` |
 |---|---|---|---|---|
-| `[ ]` workable | Branches, claims, builds, verifies, completes | `in-progress`, `blocked`, `drop`, field edits | Allowed | Lists it, marks the next one |
+| `[ ]` workable | Claims (first node), branches, starts, builds, verifies, completes | `in-progress`, `blocked`, `drop`, field edits | Allowed | Lists it, marks the next one |
 | `[ ]` waiting | Skips and says what it waits for | `blocked`, `drop`, field edits (`in-progress` is refused) | Allowed | Shows what it waits for |
 | `[ ]` in a tree claimed by another branch | Skips and reports the branch | `ready` on the root releases the claim | Refused | Shows `claimed by <branch>`, stale if the branch is gone |
 | `[/]` | Resumes from `State:` and `git status` | `ready` (abandons, keeps the branch), `blocked`, field edits. No `drop` | Refused | Shows branch, State, changes |
@@ -61,34 +64,21 @@ Any step that fails after three cycles, finds a red baseline, or needs something
 
 | Practice | How it shows up |
 |---|---|
-| Short-lived branches, small changes (DORA: hours, few active branches) | Leaves fit one context window (at most 5 files), one branch per node, at most 3 levels, so at most 3 branches are open |
+| Short-lived branches, small changes | Leaves fit one context window (at most 5 files), one branch per node, at most 3 levels, so at most 3 branches are open per tree |
 | Visible work in progress, no duplicate work | The tree claim on the base branch names the owning branch |
-| Tests pass before anything merges (DORA: protected trunk) | Nothing merges to the parent without `Done when` and regression green. Nothing merges to base before its root is verified, and then only on `--merge` |
+| Tests pass before anything merges | Nothing merges to the parent without `Done when` and the regression green. Nothing merges to the base before its root is verified, and then only with `--merge` |
 | Integrate continuously | Roots merge the latest base in and rerun the full regression before landing, so the tested code is the code that lands |
-| Keep the build green, fix or revert at once | A red baseline blocks the node before work starts. Revert a bad merge with `git revert -m 1 <merge>` and `/todo-update <ID> --status revert` |
-| Definition of Ready | The ready check above, repeated by `/todo-add` when it writes a task |
-| Definition of Done | The project's own `Definition of Done` heading plus the gates: tests, regression, docs drift, and the review step (hunks trace to the task, no secrets, no tracked build output, no stray `TODO`/`FIXME`) |
-| Red, green, refactor | Build step. Containers run an integration check instead |
-| Test levels | Leaf: unit tests for its `Done when`. Parent: integration check of its children. Root: the full regression suite |
-| Regression testing | The `regression:` command, or the full suite, against a baseline taken before coding |
-| Lightweight review | The review step (a fresh-context reviewer when a subagent tool exists) and the human merge into base. Teams can open a pull request from the root branch instead of merging locally |
-| Traceability | The ID is in the branch name, commit body (`Refs:`) and CHANGELOG entry. Put the ID in new test names or comments |
-| CI parity | `/todo-init` reports the test command found in CI config, so the regression command matches what CI runs |
-| Release is separate | Only `/todo-release` moves `[Unreleased]` to a version, after you confirm it. No skill tags, pushes or touches the network |
-| Hotfix | A `P0` `FIX` root branches from the base branch like any other root |
-
-## Interrupting for a hotfix
-
-A claimed tree is not lost when something urgent arrives. (`[/]` lives on tree branches, so the base branch has none and the one-active-task rule holds per file.) Commit or stash your work, `git switch` to the base branch, add the fix with `/todo-add "..." --type fix --priority P0`, and run `/todo-continue`. On the base branch the claimed trees are skipped, the P0 root is picked first, and it gets its own branch. When it is merged, `git switch` back to the parked tree's branch and `/todo-continue` resumes it.
-
-## Where the backlog lives
-
-`TODO.md` is versioned like code. The base branch carries one thing about a tree in flight: the **tree claim**, a root `State: branch <name> from <base>`. Everything else (`[/]`, `[x]`, descendants' `State:`) lives on the tree's branches and reaches the base branch at the root merge. A second agent that starts from the base branch sees the claim and skips that tree, so a tree is never run twice. Add new roots from the base branch; add children and follow-ups on the tree's own branches. The skills never fetch, pull or push, so a claim reaches other clones the way any commit does. A claim whose branch is gone is stale and is released with `/todo-update <ROOT-ID> --status ready`.
-
-## Lanes
-
-A root's `Lane:` names the agent context that works its tree. One agent walks one lane in order; `/todo-continue --all-lanes` starts one subagent per lane in its own worktree. Lane agents run the steps up to and including verify; the coordinator then refreshes each root from the base, drains and merges it, one at a time. Cross-lane order is `Depends:` only.
+| Keep the build green | A red baseline blocks new work before it starts; only a `FIX` for the failure may start |
+| Definition of Ready | The ready check, repeated by `/todo-add` and `/todo-plan` when they write a task |
+| Definition of Done | The project's own `Definition of Done` checklist plus the gates: tests, regression, documentation drift, review |
+| Red, green, refactor | The build step. Parents run an integration check instead |
+| Test levels | Leaf: its `Done when` tests. Parent: an integration check of its children. Root: the full regression suite and the last gate |
+| Lightweight review | The review step (a fresh-context reviewer when possible) and your merge into the base, or a pull request from the root branch |
+| Traceability | The ID is in the branch name, the commit body (`Refs:`), the test names and the CHANGELOG entry; optionally an RTM row |
+| CI parity | `/todo-init` reports the test command CI runs, and `.todo/check.sh` runs the same lint and tests locally and in CI |
+| Release is separate | Only `/todo-release` turns `[Unreleased]` into a version, after you confirm. No skill tags or pushes |
+| Hotfix | A `P0` `FIX` root added on the base is picked before claimed trees and gets its own branch ([GIT-FLOW.md](GIT-FLOW.md#starting-resuming-and-recovering)) |
 
 ## Without git
 
-Steps 2, 2b, 3's commit, 6's commit, 7 and 10 are skipped, and the one-time warning is printed. The status model, `State:`, verification, gates and drain are the same. The review step reads the files listed in `State: files:` against the task line, because there is no diff.
+The tree claim, branches, commits, merges and the refresh are skipped, after a one-time warning. Statuses, `State:` (with `no git`, `files:` and `docs:`), verification, the gates and the drain are the same. The review reads the files listed in `State: files:`, because there is no diff ([GIT-FLOW.md](GIT-FLOW.md#no-git-mode)).

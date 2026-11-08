@@ -1,8 +1,8 @@
 # Reference
 
-The full format and rules of the todo-skills. The rules themselves live in [`plugin/skills/todo/SKILL.md`](../plugin/skills/todo/SKILL.md) (the model reads that file); this page is the human-readable version. New here? Start with [GETTING-STARTED.md](GETTING-STARTED.md).
+The formats and rules of the todo-skills. The model reads the rules in [`plugin/skills/todo/SKILL.md`](../plugin/skills/todo/SKILL.md) and its [`reference/`](../plugin/skills/todo/reference/) files; this page is the version for people. New here? Start with [GETTING-STARTED.md](GETTING-STARTED.md). For what each command does, see [COMMANDS.md](COMMANDS.md); for the files involved, [FILES.md](FILES.md).
 
-## Task tree
+## TODO.md
 
 ```markdown
 # Active Backlog
@@ -10,121 +10,196 @@ The full format and rules of the todo-skills. The rules themselves live in [`plu
 ## 🌳 Task Tree
 
 - [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npm test -- auth`; regression: `npm test`
+  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
+  - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
   - [ ] **FEAT-002.1** · mid · L · Refresh endpoint
-    - Done when: endpoint covered by an integration test; `npm test -- auth/refresh`
+    - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
     - [x] **FEAT-002.1.1** · low · S · Token store interface
-      - Done when: store round-trips a token; `npm test -- auth/store`
+      - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
     - [/] **FEAT-002.1.2** · high · M · Rotate refresh tokens
-      - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
-      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: add reuse test
+      - Done when: reuse of a rotated token fails; `npx jest tests/auth/rotate.test.ts`
+      - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
-- **2 to 4 lines per task.** The header says what to do. `Done when:` gives the criteria and at least one exact command. Longer planning goes into `docs/` (for example `docs/plans/FEAT-002-refresh.md`) and is linked with `Ref:`. TODO.md only tracks work.
-- **Markers:** `[ ]` open, `[/]` active (only one), `[!]` blocked, `[x]` verified and merged into its parent, waiting for the root to drain.
-- **Complexity** (required): `low`, `mid` or `high`, how hard the reasoning is, so an agent can pick a model. An optional README line `Models: low=…, mid=…, high=…` maps levels to models for `--delegate`, lane subagents and the reviewer; a failed attempt escalates one tier.
-- **Sizes** (optional, after the complexity): leaves are `S` (at most 2 files) or `M` (one context window, at most 5 files). Parents are `L` (children are leaves) or `XL` (has grandchildren). Every leaf must fit one context window whether or not a size is written. At most 3 levels. The lint script enforces this.
-- **Order:** roots by priority P0 to P2, then by ID. Inside a root, depth first. A parent becomes workable again when all its children are `[x]`; that is its integration step.
-- **Closing:** a child is merged into its parent's branch when verified. A parent closes only when all children are done, and the whole tree is written to `CHANGELOG.md` as one entry ending in `Includes: FEAT-002.1, FEAT-002.1.1, ...`.
-- **Blocked** tasks replace `State:` with `Blocked: reason → \`command\` error → action required`.
+The file is exactly the heading `# Active Backlog` and one section whose heading ends in `Task Tree`. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
 
-## Lifecycle
+### A task
 
-The marker is the status, and every command acts only as that status allows. The branch is created **before** the task is marked in progress:
+A task is 2 to 4 lines: a header and up to three fields.
 
-`[ ]` ready check → create branch → `[/]` claim → red, green, refactor → verify (Done when + regression) → `[x]` commit → merge into the parent's branch. A root is then drained to `CHANGELOG.md` and merged into the base branch only with `--merge`. `[!]` blocked stops the flow until `/todo-update --status ready`.
+**Header:** `- [m] **ID** · [P0-P2 · (roots only)] COMPLEXITY [· SIZE] · what to do, in one sentence`
 
-See [LIFECYCLE.md](LIFECYCLE.md) for the diagram, the command-by-status matrix and how it maps to short-lived branches, Definition of Ready and Done, red-green-refactor, regression testing and CI parity.
+| Part | Rule |
+|---|---|
+| Marker `[m]` | `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged into its parent, waiting for its root to drain |
+| Priority | `P0`, `P1` or `P2`, on roots only; children inherit it |
+| Complexity | Required: `low`, `mid` or `high` (below) |
+| Size | Optional: `S`, `M`, `L` or `XL` (below) |
+| `Done when:` | **Required.** Criteria, then `; ` and at least one exact command in backticks. Optional `; regression: \`cmd\``; without it the regression is the project's full suite. Rules: [VERIFICATION.md](VERIFICATION.md#writing-a-done-when) |
+| `Links:` | Optional. `Ref: <path#anchor>`, `Depends: <IDs>`, `From: <ID>`, `Lane: <name>` (roots only), separated by ` · ` |
+| `State:` | Optional; survives a context reset. Grammar below |
+| `Blocked:` | On `[!]` tasks only, in place of `State:`: `<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`. A manual block writes `n/a (manual)` in the middle |
 
-## Claims: no tree runs twice
+Only these four fields exist, and a task never has both `State:` and `Blocked:`. More than 4 lines is design prose: put it in `docs/` and link it.
 
-When the first node of a tree is claimed, the root branch gets a claim-only commit (`State: branch todo/<ID>-<slug> from main` on the root, plus any pending backlog edits), and the base branch is fast-forwarded to it. Anyone starting from the base branch sees the tree as claimed, with the owning branch name, and skips it. Only the root is published; `[/]` and the children's state stay on the tree's branches. A stale claim (branch gone) is released with `/todo-update <ROOT-ID> --status ready`. A root you have just added and not yet committed is claimable: the claim commit carries those pending backlog edits, and if another claim wins the race (or a root with the same ID appears on the base) they stay on your branch for you to restore. A claim is a local commit. Worktrees of one repository see it at once; how it reaches other clones is left to git (push, pull request, your usual flow), and a clash shows up as a normal merge conflict.
+### State grammar
 
-## Verification
+Items separated by `; `, each at most once, in this order:
 
-Each node: write the tests first, run `Done when` in full (target a test id or path, not a name filter), then run the regression command (the task's `regression:` or the full suite) and compare with the baseline taken before coding. A red baseline blocks the node. Deleted, skipped or weakened tests, runs that execute zero tests, masked failures (`|| true`, `; exit 0`) and test paths that do not exist do not count; the optional `todo-verify.sh` classifies a finished run, and the lint rejects masked failures in a `Done when`. Three failed fix cycles block the node.
+| Item | Meaning |
+|---|---|
+| `attempts n/3` | Failed verification attempts so far |
+| `baseline <n> passing`, `baseline none` or `baseline red: <ids>` | The regression result before work started |
+| `tier: low\|mid\|high` | Only once escalated above the node's complexity |
+| `hyp: <one line>` | The current hypothesis while fixing a failure |
+| `branch todo/<ID>-<slug> from <branch>` | The node's branch and the branch it was created from |
+| `no git` | No-git mode |
+| `files: <paths>`, `docs: <paths>` | Touched files, in no-git mode (a root keeps its finished children's until the drain) |
+| `next: <step>` | One of `start <ID>`, `build children`, `read docs`, `plan proposed`, `build`, `drain`, `decompose`, `resume`, `redo after revert` |
 
-## Git flow and no-git mode
+A later claim or start **replaces** the whole line. The only exception is no-git mode, where a root keeps the `files:` and `docs:` rolled up from its finished children.
 
-- One branch per node, `todo/<ID>-<slug>`. A root starts from the base branch, a child from its parent's branch. Verified children are merged `--no-ff` into the parent's branch. Nothing is merged into `main` or `develop` until the root is verified, and then only with `--merge`. The one earlier change on the base branch is the tree claim.
-- **No git repository?** Every command warns once and carries on without branches, worktrees, commits or merges. Progress and touched files are recorded in `State:`, and markers and the CHANGELOG drain work as usual. Run `git init` to get isolation and history.
+### Tree, levels and sizes
+
+A node at level L has its header indented `2L` spaces and its fields `2L + 2`. At most 3 levels. Child IDs append `.n` to the parent's ID, so the number of dots equals the level.
+
+**Scope rule:** every leaf is one change that fits one context window and touches at most 5 files. Bigger work is split into children. A node too big to split yet carries `State: next: decompose` until `/todo-continue` breaks it down.
+
+| Size | Meaning | Where |
+|---|---|---|
+| `S` | One change, at most 2 files | Leaf |
+| `M` | One context window, at most 5 files | Leaf |
+| `L` | Has children, all leaves | Parent |
+| `XL` | Has grandchildren | Parent |
+
+Sizes are optional. When present they must match the tree, and adding or dropping a node updates every ancestor's size. A leaf with `next: decompose` may carry `L` or `XL`.
+
+### Complexity and model routing
+
+Complexity says how hard the reasoning is, not how big the change is, so an agent can pick a fitting model.
+
+| Complexity | Meaning | Examples |
+|---|---|---|
+| `low` | Mechanical: the cause and the change are already known | Rename, docs, config, a guard or small function whose fix the task line states |
+| `mid` | Ordinary work that needs some investigation or design (the default) | A new endpoint, a bug whose cause must be found |
+| `high` | Hard reasoning or high risk | Concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
+
+A parent is rated by its integration step alone (usually `low` or `mid`). A one-file race condition is `high`; a five-file rename is `low`.
+
+**Model routing (optional).** A README line such as `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands) maps levels to models. With that line and a subagent tool, `/todo-continue --delegate` and lane runs give each node a subagent on the mapped model, the reviewer runs at the node's tier or higher, and after a failed attempt the next one runs one tier higher (`low` → `mid` → `high`, recorded as `tier:`). Without either, complexity is only a hint and the work runs in the current model.
+
+## IDs
+
+- Roots are `<PREFIX>-<NNN>`: one global sequence across all prefixes, 3 digits. Children append `.n` (`FEAT-002.1`, `FEAT-002.1.2`) and use their root's prefix.
+- IDs are never reused. The next root number is the highest FEAT/FIX/TASK number found in `TODO.md`, `CHANGELOG.md` (IDs after `Includes:` count), `docs/plans/*.md` (dropped IDs are named under Revisions) and, in git mode, every commit subject (`git log --all --format=%s`), plus 1. Child numbers work the same way under their parent.
+
+| Prefix | Meaning | CHANGELOG heading | Commit type |
+|---|---|---|---|
+| `FEAT` | New capability | `### Added` | `feat` |
+| `FIX` | Bug or regression | `### Fixed` | `fix` |
+| `TASK` | Refactor, chore, docs, test, perf, build | `### Changed` | Whichever fits |
+
+## Order and the next node
+
+Roots run P0 → P1 → P2, then by ID number (ignoring the prefix); within a root, depth-first in document order. A node is **workable** when it is `[ ]`, all its children are `[x]`, every `Depends:` ID is satisfied (in `CHANGELOG.md`, in the base branch's `CHANGELOG.md`, or `[x]` in `TODO.md`), no ancestor is `[!]`, and, in git mode, its tree is not claimed by another branch. A parent whose children are all `[x]` is workable: that is its **integration step**.
+
+A tree is **claimed** when its root's `State:` in the base branch's `TODO.md` names a branch; it is workable only from a branch of that tree. How claims are made, read and released is in [GIT-FLOW.md](GIT-FLOW.md#tree-claims).
+
+## Lifecycle by status
+
+| Status | `/todo-continue` | `/todo-update` | `/todo-add --parent` |
+|---|---|---|---|
+| `[ ]` workable | Branch, claim, build, review, verify, complete | `in-progress`, `blocked`, `drop`, edits | Allowed |
+| `[ ]` waiting | Skip, say what it waits for | `blocked`, `drop`, edits | Allowed |
+| `[ ]` in a tree claimed by another branch | Skip, report the branch | `ready` on the root releases the claim | Refused |
+| `[/]` | Resume from `State:` | `ready`, `blocked`, edits; no `drop` | Refused |
+| `[!]` | Skip, report `Blocked:` | `ready`, `drop`, edits | Refused |
+| `[x]` | Never touch | `revert` only | Refused |
+
+The steps and the diagram are in [LIFECYCLE.md](LIFECYCLE.md).
+
+## CHANGELOG.md
+
+The file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is append-only. Only `## [Unreleased]` changes: a root drain inserts one entry there, and the confirmed `/todo-release` renames it to a version, adds a new empty `[Unreleased]` above it and updates the link lines at the end. Released sections are never rewritten.
+
+One entry per finished root, inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, with no blank lines between entries. A missing heading is created in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
+
+```markdown
+- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Docs: updated docs/auth.md. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.1.2.
+```
+
+Parts in this order, each only when it applies: `Ref:` (the root's), `Validated:` (the root's `Done when` commands, without a `regression:` command), `From:`, `Docs: updated …` (README/`docs/` files the tree changed, backlog files excluded), and last `Includes:` with every descendant ID. Entries written by hand (without an ID) are kept as they are.
+
+## Invariants
+
+Every command checks these first. `.todo/todo-lint.sh` (a copy of [`tools/todo-lint.sh`](../tools/todo-lint.sh)) checks them deterministically; without it the agent checks them by reading.
+
+| # | Invariant |
+|---|---|
+| I1 | At most one `[/]` task, and a `[/]` parent has no open children |
+| I2 | Every ID is unique in `TODO.md` |
+| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no `State:` together with `Blocked:`, a `Blocked:` line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
+| I4 | `TODO.md` is at most 120 lines |
+| I5 | No ID is in both `TODO.md` and `CHANGELOG.md` (IDs after `Includes:` count) |
+| I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
+| I7 | Every ID in `Depends:` or `From:` exists in `TODO.md` or `CHANGELOG.md` |
+| I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indentation, no `[x]` root, no `[x]` node with open children, and any size matches the tree |
+| I9 | No dependency cycles, counting "a parent waits for its children" |
+| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, a downloaded script piped into a shell, `git push` (also `git -C … push`), `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec` (`bundle exec`, `npm exec`, `pnpm exec` are fine), the one-liner code flags of shells and interpreters (`sh -c`, `bash -c`, `python -c`, `node -e`, `ruby -e`, `perl -e`, `php -r`), `find -exec rm`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), and reads of credential files (SSH keys, cloud credentials) |
+
+The lint also rejects a `Done when` whose command masks failures (`|| true`, `; true`, `; exit 0`, `&& true`) under I3. A lint failure after an edit means the edit is wrong: the agent fixes or undoes it before it stops. A passing lint does not replace judging a command's safety ([VERIFICATION.md](VERIFICATION.md#command-safety)).
+
+### Warnings
+
+The lint prints `WARN` lines that never change its exit code:
+
+| # | Warns about |
+|---|---|
+| W1 | A `Done when` that only checks that text or files exist (`grep`, `test -f`) |
+| W2 | Tests selected by a name filter, which some runners accept with zero matches; target a test id or path instead |
+| W3 | A command that is not a known test, lint, typecheck or build runner; confirm it only tests or builds (the agent records `Checked: <command>` in the node commit) |
+| W4 | A test runner piped into another command, which hides its exit status unless `pipefail` is set |
 
 ## Requirements traceability (optional)
 
-Simple projects need no RTM. A project that wants requirement-to-task-to-test links keeps a Markdown table (`Req | Requirement | Tasks | Verification`) in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README.md; `docs/RTM.md` wins when both exist. `/todo-plan` and `/todo-add` link a root to a listed requirement with `Ref: <rtm path>#R-001` and propose the row change; `/todo-continue` records the node's test references in Verification; task state is never copied into the RTM, and archived task IDs keep resolving through CHANGELOG.md. `bash tools/todo-rtm.sh` (an optional script from this repository, copied into your project) prints the resolved location and flags stale task IDs (R1), archived rows without verification (R2) and duplicate requirement rows (R3). Format and rules: `plugin/skills/todo/reference/rtm.md`.
+A project that wants requirement → task → test links keeps a table in `docs/RTM.md`, or, when that file is absent, in a `## RTM` section of README (`docs/RTM.md` wins when both exist). No command asks for one, creates one, or fails because it is missing.
 
-## Project Definition of Done (optional)
-
-Optional. If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading `Definition of Done`, its checklist applies to every task on top of that task's Done when. Command items run under the same safety rules as Done when. Statement items are checked by inspection and reported one by one.
-
-## Optional enforcement
-
-The invariants I1-I10 (one active task, unique IDs, task fields, complexity and any sizes, 120-line cap, no ID in both files, exact headings, no dangling references, tree integrity, no dependency cycles, no forbidden commands) can be checked by a script instead of by the model. The scripts are read-only, need only bash, awk, grep, sed and tr, and live in `tools/` of the todo-skills repository (the plugin itself ships Markdown only); copy the ones you want into your project.
-
-```bash
-bash tools/todo-lint.sh          # from the repository root
+```markdown
+| Req | Requirement | Tasks | Verification |
+|---|---|---|---|
+| R-001 | Refresh returns a new token and rejects the old one | FEAT-002, FEAT-002.1 | tests/auth/refresh.test.ts |
 ```
 
-Exit code 0 means I1-I10 hold. It also prints `WARN` lines that never fail the run: W1 for a `Done when` that only checks text or files exist, W2 for tests selected by a name filter that some runners accept with zero matches, W3 for a command that is not a known test, lint, typecheck or build runner, W4 for a test runner piped into another command, which hides its exit status unless `pipefail` is set. Use it as a pre-commit hook or a CI step. To stop an agent session from ending on a corrupted backlog, add a Claude Code Stop hook:
+- **Req** is a stable ID, never renumbered or reused.
+- **Tasks** holds task IDs only, never markers, status or copied text: the task's marker in `TODO.md` (or its CHANGELOG entry) is the only state. An ID stays after its task is drained and resolves through `CHANGELOG.md`.
+- **Verification** names the test files or ids that prove the requirement. It may be empty while the tasks are open.
 
-```json
-{ "hooks": { "Stop": [ { "hooks": [
-  { "type": "command", "command": "bash tools/todo-stop-hook.sh" }
-] } ] } }
-```
+`/todo-plan` and `/todo-add` link a root with `Ref: docs/RTM.md#R-001` and propose the row change in the same confirmation; `/todo-continue` adds the node's test paths to Verification in the node's commit; a dropped ID is removed from Tasks in the same change. `bash tools/todo-rtm.sh` checks the table ([TOOLS.md](TOOLS.md#todo-rtmsh)).
 
-Use the path where you copied the script as the command. The hook blocks the stop once with the lint output and never loops (it honors `stop_hook_active`).
+## Definition of Done (optional)
 
-Run the tests with `bash tests/run.sh`. They use static fixtures in `tests/fixtures` and create no files. The agent trials and their harness tests are described in [trials.md](trials.md).
-
-## Lanes and parallel work
-
-A **lane** is a named track of root trees that one agent context works alone. Put `Lane: <name>` in a root's `Links:` (default lane `main`); children inherit it. A lane can hold one task or many.
-
-- `/todo-continue --lane <name>` takes only that lane's roots, in order.
-- `/todo-continue --all-lanes [--seq]` starts one subagent per lane, each in its own worktree. The main thread is the coordinator: it publishes the tree claims, then refreshes each finished root from the base, re-runs its tests, drains it and (with `--merge`) merges it, one root at a time. `--seq` runs the lanes one after another; without a subagent tool the lanes run sequentially anyway.
-- Order across lanes is `Depends:` only. Lanes work best when their trees touch different files; the second and later roots to land will usually conflict in `TODO.md` and `CHANGELOG.md`, which the coordinator resolves by the conflict rules in `plugin/skills/todo/reference/git-flow.md`.
-
-## Planning
-
-`/todo-init --plan` asks up to three pre-planning questions and can save the answers as `docs/plans/PROJECT.md`. `/todo-plan "<goal>"` turns a goal into that plan doc and a proposed tree with lanes. `/todo-plan --revise "<reason>"` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept, and the change is logged under *Revisions* in the plan doc.
-
-## Review
-
-Between build and verify, `/todo-continue` reads the whole diff against the task line and its `Done when` (hunks trace to the task, tests assert the criteria, no debug code or secrets). With a subagent tool a fresh-context reviewer does this; otherwise it is a self-review. Only then do `Done when` and the regression run.
-
-## Status page
-
-`/todo-report` writes `docs/status.html`: a self-contained interactive page with counts, lanes with progress, the filterable task tree (Done when, links, state, blockers), release history, claims, test command and the plan. It is a snapshot; rerun the command to refresh. The optional `tools/todo-report.sh` (bash and sed) fills the template deterministically; without it the agent does the same encoding by hand. It renders text with `textContent` only and loads nothing from the network.
-
-## CI and the local fallback
-
-`/todo-init --ci` (rules in `plugin/skills/todo/reference/ci.md`) writes, each on your yes:
-
-- `.todo/check.sh`, which runs the project's test command and, when you have copied `tools/todo-lint.sh` to `.todo/todo-lint.sh` (so CI needs no skills installed; the skills never download it), the lint first;
-- a CI job that runs `bash .todo/check.sh`: `.github/workflows/todo-check.yml` (runtime set up from the project's marker files), a `todo-check` job for `.gitlab-ci.yml`, or the one line to add for other CI. If CI already runs the tests, the job only runs the lint.
-
-Fallback without CI: a git `pre-push` hook that runs the same check and refuses the push when it fails. In every case `/todo-continue` runs `.todo/check.sh` as the last gate before a root's drain, so the same lint and tests run whether or not CI exists. Commit `.todo/` and the workflow yourself; the skills never push.
+If `README.md`, `CONTRIBUTING.md` or a file in `docs/` has a heading named exactly `Definition of Done` followed by a list, every item applies to every node on top of its `Done when`. Command items run under the command safety rules; statements are checked by inspection and reported one by one. A missing item blocks the node.
 
 ## Versioning
 
-This project follows [Semantic Versioning](https://semver.org/). The public interface is the set of things an existing project depends on: the `TODO.md` and `CHANGELOG.md` formats, the command names and flags, the `State:` grammar, the invariants the lint enforces, and the script exit codes.
+This project follows [Semantic Versioning](https://semver.org/). The public interface is what an existing project depends on: the `TODO.md` and `CHANGELOG.md` formats, the command names and flags, the `State:` grammar, the invariants the lint enforces, and the script exit codes.
 
-- **MAJOR** when a valid `TODO.md` or `CHANGELOG.md` can become invalid, a command or flag changes meaning or is removed, or a lint invariant gets stricter in a way old files fail. While the version is `0.x`, such changes bump MINOR.
+- **MAJOR** when a valid `TODO.md` or `CHANGELOG.md` can become invalid, a command or flag changes meaning or is removed, or an invariant gets stricter in a way old files fail. While the version is `0.x`, such changes bump MINOR.
 - **MINOR** for a new command, flag, optional field, warning or script that existing valid files still pass.
 - **PATCH** for wording fixes, bug fixes and documentation.
 
-The version lives in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this; Codex caches an install by version, so bump it on every release). Releases are cut with `/todo-release` and tagged by a person.
+The version lives in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` and must equal the newest `## [X.Y.Z]` heading in `CHANGELOG.md` (`tests/run.sh` checks this; Codex caches an install by version, so bump it on every release). Releases are cut with `/todo-release` and tagged by a person ([DEVELOPMENT.md](DEVELOPMENT.md#releasing-this-repository)).
 
 ## Design rules
 
+- The repository is the state machine. Nothing outside the project's files and git stores state.
 - One active task at a time, enforced by file state.
 - A node closes only when its `Done when` command and the regression run pass. A run that executes zero tests does not count.
-- Nothing reaches the base branch before its root is verified.
-- Backlog changes come only from a user command or a completed code transition. The agent never invents tasks. Adjacent findings are returned as ready-to-run `/todo-add ... --from <ID>` commands.
+- Nothing reaches the base branch before its root is verified. The base receives only tree claims, claim releases, the confirmed release commit and the merge of a verified root.
+- Backlog changes come only from a user command or a completed code transition. The agent never invents tasks; adjacent findings are returned as ready-to-run `/todo-add "…" --from <ID>` commands.
 - `Done when` commands are limited to test, lint, typecheck and build commands, because `TODO.md` text can be influenced by docs and pull requests.
-- Nothing is required beyond Markdown. Git is used when present. The skills never tag, release, fetch, pull or push; sharing is git's job.
+- Nothing is required beyond Markdown. Git is used when present. The skills never tag, release on their own, fetch, pull or push; sharing is git's job.
 
 ## Issue reconciliation
 

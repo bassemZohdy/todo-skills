@@ -300,6 +300,16 @@ if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; t
 # A Done when that cannot run for an environmental reason (TASK-027).
 vr="$root/plugin/skills/todo/reference/verification.md"
 if grep -q '^## A Done when that cannot run' "$vr" && grep -q 'before any test executes' "$vr" && grep -qi 'never edit `Done when`' "$vr" && grep -q 'empty `__init__.py`' "$vr" && grep -q 'Adjacent problems' "$vr" && grep -q 'Done when cannot run' "$vr"; then ok "verification reference says what to do when a Done when cannot run"; else bad "verification reference lacks the cannot-run rule"; fi
+# Two-verdict review (FEAT-056): one reviewer call returns spec compliance, then quality; every place that documents the
+# Reviewed trailer uses the same form, keeps the self-review fallback, and none keeps the old one-verdict form.
+rv_new='Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed'; rv_self='Reviewed: self, <n> findings fixed'
+rv_bad=""
+for f in plugin/skills/todo-continue/SKILL.md plugin/skills/todo/reference/git-flow.md docs/VERIFICATION.md docs/GIT-FLOW.md; do
+  grep -qF -- "$rv_new" "$root/$f" && grep -qF -- "$rv_self" "$root/$f" || rv_bad="$rv_bad $f(missing)"
+  grep -qF -- 'Reviewed: <subagent|self>' "$root/$f" && rv_bad="$rv_bad $f(old form)"
+done
+grep -q 'spec compliance first' "$root/plugin/skills/todo-continue/SKILL.md" && grep -q 'one call' "$root/plugin/skills/todo-continue/SKILL.md" || rv_bad="$rv_bad todo-continue(order or single call)"
+if [ -z "$rv_bad" ]; then ok "review records spec compliance and quality from one reviewer call, with the self-review fallback"; else bad "two-verdict review:$rv_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"

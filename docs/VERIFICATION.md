@@ -49,13 +49,12 @@ If the command fails before any test executes for a reason outside the task (a d
 
 ## Review
 
-Between build and verify, `/todo-continue` reviews the whole diff (`git diff`; in no-git mode, the files in `State: files:`) against the task line and its `Done when`:
+Between build and verify, `/todo-continue` reviews the whole diff (`git diff`; in no-git mode, the files in `State: files:`), spec compliance first, then quality:
 
-- Every hunk traces to the task line. No debug output, commented-out code, new `TODO`/`FIXME` or unrelated reformatting.
-- The tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the task ID.
-- No generated files, secrets or `.env` in the diff or in backlog text.
+- **Spec:** every hunk traces to the task line and nothing it asks for is missing; the tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the task ID.
+- **Quality:** no debug output, commented-out code, new `TODO`/`FIXME`, unrelated reformatting, generated files, secrets or `.env` in the diff or in backlog text.
 
-With a subagent tool, a fresh-context reviewer does this, given only the task lines, the `Ref` path and the diff (at the node's tier or higher with a `Models:` line); it never edits files or runs tests. Without one, the agent reviews its own diff. Valid findings are fixed, at most 2 rounds; findings still valid after that block the node. The node commit records `Reviewed: <subagent|self>, <n> findings fixed`.
+With a subagent tool, a fresh-context reviewer does both in one call, given only the task lines, the `Ref` path and the diff (at the node's tier or higher with a `Models:` line), and returns a verdict for each (`ok` or `fail`) with its findings; it never edits files or runs tests. Without one, the agent reviews its own diff. Valid findings are fixed, at most 2 rounds; findings still valid after that block the node. The node commit records the first round's verdicts as `Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed`, or `Reviewed: self, <n> findings fixed` for a self-review. Separate verdicts show whether findings were about building the wrong thing or building it badly.
 
 ## Test failures and blocking
 

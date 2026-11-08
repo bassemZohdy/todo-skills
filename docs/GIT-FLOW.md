@@ -56,11 +56,11 @@ Lane runs (`--all-lanes`) use the same layout, one worktree per lane root, kept 
 ```text
 Refs: FEAT-002.1
 Red: AssertionError: expected 401, got 200
-Reviewed: subagent, 2 findings fixed
+Reviewed: subagent, spec fail quality ok, 2 findings fixed
 Checked: make smoke
 ```
 
-`Red:` appears on leaves that started red, and one `Checked:` line names each command the lint flagged as an unfamiliar runner (W3) that the agent judged safe.
+`Reviewed:` is `Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed` (the reviewer's first-round verdicts) or `Reviewed: self, <n> findings fixed`. `Red:` appears on leaves that started red, and one `Checked:` line names each command the lint flagged as an unfamiliar runner (W3) that the agent judged safe.
 
 **Backlog commits** have no body, except a drain (`Refs:` and `Includes:`) and a plan (the plan itself):
 

@@ -1,0 +1,1 @@
+run_id,date_utc,arm,scenario,agent,agent_version,model,isolation,first_outcome,final_outcome,attempts,agent_exit,verifier_exit,duration_s,input_tokens,output_tokens,cached_tokens,llm_calls,subagent_calls,evidence_sha256,evidence_dir

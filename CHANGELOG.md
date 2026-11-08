@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FEAT-055** (feat): Add an arm-agnostic agent benchmark (`docs/evals/benchmark`): six scenarios, the arms todo-skills, lean-baseline and no-methodology, hidden acceptance tests scored by a trusted verifier on a copy of the agent's repository, PASS, FAIL, INFRA_ERROR or UNVERIFIED with checksummed evidence and one CSV row per run, tokens only from the CLI's own usage output, and median, mean and spread by `summarize.sh`. Tested with a stub agent; no real agent has run, so the results file holds only its header. Ref: docs/evals/update-review.md. Validated: `bash tests/trials/test-benchmark-harness.sh`. Docs: updated README.md, docs/evals/benchmark/README.md, tests/trials/README.md.
+
 ### Changed
 
 - **TASK-054** (docs): Record the update review (`docs/evals/update-review.md`: findings F1-F9 with evidence, existing coverage, the lean-prompt lint experiment and rulings) and guard README against drift: `tests/run.sh` checks that README's versions equal both manifests and the newest CHANGELOG heading, that the install source holds the nine skills, that relative links resolve, and that README names each agent with recorded trials and its evidence. Ref: docs/evals/update-review.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/DEVELOPMENT.md, docs/evals/update-review.md.

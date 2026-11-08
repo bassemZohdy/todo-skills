@@ -134,7 +134,7 @@ Known limits: planning is shallow (a short plan doc and the tree), the 120-line 
 | [Development](docs/DEVELOPMENT.md) | Repository layout, packaging rules, tests and CI of this repository |
 | [Agent compatibility](docs/agent-compatibility.md) | What was observed on Claude Code and Codex, and what was not |
 | [Trials](docs/trials.md) and [harness README](tests/trials/README.md) | The scenarios, how to run and score them, recorded results |
-| [Evaluations](docs/evals/) | Retained evidence: [Claude Code](docs/evals/claude-code-2026-11-07/summary.md), [Codex on Windows](docs/evals/codex-2026-11-07/summary.md) ([rerun with the isolated verifier](docs/evals/codex-windows-2026-11-08/summary.md)), [Codex on Linux](docs/evals/codex-linux-2026-11-08/summary.md) |
+| [Evaluations](docs/evals/) | Retained evidence: [Claude Code](docs/evals/claude-code-2026-11-07/summary.md), [Codex on Windows](docs/evals/codex-2026-11-07/summary.md) ([rerun with the isolated verifier](docs/evals/codex-windows-2026-11-08/summary.md)), [Codex on Linux](docs/evals/codex-linux-2026-11-08/summary.md); the [agent benchmark](docs/evals/benchmark/README.md) harness (no real runs yet) |
 | [Distribution](docs/distribution.md) | Install channels and the plugin-directory submission |
 | [Comparison](docs/COMPARISON.md) | Similar tools, scored under two weightings, with caveats |
 

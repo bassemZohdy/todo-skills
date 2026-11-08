@@ -64,4 +64,6 @@ export MSYS_NO_PATHCONV=1
 # Exactly this mode is requested: do not silently fall back to unelevated.
 mode="${TRIAL_WINDOWS_SANDBOX:-elevated}"
 case "$mode" in elevated|mxc) ;; *) echo 'INFRA_ERROR: unsupported Windows sandbox mode' >&2; exit 2 ;; esac
+# The first line of every assertion log names the verifier, so published evidence shows where the assertions ran.
+printf 'INFO  verifier: windows-assert-exec.sh, %s Windows sandbox, python %s\n' "$mode" "${py:-$(command -v python3 2>/dev/null || echo none)}"
 timeout 180 codex -c "windows.sandbox=$mode" -c 'default_permissions="verify"'   -c "permissions.verify.filesystem=$fs" -c 'permissions.verify.network.enabled=false'   -c 'shell_environment_policy.inherit="core"' -c 'shell_environment_policy.ignore_default_excludes=false'   sandbox -P verify -C "$repo_w" -- "$bash_w" -c   'export TRIAL_REPORT="$1" PYTHONNOUSERSITE=1; [ -z "$5" ] || PATH="$5:$PATH"; source "$2" "$3" "$4"'   _ "$report" "$here_w/assert.sh" "$repo_w" "$scenario" "$shim"

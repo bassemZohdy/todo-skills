@@ -83,6 +83,7 @@ Scripts that test the harness and the retained evidence. The scripts not marked 
 | `test-shell-line-endings.sh` | A shell tool copied from a Windows (autocrlf) checkout still runs on Linux (`.gitattributes` keeps `*.sh` LF; FIX-038) |
 | `test-codex-evidence.sh` | The Windows Codex evidence in `docs/evals/codex-2026-11-07` is complete, checksummed and consistent |
 | `test-linux-codex-evidence.sh` | The Linux Codex evidence in `docs/evals/codex-linux-2026-11-08` is complete and its hashes, prompts and verdicts agree |
+| `test-existing-project-evidence.sh` | The existing-project rerun in `docs/evals/eval-skills-2026-11-08` (TASK-043): hashes, three fresh sessions, no commit between them, the claim, drain and merge, and the independent checks |
 | `test-linux-boundary.sh` | **By hand** (needs Docker and the `todo-codex-linux` image): dummy-sentinel probes of the Linux profile and of `assert-exec.sh` |
 | `test-verifier-failures.sh` | A verifier that is refused or killed is INFRA_ERROR in `score.sh`, `run-claude.sh` and `run-codex.sh`, never PASS or FAIL, and both runners assert through `assert-exec.sh` (stubs, FIX-041) |
 | `test-windows-verifier-isolation.sh` | **Windows only** (needs native Windows, Node and the elevated Codex sandbox): dummy-sentinel probes of the default verifier, with no opt-in, and a check that an unusable sandbox fails closed. Run by `.github/workflows/windows-verifier-test.yml` on disposable windows-2022 and windows-2025 runners |

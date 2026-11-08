@@ -2,7 +2,7 @@
 
 ## 🌳 Task Tree
 - [ ] **FEAT-001** · P1 · high · Build the reporting module
-  - Done when: reports render; `python3 -m unittest tests.test_report`
+  - Done when: reports render and a missing template fails with an error; `python3 -m unittest tests.test_report`
   - [ ] **FEAT-001.1** · mid · Report data layer, decomposed when it becomes workable
     - Done when: data layer covered; `python3 -m unittest tests.test_report_data`
     - State: next: decompose

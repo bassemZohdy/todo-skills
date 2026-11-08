@@ -74,4 +74,32 @@ grep -q '^PASS  an agent report was provided and is not empty' "$tmp/report-asse
   grep -q '^PASS  report says the baseline is red and names the failing test' "$tmp/report-assert.log" && \
   grep -q '^PASS  report suggests a fix' "$tmp/report-assert.log" || { echo 'FAIL  baseline report inaccessible'; cat "$tmp/report-assert.log"; exit 1; }
 echo 'PASS  baseline report remains readable'
-echo '9 passed, 0 failed'
+# FIX-052: Python scenario assertions must run in the verifier. Its sandbox user cannot start a Microsoft Store `python3`
+# alias, so that host needs TRIAL_PYTHON; without it the verifier refuses (INFRA_ERROR) rather than scoring false FAILs.
+# The probe test also fails while the host's user site-packages are enabled (one shadowed the scenario's `tests`).
+store=no; case "$(command -v python3 2>/dev/null)" in */Microsoft/WindowsApps/*) store=yes ;; esac
+n=9
+if [ "$store" = yes ] && [ -z "${TRIAL_PYTHON:-}" ]; then
+  echo 'INFO  python3 is a Store alias and TRIAL_PYTHON is unset: the Python probe did not run'
+elif command -v python3 >/dev/null 2>&1 || [ -n "${TRIAL_PYTHON:-}" ]; then
+  py="$tmp/py-runs/happy-path/repo"; mkdir -p "$tmp/py-runs/happy-path"
+  bash "$here/setup.sh" "$py" happy-path >/dev/null
+  cat > "$py/tests/test_user_site.py" <<'PY'
+import sys, unittest
+class UserSiteTest(unittest.TestCase):
+    def test_no_user_site(self):
+        self.assertTrue(sys.flags.no_user_site, 'the host user site-packages are enabled')
+PY
+  env -u TRIAL_WINDOWS_ISOLATION bash "$here/assert-exec.sh" "$py" happy-path > "$tmp/py-assert.log" 2>&1 || :
+  grep -q '^PASS  tests pass on the checked-out branch' "$tmp/py-assert.log" || { echo 'FAIL  the Python project test did not pass in the verifier'; cat "$tmp/py-assert.log"; exit 1; }
+  echo 'PASS  Python project tests run in the verifier without the host user site'; n=10
+else
+  echo 'INFO  no python3: the Python probe did not run'
+fi
+mkdir -p "$tmp/fake/Microsoft/WindowsApps"; printf '#!/usr/bin/env bash\nexit 0\n' > "$tmp/fake/Microsoft/WindowsApps/python3"
+chmod +x "$tmp/fake/Microsoft/WindowsApps/python3"; rm -f "$repo/probe-result.txt"
+rc=0; env -u TRIAL_PYTHON PATH="$tmp/fake/Microsoft/WindowsApps:$PATH" bash "$here/assert-exec.sh" "$repo" happy-path > "$tmp/alias.log" 2>&1 || rc=$?
+[ "$rc" = 2 ] && grep -q '^INFRA_ERROR: python3 is a Microsoft Store alias' "$tmp/alias.log" && [ ! -e "$repo/probe-result.txt" ] \
+  || { echo "FAIL  a Store python3 alias without TRIAL_PYTHON did not fail closed (exit $rc)"; cat "$tmp/alias.log"; exit 1; }
+echo 'PASS  a Store python3 alias without TRIAL_PYTHON fails closed'
+echo "$((n + 1)) passed, 0 failed"

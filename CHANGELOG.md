@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **FIX-052** (fix): Run Python scenario assertions in the isolated Windows verifier: `TRIAL_PYTHON` names a regular python.exe for the sandbox user, a Microsoft Store python3 alias without it is INFRA_ERROR, and `PYTHONNOUSERSITE=1` keeps the host's user site-packages out. Ref: tests/trials/windows-assert-exec.sh. Validated: `bash tests/trials/test-windows-verifier-isolation.sh`. Docs: updated tests/trials/README.md, docs/evals/fix-041.md.
 - **FIX-051** (fix): Keep the lane runner's controller clock sub-second on macOS bash 3.2, which has no EPOCHREALTIME. Ref: tests/trials/run-codex-lanes.sh. Validated: `bash tests/trials/test-lane-activity.sh`. Docs: updated tests/trials/README.md.
 - **FIX-041** (fix): Isolate native Windows trial verification from authentication and evidence. Ref: docs/evals/linux-boundary-2026-11-08.md. Validated: `bash tests/trials/test-windows-verifier-isolation.sh`. Docs: updated README.md, SECURITY.md, docs/DEVELOPMENT.md, docs/agent-compatibility.md, docs/evals/fix-041.md.
 - **FIX-038** (fix): Keep shell scripts LF in Windows Git checkouts so copied optional tools run on Linux. Ref: README.md. Validated: `bash tests/trials/test-shell-line-endings.sh`.

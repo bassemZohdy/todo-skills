@@ -33,19 +33,35 @@ for item in "$runs"/* "$scenario_dir"/*; do
 done
 shopt -u nullglob
 fs="$fs}"
+# Python (FIX-052): the elevated sandbox runs as another user, which cannot start the Microsoft Store `python3` alias
+# ("Permission denied"), so every Python assertion would fail whatever the agent did. TRIAL_PYTHON=<python.exe> puts a
+# `python3`/`python` shim for a regular installation first on the sandbox PATH; a Store alias without it is INFRA_ERROR.
+# PYTHONNOUSERSITE=1: the host's user site-packages are not part of the scenario (another project's `tests` package there
+# shadowed the scenario's own tests on this project's Windows host).
+py="${TRIAL_PYTHON:-}"
+if [ -z "$py" ]; then
+  case "$(command -v python3 2>/dev/null)" in */Microsoft/WindowsApps/*)
+    echo 'INFRA_ERROR: python3 is a Microsoft Store alias, which the elevated sandbox cannot run; set TRIAL_PYTHON to a regular python.exe' >&2; exit 2 ;; esac
+else
+  [ -f "$py" ] || { echo "INFRA_ERROR: TRIAL_PYTHON $py does not exist" >&2; exit 2; }
+fi
+work="$(mktemp -d "$(dirname "$runs")/trial-verify.XXXXXXXX")" || exit 2
+trap 'rm -rf "$work"' EXIT
+mkdir "$work/bin"; shim=
+if [ -n "$py" ]; then
+  py_u="$(cygpath -u "$py")"
+  for name in python3 python; do printf '#!/usr/bin/env bash
+exec "%s" "$@"
+' "$py_u" > "$work/bin/$name"; chmod +x "$work/bin/$name"; done
+  shim="$work/bin"
+fi
 report="${TRIAL_REPORT:-}"
 if [ -n "$report" ] && [ "$report" != /dev/null ]; then
-  report_dir="$(mktemp -d "$(dirname "$runs")/trial-report.XXXXXXXX")" || exit 2
-  trap 'rm -f "$report_dir/report.txt"; rmdir "$report_dir"' EXIT
-  cp -- "$report" "$report_dir/report.txt" || exit 2
-  report="$(cygpath -m "$report_dir/report.txt")"
+  cp -- "$report" "$work/report.txt" || exit 2
+  report="$(cygpath -m "$work/report.txt")"
 fi
 export MSYS_NO_PATHCONV=1
 # Exactly this mode is requested: do not silently fall back to unelevated.
 mode="${TRIAL_WINDOWS_SANDBOX:-elevated}"
 case "$mode" in elevated|mxc) ;; *) echo 'INFRA_ERROR: unsupported Windows sandbox mode' >&2; exit 2 ;; esac
-timeout 180 codex -c "windows.sandbox=$mode" -c 'default_permissions="verify"' \
-  -c "permissions.verify.filesystem=$fs" -c 'permissions.verify.network.enabled=false' \
-  -c 'shell_environment_policy.inherit="core"' -c 'shell_environment_policy.ignore_default_excludes=false' \
-  sandbox -P verify -C "$repo_w" -- "$bash_w" -c \
-  'export TRIAL_REPORT="$1"; source "$2" "$3" "$4"' _ "$report" "$here_w/assert.sh" "$repo_w" "$scenario"
+timeout 180 codex -c "windows.sandbox=$mode" -c 'default_permissions="verify"'   -c "permissions.verify.filesystem=$fs" -c 'permissions.verify.network.enabled=false'   -c 'shell_environment_policy.inherit="core"' -c 'shell_environment_policy.ignore_default_excludes=false'   sandbox -P verify -C "$repo_w" -- "$bash_w" -c   'export TRIAL_REPORT="$1" PYTHONNOUSERSITE=1; [ -z "$5" ] || PATH="$5:$PATH"; source "$2" "$3" "$4"'   _ "$report" "$here_w/assert.sh" "$repo_w" "$scenario" "$shim"

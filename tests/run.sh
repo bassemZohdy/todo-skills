@@ -423,6 +423,38 @@ if [ -f "$replay" ]; then
 fi
 [ -f "$replay" ] || bad "tools/todo-replay.sh is missing"
 rm -rf "$rt"
+# Load budget (TASK-061): the "## Load budget" table in docs/DEVELOPMENT.md lists, per command, the files it always loads
+# (under plugin/skills/) and a byte and word budget. Print each command's load, and fail when one is over its budget, when
+# a listed file is missing, or when a SKILL.md is in no row. Bytes are counted with LF line endings on every platform.
+loadcheck() {   # <doc>: prints LOAD and OVER lines; returns 1 when a row is over, a file is missing or no row parses
+  local doc="$1" n=0 over=0 cmd files bb wb b w f
+  while IFS='|' read -r _ cmd files bb wb _; do
+    cmd="$(printf '%s' "$cmd" | tr -d '`' | sed -e 's/^ *//' -e 's/ *$//')"; bb="$(printf '%s' "$bb" | tr -dc '0-9')"; wb="$(printf '%s' "$wb" | tr -dc '0-9')"
+    [ -n "$bb" ] && [ -n "$wb" ] || continue
+    n=$((n + 1)); b=0; w=0
+    for f in $(printf '%s\n' "$files" | awk -F'`' '{ for (i = 2; i <= NF; i += 2) print $i }'); do
+      if [ ! -f "$root/plugin/skills/$f" ]; then echo "OVER $cmd: missing file $f"; over=1; continue; fi
+      b=$((b + $(tr -d '\r' < "$root/plugin/skills/$f" | wc -c))); w=$((w + $(wc -w < "$root/plugin/skills/$f")))
+    done
+    echo "LOAD $cmd: $b bytes, $w words (budget $bb, $wb)"
+    if [ "$b" -gt "$bb" ] || [ "$w" -gt "$wb" ]; then echo "OVER $cmd: $b bytes, $w words exceeds $bb, $wb"; over=1; fi
+  done < <(tr -d '\r' < "$doc" | awk '/^## Load budget/ { on = 1; next } /^## / { on = 0 } on && /^\| `\// { print }')
+  [ "$n" -gt 0 ] && [ "$over" -eq 0 ]
+}
+lb_out="$(loadcheck "$root/docs/DEVELOPMENT.md")"; lb_rc=$?
+printf '%s\n' "$lb_out" | grep '^LOAD' | sed 's/^/      /'
+lb_bad="$(printf '%s\n' "$lb_out" | grep '^OVER' | tr '\n' ';')"
+lb_rows="$(tr -d '\r' < "$root/docs/DEVELOPMENT.md" | awk '/^## Load budget/ { on = 1; next } /^## / { on = 0 } on')"
+for s in "$root"/plugin/skills/*/SKILL.md; do
+  rel="${s#"$root/plugin/skills/"}"
+  printf '%s\n' "$lb_rows" | grep -qF "\`$rel\`" || lb_bad="$lb_bad $rel is in no row;"
+done
+if [ "$lb_rc" -eq 0 ] && [ -z "$lb_bad" ]; then ok "every command's always-loaded files fit its budget in docs/DEVELOPMENT.md"; else bad "load budget: ${lb_bad:-no budget row parsed}"; fi
+# The check itself must fail a row over its budget.
+lbt="$(mktemp -d)"
+printf '## Load budget\n\n| Command | Files | Bytes | Words |\n|---|---|---|---|\n| `/todo` | `todo/SKILL.md` | 10 | 10 |\n' > "$lbt/doc.md"
+if loadcheck "$lbt/doc.md" | grep -q '^OVER /todo:'; then ok "the load budget check fails a command over its budget"; else bad "the load budget check accepted a command over its budget"; fi
+rm -rf "$lbt"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

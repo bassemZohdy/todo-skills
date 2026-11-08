@@ -63,11 +63,32 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - the packaging rules above;
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
 - that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules);
+- each command's loaded bytes and words against the [load budget](#load-budget);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.
 
 When you change the lint, add a fixture: `ok-<case>.md`, `I<n>-<case>.md` or `W<n>-<case>.md`.
 
 The trial harness, its scenarios and its own checks are described in [tests/trials/README.md](../tests/trials/README.md) and [trials.md](trials.md).
+
+## Load budget
+
+Every command loads the core skill, its own `SKILL.md`, and the reference files its steps always read. `tests/run.sh` adds up the bytes (counted with LF line endings) and words of the files in each row below, prints them, and fails when a command is over either budget, a listed file is missing, or a `SKILL.md` is in no row. Files read only on a condition (`review.md`, `clarify.md`, `rtm.md`) are not counted; `lanes.md` has its own row. Words are a rough stand-in for tokens, which were not measured.
+
+The budgets are the 2026-11-08 measurement plus about 5%, rounded up. Raise one only with a measured reason in the commit, and prefer moving a rare branch into a `reference/` file.
+
+| Command | Files (under `plugin/skills/`) | Byte budget | Word budget |
+|---|---|---|---|
+| `/todo` | `todo/SKILL.md` | 24000 | 3900 |
+| `/todo-init` | `todo/SKILL.md` `todo-init/SKILL.md` | 31500 | 5100 |
+| `/todo-init --ci` | `todo/SKILL.md` `todo-init/SKILL.md` `todo/reference/ci.md` `todo/reference/verification.md` | 46000 | 7400 |
+| `/todo-plan` | `todo/SKILL.md` `todo-plan/SKILL.md` `todo-add/SKILL.md` `todo/reference/verification.md` | 45500 | 7500 |
+| `/todo-add` | `todo/SKILL.md` `todo-add/SKILL.md` `todo/reference/verification.md` | 39500 | 6500 |
+| `/todo-continue` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` | 57500 | 9400 |
+| `/todo-continue --lane` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` `todo/reference/lanes.md` | 62500 | 10200 |
+| `/todo-update` | `todo/SKILL.md` `todo-update/SKILL.md` | 33000 | 5400 |
+| `/todo-status` | `todo/SKILL.md` `todo-status/SKILL.md` | 28000 | 4500 |
+| `/todo-report` | `todo/SKILL.md` `todo-report/SKILL.md` `todo-report/template.md` | 41000 | 5000 |
+| `/todo-release` | `todo/SKILL.md` `todo-release/SKILL.md` | 28000 | 4500 |
 
 ## CI
 

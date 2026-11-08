@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # todo-lint.sh - deterministic, read-only check of the todo invariants I1-I10.
-# Usage: bash todo-lint.sh [TODO.md] [CHANGELOG.md]     (run from the repository root)
+# Usage: bash todo-lint.sh [--progress] [TODO.md] [CHANGELOG.md]     (run from the repository root)
+# --progress also prints one read-only line (FEAT-042), whatever the lint result, without changing the exit code:
+#   Progress: [<10 cells>] <done>/<total> leaves · <n> active · <n> blocked · <n> roots open · <n> drained in [Unreleased]
+#   Leaves are tasks without children. Done = [x] leaves plus the leaves of roots drained into ## [Unreleased] (an entry's
+#   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
+#   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
 # Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
+progress=0
+if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi
 todo="${1:-TODO.md}"
 changelog="${2:-CHANGELOG.md}"
 
@@ -214,4 +221,30 @@ END {
 }' "$todo"
 rc=$?
 if [ "$rc" -eq 0 ]; then echo "OK: invariants I1-I10 hold"; fi
+if [ "$progress" -eq 1 ]; then
+  tree="$(awk '{ sub(/\r$/, "") }
+    /^ *- \[.\] \*\*[A-Z]+-[0-9]+(\.[0-9]+)*\*\*/ { match($0, /^ */); n++; lv[n] = RLENGTH / 2; mk[n] = substr($0, RLENGTH + 4, 1) }
+    END { for (i = 1; i <= n; i++) { if (lv[i] == 0) r++; if (mk[i] == "/") a++
+            if (i == n || lv[i + 1] <= lv[i]) { l++; if (mk[i] == "x") d++; if (mk[i] == "!") b++ } }
+          print l + 0, d + 0, b + 0, a + 0, r + 0 }' "$todo")"
+  drained="0 0"
+  if [ -f "$changelog" ]; then
+    drained="$(awk '{ sub(/\r$/, "") }
+      /^## \[Unreleased\]/ { on = 1; next }
+      /^## / { on = 0 }
+      on && /^- \*\*[A-Z]+-[0-9]+(\.[0-9]+)*\*\*/ {
+        r++; n = 0; p = index($0, "Includes:")
+        if (p > 0) { s = substr($0, p + 9); while (match(s, /[A-Z]+-[0-9]+(\.[0-9]+)*/)) { ids[++n] = substr(s, RSTART, RLENGTH); s = substr(s, RSTART + RLENGTH) } }
+        if (n == 0) l++
+        for (i = 1; i <= n; i++) { par = 0; for (j = 1; j <= n; j++) if (j != i && index(ids[j], ids[i] ".") == 1) par = 1; if (!par) l++ }
+      }
+      END { print r + 0, l + 0 }' "$changelog")"
+  fi
+  awk -v t="$tree" -v u="$drained" 'BEGIN {
+    split(t, a, " "); split(u, c, " ")
+    total = a[1] + c[2]; done = a[2] + c[2]; blocked = a[3]; nd = 0; nb = 0
+    if (total > 0) { nd = int(10 * done / total); nb = int(10 * blocked / total + 0.5); if (blocked > 0 && nb < 1) nb = 1; if (nb > 10 - nd) nb = 10 - nd }
+    bar = ""; for (i = 0; i < nd; i++) bar = bar "#"; for (i = 0; i < nb; i++) bar = bar "!"; while (length(bar) < 10) bar = bar "-"
+    printf "Progress: [%s] %d/%d leaves · %d active · %d blocked · %d roots open · %d drained in [Unreleased]\n", bar, done, total, a[4], blocked, a[5], c[1] }'
+fi
 exit "$rc"

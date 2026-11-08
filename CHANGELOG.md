@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **FIX-041** (fix): Isolate native Windows trial verification from authentication and evidence. Ref: docs/evals/linux-boundary-2026-11-08.md. Validated: `bash tests/trials/test-windows-verifier-isolation.sh`. Docs: updated README.md, SECURITY.md, docs/DEVELOPMENT.md, docs/agent-compatibility.md, docs/evals/fix-041.md.
 - **FIX-038** (fix): Keep shell scripts LF in Windows Git checkouts so copied optional tools run on Linux. Ref: README.md. Validated: `bash tests/trials/test-shell-line-endings.sh`.
 - **FIX-039** (fix): Run multi-node Codex trials with distinct fresh sessions, retained prompts, checksums and independent per-invocation assertions; Linux isolation remains provisional pending TASK-040. Ref: tests/trials/run-codex-multi.sh. Validated: `bash tests/trials/test-codex-fresh-invocations.sh`.
 - **FIX-037** (fix): Exclude batch evidence and metadata from trial scenario scores while retaining incomplete scenarios and all verdicts. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-score-layout.sh`, `bash tests/trials/test-score-outcomes.sh`.

@@ -26,9 +26,20 @@ set -u
 repo="${1:?usage: codex-exec.sh <repo> <prompt-file> <report-file>}"; pf="${2:?prompt file}"; out="${3:?report file}"
 nat() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s\n' "$1"; fi; }
 repo="$(cd "$repo" && pwd)"
-args=(exec --ephemeral -s workspace-write
-  -c sandbox_workspace_write.exclude_tmpdir_env_var=true -c sandbox_workspace_write.exclude_slash_tmp=true
-  -C "$(nat "$repo")" -o "$out")
-[ -d "$repo.todo" ] && args+=(--add-dir "$(nat "$repo.todo")")
+if [ "${TRIAL_LINUX_ISOLATION:-0}" = 1 ]; then
+  # This profile is for a Linux container with controller at /controller and
+  # all trial data under /runs. Audit its boundaries before trusting results.
+  case "$repo" in /runs/*) ;; *) echo 'Linux profile requires a repository under /runs' >&2; exit 2 ;; esac
+  case "$repo" in *'"'*|*'\'*) echo 'unsupported character in repo path' >&2; exit 2 ;; esac
+  args=(exec --ephemeral --ignore-user-config -m "${TRIAL_CODEX_MODEL:-gpt-6.1-terra}"
+    -c 'default_permissions="trial"'
+    -c "permissions.trial.filesystem={\":root\"=\"read\", \"/root/.codex\"=\"deny\", \"/controller\"=\"deny\", \"/runs\"=\"deny\", \"$repo\"=\"write\", \"$repo/.git\"=\"write\"}"
+    -c 'permissions.trial.network.enabled=false' -C "$repo" -o "$out")
+else
+  args=(exec --ephemeral -s workspace-write
+    -c sandbox_workspace_write.exclude_tmpdir_env_var=true -c sandbox_workspace_write.exclude_slash_tmp=true
+    -C "$(nat "$repo")" -o "$out")
+  [ -d "$repo.todo" ] && args+=(--add-dir "$(nat "$repo.todo")")
+fi
 tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
 ${tmo[@]+"${tmo[@]}"} codex "${args[@]}" "$(cat "$pf")" < /dev/null

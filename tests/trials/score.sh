@@ -36,11 +36,14 @@ for d in "$runs"/*/; do
   fi
   # the agent's record: newest evidence folder, else the old agent.log
   evd=""; [ -d "$d/evidence" ] && evd="$(ls -1 "$d/evidence" 2>/dev/null | sort | tail -1)"
-  code=""; outcome=""; report=""
+  code=""; outcome=""; report=""; multi=""
   if [ -n "$evd" ]; then
     e="$d/evidence/$evd"
     [ -f "$e/agent-exit.txt" ] && code="$(tr -d ' \r\n' < "$e/agent-exit.txt")"
     [ -f "$e/outcome.txt" ] && outcome="$(tr -d ' \r\n' < "$e/outcome.txt")"
+    [ -f "$e/multi-outcome.txt" ] && multi="$(tr -d ' \r\n' < "$e/multi-outcome.txt")"
+    # A controller interrupted between invocations has no final verdict yet.
+    if [ -z "$multi" ] && [ -f "$e/prompt.txt" ] && grep -Fq 'The controller will run it again in a fresh session' "$e/prompt.txt"; then multi=UNVERIFIED; fi
     [ -s "$e/report.txt" ] && report=yes
     export TRIAL_REPORT="$e/report.txt"
   elif [ -f "$d/agent.log" ]; then
@@ -56,6 +59,11 @@ for d in "$runs"/*/; do
   if [ "$outcome" = INFRA_ERROR ] || [ "$code" != 0 ]; then
     printf '%-11s %-22s agent exit %s%s\n' INFRA_ERROR "$s" "$code" "$([ "$outcome" = INFRA_ERROR ] && echo ', marked INFRA_ERROR')"; ninfra=$((ninfra + 1)); continue
   fi
+  if [ "$multi" = INFRA_ERROR ]; then
+    printf '%-11s %-22s multi-session controller reported infrastructure failure\n' INFRA_ERROR "$s"; ninfra=$((ninfra + 1)); continue
+  elif [ -n "$multi" ] && [ "$multi" != PASS ] && [ "$multi" != FAIL ]; then
+    printf '%-11s %-22s multi-session result: %s\n' UNVERIFIED "$s" "$multi"; nunv=$((nunv + 1)); continue
+  fi
   if [ -z "$report" ]; then
     printf '%-11s %-22s agent exit 0 but no report\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
@@ -69,7 +77,7 @@ for d in "$runs"/*/; do
   if [ $((p + f)) -eq 0 ]; then
     printf '%-11s %-22s no checks ran\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
-  if [ "$f" = 0 ]; then ok=$((ok + 1)); v=PASS; else nfail=$((nfail + 1)); v=FAIL; fi
+  if [ "$f" = 0 ] && [ "$multi" != FAIL ]; then ok=$((ok + 1)); v=PASS; else nfail=$((nfail + 1)); v=FAIL; fi
   printf '%-11s %-22s %d/%d checks\n' "$v" "$s" "$p" $((p + f))
   printf '%s\n' "$out" | grep '^FAIL' | sed 's/^FAIL  /       - /'
 done

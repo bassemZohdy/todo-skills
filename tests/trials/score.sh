@@ -3,7 +3,7 @@
 # Layout: <runs-dir>/<scenario>/repo/ as made by `setup.sh <runs-dir>/<scenario>/repo <scenario>`, and the agent's
 # evidence in <runs-dir>/<scenario>/evidence/<id>/ as written by run-claude.sh (the newest <id> counts). Older batches with
 # agent.log directly in the scenario folder are still read.
-# Every scenario folder is counted in the totals and gets one verdict:
+# Only names listed by setup.sh are scenario folders; each is counted even if incomplete.
 #   PASS         the agent ran (exit 0, a report) and every check in assert.sh passes
 #   FAIL         the agent ran and at least one check fails
 #   INFRA_ERROR  the agent exited non-zero (for example 124, a timeout), or evidence/<id>/outcome.txt says INFRA_ERROR
@@ -18,10 +18,16 @@ set -u
 runs="${1:?usage: score.sh <runs-dir>}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skip="${TRIAL_SKIP:-}"
+# Use the setup script's scenario list, also used by selftest.sh, as the source
+# of truth so batch evidence and unrelated metadata never become scenarios.
+scenarios="$(sed -n '/^# Scenarios:/,/^# Needs /p' "$here/setup.sh" | sed '$d; s/^# Scenarios: //; s/^# *//; s/|/ /g')"
 n=0; ok=0; P=0; T=0; nfail=0; ninfra=0; nunv=0
 for d in "$runs"/*/; do
   [ -d "$d" ] || continue
-  s="$(basename "$d")"; n=$((n + 1))
+  s="$(basename "$d")"; known=no
+  for scenario in $scenarios; do [ "$scenario" != "$s" ] || known=yes; done
+  [ "$known" = yes ] || continue
+  n=$((n + 1))
   repo=""
   if [ -d "$d/repo" ]; then repo="$d/repo"
   else repo="$(find "$d" -mindepth 1 -maxdepth 1 -type d ! -name '*.todo' ! -name evidence | head -1)"; fi

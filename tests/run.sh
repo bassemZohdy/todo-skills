@@ -49,6 +49,37 @@ fi
 # The Codex manifest parses and carries the same version as the Claude plugin manifest.
 cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugin/.codex-plugin/plugin.json" | head -1)"
 if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/plugin/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
+# FEAT-048: the Codex manifest carries the public-directory listing metadata within the documented limits
+# (developers.openai.com/plugins/deploy/submission, read 2026-11-08) and declares no MCP servers, apps or hooks.
+cxbad="$(python3 - "$root/plugin/.codex-plugin/plugin.json" <<'PY' 2>&1
+import json, re, sys
+m = json.load(open(sys.argv[1], encoding='utf-8')); i = m.get('interface') or {}; e = []
+def text(k, n, d=i):
+    v = d.get(k)
+    if not isinstance(v, str) or not v.strip() or len(v) > n: e.append(f'{k}: required, at most {n} characters')
+text('displayName', 30); text('shortDescription', 30); text('longDescription', 4000); text('developerName', 80); text('category', 80)
+c = i.get('capabilities')
+if not isinstance(c, list) or len(c) > 20 or not all(isinstance(x, str) and 0 < len(x) <= 120 for x in c): e.append('capabilities: at most 20 strings of at most 120 characters')
+p = i.get('defaultPrompt', [])
+p = [p] if isinstance(p, str) else p
+if not isinstance(p, list) or len(p) > 3 or len(set(p)) != len(p) or not all(isinstance(x, str) and 0 < len(x) <= 128 and '@' not in x for x in p): e.append('defaultPrompt: at most 3 unique prompts of at most 128 characters, no @mentions')
+for k in ('websiteURL', 'supportURL', 'privacyPolicyURL', 'termsOfServiceURL'):
+    if k in i and not (isinstance(i[k], str) and i[k].startswith('https://') and len(i[k]) <= 1024): e.append(f'{k}: HTTPS, at most 1024 characters')
+b = i.get('brandColor')
+if b is not None:
+    if not (isinstance(b, str) and re.fullmatch(r'#[0-9A-Fa-f]{6}', b)): e.append('brandColor: #RRGGBB')
+    else:
+        lin = lambda v: v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+        L = sum(w * lin(int(b[k:k + 2], 16) / 255) for w, k in ((0.2126, 1), (0.7152, 3), (0.0722, 5)))
+        if 1.05 / (L + 0.05) < 2: e.append('brandColor: contrast against white below 2:1')
+if not re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)*', m.get('name', '')) or len(m['name']) > 64: e.append('name: at most 64 lowercase letters, digits and single hyphens')
+text('description', 4000, m)
+for k in ('hooks', 'mcpServers', 'apps'):
+    if k in m: e.append(f'{k}: a skills-only package declares none')
+print('; '.join(e))
+PY
+)"
+if [ -z "$cxbad" ]; then ok "codex manifest carries listing metadata within the directory limits"; else bad "codex listing metadata: $cxbad"; fi
 
 # The report template keeps its four placeholders.
 tpl="$root/tools/template.html"

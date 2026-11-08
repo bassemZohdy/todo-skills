@@ -55,7 +55,7 @@ Fresh `codex exec` processes via `tests/trials/run-codex.sh` (codex-cli 0.167.0,
 
 ### Linux Codex runs (2026-11-08)
 
-Fresh Codex CLI 0.167.0 sessions using `gpt-6.1-terra` in Linux containers passed all eight scenarios (105/105 final assertions). TypeScript and Java used a fresh session per node. The multi-module lanes ran sequentially; the event heuristic's `overlapping` output is not proof of concurrent agents. Clean installations with and without optional tools passed, and a scratch clone of an existing project completed a feature after an explicit backlog-commit workaround. Results are provisional because the sandbox boundary has not had a full adversarial audit. Prompts, logs, exit codes, Git state, failures and checksums are in [the Linux evidence](evals/codex-linux-2026-11-08/summary.md).
+Fresh Codex CLI 0.167.0 sessions using `gpt-6.1-terra` in Linux containers passed all eight scenarios (105/105 final assertions). TypeScript and Java used a fresh session per node. The multi-module lanes ran sequentially; the event heuristic's `overlapping` output is not proof of concurrent agents. Clean installations with and without optional tools passed, and a scratch clone of an existing project completed a feature after an explicit backlog-commit workaround. Results are provisional because the sandbox boundary has not had a full adversarial audit. Prompts, logs, exit codes, Git state, failures and checksums are in [the Linux evidence](evals/codex-linux-2026-11-08/summary.md); the [independent CI verification](evals/codex-linux-2026-11-08/ci-verification.md) checked the retained evidence on Ubuntu and macOS.
 
 ### Limits of the earlier by-hand runs
 

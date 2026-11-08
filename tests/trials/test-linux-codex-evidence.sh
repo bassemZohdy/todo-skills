@@ -65,12 +65,15 @@ for mode in ('without-tools', 'with-tools'):
     assert (task / 'agent-exit.txt').read_text().strip() == '0'
     assert (task / 'assert-exit.txt').read_text().strip() == '0'
     messages = [json.loads(line) for line in (discovery / 'codex.jsonl').read_text(encoding='utf-8').splitlines() if line]
+    discovery_id = next(e['thread_id'] for e in messages if e['type'] == 'thread.started')
     text = ' '.join(e['item']['text'] for e in messages if e.get('type') == 'item.completed' and e.get('item', {}).get('type') == 'agent_message')
     names = set(re.findall(r'(?<![a-z-])todo(?:-[a-z]+)?(?![a-z-])', text))
     assert expected <= names
     assert sum(line.startswith('PASS  ') for line in (task / 'assert.log').read_text().splitlines()) == 12
+    events = [json.loads(line) for line in (task / 'codex.jsonl').read_text(encoding='utf-8').splitlines() if line]
+    task_id = next(e['thread_id'] for e in events if e['type'] == 'thread.started')
+    ids.extend((discovery_id, task_id))
     if mode == 'with-tools':
-        events = [json.loads(line) for line in (task / 'codex.jsonl').read_text(encoding='utf-8').splitlines() if line]
         assert any(e.get('type') == 'item.completed' and e.get('item', {}).get('exit_code') == 0 and 'bash .todo/check.sh' in e['item'].get('command', '') for e in events)
 print('PASS  both installations discovered nine skills and completed their checks')
 
@@ -83,6 +86,8 @@ for name, session_id in metadata['sessions'].items():
     first = json.loads((rep / name / 'codex.jsonl').read_text(encoding='utf-8').splitlines()[0])
     assert first['thread_id'] == session_id
     assert (rep / name / 'agent-exit.txt').read_text().strip() == '0'
+    ids.append(session_id)
+assert len(ids) == len(set(ids)) == 20
 assert (rep / 'independent-check-exit.txt').read_text().strip() == '0'
 assert (rep / 'final-regression-exit.txt').read_text().strip() == '0'
 assert '14 unique expected targets' in (rep / 'independent-check.log').read_text()

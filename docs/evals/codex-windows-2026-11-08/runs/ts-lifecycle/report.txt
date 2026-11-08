@@ -1,0 +1,10 @@
+**Stopped at step 4:** FEAT-001.1, “Add subtract with a test,” could not start because Git could not create its branch: `unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-multiply-src`. The environment grants read-only access to `.git`.
+
+- Baseline: `npm test` passed, **1 test**.
+- Files changed: none. No commit was created.
+- Checked-out branch: `main`, at commit `196184f`.
+- Parent FEAT-001: **0/2 children done**.
+- Next workable node: FEAT-001.1, once Git metadata is writable.
+- Adjacent problems: none identified. Clear context before the next invocation.
+
+**Skill-text ambiguities or contradictions encountered:** none.

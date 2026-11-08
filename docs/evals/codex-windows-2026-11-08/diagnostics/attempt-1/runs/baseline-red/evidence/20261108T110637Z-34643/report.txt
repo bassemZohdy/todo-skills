@@ -1,0 +1,7 @@
+**Stopped at step 3: baseline red.** FEAT-001, “Add subtract to calc.py,” cannot start because its regression command could not run:
+
+`python3 -m unittest discover -s tests` — exit 1: `python3.exe` “cannot be accessed by the system.” No tests ran, so there is no passing baseline or failing test ID to report.
+
+No files were changed and no commit or task branch was created. The checked-out branch is `main`. FEAT-001 remains the next workable node, but it is blocked by the Python setup. Restore `python3` and rerun `/todo-continue`; clearing context before the next invocation is suggested.
+
+Ambiguities, contradictions, or unclear instructions encountered: **none**.

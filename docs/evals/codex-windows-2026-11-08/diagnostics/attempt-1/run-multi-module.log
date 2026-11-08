@@ -1,0 +1,4 @@
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+runner error: runner pipe closed before exit
+outcome: INFRA_ERROR (/c/Users/<user>/todo-trials/win-20261108/runs/multi-module/evidence/20261108T111224Z-37427)

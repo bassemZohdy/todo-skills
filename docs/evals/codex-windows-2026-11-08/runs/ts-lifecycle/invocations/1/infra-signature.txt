@@ -1,0 +1,1 @@
+**Stopped at step 4:** FEAT-001.1, “Add subtract with a test,” could not start because Git could not create its branch: `unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-multiply-src`. The environment grants read-only access to `.git`.

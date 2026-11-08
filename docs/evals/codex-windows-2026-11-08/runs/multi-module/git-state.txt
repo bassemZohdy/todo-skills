@@ -1,0 +1,31 @@
+## HEAD
+95608556a3ab4251b6a61b8d1341335559439859
+## current branch
+main
+## branches
+* main 9560855 init multi-module project
+## worktrees
+C:/Users/<user>/todo-trials/win-20261108/runs2/multi-module/repo  9560855 [main]
+## tags
+## refs
+refs/heads/main 95608556a3ab4251b6a61b8d1341335559439859
+## log --all --graph
+* 9560855  (HEAD -> main) init multi-module project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./core/pom.xml
+./core/src/main/java/mini/core/Calc.java
+./core/src/test/java/mini/core/AddTest.java
+./core/target/classes/mini/core/Calc.class
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./core/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./pom.xml
+./text/pom.xml
+./text/src/main/java/mini/text/Text.java
+./text/src/test/java/mini/text/UpperTest.java

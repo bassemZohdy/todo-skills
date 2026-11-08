@@ -1,0 +1,132 @@
+{
+  "agent": "codex-cli 0.167.0",
+  "host": "Windows 11 Pro 10.0.26300, Git Bash",
+  "controller_commit": "533b2bb1325050aa92c29f012f38491815aa562b",
+  "verifier": "windows-assert-exec.sh, elevated Windows sandbox",
+  "scenarios": [
+    {
+      "scenario": "happy-path",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 1,
+      "assertions_passed": 8,
+      "assertions_failed": 4,
+      "session_ids": [
+        "session id: 01a1baf4-f512-7301-9913-2d11451a1cc5"
+      ],
+      "infra_signature": "unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-calc-py",
+      "evidence_folder": "20261108T113936Z-286991",
+      "cause": "Codex's unelevated Windows sandbox kept Git from creating the task branch: unable to create directory for .git/refs/heads/todo/... (the agent stopped at the claim)"
+    },
+    {
+      "scenario": "baseline-red",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 10,
+      "assertions_failed": 0,
+      "session_ids": [
+        "session id: 01a1baf6-e18e-7092-929f-e374689c6e07"
+      ],
+      "infra_signature": "",
+      "evidence_folder": "20261108T114141Z-314106",
+      "cause": ""
+    },
+    {
+      "scenario": "interrupted-merge",
+      "outcome": "PASS",
+      "agent_exit": 0,
+      "assert_exit": 0,
+      "assertions_passed": 16,
+      "assertions_failed": 0,
+      "session_ids": [
+        "session id: 01a1baf9-4acd-76c3-9a6e-b02cc6311a19"
+      ],
+      "infra_signature": "",
+      "evidence_folder": "20261108T114419Z-345513",
+      "cause": ""
+    },
+    {
+      "scenario": "race-claim-conflict",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 1,
+      "assertions_passed": 11,
+      "assertions_failed": 2,
+      "session_ids": [
+        "session id: 01a1baf9-d412-7172-9659-86d8972705ec"
+      ],
+      "infra_signature": "fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-function-calc': unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-function-calc",
+      "evidence_folder": "20261108T114455Z-352169",
+      "cause": "Codex's unelevated Windows sandbox kept Git from creating the task branch: unable to create directory for .git/refs/heads/todo/... (the agent stopped at the claim)"
+    },
+    {
+      "scenario": "ts-lifecycle",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 1,
+      "assertions_passed": 9,
+      "assertions_failed": 4,
+      "session_ids": [
+        "session id: 01a1bb01-76f9-7a13-86c1-ebb70031bcf5"
+      ],
+      "infra_signature": "**Stopped at step 4:** FEAT-001.1, \u201cAdd subtract with a test,\u201d could not start because Git could not create its branch: `unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-multiply-src`. The environment grants read-only access to `.git`.",
+      "evidence_folder": "20261108T115315Z-463108-multi-20261108T115315Z-463042-1",
+      "cause": "baseline npm test passed (1 test); then Codex's unelevated Windows sandbox kept Git from creating the task branch: unable to create directory for .git/refs/heads/todo/... (the agent stopped at the claim)"
+    },
+    {
+      "scenario": "java-lifecycle",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 124,
+      "assertions_passed": 5,
+      "assertions_failed": 0,
+      "session_ids": [
+        "session id: 01a1bb05-841d-7120-ba36-d8780fa84305"
+      ],
+      "infra_signature": "",
+      "evidence_folder": "20261108T115740Z-521920-multi-20261108T115740Z-521867-1",
+      "cause": "Maven in the agent's sandbox could not read junit-jupiter-engine-5.10.2.jar from the host cache (Access is denied, fatal test-compile error), so the agent stopped at a broken baseline; the verifier then timed out after 180 s (exit 124)"
+    },
+    {
+      "scenario": "multi-module",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 124,
+      "assertions_passed": 5,
+      "assertions_failed": 0,
+      "session_ids": [
+        "session id: 01a1bafe-237a-7e50-bc56-f8b8ea360a3d"
+      ],
+      "infra_signature": "",
+      "evidence_folder": "20261108T114937Z-408173",
+      "cause": "Maven in the agent's sandbox could not read junit-jupiter-engine-5.10.2.jar from the host cache (Access is denied, fatal test-compile error), so the agent stopped at a broken baseline; the verifier then timed out after 180 s (exit 124)"
+    },
+    {
+      "scenario": "ci-local",
+      "outcome": "INFRA_ERROR",
+      "agent_exit": 0,
+      "assert_exit": 1,
+      "assertions_passed": 12,
+      "assertions_failed": 1,
+      "session_ids": [
+        "session id: 01a1bafb-cd8c-7622-b8aa-127e9b174b28"
+      ],
+      "infra_signature": "- No CI configuration or remote was found. The pre-push hook was not written because `.git` is read-only in this environment. To install it yourself, create `.git/hooks/pre-push` containing:",
+      "evidence_folder": "20261108T114704Z-378372",
+      "cause": "the sandbox keeps .git read-only, so the agent could not write .git/hooks/pre-push; it reported the hook for the user to install"
+    }
+  ],
+  "model": "gpt-6.1-terra",
+  "attempts": {
+    "1": "diagnostics/attempt-1: four environment stops scored FAIL (Store python3 alias, .git hook), fixed by FIX-052 and the infra-signature change; scenario results superseded",
+    "2": "runs/"
+  },
+  "score": {
+    "pass": 2,
+    "fail": 0,
+    "infra_error": 6,
+    "unverified": 0,
+    "source": "score-rerun.txt; score.txt shows one transient verifier exit 127 for interrupted-merge, re-verified 16/16 in rescore-interrupted-merge.log"
+  }
+}

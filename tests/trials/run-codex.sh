@@ -30,7 +30,7 @@ printf '%s\n' "$code" > "$ev/agent-exit.txt"
 [ -f "$ev/report.txt" ] || : > "$ev/report.txt"
 grep -m1 '^session id:' "$ev/session.log" > "$ev/session-id.txt" 2>/dev/null || : > "$ev/session-id.txt"   # proof of a fresh session
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1                                             # before assert.sh, which may check out branches
-TRIAL_REPORT="$ev/report.txt" bash "$here/assert.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1
+TRIAL_REPORT="$ev/report.txt" bash "$here/assert-exec.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1
 arc=$?
 printf '%s\n' "$arc" > "$ev/assert-exit.txt"
 if [ "$code" != 0 ]; then outcome=INFRA_ERROR

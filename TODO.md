@@ -7,9 +7,6 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [/] **FIX-082** · P2 · low · Repair the CHANGELOG compare links: they name the tags v0.1.0, v0.2.0, v0.3.0 and v0.3.1, but this clone has only v0.4.0 and v0.5.0; print the four git tag commands for the owner (the skills never tag) and check the links
-  - Done when: a check fails when a CHANGELOG link names a tag that git tag --list lacks, and reports a skip in a clone without tags; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 226 passing; branch todo/FIX-082-repair-changelog-compare-links from main; next: read docs
 - [ ] **TASK-083** · P2 · low · Complete the Claude listing: claude plugin validate advises that plugin/README.md has no marketplace install line, and the Claude manifest lacks the repository and keywords fields the Codex manifest carries
   - Done when: run.sh fails when plugin/README.md lacks the install line or the two manifests disagree on repository and keywords; `bash tests/run.sh`
 - [ ] **TASK-084** · P2 · low · Add a .gitignore (the repository has none) for generated files: docs/status.html.tmp, built ZIP archives and __pycache__

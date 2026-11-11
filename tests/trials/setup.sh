@@ -3,7 +3,8 @@
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
 # Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release-ask | release |
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
-#   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim
+#   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
+#   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -35,7 +36,11 @@ head='# Active Backlog
 '
 [ "$scenario" = no-git ] || git init -q -b main
 
-case "$scenario" in
+# The red-baseline and interrupted variants start from the lifecycle project of their language (TASK-086).
+kind="$scenario"
+case "$scenario" in ts-baseline-red|ts-interrupted) kind=ts-lifecycle ;; java-baseline-red|java-interrupted) kind=java-lifecycle ;; esac
+
+case "$kind" in
 interrupted-merge)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
   - Done when: both functions work; `python3 -m unittest discover -s tests`
@@ -360,6 +365,50 @@ XML
 esac
 # The lane scenarios log every checkout and commit with its worktree and a nanosecond time to <git-common-dir>/trial-events,
 # so lane-evidence.sh can record separate worktrees (these events cannot prove worker concurrency).
+# Variants of the lifecycle projects (TASK-086): a red baseline on main, or a session that died before a child's merge.
+case "$scenario" in
+ts-baseline-red)
+  printf 'export function add(a: number, b: number): number {\n  return a - b;\n}\n' > src/calc.ts   # a bug already on main: the baseline is red
+  g add -A && g commit -q -m "init with a red baseline"
+  ;;
+java-baseline-red)
+  printf 'package mini;\n\npublic class Calc {\n    public static int add(int a, int b) {\n        return a - b;\n    }\n}\n' > src/main/java/mini/Calc.java
+  g add -A && g commit -q -m "init with a red baseline"
+  ;;
+ts-interrupted|java-interrupted)
+  if [ "$scenario" = ts-interrupted ]; then rslug=add-subtract-multiply-src; cslug=add-subtract-test; else rslug=add-subtract-multiply-calc; cslug=add-subtract-test-class; fi
+  python3 - "$rslug" <<'PY'
+import sys
+p='TODO.md'
+s=open(p,encoding='utf-8').read()
+i=s.index('  - [ ] **FEAT-001.1**')
+s=s[:i]+'  - State: branch todo/FEAT-001-%s from main; next: build children\n'%sys.argv[1]+s[i:]
+open(p,'w',encoding='utf-8',newline='\n').write(s)
+PY
+  g add TODO.md && g commit -q -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-$rslug"
+  g switch -q -c "todo/FEAT-001-$rslug"
+  g switch -q -c "todo/FEAT-001.1-$cslug"
+  if [ "$scenario" = ts-interrupted ]; then
+    printf 'export function add(a: number, b: number): number {\n  return a + b;\n}\n\nexport function subtract(a: number, b: number): number {\n  return a - b;\n}\n' > src/calc.ts
+    printf 'import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { subtract } from "../src/calc.ts";\n\ntest("subtract", () => {\n  assert.equal(subtract(5, 3), 2);\n});\n' > tests/subtract.test.ts
+    work="src/calc.ts tests/subtract.test.ts"
+  else
+    printf 'package mini;\n\npublic class Calc {\n    public static int add(int a, int b) {\n        return a + b;\n    }\n\n    public static int subtract(int a, int b) {\n        return a - b;\n    }\n}\n' > src/main/java/mini/Calc.java
+    printf 'package mini;\n\nimport static org.junit.jupiter.api.Assertions.assertEquals;\nimport org.junit.jupiter.api.Test;\n\nclass SubtractTest {\n    @Test\n    void subtracts() {\n        assertEquals(2, Calc.subtract(5, 3));\n    }\n}\n' > src/test/java/mini/SubtractTest.java
+    work="src/main/java/mini/Calc.java src/test/java/mini/SubtractTest.java"
+  fi
+  python3 - <<'PY'
+p='TODO.md'
+s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001.1**','- [x] **FEAT-001.1**')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
+PY
+  # shellcheck disable=SC2086
+  g add $work TODO.md && g commit -q -m "feat(calc): add subtract" -m "Refs: FEAT-001.1
+Reviewed: self, 0 findings fixed"
+  g switch -q "todo/FEAT-001-$rslug"   # the session died here, before the merge
+  ;;
+esac
+
 case "$scenario" in lanes|multi-module)
   cat > .git/hooks/post-checkout <<'HOOK'
 #!/bin/sh

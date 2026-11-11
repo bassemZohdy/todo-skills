@@ -633,6 +633,35 @@ printf '## Status\n\n| Agent | Platform | What ran | Result | Evidence |\n|---|-
 st_t="$(statuscheck "$stt")"
 if [ "$(printf '%s\n' "$st_t" | grep -c 'does not resolve\|no evidence link\|no row for Codex')" -eq 3 ]; then ok "the Status check fails a lost evidence link, an unresolved one and a missing agent"; else bad "the Status check missed a gap: $st_t"; fi
 rm -rf "$stt"
+# Release stamps (FEAT-088): each stamped tool carries todo_skills_version="X.Y.Z" and prints it with --version; the stamps, both
+# plugin manifests and the newest CHANGELOG heading name one version, so a copied script says which release it came from.
+stamped_tools="todo-lint.sh"
+stampcheck() {   # <tools dir> <plugin dir> <changelog> <tool names...>: prints one STAMP line per disagreement
+  local td="$1" pd="$2" cl="$3" want="" v n got s
+  shift 3
+  for v in "$pd/.claude-plugin/plugin.json" "$pd/.codex-plugin/plugin.json"; do
+    n="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$v" | head -1)"
+    [ -n "$want" ] && [ "$n" != "$want" ] && echo "STAMP the manifests disagree: $want and $n"
+    [ -n "$want" ] || want="$n"
+  done
+  n="$(tr -d '\r' < "$cl" | sed -nE 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/p' | head -1)"
+  [ "$n" = "$want" ] || echo "STAMP the newest CHANGELOG heading is $n, the manifests say $want"
+  for s in "$@"; do
+    got="$(sed -nE 's/^todo_skills_version="([^"]*)".*/\1/p' "$td/$s" | head -1)"
+    [ -n "$got" ] || { echo "STAMP $s has no todo_skills_version line"; continue; }
+    [ "$got" = "$want" ] || echo "STAMP $s is stamped $got, the manifests say $want"
+    [ "$(bash "$td/$s" --version 2>&1 </dev/null)" = "$s $got" ] || echo "STAMP $s --version does not print '$s $got'"
+  done
+}
+sp_out="$(stampcheck "$root/tools" "$root/plugin" "$root/CHANGELOG.md" $stamped_tools)"
+if [ -z "$sp_out" ]; then ok "the stamped tools, both manifests and the newest CHANGELOG heading name one version, and each tool prints it"; else bad "release stamps: $(printf '%s' "$sp_out" | tr '\n' ';')"; fi
+spt="$(mktemp -d)"; mkdir -p "$spt/tools" "$spt/plugin/.claude-plugin" "$spt/plugin/.codex-plugin"
+sed 's/^todo_skills_version="[^"]*"/todo_skills_version="9.9.9"/' "$root/tools/todo-lint.sh" > "$spt/tools/todo-lint.sh"
+printf '{"version": "0.5.0"}\n' > "$spt/plugin/.claude-plugin/plugin.json"; printf '{"version": "0.4.0"}\n' > "$spt/plugin/.codex-plugin/plugin.json"
+printf '## [Unreleased]\n\n## [0.3.0] - 2026-01-01\n' > "$spt/CHANGELOG.md"; printf '#!/usr/bin/env bash\necho hi\n' > "$spt/tools/todo-bare.sh"
+sp_t="$(stampcheck "$spt/tools" "$spt/plugin" "$spt/CHANGELOG.md" todo-lint.sh todo-bare.sh)"
+if [ "$(printf '%s\n' "$sp_t" | grep -c "^STAMP")" -ge 4 ]; then ok "the stamp check fails disagreeing manifests, a stale CHANGELOG heading, a wrong stamp and an unstamped script"; else bad "the stamp check missed a gap: $sp_t"; fi
+rm -rf "$spt"
 # Shell scripts hold no carriage return (FIX-093): one stray CR makes git treat the file as binary and breaks a copied tool.
 crbad=""
 for f in "$root"/tools/*.sh "$root"/.todo/*.sh "$root"/tests/*.sh "$root"/tests/trials/*.sh; do

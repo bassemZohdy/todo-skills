@@ -161,6 +161,7 @@ The lint prints `WARN` lines that never change its exit code:
 | W3 | A command, at the start or after `&&`, `||`, `;`, `|` or `&`, that is not a known test, lint, typecheck or build runner; confirm it only tests or builds (the agent records `Checked: <command>` in the node commit) |
 | W4 | A test runner piped into another command, which hides its exit status unless `pipefail` is set |
 | W5 | An open node that is `high` or whose title names a security subject (auth, login, password, token, secret, credential, permission, session, crypt) and whose criteria name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid). A wording heuristic: "author" and "tokenizer" also match, and a negative case covered by a child node still warns on the parent |
+| W6 | A command that may download and run code from the network: `npx --yes`/`-y`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`. Use a package already in the lockfile (`npx --no-install`) and install dependencies before the task. `todo-replay.sh` refuses these |
 
 ## Requirements traceability (optional)
 

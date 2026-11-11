@@ -6,7 +6,8 @@
 #   No <rev>, or an empty one (an unset variable in check.sh): nothing to replay, exit 0.
 #   New entries are the `- **ID**` lines of CHANGELOG.md whose ID is not in `git show <rev>:CHANGELOG.md`.
 # A command is SAFE only when todo-lint.sh, given it as a Done when, reports no FAIL (I3 vacuous or masked, I10 forbidden)
-# and neither W3 (not a known test, lint, typecheck or build runner) nor W4 (a piped runner hides its exit status). Every
+# and none of W3 (not a known test, lint, typecheck or build runner), W4 (a piped runner hides its exit status) and W6 (may
+# download and run remote code). Every
 # other command is printed as REFUSED and never run: review it, and run it yourself if it is safe.
 # Command safety: a command that runs a script or target (`bash <file>`, `make <target>`, `npm test`) runs what that file
 # holds, which the lint does not read. Read the scripts your Validated commands name, as for .todo/check.sh.
@@ -39,7 +40,7 @@ while IFS= read -r line; do
     if [ ! -f "$lint" ]; then reason="todo-lint.sh not found next to todo-replay.sh"
     else
       printf '# Active Backlog\n\n## Task Tree\n- [ ] **TASK-001** · P2 · low · replay\n  - Done when: replay; `%s`\n' "$c" > "$tmp/TODO.md"
-      reason="$(bash "$lint" "$tmp/TODO.md" "$tmp/none.md" 2>&1 | grep -E '^(FAIL|WARN W3|WARN W4)' | head -1 | sed -E 's/^(FAIL |WARN )([A-Z][0-9]+): line [0-9]+: TASK-001: /\2: /')"
+      reason="$(bash "$lint" "$tmp/TODO.md" "$tmp/none.md" 2>&1 | grep -E '^(FAIL|WARN W3|WARN W4|WARN W6)' | head -1 | sed -E 's/^(FAIL |WARN )([A-Z][0-9]+): line [0-9]+: TASK-001: /\2: /')"
     fi
     if [ -n "$reason" ]; then refused=$((refused + 1)); echo "REFUSED  $id: $c ($reason)"; continue; fi
     if [ "$run" -eq 0 ]; then echo "SAFE  $id: $c"; continue; fi

@@ -265,6 +265,15 @@ vcase ACCEPT 0 'cargo test' 'test result: ok. 3 passed; 0 failed
 test result: ok. 0 passed; 0 failed'
 vcase ACCEPT 0 'make check' 'done'
 vcase REJECT 0 'pytest' 'collected 0 items'
+# FIX-068: a run that executed no test is rejected whatever it prints; mixed outputs with a real pass still count.
+vcase REJECT 0 'pytest --co -q' '3 tests collected in 0.01s'
+vcase REJECT 0 'pytest' '5 skipped in 0.01s'
+vcase REJECT 0 'mvn test' 'Tests run: 0, Failures: 0, Errors: 0, Skipped: 0'
+vcase REJECT 0 'dotnet test' 'No test is available in x.dll'
+vcase ACCEPT 0 'pytest' '1 passed, 4 skipped in 0.01s'
+vcase ACCEPT 0 'mvn test' 'Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0'
+vcase ACCEPT 0 'dotnet test' 'Passed!  - Failed:     0, Passed:     3, Skipped:     0'
 vcase REJECT 0 'python3 -m unittest' 'Ran 0 tests in 0.00s'
 vcase REJECT 0 'npx jest' 'No tests found, exiting with code 0'
 vcase REJECT 0 'npm test' 'Tests: 0 total'

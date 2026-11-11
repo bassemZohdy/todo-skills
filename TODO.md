@@ -17,8 +17,9 @@
 - [ ] **FEAT-088** · P2 · mid · L · Stamp the copied scripts with their release: users copy tools/*.sh by hand and nothing says which version a copy is, and a release needs hand edits in three places (0.4.0 took a separate manifest-bump commit, 8b5a2fd); add a version line and a --version flag to each tool and one helper that sets the manifests, README and stamps together
   - Done when: run.sh fails when a tool's stamp, either manifest or the newest CHANGELOG heading disagree, and each tool prints its version; `bash tests/run.sh`
   - State: branch todo/FEAT-088-stamp-copied-scripts-their from main; next: build children
-  - [ ] **FEAT-088.1** · low · S · Stamp todo-lint.sh and its vendored copy with the release version and a --version flag, and check the stamp against both manifests and the newest CHANGELOG heading
+  - [/] **FEAT-088.1** · low · S · Stamp todo-lint.sh and its vendored copy with the release version and a --version flag, and check the stamp against both manifests and the newest CHANGELOG heading
     - Done when: todo-lint.sh --version prints the manifest version and a stamp that disagrees with the manifests fails the check; `bash tests/run.sh`
+    - State: attempts 0/3; baseline 239 passing; branch todo/FEAT-088.1-stamp-todo-lint-sh from todo/FEAT-088-stamp-copied-scripts-their; next: read docs
   - [ ] **FEAT-088.2** · low · S · Stamp the other five tools (verify, rtm, replay, report, stop-hook) the same way and require every script in tools to be stamped
     - Done when: each tool prints its version, and an unstamped script in tools fails the check; `bash tests/run.sh`
   - [ ] **FEAT-088.3** · mid · S · Add tests/set-version.sh, one helper that sets both manifests, the README version statements and the stamps, and name it in the release steps

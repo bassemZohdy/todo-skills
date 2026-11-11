@@ -89,7 +89,7 @@ A Claude Code Stop hook that keeps a session from ending on a corrupted backlog.
 ] } ] } }
 ```
 
-It allows the stop (no output) when `stop_hook_active` is true, so it can never loop, when there is no `TODO.md`, or when the lint passes. Otherwise it prints a `block` decision with the lint output quoted as data. `TODO_FILE` and `CHANGELOG_FILE` override the file names. Codex has no equivalent wired up here.
+It allows the stop (no output) when `stop_hook_active` is true (whatever the JSON whitespace), so it can never loop, when there is no `TODO.md`, or when the lint passes. Otherwise it prints a `block` decision with the lint output quoted as data. `TODO_FILE` and `CHANGELOG_FILE` override the file names. Codex has no equivalent wired up here.
 
 ## CI: `/todo-init --ci`
 

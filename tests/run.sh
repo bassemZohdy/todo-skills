@@ -402,6 +402,16 @@ if printf '%s' "$out" | grep -q '"decision":"block"'; then ok "hook blocks on an
 # Stop hook: never blocks twice in a row (loop guard).
 out="$(printf '{"stop_hook_active": true}' | TODO_FILE="$fx/I1-two-active.md" CHANGELOG_FILE="$changelog" bash "$hook")"
 if [ -z "$out" ]; then ok "hook honours stop_hook_active"; else bad "hook ignored stop_hook_active: $out"; fi
+# FIX-069: the loop guard reads the flag whatever the JSON whitespace (spaces, tabs, a pretty-printed document), and only true.
+hook_with() { printf '%b' "$1" | TODO_FILE="$fx/I1-two-active.md" CHANGELOG_FILE="$changelog" bash "$hook"; }
+hg_bad=""
+for form in '{"stop_hook_active" : true}' '{"stop_hook_active"\t:\ttrue}' '{\n  "stop_hook_active":\n    true\n}' '{ "other": 1, "stop_hook_active" :true }'; do
+  [ -z "$(hook_with "$form")" ] || hg_bad="$hg_bad [$form]"
+done
+for form in '{"stop_hook_active" : false}' '{"stop_hook_active":\n false}' '{"stop_hook_active": "true"}'; do
+  hook_with "$form" | grep -q '"decision":"block"' || hg_bad="$hg_bad (blocks: $form)"
+done
+if [ -z "$hg_bad" ]; then ok "hook loop guard tolerates JSON whitespace and still blocks when the flag is not true"; else bad "hook loop guard:$hg_bad"; fi
 
 # Stop hook: no TODO.md means nothing to enforce.
 out="$(printf '{}' | TODO_FILE="$fx/does-not-exist.md" CHANGELOG_FILE="$changelog" bash "$hook")"

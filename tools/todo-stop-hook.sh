@@ -12,8 +12,10 @@
 # stop_hook_active is true, so it can never loop, when there is no TODO.md, or
 # when the lint passes. Otherwise it prints a block decision and exits 0.
 input=$(cat)
-case "$input" in
-  *'"stop_hook_active":true'*|*'"stop_hook_active": true'*) exit 0 ;;
+# Whitespace is not significant in JSON, so compare with all of it removed (spaces, tabs, a pretty-printed document).
+compact=$(printf '%s' "$input" | tr -d ' \t\r\n')
+case "$compact" in
+  *'"stop_hook_active":true'*) exit 0 ;;
 esac
 
 todo="${TODO_FILE:-TODO.md}"

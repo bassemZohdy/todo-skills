@@ -14,6 +14,10 @@ fail=0
 
 ok()  { pass=$((pass + 1)); printf 'PASS  %s\n' "$1"; }
 bad() { fail=$((fail + 1)); printf 'FAIL  %s\n' "$1"; }
+# A check that cannot run here (a missing optional tool) is reported, never silently dropped (TASK-080). CI must not skip any.
+skipped=0
+skip() { skipped=$((skipped + 1)); printf 'SKIP  %s\n' "$1"; }
+skipgate() { [ "${1:-0}" -eq 0 ] || [ -z "${CI:-}" ]; }   # <skipped count>: fails when something was skipped and CI is set
 
 for f in "$fx"/*.md; do
   name="$(basename "$f" .md)"
@@ -96,6 +100,8 @@ for f in sorted(glob.glob(sys.argv[1] + "/plugin/skills/*/SKILL.md")):
 PY
 )"
   if [ -z "$yamlbad" ]; then ok "SKILL.md frontmatter is valid YAML"; else bad "invalid YAML frontmatter: $yamlbad"; fi
+else
+  skip "SKILL.md frontmatter YAML check (PyYAML is not installed: python3 -m pip install pyyaml)"
 fi
 
 # The Codex manifest parses and carries the same version as the Claude plugin manifest.
@@ -250,7 +256,11 @@ rc=$?
 if [ "$rc" -eq 1 ] && [ "${err#todo-report:}" != "$err" ]; then ok "report generator exits 1 without TODO.md"; else bad "report generator without TODO.md: expected rc=1 and stderr starting 'todo-report:', got rc=$rc: $err"; fi
 
 # This repository's vendored lint (.todo/, from /todo-init --ci) stays identical to the core lint.
-if [ ! -f "$root/.todo/todo-lint.sh" ] || cmp -s "$root/.todo/todo-lint.sh" "$lint"; then ok "vendored .todo/todo-lint.sh matches tools/todo-lint.sh"; else bad ".todo/todo-lint.sh differs from skills/todo/scripts/todo-lint.sh: copy it again"; fi
+if [ ! -f "$root/.todo/todo-lint.sh" ] || cmp -s "$root/.todo/todo-lint.sh" "$lint"; then ok "vendored .todo/todo-lint.sh matches tools/todo-lint.sh"; else bad ".todo/todo-lint.sh differs from tools/todo-lint.sh: copy it again (cp tools/todo-lint.sh .todo/todo-lint.sh)"; fi
+# The Codex logo is a copy of the Claude icon.
+if cmp -s "$root/plugin/.claude-plugin/icon.png" "$root/plugin/assets/icon.png"; then ok "plugin/assets/icon.png equals plugin/.claude-plugin/icon.png"; else bad "the two icon.png copies differ: cp plugin/.claude-plugin/icon.png plugin/assets/icon.png"; fi
+# The generated check script starts with the shebang its template writes.
+if [ ! -f "$root/.todo/check.sh" ] || [ "$(head -n1 "$root/.todo/check.sh" | tr -d '\r')" = '#!/usr/bin/env bash' ]; then ok ".todo/check.sh starts with the bash shebang"; else bad ".todo/check.sh has no '#!/usr/bin/env bash' first line"; fi
 
 # The repository's own backlog must follow its own rules.
 out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
@@ -422,6 +432,8 @@ if command -v node >/dev/null 2>&1; then
   got="$(cd "$pf" && printf '%s\n%s\n' "$js" 'const fs=require("fs");process.stdout.write(progressLine(fs.readFileSync("TODO.md","utf8"),fs.readFileSync("CHANGELOG.md","utf8")))' | node 2>&1)"
   if [ -n "$js" ] && [ "$got" = "$want" ]; then ok "status page progressLine matches lint --progress"; else bad "status page progressLine: expected '$want', got '$got'"; fi
   grep -q "\$('progress').textContent=progressLine(" "$root/tools/template.html" && ok "status page shows the progress line" || bad "status page does not render the progress line"
+else
+  skip "status page progressLine check (node is not installed)"
 fi
 st="$root/plugin/skills/todo-status/SKILL.md"
 if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
@@ -575,5 +587,8 @@ wf_t="$(wfcheck "$wft/bare.yml" windows)"
 if [ "$(printf '%s\n' "$wf_t" | grep -c '^WF')" -eq 3 ]; then ok "the workflow check fails a missing Windows runner, timeout and concurrency group"; else bad "the workflow check missed a gap: $wf_t"; fi
 rm -rf "$wft"
 
-printf '\n%d passed, %d failed\n' "$pass" "$fail"
+# The skip gate itself: a skip is tolerated locally and fails when CI is set.
+if (unset CI; skipgate 1) && ! (CI=true; skipgate 1) && (CI=true; skipgate 0); then ok "a skipped check fails under CI and is tolerated locally"; else bad "the skip gate does not fail a skipped check under CI"; fi
+if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
+printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

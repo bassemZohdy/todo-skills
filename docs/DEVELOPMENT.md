@@ -51,7 +51,7 @@ bash tests/trials/selftest.sh                              # the trial harness w
 for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (three of them need Docker or Codex)
 ```
 
-`tests/run.sh` needs bash, awk, grep, sed and python3 (for the JSON manifest check; with PyYAML installed it also checks the frontmatter) and writes only temporary directories that it removes. It checks:
+`tests/run.sh` needs bash, awk, grep, sed and python3 (for the JSON manifest check; with PyYAML installed it also checks the frontmatter) and writes only temporary directories that it removes. A check that needs PyYAML or node and cannot run prints a `SKIP` line and is counted in the final line; when the `CI` environment variable is set, any skip fails the run (the test workflow installs PyYAML). It checks:
 
 - every lint fixture against its name (pass, the named invariant, or the named warning, with no warning on `ok-*`);
 - the lint without a `CHANGELOG.md` (exit 0) and without a `TODO.md` (exit 2);
@@ -66,6 +66,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - each command's loaded bytes and words against the [load budget](#load-budget);
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
+- that the two `icon.png` copies are identical and `.todo/check.sh` starts with its shebang (TASK-080);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.
 
 When you change the lint, add a fixture: `ok-<case>.md`, `I<n>-<case>.md` or `W<n>-<case>.md`.

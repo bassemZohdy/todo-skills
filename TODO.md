@@ -7,9 +7,9 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [ ] **FIX-076** · P2 · low · Stop todo-verify.sh expanding globs in the wrong folder: cd pkg && pytest tests/*.py is rejected with missing test target tests/root_only.py when the repository root also matches the glob, because the command words are split unquoted
+- [/] **FIX-076** · P2 · low · Stop todo-verify.sh expanding globs in the wrong folder: cd pkg && pytest tests/*.py is rejected with missing test target tests/root_only.py when the repository root also matches the glob, because the command words are split unquoted
   - Done when: a case with matching files in both the root and the package is accepted, and a glob that matches nothing still fails; `bash tests/run.sh`
-  - State: branch todo/FIX-076-stop-verify-expanding-globs from main; next: start FIX-076
+  - State: attempts 0/3; baseline 206 passing; branch todo/FIX-076-stop-verify-expanding-globs from main; next: read docs
 - [ ] **FIX-077** · P2 · low · Enforce the documented State grammar and ID scheme in the lint: State: attempts 9/3; next: banana; wibble 12 passes, and so do the IDs TASK-1 and BUG-0003
   - Done when: I3 fixtures for an unknown State item, a next value outside the list, attempts above 3 and an ID outside FEAT, FIX or TASK with three digits each fail, and every ok fixture still passes; `bash tests/run.sh`
 - [ ] **FEAT-078** · P2 · low · Warn in the lint when a Ref path does not exist: Links: Ref: docs/does-not-exist.md lints clean, so only an agent that reads the file notices

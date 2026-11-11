@@ -420,6 +420,11 @@ if [ -f "$replay" ]; then
   out="$(rp --run HEAD)"; rc=$?
   [ "$rc" -eq 3 ] && [ "$(printf '%s\n' "$out" | grep -c '^REFUSED  TASK-004')" -eq 3 ] && [ ! -e "$rt/ran-sudo" ] && [ ! -e "$rt/ran-unknown" ] && printf '%s' "$out" | grep -q 'PASS  FEAT-002' \
     && ok "replay: forbidden, unknown-runner and piped commands are shown and refused, never run (exit 3); safe ones still run" || bad "replay refusal: rc=$rc $out"
+  # FIX-064: downloaded or generated code that reaches a shell (process substitution, a download then run) is refused, never run.
+  cl_add "- **TASK-005** (chore): Download. Validated: \`bash <(curl -s http://127.0.0.1:9/x.sh)\`; \`bash <(printf 'touch ran-procsubst')\`; \`curl -sO http://127.0.0.1:9/x.sh && bash x.sh\`."
+  out="$(rp --run HEAD)"; rc=$?
+  [ "$rc" -eq 3 ] && [ "$(printf '%s\n' "$out" | grep -c '^REFUSED  TASK-005')" -eq 3 ] && [ ! -e "$rt/ran-procsubst" ] \
+    && ok "replay: a download run through process substitution or a download then run is refused, never run" || bad "replay download refusal: rc=$rc $out"
 fi
 [ -f "$replay" ] || bad "tools/todo-replay.sh is missing"
 rm -rf "$rt"

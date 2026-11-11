@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FIX-070** (fix): Widen the credential files lint I10 refuses: reads of `~/.netrc`, `~/.npmrc`, `~/.pypirc`, `~/.git-credentials`, `~/.docker/config.json`, `~/.kube/config`, `~/.config/gh/` and `~/.gnupg/` (also by `$HOME` or a home path) passed with at most a W1 warning; a test named after one (`tests/test_netrc.py`) stays accepted. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FIX-069** (fix): Make the Stop hook's loop guard tolerate JSON whitespace: `"stop_hook_active" : true`, a tab, or a pretty-printed document made it block again instead of allowing the stop, which could loop a session. A false or quoted flag still blocks an invalid backlog. Validated: `bash tests/run.sh`. Docs: updated docs/TOOLS.md.
 - **FIX-068** (fix): Reject runs that executed no test in `todo-verify.sh`: a collect-only run (`--collect-only`, `--co`, `N tests collected`), a run that only skipped tests, Maven `Tests run: 0` and dotnet `No test is available` were accepted. A run with a real pass among them still counts. Validated: `bash tests/run.sh`. Docs: updated docs/TOOLS.md.
 - **FIX-067** (fix): Close the masking gaps in lint I3: `|| echo`, `|| printf` and `set +e` now fail it, and a new W7 warns on flags that make a runner execute no test (`--collect-only`, `--co`, `--passWithNoTests`, `-DskipTests`, `--no-run`); `|| exit 1` in a chain stays quiet. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.

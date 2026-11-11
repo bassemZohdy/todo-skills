@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **FEAT-078** (feat): Warn (W8) in the lint when a `Ref:` path does not exist, taken relative to the folder of the backlog file (the part before `#`; a URL is skipped, the anchor is not checked); it never changes the exit code. Two fixtures (`W8-missing-ref`, `ok-ref-anchor`) and the files the `ok` fixtures cite now exist under `tests/fixtures/docs/`. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FEAT-066** (feat): Warn (W6) when a `Done when` may download and run remote code through a known runner (`npx --yes`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`); `npx --no-install` stays silent and `todo-replay.sh` refuses a W6 command. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md, docs/TOOLS.md.
 
 ### Changed

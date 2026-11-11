@@ -9,6 +9,7 @@
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
 - [ ] **FIX-077** · P2 · low · Enforce the documented State grammar and ID scheme in the lint: State: attempts 9/3; next: banana; wibble 12 passes, and so do the IDs TASK-1 and BUG-0003
   - Done when: I3 fixtures for an unknown State item, a next value outside the list, attempts above 3 and an ID outside FEAT, FIX or TASK with three digits each fail, and every ok fixture still passes; `bash tests/run.sh`
+  - State: branch todo/FIX-077-enforce-state-grammar-id-scheme from main; next: start FIX-077
 - [ ] **FEAT-078** · P2 · low · Warn in the lint when a Ref path does not exist: Links: Ref: docs/does-not-exist.md lints clean, so only an agent that reads the file notices
   - Done when: a fixture with a missing Ref path warns, a Ref with an anchor into an existing file stays silent, and REFERENCE.md lists the warning; `bash tests/run.sh`
 - [ ] **FIX-079** · P2 · low · Match whole words in W5: it matches by prefix, so a title with author or tokenizer warns as a security node (a false positive REFERENCE.md documents)

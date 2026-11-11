@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-069** · P1 · low · Make the Stop hook's loop guard tolerate whitespace: it matches two exact spellings of stop_hook_active, so with a space before the colon or pretty-printed JSON it blocks again and can loop the session
-  - Done when: the hook is silent for spaced, tabbed and multi-line forms of the true flag and still blocks an invalid backlog when the flag is false; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 193 passing; branch todo/FIX-069-make-stop-hook-loop from main; next: drain
 - [ ] **FIX-070** · P1 · low · Widen the credential files lint I10 refuses: only SSH keys and ~/.aws/credentials are named, so cat ~/.netrc, ~/.config/gh/hosts.yml, ~/.npmrc, ~/.docker/config.json and ~/.kube/config pass with at most W1
   - Done when: one I10 fixture per added path fails the lint and a test file named tests/test_netrc.py stays accepted; `bash tests/run.sh`
 - [ ] **TASK-071** · P1 · low · Correct the safety docs: SECURITY.md, README and the core skill call every optional script read-only and SECURITY.md omits todo-replay.sh, which runs commands; DEVELOPMENT.md's layout omits reference/review.md, reference/clarify.md and tools/todo-replay.sh and says tests/run.sh creates no files

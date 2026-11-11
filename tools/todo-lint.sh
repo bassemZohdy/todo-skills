@@ -139,6 +139,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
   mk = substr($0, ind + 4, 1)
   match($0, /\*\*[A-Z]+-[0-9]+(\.[0-9]+)*\*\*/)
   id = substr($0, RSTART + 2, RLENGTH - 4)
+  if (id !~ /^(FEAT|FIX|TASK)-[0-9][0-9][0-9]+(\.[0-9]+)*$/) fail("I3", "line " NR ": " id ": an ID is FEAT-, FIX- or TASK- followed by at least three digits, then .n per level")
   rest = substr($0, RSTART + RLENGTH)
   if (mk != " " && mk != "/" && mk != "!" && mk != "x") fail("I3", "line " NR ": " id ": invalid marker [" mk "]")
   if (ind % 2 != 0) fail("I8", "line " NR ": " id ": indent must be a multiple of 2")
@@ -215,7 +216,13 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
     nst[cur] = 1
     m = split(val, sp, "; ")
     for (k = 1; k <= m; k++) {
-      kw = trim(sp[k]); if (kw == "next: decompose") ndec[cur] = 1; sub(/[ :].*/, "", kw)
+      item = trim(sp[k]); kw = item; if (kw == "next: decompose") ndec[cur] = 1; sub(/[ :].*/, "", kw)
+      if (item ~ /^attempts /) { if (item !~ /^attempts [0-3]\/3$/) fail("I3", "line " NR ": " id ": State attempts must read attempts n/3 with n from 0 to 3 (found: " item ")") }
+      else if (item ~ /^baseline /) { if (item !~ /^baseline (none|[0-9]+ passing|red: .+)$/) fail("I3", "line " NR ": " id ": State baseline must read baseline <n> passing, baseline none or baseline red: <ids> (found: " item ")") }
+      else if (item ~ /^tier:/) { if (item !~ /^tier: (low|mid|high)$/) fail("I3", "line " NR ": " id ": State tier must be low, mid or high (found: " item ")") }
+      else if (item ~ /^branch /) { if (item !~ /^branch [^ ]+ from [^ ]+$/) fail("I3", "line " NR ": " id ": State branch must read branch <name> from <branch> (found: " item ")") }
+      else if (item ~ /^next:/) { if (item !~ /^next: (start [A-Z]+-[0-9]+(\.[0-9]+)*|build children|read docs|plan proposed|build|drain|decompose|resume|redo after revert)$/) fail("I3", "line " NR ": " id ": State next must be start <ID>, build children, read docs, plan proposed, build, drain, decompose, resume or redo after revert (found: " item ")") }
+      else if (item !~ /^(hyp: .+|files: .+|docs: .+|no git)$/) fail("I3", "line " NR ": " id ": unknown State item (allowed: attempts, baseline, tier, hyp, branch, no git, files, docs, next; found: " item ")")
       if (kw == "attempts" || kw == "baseline" || kw == "tier" || kw == "branch" || kw == "hyp" || kw == "files" || kw == "docs" || kw == "next")
         if (seenst[cur, kw]++) fail("I3", "line " NR ": " id ": State repeats the item " kw "; a later claim must replace the State line")
     }

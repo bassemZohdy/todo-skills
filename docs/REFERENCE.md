@@ -163,6 +163,7 @@ The lint prints `WARN` lines that never change its exit code:
 | W5 | An open node that is `high` or whose title names a security subject (auth, login, password, token, secret, credential, permission, session, crypt) and whose criteria name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid). A wording heuristic: "author" and "tokenizer" also match, and a negative case covered by a child node still warns on the parent |
 | W6 | A command that may download and run code from the network: `npx --yes`/`-y`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`. Use a package already in the lockfile (`npx --no-install`) and install dependencies before the task. `todo-replay.sh` refuses these |
 | W7 | A flag that makes a runner execute no test: `--collect-only`, `--co`, `--passWithNoTests`, `-DskipTests`, `-Dmaven.test.skip`, `--no-run`. The run exits 0 without proving the behavior |
+| W8 | A `Ref:` path (the part before `#`) that does not exist, taken relative to the folder of the backlog file. The anchor is not checked. A URL is skipped. `/todo-continue` refuses to start a node whose `Ref:` is missing, so the warning shows it earlier |
 
 ## Requirements traceability (optional)
 

@@ -7,9 +7,6 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [ ] **FEAT-078** · P2 · low · Warn in the lint when a Ref path does not exist: Links: Ref: docs/does-not-exist.md lints clean, so only an agent that reads the file notices
-  - Done when: a fixture with a missing Ref path warns, a Ref with an anchor into an existing file stays silent, and REFERENCE.md lists the warning; `bash tests/run.sh`
-  - State: branch todo/FEAT-078-warn-missing-ref-path from main; next: start FEAT-078
 - [ ] **FIX-079** · P2 · low · Match whole words in W5: it matches by prefix, so a title with author or tokenizer warns as a security node (a false positive REFERENCE.md documents)
   - Done when: an ok fixture titled with both words prints no warning, the W5 fixtures and an invalid-login title still warn, and REFERENCE.md drops the caveat; `bash tests/run.sh`
 - [ ] **TASK-080** · P2 · low · Make silent gaps in tests/run.sh visible: the frontmatter and status page checks vanish without PyYAML or node, nothing compares the two icon.png copies, the vendored-lint failure message names a path that no longer exists, and .todo/check.sh lacks the shebang its template writes

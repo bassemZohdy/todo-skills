@@ -7,7 +7,7 @@
 #   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
 #   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test, W8 a Ref path that does not exist) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 progress=0
 if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi
@@ -27,7 +27,15 @@ if [ -f "$changelog" ]; then
           } | tr '\n' ' ') "
 fi
 
-awk -v cl="$cl" '
+# Ref paths (the part before "#") that do not exist next to the backlog file, for W8.
+mr=" "
+base="$(dirname "$todo")"
+for r in $(grep -oE 'Ref: *[^ ]+' "$todo" | sed -e 's/^Ref: *//' -e 's/#.*//' -e 's/$//' | sort -u); do
+  case "$r" in *://*|mailto:*) continue ;; esac
+  [ -e "$base/$r" ] || mr="$mr$r "
+done
+
+awk -v cl="$cl" -v mr="$mr" '
 function fail(code, msg) { print "FAIL " code ": " msg; bad++ }
 function trim(s) { gsub(/^ +/, "", s); gsub(/ +$/, "", s); return s }
 function dfs(u,   k, n, a, v) {
@@ -201,7 +209,11 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
     m = split(val, lp, " · ")
     for (k = 1; k <= m; k++) {
       p = trim(lp[k])
-      if (p ~ /^Ref:/) continue
+      if (p ~ /^Ref:/) {
+        refpath = p; sub(/^Ref: */, "", refpath); sub(/#.*/, "", refpath)
+        if (refpath != "" && index(mr, " " refpath " ")) warn("W8", "line " NR ": " id ": Ref path " refpath " does not exist; fix the path or drop the Ref")
+        continue
+      }
       else if (p ~ /^Depends:/) { sub(/^Depends: */, "", p); addrefs(cur, "D", p) }
       else if (p ~ /^From:/) { sub(/^From: */, "", p); addrefs(cur, "F", p) }
       else if (p ~ /^Lane:/) {

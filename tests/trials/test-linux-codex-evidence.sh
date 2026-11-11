@@ -10,7 +10,9 @@ git -C "$root" cat-file -e "$source_commit^{commit}"
 git -C "$root" merge-base --is-ancestor "$source_commit" HEAD
 bash "$here/test-codex-evidence.sh" "$ev"
 
-python3 - "$ev" "$here/prompt.sh" "$source_commit" <<'PY'
+# Python starts bash itself; a bare "bash" can be the WSL launcher on Windows, so hand it the bash that runs this script.
+bash_exe="$(cygpath -m "$BASH" 2>/dev/null || printf '%s' "$BASH")"
+python3 - "$ev" "$here/prompt.sh" "$source_commit" "$bash_exe" <<'PY'
 import json
 import pathlib
 import re
@@ -18,7 +20,7 @@ import subprocess
 import sys
 
 ev = pathlib.Path(sys.argv[1])
-prompt_script, source_commit = sys.argv[2:]
+prompt_script, source_commit, bash_exe = sys.argv[2:]
 results = json.loads((ev / 'results.json').read_text(encoding='utf-8'))
 assert results['project_commit'] == source_commit, 'tested source commit changed'
 assert results['agent'] == 'codex-cli 0.167.0' and results['model'] == 'gpt-6.1-terra'
@@ -36,7 +38,7 @@ for scenario in results['scenarios']:
     failures = sum(line.startswith('FAIL  ') for line in lines)
     assert (passes, failures) == (scenario['assertions_passed'], scenario['assertions_failed'])
     checks += passes
-    assert subprocess.check_output(['bash', prompt_script, '/work', name]) == (run / 'prompt.txt').read_bytes()
+    assert subprocess.check_output([bash_exe, prompt_script, '/work', name]) == (run / 'prompt.txt').read_bytes()
     events = [json.loads(line) for line in (run / 'session.log').read_text(encoding='utf-8').splitlines() if line]
     assert next(e['thread_id'] for e in events if e['type'] == 'thread.started') == scenario['session_id']
     assert any(e['type'] == 'turn.completed' for e in events)

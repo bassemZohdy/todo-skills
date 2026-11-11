@@ -7,9 +7,8 @@
   - State: branch todo/TASK-073-add-static-analysis-shell from main; next: build children
   - [x] **TASK-073.1** · mid · S · Add tests/shellcheck.sh, a .shellcheckrc and a CI step that run shellcheck (pinned shellcheck-py) over tools, .todo and tests/*.sh, and fix what it reports there
     - Done when: tests/run.sh runs shellcheck when it is installed, a seeded unquoted variable fails tests/shellcheck.sh, and the in-scope scripts are clean; `bash tests/run.sh`
-  - [/] **TASK-073.2** · low · S · Bring the trial harness scripts assert.sh, assert-exec.sh, codex-exec.sh and run-codex-lanes.sh into the shellcheck scope and fix or annotate what it reports
+  - [x] **TASK-073.2** · low · S · Bring the trial harness scripts assert.sh, assert-exec.sh, codex-exec.sh and run-codex-lanes.sh into the shellcheck scope and fix or annotate what it reports
     - Done when: tests/shellcheck.sh passes with those four scripts in scope and a seeded finding in one of them fails it; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 243 passing; branch todo/TASK-073.2-bring-trial-harness-scripts from todo/TASK-073-add-static-analysis-shell; next: read docs
   - [ ] **TASK-073.3** · low · S · Bring the remaining tests/trials scripts into the shellcheck scope and fix or annotate what it reports
     - Done when: tests/shellcheck.sh passes over every script under tools, tests and .todo; `bash tests/run.sh`
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0

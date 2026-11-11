@@ -3,6 +3,9 @@
 # break out of the page's script blocks (& -> &amp;, < -> &lt;; the page decodes them).
 # Usage, from the repository root:  bash tools/todo-report.sh < meta.txt > docs/status.html
 #   meta.txt: one "key: value" per line (may be empty). Writes only to stdout. Needs bash and sed.
+# --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
+todo_skills_version="0.5.0"
+if [ "${1:-}" = "--version" ]; then echo "todo-report.sh $todo_skills_version"; exit 0; fi
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tpl="$here/template.html"

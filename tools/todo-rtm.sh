@@ -8,6 +8,9 @@
 #   R2 every task of a row is archived in CHANGELOG.md but the Verification cell is empty
 #   R3 the same Req ID appears in more than one row (a duplicate mapping)
 # Exit codes: 0 no RTM or no problems, 1 problems found. Needs bash, awk, grep, sed and tr.
+# --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
+todo_skills_version="0.5.0"
+if [ "${1:-}" = "--version" ]; then echo "todo-rtm.sh $todo_skills_version"; exit 0; fi
 root="${1:-.}"
 if [ -f "$root/docs/RTM.md" ]; then src="$root/docs/RTM.md"; loc="docs/RTM.md"; sect=0
 elif [ -f "$root/README.md" ] && grep -q '^## RTM[[:space:]]*$' "$root/README.md"; then src="$root/README.md"; loc="README.md"; sect=1

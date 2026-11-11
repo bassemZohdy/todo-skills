@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **TASK-072** · P1 · low · Run tests/run.sh on Windows in CI and bound the jobs: the maintainer and all Claude Code evidence are on Windows with Git Bash (157 of 157 checks pass there in 49 s), but test.yml covers only Ubuntu and macOS and sets no timeout or concurrency group
-  - Done when: a check parses test.yml and fails without a Windows runner, timeout-minutes or a concurrency group; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 202 passing; branch todo/TASK-072-run-tests-windows-ci from main; next: read docs
 - [ ] **TASK-073** · P1 · mid · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports
   - Done when: test.yml runs shellcheck over tools, tests and .todo, run.sh runs it when installed, and a seeded unquoted-variable finding fails it; `bash tests/run.sh`
   - State: next: decompose

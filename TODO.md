@@ -2,6 +2,8 @@
 
 ## 🌳 Task Tree
 
+- [ ] **FIX-092** · P0 · low · Make test-linux-codex-evidence.sh pass on the Windows CI leg added by TASK-072: its Python calls a bare bash, which there is probably the WSL launcher in System32 and exits 1, so the test job failed at 377152d
+  - Done when: the script gives Python the bash that runs it (as a Windows path under Git Bash) and the Windows leg of the test workflow is green; `bash tests/trials/test-linux-codex-evidence.sh`
 - [ ] **TASK-073** · P1 · mid · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports
   - Done when: test.yml runs shellcheck over tools, tests and .todo, run.sh runs it when installed, and a seeded unquoted-variable finding fails it; `bash tests/run.sh`
   - State: next: decompose

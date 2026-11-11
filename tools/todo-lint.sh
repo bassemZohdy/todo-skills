@@ -127,10 +127,10 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
   if (filt > 0) warn("W2", "line " NR ": " lab ": Done when selects tests by name filter; some runners exit 0 when nothing matches, so target a test id or path that errors when missing")
 }
 # W5 (a heuristic, FEAT-060): an open high-complexity node, or one whose title names a security subject, whose criteria
-# (the text before the first command) name no negative case. Known false positives: "author" and "tokenizer" match.
+# (the text before the first command) name no negative case. Whole words only (auth, authentication, authorization, OAuth, login, passwords, tokens, ...), so "author" and "tokenizer" do not match; "crypt" still matches inside a word.
 function checkneg(i, s, lab,   p) {
   if (nmark[i] == "x") return
-  if (ncx[i] != "high" && ntitle[i] !~ /(^|[^a-z])(auth|login|password|passwd|token|secret|credential|permission|session)|crypt/) return
+  if (ncx[i] != "high" && ntitle[i] !~ /(^|[^a-z])(o?auth(entication|enticate|enticated|orization|orize|orized|orisation|orise|n|z)?|logins?|passwords?|passwd|tokens?|secrets?|credentials?|permissions?|sessions?)([^a-z]|$)|crypt/) return
   p = index(s, "`"); if (p > 0) s = substr(s, 1, p - 1)
   if (tolower(s) ~ /reject|den(y|ies|ied)|fail|refus|rais|unauthori[sz]ed|invalid/) return
   warn("W5", "line " NR ": " lab ": the Done when of a high or security node names no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid); add one as a criterion or a child node")

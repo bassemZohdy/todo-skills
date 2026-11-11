@@ -3,7 +3,7 @@
 # Usage: bash tests/trials/setup.sh <new-dir> <scenario>
 # Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release-ask | release |
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
-#   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module
+#   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -88,6 +88,29 @@ PY
   g add extra.py tests/test_extra.py CHANGELOG.md && g commit -q -m "feat(extra): add twice" -m "Refs: FEAT-009"
   g switch -q todo/FEAT-001-subtract
   g stash pop -q
+  ;;
+team-claim)
+  # Two clones of one bare remote (TASK-091). The peer already claimed FEAT-001 and added its own FEAT-003 on origin; this clone
+  # (the agent's) is behind, and holds an unpushed local FEAT-003 of its own, so a pull collides on both the claim and the ID.
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
+  - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+- [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
+  - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  g add -A && g commit -q -m "init with two free roots"
+  mkdir -p .team && printf '.team/\n' >> .git/info/exclude
+  git init -q --bare -b main .team/origin.git
+  g remote add origin "$dir/.team/origin.git"
+  g push -q -u origin main
+  git clone -q .team/origin.git .team/peer
+  ( cd .team/peer
+    awk '{print} /Done when: subtract works/ {print "  - State: branch todo/FEAT-001-peer-work from main; next: build children"}' TODO.md > TODO.new && mv TODO.new TODO.md
+    git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-peer-work"
+    printf '%s\n' '- [ ] **FEAT-003** · P1 · low · Add a divide function to calc.py with a test' '  - Done when: divide works; `python3 -m unittest tests.test_calc.CalcTest.test_divide`' >> TODO.md
+    git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): add FEAT-003"
+    git -c user.email=p@p -c user.name=peer push -q origin main )
+  printf '%s\n' '- [ ] **FEAT-003** · P2 · low · Add a power function to calc.py with a test' '  - Done when: power works; `python3 -m unittest tests.test_calc.CalcTest.test_power`' '  - Links: Depends: FEAT-002' >> TODO.md
+  g add TODO.md && g commit -q -m "chore(backlog): add FEAT-003"
+  git -C .team/origin.git for-each-ref --format='%(refname) %(objectname)' > .git/team-origin-refs
   ;;
 claimed-elsewhere)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test

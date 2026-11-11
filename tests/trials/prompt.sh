@@ -6,6 +6,7 @@ dir="${1:?usage: prompt.sh <dir> <scenario>}"; scenario="${2:?scenario}"
 case "$scenario" in
   interrupted-merge)  task='Run `/todo-continue`. Stop after one invocation.' ;;
   refresh-from-base)  task='Run `/todo-continue` (no `--merge`). Stop after one invocation.' ;;
+  team-claim)         task='A teammate pushed to `origin` since you last pulled, and you have one local commit that is not pushed. Run `git pull --no-rebase`: it conflicts in TODO.md. Resolve the conflict by the skills'"'"' conflict rules, finish the merge with `git commit --no-edit`, and lint. Then run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`). Never push.' ;;
   claimed-elsewhere)  task='Run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`). Do not build.' ;;
   race-claim-*)       task='Run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`), or earlier if the skill says to stop. Do not build. Do not modify or remove git hooks.' ;;
   release-ask)        task='Run `/todo-release`. When the skill tells you to ask the user something, STOP there and end your turn with the question.' ;;

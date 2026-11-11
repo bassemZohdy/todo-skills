@@ -64,6 +64,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
 - that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules);
 - each command's loaded bytes and words against the [load budget](#load-budget);
+- that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.
 
@@ -109,7 +110,8 @@ Shell scripts are LF in every checkout (`.gitattributes`: `*.sh text eol=lf`); `
 1. `/todo-release` on `main` proposes the version from `[Unreleased]`; confirm it, and it commits `chore(release): X.Y.Z`.
 2. Set `"version"` in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` to the same version (Codex caches an install by version), and run `bash tests/run.sh`.
 3. Tag and push by hand: `git tag -a vX.Y.Z -m "X.Y.Z"` and `git push --follow-tags`.
-4. For the Anthropic directory, follow the checklist in [distribution.md](distribution.md).
+4. For the Anthropic directory, follow the checklist in [distribution.md](distribution.md); its package-check record is dated and names the version it checked, so redo it when you submit.
+5. Review [agent-compatibility.md](agent-compatibility.md) against the release and update its "Last reviewed … against version" line, saying what was and was not re-run; `tests/run.sh` fails while that line names an older version than the manifests (TASK-074).
 
 ## Documentation
 

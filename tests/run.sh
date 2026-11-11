@@ -662,6 +662,18 @@ printf '## [Unreleased]\n\n## [0.3.0] - 2026-01-01\n' > "$spt/CHANGELOG.md"; pri
 sp_t="$(stampcheck "$spt/tools" "$spt/plugin" "$spt/CHANGELOG.md" todo-lint.sh todo-bare.sh)"
 if [ "$(printf '%s\n' "$sp_t" | grep -c "^STAMP")" -ge 4 ]; then ok "the stamp check fails disagreeing manifests, a stale CHANGELOG heading, a wrong stamp and an unstamped script"; else bad "the stamp check missed a gap: $sp_t"; fi
 rm -rf "$spt"
+# set-version.sh (FEAT-088): on a scratch copy it moves the manifests, README statements and every stamp to a new version in one
+# step, so the stamp check passes for it; a malformed version is refused and changes nothing.
+sv="$root/tests/set-version.sh"; svt="$(mktemp -d)"
+mkdir -p "$svt/tools" "$svt/plugin/.claude-plugin" "$svt/plugin/.codex-plugin" "$svt/.todo"
+cp "$root"/tools/todo-*.sh "$svt/tools/"; cp "$root/tools/todo-lint.sh" "$svt/.todo/todo-lint.sh"
+cp "$root/plugin/.claude-plugin/plugin.json" "$svt/plugin/.claude-plugin/"; cp "$root/plugin/.codex-plugin/plugin.json" "$svt/plugin/.codex-plugin/"
+cp "$root/README.md" "$svt/README.md"; printf '## [Unreleased]\n\n## [0.6.0] - 2026-12-01\n' > "$svt/CHANGELOG.md"
+if bash "$sv" 0.6 "$svt" >/dev/null 2>&1 || bash "$sv" v0.6.0 "$svt" >/dev/null 2>&1; then bad "set-version.sh accepted a malformed version"; else
+  if [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools | grep -v 'CHANGELOG heading')" ] && ! grep -q '"version": *"0.6.0"' "$svt/plugin/.claude-plugin/plugin.json"; then ok "set-version.sh refuses a malformed version and changes nothing"; else bad "set-version.sh changed files for a malformed version"; fi
+fi
+if bash "$sv" 0.6.0 "$svt" >/dev/null 2>&1 && [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools)" ] && grep -qi 'version 0.6.0' "$svt/README.md" && cmp -s "$svt/.todo/todo-lint.sh" "$svt/tools/todo-lint.sh"; then ok "set-version.sh moves the manifests, README and every stamp to a new version in one step"; else bad "set-version.sh left a version unchanged: $(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools | tr '\n' ';')"; fi
+rm -rf "$svt"
 # Shell scripts hold no carriage return (FIX-093): one stray CR makes git treat the file as binary and breaks a copied tool.
 crbad=""
 for f in "$root"/tools/*.sh "$root"/.todo/*.sh "$root"/tests/*.sh "$root"/tests/trials/*.sh; do

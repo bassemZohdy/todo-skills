@@ -12,6 +12,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
 | Regression failure | `baseline-red` | Python |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
+| Team use (two clones, one bare remote) | `team-claim` | Python; set up and checked by the selftest only, no agent run yet |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
 | Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |

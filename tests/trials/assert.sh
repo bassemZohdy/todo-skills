@@ -29,7 +29,7 @@ if [ -e .git ]; then
   chk "no tag created" '[ "$(git tag | grep -vc "^v0\.1\.0$")" = 0 ]'
   chk "new commit subjects are conventional or merges" '[ -z "$(git log --format=%s --all --not $old | grep -Ev "^((feat|fix|chore|docs|refactor|test|perf|build|ci|style)(\([a-z0-9._/-]+\))?!?: [^A-Z]|Merge )")" ]'
   chk "node commits carry Refs: and Reviewed: trailers" '(for c in $(git log --format=%H --all --not $old --grep="^\(feat\|fix\|refactor\|test\|perf\)"); do git log -1 --format=%B $c | grep -q "^Refs: " && git log -1 --format=%B $c | grep -q "^Reviewed: " || exit 1; done)'
-  chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$")" ]'
+  chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$|^Merge branch .main. of ")" ]'
 fi
 if [ "$scenario" != baseline-red ]; then
   if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'
@@ -75,6 +75,17 @@ claimed-elsewhere)
   chk "main gained exactly the claim commit, TODO.md only" '[ "$(git log --format=%s $start..main)" = "chore(backlog): claim FEAT-002 on $(git branch --list "todo/FEAT-002-*" | tr -d "* ")" ] && [ "$(git diff --name-only $start main)" = TODO.md ]'
   chk "FEAT-002 is [/] on its branch with attempts and baseline" 'at "$(git branch --list "todo/FEAT-002-*" | tr -d "* ")" TODO.md | grep -A3 "\[/\] \*\*FEAT-002" | grep -q "State: attempts 0/3; baseline 1 passing; branch todo/FEAT-002-"'
   chk "no code written (stopped after the claim)" '! git grep -q "def multiply" $(git for-each-ref --format="%(refname)" refs/heads)'
+  ;;
+team-claim)
+  chk "the pull was merged: the peer's claim of FEAT-001 is on main" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-peer-work"'
+  chk "no conflict markers are left in TODO.md" '! at main TODO.md | grep -Eq "^(<<<<<<<|=======|>>>>>>>)"'
+  chk "FEAT-003 stays the peer's divide root, once" '[ "$(at main TODO.md | grep -c "\*\*FEAT-003\*\*")" = 1 ] && at main TODO.md | grep "\*\*FEAT-003\*\*" | grep -q divide'
+  chk "the local power root was renumbered to FEAT-004 and keeps its Depends" 'at main TODO.md | grep -A3 "\*\*FEAT-004\*\*" | grep -q power && at main TODO.md | grep -A3 "\*\*FEAT-004\*\*" | grep -q "Depends: FEAT-002"'
+  chk "FEAT-001 was skipped: no branch of ours for it" '! git branch --list "todo/FEAT-001-*" | grep -q .'
+  chk "FEAT-002 is claimed on main with its branch" 'at main TODO.md | grep -A3 "FEAT-002\*\*" | grep -q "State: branch todo/FEAT-002-"'
+  chk "a branch for FEAT-002 exists with FEAT-002 [/]" 'at "$(git branch --list "todo/FEAT-002-*" | head -1 | tr -d "* ")" TODO.md | grep -q "\[/\] \*\*FEAT-002"'
+  chk "nothing was pushed: origin is as the setup left it" '[ "$(git -C .team/origin.git for-each-ref --format="%(refname) %(objectname)")" = "$(cat "$gd/team-origin-refs")" ]'
+  chk "no code written (stopped after the start commit)" '! git grep -q "def multiply" $(git for-each-ref --format="%(refname)" refs/heads)'
   ;;
 race-claim-conflict)
   chk "the rival's claim is on main" 'at main TODO.md | grep -q "State: branch todo/FEAT-001-rival"'

@@ -7,7 +7,7 @@
 #   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
 #   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 progress=0
 if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi
@@ -71,7 +71,7 @@ function chain(c, lab,   t, n, a, k, w, wi, norm, seg) {
     if (norm == "") continue
     sub(/^(\.\/)?(\.venv|venv|env)\/bin\//, "", norm); sub(/^(\.\/)?node_modules\/\.bin\//, "", norm)
     if (norm == "./gradlew" || norm == "./mvnw") sub(/^\.\//, "", norm)
-    if (!isrunner(norm) && norm !~ /^(cd|echo|printf|export|set|sleep|tee|sort|uniq|sed|awk|cut|tr|xargs)$/) {
+    if (!isrunner(norm) && norm !~ /^(cd|echo|printf|export|set|sleep|tee|sort|uniq|sed|awk|cut|tr|xargs|exit|false|wait)$/) {
       warn("W3", "line " NR ": " lab ": Done when runs " norm " after a chain operator, which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
       break
     }
@@ -94,10 +94,12 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
     if (c ~ /^(true|:|echo( .*)?|ls( .*)?|manual|n\/a|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c)
     if (c ~ /(^|[^A-Za-z])sudo([^A-Za-z]|$)/ || c ~ /(^|[ ;&|(])(\/[^ ]*\/)?rm +-[A-Za-z]*[rRfF]/ || c ~ /(^|[ ;&|(])(\/[^ ]*\/)?rm +.*--(recursive|force)/ || c ~ /(curl|wget)[^|]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /(curl|wget)[^;&]*[|][^;&]*[|] *(sudo +)?(sh|bash|zsh|dash|python[0-9.]*|perl|ruby)/ || c ~ /<\( *(curl|wget)/ || c ~ /(^|[ ;&|(])(ba|z|da)?sh +<\(/ || c ~ /(^|[ ;&|(])(source|\.) +<\(/ || c ~ /(wget|curl +[^|;&]*(-[A-Za-z]*[oO]|--output|--remote-name))[^|]*(&&|;) *(sudo +)?(sh|bash|zsh|dash|source|\.\/)/ || c ~ /git( +-[cC] +[^ ]+)* +push/ || c ~ /git +reset +--hard/ || c ~ /git +clean( |$)/ || c ~ /(^|[;&|] *)(eval|exec)( |$)/ || c ~ /(^|[ ;&|])(ba|z)?sh +-[a-z]*c/ || c ~ /python[0-9.]*( +-[A-Za-z]+)* +-[A-Za-z]*c( |$)/ || c ~ /-exec(dir)? +rm( |$)/ || c ~ /(ruby|perl) +-e/ || c ~ /php +-r/ || c ~ /node +(-[a-z]*[ep]( |$)|--eval|--print)/ || c ~ /chmod +-R/ || c ~ /(^|[ ;&|])mkfs([. ]|$)/ || c ~ /dd +if=/ || c ~ /git +-C +[^ ]+ +push/ || c ~ /(^| )-delete( |$)/ || c ~ /(npm|yarn|pnpm|cargo|poetry|gem) +(npm +)?(publish|push)/ || c ~ /twine +upload/ || c ~ /(docker|podman) +push/ || c ~ /nuget +push/ || c ~ /mvnw? .*deploy( |$)/ || c ~ /[.]ssh\/|id_rsa|[.]aws\/credentials/)
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
-    if (c ~ /(\|\| *(true|:|exit +0)|;[ ]*(true|:|exit +0)[ ]*$|&& *(true|:)[ ]*$)/) fail("I3", "line " NR ": " lab ": the command masks failures (|| true, ; true, ; exit 0): " c)
+    if (c ~ /(\|\| *(true|:|exit +0)|;[ ]*(true|:|exit +0)[ ]*$|&& *(true|:)[ ]*$|[|][|] *(echo|printf)( |$)|(^|[ ;&|(])set +[+]e( |;|$))/) fail("I3", "line " NR ": " lab ": the command masks failures (|| true, || echo, ; true, ; exit 0, set +e): " c)
     if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|rspec|mocha|dotnet test|(npm|yarn|pnpm|bun)( run)? test|bash tests?\/|make (test|check))[^|]*[|][^|]/ && c !~ /\|\|/) warn("W4", "line " NR ": " lab ": a test runner piped into another command hides its exit status unless pipefail is set; run the runner alone: " c)
     if (c ~ /(^|[ ;&|(])npx +([^;&|]* )?(--yes|-y)( |$)/ || c ~ /(pnpm|yarn) +dlx( |$)/ || c ~ /(^|[ ;&|(])(bunx|uvx)( |$)/ || c ~ /deno +run +[^;&|]*https?:\/\// || c ~ /go +run +[^ ]+@[^ ]+/ || c ~ /(^|[ ;&|(])pip3? +install( |$)/ || c ~ /-m +pip +install( |$)/ || c ~ /(^|[ ;&|(])npm +(install|i|add)( |$)/)
       warn("W6", "line " NR ": " lab ": Done when may download and run code from the network; use a package already in the lockfile (npx --no-install) and install dependencies before the task: " c)
+    if (c ~ /(^| )(--collect-only|--co|--passWithNoTests|--no-run|-DskipTests(=true)?|-Dmaven[.]test[.]skip(=true)?)( |$)/)
+      warn("W7", "line " NR ": " lab ": the command may run no test (collect-only, pass-with-no-tests, skip-tests, no-run); a Done when must run the tests: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first
       if (c ~ /^(true|:|echo( .*)?|ls( .*)?|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c) }

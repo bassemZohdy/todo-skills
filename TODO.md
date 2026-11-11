@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FIX-063** · P0 · high · Make lint I10 catch a forbidden command that follows ( or $( or an absolute path: (rm -rf x), $(rm -rf x), /bin/rm -rf x and git -c k=v push pass today, the first two without any warning
-  - Done when: one I10 fixture per form fails the lint and every ok fixture still passes; `bash tests/run.sh`
-  - State: branch todo/FIX-063-make-lint-i10-catch from main; next: start FIX-063
 - [ ] **FIX-064** · P0 · high · Make lint I10 catch downloaded code that reaches a shell indirectly: bash <(curl ...), curl x | tee f | sh and curl -o x.sh ... && bash x.sh pass (the first with no warning), and todo-replay.sh --run executes process substitution as SAFE
   - Done when: one I10 fixture per form fails the lint and the replay test refuses each without running it; `bash tests/run.sh`
 - [ ] **FIX-065** · P1 · mid · Vet every command of a chain, not only the first: pytest tests/a.py && shred README.md, bash tests/ok.sh; touch x and bash tests/ok.sh > ~/.bashrc lint clean, and todo-replay.sh --run ran all three forms in a probe

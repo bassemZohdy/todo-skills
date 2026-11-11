@@ -2,7 +2,7 @@
 
 ## What the skills can do
 
-The plugin (`plugin/`) is Markdown instructions only, plus one HTML page template embedded in a Markdown file. Optional read-only shell scripts (the lint, the Stop hook, `todo-verify.sh`, `todo-rtm.sh`, `todo-report.sh`) live in `tools/` of the repository and are not part of the plugin. They never touch the network, tag, push or run destructive commands.
+The plugin (`plugin/`) is Markdown instructions only, plus one HTML page template embedded in a Markdown file. Optional shell scripts live in `tools/` of the repository and are not part of the plugin. `todo-lint.sh`, `todo-stop-hook.sh`, `todo-verify.sh`, `todo-rtm.sh` and `todo-report.sh` are read-only: they run no project command and edit no file. `todo-replay.sh` is not: without `--run` it only lists the `Validated:` commands of newly drained entries, but with `--run` it runs the ones the lint accepts, which may do whatever your tests do (it refuses the rest and never runs them), so read `--run` as running code from the CHANGELOG. None of the scripts touches the network, tags, pushes or runs destructive commands of its own.
 
 An agent following the skills still runs the `Done when` and test commands found in a repository, so review `TODO.md` the way you review code: a task from an untrusted source can name any command. The skills limit `Done when` to test, lint, typecheck and build commands, read a script before running it, and refuse commands that delete files, use `sudo`, run downloaded code, push, publish, deploy, leave the repository or read credentials ([docs/VERIFICATION.md](docs/VERIFICATION.md#command-safety)). The lint rejects an obvious set (`sudo`, `rm -r`, `git push`, download-to-shell and similar). These are safety nets, not a sandbox.
 

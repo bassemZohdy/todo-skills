@@ -12,13 +12,13 @@ plugin/                          The installable plugin: Markdown, JSON and the 
   README.md                      The plugin's own short README
   skills/
     todo/SKILL.md                Core rules: layers, task format, IDs, git mode, invariants, guardrails
-    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md
+    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md, review.md, clarify.md
     todo-init/ todo-plan/ todo-add/ todo-continue/ todo-update/ todo-status/ todo-release/
     todo-report/SKILL.md         …and template.md, the status page inside a fenced block
 .claude-plugin/marketplace.json  Claude Code marketplace, source ./plugin
 .agents/plugins/marketplace.json Codex marketplace, path ./plugin
-tools/                           Optional read-only scripts users copy into their projects (docs/TOOLS.md)
-  todo-lint.sh todo-verify.sh todo-rtm.sh todo-report.sh todo-stop-hook.sh template.html
+tools/                           Optional scripts users copy into their projects, read-only except todo-replay.sh --run (docs/TOOLS.md)
+  todo-lint.sh todo-verify.sh todo-rtm.sh todo-replay.sh todo-report.sh todo-stop-hook.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
   build-codex-package.sh         Builds the OpenAI Plugins Directory archive from plugin/: --claude for the preferred Claude import, else the native Codex ZIP (docs/distribution.md)
@@ -51,7 +51,7 @@ bash tests/trials/selftest.sh                              # the trial harness w
 for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (three of them need Docker or Codex)
 ```
 
-`tests/run.sh` needs bash, awk, grep, sed and python3 (for the JSON manifest check; with PyYAML installed it also checks the frontmatter) and creates no files. It checks:
+`tests/run.sh` needs bash, awk, grep, sed and python3 (for the JSON manifest check; with PyYAML installed it also checks the frontmatter) and writes only temporary directories that it removes. It checks:
 
 - every lint fixture against its name (pass, the named invariant, or the named warning, with no warning on `ok-*`);
 - the lint without a `CHANGELOG.md` (exit 0) and without a `TODO.md` (exit 2);
@@ -64,6 +64,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
 - that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules);
 - each command's loaded bytes and words against the [load budget](#load-budget);
+- that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.
 
 When you change the lint, add a fixture: `ok-<case>.md`, `I<n>-<case>.md` or `W<n>-<case>.md`.

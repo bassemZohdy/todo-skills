@@ -1,0 +1,7 @@
+# Keeps the pinned GitHub Actions current (TASK-081): a weekly pull request when a pinned action has a new release.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

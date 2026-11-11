@@ -28,7 +28,7 @@ tests/
   trials/                        Agent trial harness (tests/trials/README.md)
 docs/                            Documentation; docs/evals/ holds retained, checksummed trial evidence
 .todo/                           This repository's own check: check.sh and a copy of tools/todo-lint.sh
-.github/workflows/               test.yml (tests: Ubuntu, macOS and Windows with Git Bash), todo-check.yml (backlog lint), windows-verifier-test.yml; each has a concurrency group and a timeout per job (checked by tests/run.sh)
+.github/workflows/               test.yml (tests: Ubuntu, macOS and Windows with Git Bash), todo-check.yml (backlog lint), windows-verifier-test.yml; each has a concurrency group and a timeout per job, and every `uses:` is pinned to a commit SHA that `.github/dependabot.yml` keeps current (all checked by tests/run.sh)
 TODO.md, CHANGELOG.md            This repository's own backlog, run with the skills
 ```
 

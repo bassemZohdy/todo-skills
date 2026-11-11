@@ -17,8 +17,5 @@
 - [ ] **FEAT-088** · P2 · mid · Stamp the copied scripts with their release: users copy tools/*.sh by hand and nothing says which version a copy is, and a release needs hand edits in three places (0.4.0 took a separate manifest-bump commit, 8b5a2fd); add a version line and a --version flag to each tool and one helper that sets the manifests, README and stamps together
   - Done when: run.sh fails when a tool's stamp, either manifest or the newest CHANGELOG heading disagree, and each tool prints its version; `bash tests/run.sh`
   - State: next: decompose
-- [ ] **TASK-090** · P2 · mid · Cut what /todo-continue always loads: 54,689 bytes and 8,871 words load for every node and the budget only caps growth (tokens were never measured); move the --worktree and claim-collision branches of git-flow.md into a reference read on demand and lower the budget
-  - Done when: the /todo-continue row of the load budget drops by at least 15 percent, the check fails above it, and the skill text checks still pass; `bash tests/run.sh`
-  - State: branch todo/TASK-090-cut-continue-load from main; next: start TASK-090
 - [ ] **TASK-091** · P2 · mid · Add a two-clone claim scenario to the trial harness: team use is unverified (README Status) and every claim trial runs in one clone; use a bare remote and two clones whose claims and new root IDs collide after a pull
   - Done when: selftest sets up the scenario with its bare remote and doing nothing fails it; `bash tests/trials/selftest.sh`

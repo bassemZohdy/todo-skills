@@ -411,8 +411,8 @@ if [ -z "$out" ]; then ok "hook allows the stop when verification is blocked"; e
 if [ ! -d "$root/tests/fixtures-rtm/neither/.todo" ]; then ok "a project without .todo/ or CI files is a valid fixture (checks are optional)"; else bad "fixture unexpectedly has .todo/"; fi
 
 # Documentation drift (TASK-011): file:line references, interface changes only, never a new tool.
-dd="$root/plugin/skills/todo-continue/SKILL.md"
-if grep -q '<file>:<line>: <name>' "$dd" && grep -q 'grep -rnF' "$dd" && grep -q 'changed no interface skips this' "$dd" && grep -q 'never blocks it' "$dd"; then ok "documentation drift reports file:line references and does not block unrelated nodes"; else bad "todo-continue documentation drift rules are incomplete"; fi
+dd="$root/plugin/skills/todo-continue/SKILL.md"; dr="$root/plugin/skills/todo/reference/doc-drift.md"
+if grep -q '<file>:<line>: <name>' "$dr" && grep -q 'grep -rnF' "$dr" && grep -qF 'reference/doc-drift.md' "$dd" && grep -q 'changed no interface skips this' "$dd" && grep -q 'never blocks it' "$dd"; then ok "documentation drift reports file:line references and does not block unrelated nodes"; else bad "todo-continue documentation drift rules are incomplete"; fi
 drift="$(grep -rnF -- 'todo-lint.sh' "$root/README.md" "$root/docs" 2>/dev/null | head -1)"
 if printf '%s' "$drift" | grep -Eq '^[^:]+:[0-9]+:'; then ok "the documented grep -rnF form yields file:line hits"; else bad "grep -rnF drift form gave no file:line: $drift"; fi
 

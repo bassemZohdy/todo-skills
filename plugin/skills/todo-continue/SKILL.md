@@ -75,7 +75,6 @@ The order of every node is the core's "Lifecycle by status".
 ## Documentation drift
 
 - If the implementation must deviate from the `Ref` doc, stop and let the user choose: change the code, or update the doc in this node.
-- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, renamed, removed or with a changed meaning), search README.md and `docs/` (not `docs/plans/`) for each changed name with `grep -rnF -- '<name>' README.md docs`. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
-- Report every hit as an actionable reference, one line each: `<file>:<line>: <name> - <what to change>` (for example `docs/REFERENCE.md:48: --worktree - flag renamed to --tree`). Update the hits that fit within the task line (`Docs: updated <file>` for the CHANGELOG entry; no git: the root's `State: docs:`); give the rest as `/todo-add "update <file>:<line> for <name>" --type task --from <ID>` commands in the report. Only a hit the `Done when` or the Definition of Done names blocks the node. Uses grep only; no new tool.
+- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, renamed, removed or with a changed meaning), read `reference/doc-drift.md` and follow it. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
 - Report README setup or test instructions that disagree with the commands that passed.
 - TODO.md never duplicates docs; spec-like text goes to `docs/` with a `Ref:`.

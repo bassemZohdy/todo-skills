@@ -4,7 +4,7 @@ about: You ran the skills on a project and something was wrong, unclear or great
 labels: enhancement
 ---
 
-**Agent and version** (for example Claude Code 2.x, todo-skills 0.1.0):
+**Agent and version** (for example Claude Code 2.x, todo-skills X.Y.Z, from plugin.json):
 
 **Command you ran**:
 

@@ -1,6 +1,6 @@
 # Agent compatibility
 
-What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-08, against version 0.4.0.
+What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-11, against version 0.5.0. The recorded runs below were made on 0.4.0 or earlier: 0.5.0 added skill text and scripts (the optional reviews, the ambiguity pass, `todo-replay.sh`, lint warnings), and no agent run was repeated for it, so the Claude Code and Codex trial results are evidence for 0.4.0.
 
 | Check | Claude Code | Codex |
 |---|---|---|

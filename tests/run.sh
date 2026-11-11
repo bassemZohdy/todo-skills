@@ -58,6 +58,33 @@ if not line or 'Claude Code' not in line or 'Codex' not in line or not links: pr
 PY
 )"
 if [ -z "$readme_bad" ]; then ok "README version, install path, links and agent evidence agree with the repository"; else bad "README drift: $readme_bad"; fi
+# TASK-074: the agent-compatibility review line names the current release, the trial-report template names no concrete version,
+# and the release steps in DEVELOPMENT.md name the pages that state a version.
+verdrift() {   # <repo root>: prints one line per stale statement
+python3 - "$1" <<'PY'
+import json, os, re, sys
+root = sys.argv[1]
+def rd(*p): return open(os.path.join(root, *p), encoding='utf-8').read()
+want = {json.load(open(os.path.join(root, 'plugin', d, 'plugin.json'), encoding='utf-8'))['version'] for d in ('.claude-plugin', '.codex-plugin')}
+m = re.search(r'(?i)last reviewed [0-9-]+, against version (\d+\.\d+\.\d+)', rd('docs', 'agent-compatibility.md'))
+if not m: print('docs/agent-compatibility.md has no "Last reviewed <date>, against version X.Y.Z" line')
+elif {m.group(1)} != want: print(f'docs/agent-compatibility.md was reviewed against {m.group(1)}, the manifests say {sorted(want)}')
+if re.search(r'todo-skills \d+\.\d+\.\d+', rd('.github', 'ISSUE_TEMPLATE', 'trial-report.md')): print('the trial-report template names a concrete todo-skills version')
+rel = re.search(r'^## Releasing.*?(?=^## )', rd('docs', 'DEVELOPMENT.md'), re.M | re.S)
+for page in ('agent-compatibility.md', 'distribution.md'):
+    if not rel or page not in rel.group(0): print(f'the release steps in docs/DEVELOPMENT.md do not name {page}')
+PY
+}
+vd_out="$(verdrift "$root")"
+if [ -z "$vd_out" ]; then ok "the agent-compatibility review line names the released version and the release steps name the pages that state one"; else bad "version statements: $(printf '%s' "$vd_out" | tr '\n' ';')"; fi
+vdt="$(mktemp -d)"; mkdir -p "$vdt/plugin/.claude-plugin" "$vdt/plugin/.codex-plugin" "$vdt/docs" "$vdt/.github/ISSUE_TEMPLATE"
+printf '{"version":"0.5.0"}\n' | tee "$vdt/plugin/.claude-plugin/plugin.json" > "$vdt/plugin/.codex-plugin/plugin.json"
+printf 'Last reviewed 2026-11-08, against version 0.4.0.\n' > "$vdt/docs/agent-compatibility.md"
+printf '## Releasing\n\n1. tag it\n\n## Documentation\n' > "$vdt/docs/DEVELOPMENT.md"
+printf 'Agent and version (todo-skills 0.1.0):\n' > "$vdt/.github/ISSUE_TEMPLATE/trial-report.md"
+vd_t="$(verdrift "$vdt")"
+if [ "$(printf '%s\n' "$vd_t" | grep -c .)" -eq 4 ]; then ok "the version check fails a stale review line, a concrete version in the template and release steps that omit the pages"; else bad "the version check missed a stale statement: $vd_t"; fi
+rm -rf "$vdt"
 
 # Every SKILL.md frontmatter is valid YAML (strict loaders such as the skills CLI skip a skill that is not).
 if python3 -c 'import yaml' 2>/dev/null; then

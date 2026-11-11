@@ -602,6 +602,31 @@ printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses
 pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
 if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
 rm -rf "$pit"
+# Listing (TASK-083): plugin/README.md carries the marketplace install lines, and the two manifests agree on what a listing shows
+# besides the version (repository, homepage, license, keywords).
+listcheck() {   # <plugin dir>: prints one LIST line per problem
+python3 - "$1" <<'PY'
+import json, os, sys
+d = sys.argv[1]
+readme = open(os.path.join(d, 'README.md'), encoding='utf-8').read()
+for line in ('/plugin marketplace add bassemZohdy/todo-skills', '/plugin install todo-skills@todo-skills', 'codex plugin marketplace add bassemZohdy/todo-skills'):
+    if line not in readme: print(f'LIST plugin/README.md lacks the install line: {line}')
+cl = json.load(open(os.path.join(d, '.claude-plugin', 'plugin.json'), encoding='utf-8'))
+cx = json.load(open(os.path.join(d, '.codex-plugin', 'plugin.json'), encoding='utf-8'))
+for k in ('repository', 'homepage', 'license', 'keywords'):
+    if k not in cl: print(f'LIST the Claude manifest has no {k}')
+    elif cl[k] != cx.get(k): print(f'LIST the manifests disagree on {k}')
+PY
+}
+li_out="$(listcheck "$root/plugin")"
+if [ -z "$li_out" ]; then ok "plugin/README.md has the install lines and both manifests agree on repository, homepage, license and keywords"; else bad "listing: $(printf '%s' "$li_out" | tr '\n' ';')"; fi
+lit="$(mktemp -d)"; mkdir -p "$lit/.claude-plugin" "$lit/.codex-plugin"
+printf '# p\n' > "$lit/README.md"
+printf '{"name":"x","homepage":"h","license":"MIT"}\n' > "$lit/.claude-plugin/plugin.json"
+printf '{"name":"x","repository":"r","homepage":"h","license":"MIT","keywords":["a"]}\n' > "$lit/.codex-plugin/plugin.json"
+li_t="$(listcheck "$lit")"
+if [ "$(printf '%s\n' "$li_t" | grep -c '^LIST')" -eq 5 ]; then ok "the listing check fails a missing install line and a manifest without repository or keywords"; else bad "the listing check missed a gap: $li_t"; fi
+rm -rf "$lit"
 # CHANGELOG links (FIX-082): a tag a link names (vX.Y.Z) must be in `git tag --list`, a commit it names must resolve. A clone
 # without tags cannot tell, so that is reported as a skip, never as a pass.
 linkcheck() {   # <changelog> <git dir>: prints MISSING lines, or NOTAGS when the clone has no tags

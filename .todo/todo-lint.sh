@@ -50,6 +50,33 @@ function addrefs(i, kind, s,   x) {
   }
 }
 function warn(code, msg) { print "WARN " code ": " msg; nwarn++ }
+function isrunner(norm) { return norm ~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/ }
+# FIX-065: a chain is vetted segment by segment. Quoted text is dropped first, then the text is split at && || ; | and &.
+# Every segment after the first needs a known runner (W3; a few harmless helpers are allowed there), and a redirect to a
+# path outside the repository (absolute, ~, $HOME or ..) is refused (I10); /dev/null, /dev/stdout and /dev/stderr are fine.
+function chain(c, lab,   t, n, a, k, w, wi, norm, seg) {
+  t = c
+  gsub(/"[^"]*"/, "", t); gsub(/\047[^\047]*\047/, "", t)
+  gsub(/[0-9]*>&[0-9-]*|&>>?/, "", t)
+  gsub(/>>? *\/dev\/(null|stdout|stderr)/, "", t)
+  if (t ~ />>? *(~|\$HOME|\/|\.\.)/) fail("I10", "line " NR ": " lab ": output redirected outside the repository in Done when: " c)
+  gsub(/&&|\|\||[;|&]/, "\n", t)
+  n = split(t, a, "\n")
+  for (k = 2; k <= n; k++) {
+    seg = a[k]; gsub(/^[ \t(]+/, "", seg)
+    if (k == 2 && trim(a[1]) ~ /^cd( |$)/) continue
+    split(seg, w, " "); wi = 1
+    while (w[wi] ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && length(w[wi + 1]) > 0) wi++
+    norm = w[wi]
+    if (norm == "") continue
+    sub(/^(\.\/)?(\.venv|venv|env)\/bin\//, "", norm); sub(/^(\.\/)?node_modules\/\.bin\//, "", norm)
+    if (norm == "./gradlew" || norm == "./mvnw") sub(/^\.\//, "", norm)
+    if (!isrunner(norm) && norm !~ /^(cd|echo|printf|export|set|sleep|tee|sort|uniq|sed|awk|cut|tr|xargs)$/) {
+      warn("W3", "line " NR ": " lab ": Done when runs " norm " after a chain operator, which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
+      break
+    }
+  }
+}
 function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
   n = 0; pres = 0; filt = 0
   while ((p = index(s, "`")) > 0) {
@@ -59,6 +86,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
     c = trim(substr(s, 1, q - 1))
     s = substr(s, q + 1)
     n++
+    chain(c, lab)
     split(c, w, " ")
     first = w[1]
     if (first !~ /^[A-Za-z0-9_.\/~=-]+$/ || c ~ /^[A-Za-z_][A-Za-z0-9_.]*[(]/)
@@ -77,7 +105,7 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
     sub(/^(\.\/)?(\.venv|venv|env)\/bin\//, "", norm)
     sub(/^(\.\/)?node_modules\/\.bin\//, "", norm)
     if (norm == "./gradlew" || norm == "./mvnw") sub(/^\.\//, "", norm)
-    if (norm !~ /^(npm|pnpm|yarn|bun|bunx|npx|node|deno|tsc|eslint|prettier|vitest|jest|mocha|python|python3|pytest|uv|uvx|tox|nox|ruff|mypy|pylint|flake8|black|go|golangci-lint|cargo|mvn|mvnw|gradle|gradlew|dotnet|make|cmake|ctest|ninja|bundle|rake|rspec|rubocop|ruby|php|composer|phpunit|swift|xcodebuild|bash|sh|zsh|shellcheck|markdownlint|yamllint|hadolint|tflint|ansible-lint|grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/)
+    if (!isrunner(norm))
       warn("W3", "line " NR ": " lab ": Done when runs " runner ", which is not a known test, lint, typecheck or build runner; confirm it only tests or builds")
     if (norm ~ /^(grep|egrep|fgrep|cat|ls|test|wc|head|tail|find|stat)$/) pres++
     if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|mvn|gradle|rspec|dotnet test|mocha|(npm|yarn|pnpm|bun)( run)? test)/ && (c ~ /(^| )-k[ =]/ || c ~ /-run[ =]/ || c ~ /--filter/ || c ~ /--testNamePattern/ || c ~ /(^| )-t /)) filt++

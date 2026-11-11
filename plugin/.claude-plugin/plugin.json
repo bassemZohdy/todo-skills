@@ -4,5 +4,7 @@
   "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
   "author": { "name": "Bassem Zohdy" },
   "homepage": "https://github.com/bassemZohdy/todo-skills",
-  "license": "MIT"
+  "repository": "https://github.com/bassemZohdy/todo-skills",
+  "license": "MIT",
+  "keywords": ["backlog", "todo", "agent-skills", "changelog"]
 }

@@ -5,9 +5,6 @@
 - [ ] **TASK-073** · P1 · mid · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports
   - Done when: test.yml runs shellcheck over tools, tests and .todo, run.sh runs it when installed, and a seeded unquoted-variable finding fails it; `bash tests/run.sh`
   - State: next: decompose
-- [/] **TASK-074** · P1 · low · Guard version statements outside README: docs/agent-compatibility.md says it was reviewed against 0.4.0, docs/distribution.md records the package check for 0.4.0 and the trial-report template cites 0.1.0, while the manifests say 0.5.0
-  - Done when: the version check also reads the agent-compatibility review line and fails on a stale one, and the release steps in DEVELOPMENT.md name these pages; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 204 passing; branch todo/TASK-074-guard-version-statements from main; next: read docs
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
 - [ ] **FIX-076** · P2 · low · Stop todo-verify.sh expanding globs in the wrong folder: cd pkg && pytest tests/*.py is rejected with missing test target tests/root_only.py when the repository root also matches the glob, because the command words are split unquoted

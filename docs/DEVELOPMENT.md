@@ -21,6 +21,7 @@ tools/                           Optional scripts users copy into their projects
   todo-lint.sh todo-verify.sh todo-rtm.sh todo-replay.sh todo-report.sh todo-stop-hook.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
+  shellcheck.sh                  Static analysis of every shell script (shellcheck; .shellcheckrc lists the checks disabled on purpose)
   set-version.sh                 Sets the release version in the manifests, README and tool stamps (Releasing)
   build-codex-package.sh         Builds the OpenAI Plugins Directory archive from plugin/: --claude for the preferred Claude import, else the native Codex ZIP (docs/distribution.md)
   fixtures/                      Lint fixtures: ok-*.md pass, I<n>-*.md fail with I<n>, W<n>-*.md warn
@@ -69,6 +70,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that every tag and commit a CHANGELOG link names exists in git (a clone without tags prints a `SKIP`; the links of 0.1.0 to 0.4.0 name release commits because those versions were never tagged, and the owner can add the tags later) (FIX-082);
+- that shellcheck (pinned in CI as `shellcheck-py` 0.10.0.1) finds nothing in the scripts under `tools`, `.todo` and `tests`, run through `tests/shellcheck.sh` when it is installed (a `SKIP` otherwise, a failure in CI), and that a seeded unquoted variable fails it (TASK-073);
 - that every script in `tools/` carries a `todo_skills_version` stamp equal to both manifests and the newest CHANGELOG heading and prints it with `--version`, and that `tests/set-version.sh` moves all of them in one step on a scratch copy and refuses a malformed version (FEAT-088);
 - that the README Status section is a table with a row for Claude Code and for Codex and an existing evidence link on every row (TASK-089);
 - that `.gitignore` lists the status page temp file, ZIP archives and `__pycache__` (TASK-084);

@@ -20,7 +20,7 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ]; then
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ] || [ "$expect" = "W8" ]; then
     if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
   elif [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi

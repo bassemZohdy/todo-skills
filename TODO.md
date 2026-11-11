@@ -2,9 +2,9 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-066** · P1 · mid · Add a W6 warning for Done when commands that fetch and run remote code through a known runner: npx --yes, pnpm dlx, yarn dlx, bunx, uvx, deno run with a URL, go run pkg@version, pip install and npm install lint clean although verification.md limits them to lockfile packages
+- [/] **FEAT-066** · P1 · mid · Add a W6 warning for Done when commands that fetch and run remote code through a known runner: npx --yes, pnpm dlx, yarn dlx, bunx, uvx, deno run with a URL, go run pkg@version, pip install and npm install lint clean although verification.md limits them to lockfile packages
   - Done when: a W6 fixture per form warns, npx --no-install and every ok fixture stay silent, replay refuses a W6 command, and REFERENCE.md and TOOLS.md list W6; `bash tests/run.sh`
-  - State: branch todo/FEAT-066-add-w6-warning-done from main; next: start FEAT-066
+  - State: attempts 0/3; baseline 169 passing; branch todo/FEAT-066-add-w6-warning-done from main; next: read docs
 - [ ] **FIX-067** · P1 · low · Close the masking gaps in lint I3: pytest || echo failed lints clean (only todo-verify.sh --strict rejects it), as do the no-test flags pytest --collect-only, jest --passWithNoTests, mvn test -DskipTests and cargo test --no-run
   - Done when: I3 fixtures for || echo, || printf and set +e fail, a fixture with the four no-test flags warns, and every ok fixture still passes; `bash tests/run.sh`
 - [ ] **FIX-068** · P1 · mid · Reject runs that executed no test in todo-verify.sh: pytest --co with 3 tests collected, an all-skipped run with 5 skipped, Maven with Tests run: 0 and dotnet with No test is available all return ACCEPT in default mode

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TASK-072** (task): Run `tests/run.sh` on Windows in CI and bound the jobs: `test.yml` gains a `windows-latest` leg (Git Bash) beside Ubuntu and macOS, and all three workflows get a concurrency group that cancels superseded runs and a timeout on each job; a check fails when a workflow lacks them. Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md.
 - **TASK-071** (task): Correct the safety docs: SECURITY.md, README, TOOLS.md, CONTRIBUTING.md and the core skill no longer call every script read-only (`todo-replay.sh --run` runs the commands the lint accepts), SECURITY.md names all six scripts, and the DEVELOPMENT.md layout lists `reference/review.md`, `reference/clarify.md` and `tools/todo-replay.sh`; a check fails when a script or reference file goes unlisted. Validated: `bash tests/run.sh`. Docs: updated SECURITY.md, README.md, CONTRIBUTING.md, docs/DEVELOPMENT.md, docs/TOOLS.md.
 
 ### Fixed

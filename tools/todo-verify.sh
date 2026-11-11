@@ -29,6 +29,7 @@ if printf '%s' "$cmd" | grep -qE '(\|\| *(true|:|exit 0)|;[[:space:]]*(true|:|ex
 dir="."
 body="$cmd"
 case "$body" in cd\ *) dir="$(printf '%s' "$body" | sed -E 's/^cd +([^ ;&|]+).*/\1/')"; body="$(printf '%s' "$body" | sed -E 's/^cd +[^ ;&|]+ *&& *//')";; esac
+set -f   # no pathname expansion here: a glob after "cd <dir> &&" belongs to <dir>, matched below, not to this folder
 for w in $body; do
   case "$w" in -*|*=*|*'$'*|*://*|*...) continue;; esac
   t="${w%%::*}"; t="${t%\;}"
@@ -38,6 +39,7 @@ for w in $body; do
       [ -e "$dir/$t" ] || reject "missing test target: $t";;
   esac
 done
+set +f
 
 zero='(^|[^0-9.])0 (tests?|specs?|examples?|passed|passing)([^a-z]|$)|collected 0 items|Ran 0 tests?|Tests: +0 total|no tests? (found|ran|to run)|no test files|NO TESTS RAN|0 tests? (run|executed)|Tests run: 0,|No test is available|[0-9]+ tests? collected'
 pos='(^|[^0-9.])[1-9][0-9]* (tests?|specs?|examples?|passed|passing)([^a-z]|$)|Ran [1-9][0-9]* tests?|Tests run: [1-9]|Passed: +[1-9]|^ok[[:space:]]|^PASS[[:space:]]'

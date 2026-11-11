@@ -312,6 +312,17 @@ vcase REJECT 0 'bash tests/run.sh; exit 0' '65 passed'
 vcase REJECT 1 'bash tests/run.sh' '1 failed'
 vcase REJECT x 'bash tests/run.sh' '1 passed'
 
+# FIX-076: after "cd <dir> &&" a glob is matched in <dir>, never in the repository root.
+vg="$(mktemp -d)"; mkdir -p "$vg/tests" "$vg/pkg/tests" "$vg/pkg/none"
+: > "$vg/tests/root_only.py"; : > "$vg/pkg/tests/a.py"
+vgcase() { want="$1"; cmd="$2"; out="$(cd "$vg" && printf '3 passed
+' | bash "$vf" 0 "$cmd" 2>&1)"; if [ "${out%% *}" = "$want" ]; then ok "verify $want: $cmd (glob after cd)"; else bad "verify $want: $cmd (glob after cd) gave: $out"; fi; }
+vgcase ACCEPT 'cd pkg && pytest tests/*.py'
+vgcase REJECT 'cd pkg/none && pytest tests/*.py'
+vgcase REJECT 'cd pkg && pytest tests/root_only.py'
+vgcase ACCEPT 'pytest tests/*.py'
+rm -rf "$vg"
+
 # Strict mode (TASK-012): opt-in; default mode keeps accepting count-less runners.
 vstrict() { want="$1"; rc_in="$2"; cmd="$3"; text="$4"; out="$(cd "$root" && printf '%s\n' "$text" | bash "$vf" --strict "$rc_in" "$cmd" 2>&1)"; if [ "${out%% *}" = "$want" ]; then ok "verify --strict $want: $cmd [$text]"; else bad "verify --strict expected $want for '$cmd' [$text], got: $out"; fi; }
 vstrict ACCEPT 0 'bash tests/run.sh' '65 passed, 0 failed'

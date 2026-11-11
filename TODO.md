@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-065** · P1 · mid · Vet every command of a chain, not only the first: pytest tests/a.py && shred README.md, bash tests/ok.sh; touch x and bash tests/ok.sh > ~/.bashrc lint clean, and todo-replay.sh --run ran all three forms in a probe
-  - Done when: W3 fires for an unknown runner in any segment after && || ; | or &, a redirection to a path outside the repository fails I10, and the replay test refuses both; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 165 passing; branch todo/FIX-065-vet-every-command-chain from main; next: drain
 - [ ] **FEAT-066** · P1 · mid · Add a W6 warning for Done when commands that fetch and run remote code through a known runner: npx --yes, pnpm dlx, yarn dlx, bunx, uvx, deno run with a URL, go run pkg@version, pip install and npm install lint clean although verification.md limits them to lockfile packages
   - Done when: a W6 fixture per form warns, npx --no-install and every ok fixture stay silent, replay refuses a W6 command, and REFERENCE.md and TOOLS.md list W6; `bash tests/run.sh`
 - [ ] **FIX-067** · P1 · low · Close the masking gaps in lint I3: pytest || echo failed lints clean (only todo-verify.sh --strict rejects it), as do the no-test flags pytest --collect-only, jest --passWithNoTests, mvn test -DskipTests and cargo test --no-run

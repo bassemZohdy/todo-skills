@@ -14,9 +14,9 @@
   - Done when: selftest sets up a red-baseline and an interrupted variant for TypeScript and for Java, and doing nothing fails each; `bash tests/trials/selftest.sh`
 - [ ] **TASK-087** · P2 · mid · Widen the Claude Code evidence: every recorded batch ran on Windows 11 with Git Bash, none on Linux or macOS, and no Claude Code lane run has the worker-activity records that prove concurrency (docs/agent-compatibility.md)
   - Done when: a dated docs/evals folder holds a checksummed Linux or macOS batch that agent-compatibility.md cites, and a lane run without worker-activity records fails to read as concurrent; `bash tests/trials/test-lane-evidence.sh`
-- [ ] **FEAT-088** · P2 · mid · L · Stamp the copied scripts with their release: users copy tools/*.sh by hand and nothing says which version a copy is, and a release needs hand edits in three places (0.4.0 took a separate manifest-bump commit, 8b5a2fd); add a version line and a --version flag to each tool and one helper that sets the manifests, README and stamps together
+- [/] **FEAT-088** · P2 · mid · L · Stamp the copied scripts with their release: users copy tools/*.sh by hand and nothing says which version a copy is, and a release needs hand edits in three places (0.4.0 took a separate manifest-bump commit, 8b5a2fd); add a version line and a --version flag to each tool and one helper that sets the manifests, README and stamps together
   - Done when: run.sh fails when a tool's stamp, either manifest or the newest CHANGELOG heading disagree, and each tool prints its version; `bash tests/run.sh`
-  - State: branch todo/FEAT-088-stamp-copied-scripts-their from main; next: build children
+  - State: attempts 0/3; baseline 243 passing; branch todo/FEAT-088-stamp-copied-scripts-their from main; next: drain
   - [x] **FEAT-088.1** · low · S · Stamp todo-lint.sh and its vendored copy with the release version and a --version flag, and check the stamp against both manifests and the newest CHANGELOG heading
     - Done when: todo-lint.sh --version prints the manifest version and a stamp that disagrees with the manifests fails the check; `bash tests/run.sh`
   - [x] **FEAT-088.2** · low · S · Stamp the other five tools (verify, rtm, replay, report, stop-hook) the same way and require every script in tools to be stamped

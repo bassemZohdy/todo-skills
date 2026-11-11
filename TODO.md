@@ -9,6 +9,7 @@
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
 - [ ] **TASK-084** · P2 · low · Add a .gitignore (the repository has none) for generated files: docs/status.html.tmp, built ZIP archives and __pycache__
   - Done when: a check fails when .gitignore is missing or lacks one of the three patterns; `bash tests/run.sh`
+  - State: branch todo/TASK-084-add-gitignore from main; next: start TASK-084
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets
   - Done when: tracked files under docs/evals fall below the agreed count, every README and docs link still resolves, and a dangling evidence link fails the check; `bash tests/run.sh`
   - State: next: decompose

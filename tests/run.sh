@@ -602,6 +602,37 @@ printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses
 pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
 if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
 rm -rf "$pit"
+# README Status (TASK-089): the trial history is a table of agent, platform, what ran, result and evidence. Every row links its
+# evidence under docs/evals/ (that exists), and rows exist for Claude Code and Codex.
+statuscheck() {   # <repo root>: prints one STATUS line per problem
+python3 - "$1" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+text = open(os.path.join(root, 'README.md'), encoding='utf-8').read().replace('\r\n', '\n')
+m = re.search(r'^## Status\n(.*?)(?=^## )', text, re.S | re.M)
+if not m: print('STATUS no ## Status section'); sys.exit()
+rows = [l for l in m.group(1).splitlines() if l.startswith('|') and not re.match(r'^\|[-| ]+\|$', l)][1:]
+if len(rows) < 2: print('STATUS the Status section has no table of trials')
+for l in rows:
+    cells = [c.strip() for c in l.strip().strip('|').split('|')]
+    if len(cells) != 5: print(f'STATUS a row does not have agent, platform, what ran, result and evidence: {l[:60]}'); continue
+    links = re.findall(r'\]\((docs/evals/[^)#]+)', cells[4])
+    if not links: print(f'STATUS a row has no evidence link: {l[:60]}')
+    for k in links:
+        if not os.path.exists(os.path.join(root, k)): print(f'STATUS evidence link does not resolve: {k}')
+for agent in ('Claude Code', 'Codex'):
+    if not any(l.startswith(f'| {agent} |') for l in rows): print(f'STATUS no row for {agent}')
+PY
+}
+st_out="$(statuscheck "$root")"
+if [ -z "$st_out" ]; then ok "README Status is a table with a row per agent and an evidence link on every row"; else bad "README Status: $(printf '%s' "$st_out" | tr '\n' ';')"; fi
+stt="$(mktemp -d)"
+printf '## Status\n\nOld paragraph without a table.\n\n## Documentation\n' > "$stt/README.md"
+if statuscheck "$stt" | grep -q 'no table of trials'; then ok "the Status check fails a paragraph without a table"; else bad "the Status check accepted a Status section without a table"; fi
+printf '## Status\n\n| Agent | Platform | What ran | Result | Evidence |\n|---|---|---|---|---|\n| Claude Code | Windows | x | y | [e](docs/evals/gone.md) |\n| Other | Linux | x | y | none |\n\n## Documentation\n' > "$stt/README.md"
+st_t="$(statuscheck "$stt")"
+if [ "$(printf '%s\n' "$st_t" | grep -c 'does not resolve\|no evidence link\|no row for Codex')" -eq 3 ]; then ok "the Status check fails a lost evidence link, an unresolved one and a missing agent"; else bad "the Status check missed a gap: $st_t"; fi
+rm -rf "$stt"
 # Shell scripts hold no carriage return (FIX-093): one stray CR makes git treat the file as binary and breaks a copied tool.
 crbad=""
 for f in "$root"/tools/*.sh "$root"/.todo/*.sh "$root"/tests/*.sh "$root"/tests/trials/*.sh; do

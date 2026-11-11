@@ -68,6 +68,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that every tag and commit a CHANGELOG link names exists in git (a clone without tags prints a `SKIP`; the links of 0.1.0 to 0.4.0 name release commits because those versions were never tagged, and the owner can add the tags later) (FIX-082);
+- that the README Status section is a table with a row for Claude Code and for Codex and an existing evidence link on every row (TASK-089);
 - that `.gitignore` lists the status page temp file, ZIP archives and `__pycache__` (TASK-084);
 - that `plugin/README.md` has the marketplace install lines and the two manifests agree on repository, homepage, license and keywords (TASK-083);
 - that the two `icon.png` copies are identical and `.todo/check.sh` starts with its shebang (TASK-080);

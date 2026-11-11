@@ -114,9 +114,30 @@ The plugin sends no data and has no network access, MCP server or shipped hook. 
 
 ## Status
 
-Version 0.5.0 is early. Fresh Claude Code and Codex agents have run scratch-project trials; a Linux Codex batch passed eight scenarios, and an existing-project trial first completed only after a backlog-commit workaround. After the fix for its cause (a new root left uncommitted by `/todo-add`, [FIX-035](docs/evals/fix-035.md)), the same feature on the same project passed on the first attempt with no commit between the sessions ([TASK-043](docs/evals/eval-skills-2026-11-08/summary.md)). The Linux results are provisional: a boundary audit with dummy sentinels passed its probes ([details](docs/evals/linux-boundary-2026-11-08.md)) but does not prove full isolation. On native Windows the trial assertions now run in the elevated Codex sandbox by default and fail closed; its dummy-sentinel probes passed on this host and on hosted Windows runners, with the same limits as the Linux profile ([FIX-041](docs/evals/fix-041.md)); a rerun of the Windows Codex batch with that verifier scored 2 PASS, 0 FAIL and 6 INFRA_ERROR, as the agent's own Windows sandbox still blocks the `.git` writes the lifecycle needs ([TASK-045](docs/evals/codex-windows-2026-11-08/summary.md)). The multi-module Codex lanes first ran sequentially; the harness now reports concurrency only from independent worker-activity evidence, and a later run with one fresh Codex process per lane recorded them working at the same time and passed ([TASK-044](docs/evals/lanes-codex-2026-11-08/summary.md)). See [the evidence](docs/evals/codex-linux-2026-11-08/summary.md). Team use remains unverified. "Done" is enforced by the agent following the rules, by the optional lint, and, with `/todo-init --ci`, by `.todo/check.sh` in CI or a pre-push hook; none of that is a sandbox, so read a task before you let an agent run its command. [docs/COMPARISON.md](docs/COMPARISON.md) records historical scores under two weightings and their caveats.
+Version 0.5.0 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
 
-Known limits: planning is shallow (a short plan doc and the tree), the 120-line cap holds about 30 tasks (big trees are decomposed lazily), sharing claims between clones is left to git, and the review step is a self-review when no subagent tool exists.
+| Agent | Platform | What ran | Result | Evidence |
+|---|---|---|---|---|
+| Claude Code | Windows 11, Git Bash | 17 scenarios, 38 fresh `claude -p` runs | 13 of 17 passed on the first run; the failures were harness problems, since fixed or filed; `ci-local` is an INFRA_ERROR (headless Claude Code may not write `.git/hooks`) | [summary](docs/evals/claude-code-2026-11-07/summary.md) |
+| Codex | Linux containers | 8 scenarios in fresh `codex exec` sessions | 8 of 8 passed, 105 of 105 assertions; provisional (see below) | [summary](docs/evals/codex-linux-2026-11-08/summary.md) |
+| Codex | Linux containers | Existing-project feature, three fresh sessions | First completed only after a backlog-commit workaround; after the fix for its cause ([FIX-035](docs/evals/fix-035.md)) it passed with no commit between the sessions | [TASK-043](docs/evals/eval-skills-2026-11-08/summary.md) |
+| Codex | Linux containers | `multi-module` lanes, one fresh process per lane | Worked at the same time and passed; the harness reports concurrency only from independent worker-activity records | [TASK-044](docs/evals/lanes-codex-2026-11-08/summary.md) |
+| Codex | Native Windows, elevated sandbox verifier | The lifecycle batch of 8 scenarios | 2 PASS, 0 FAIL, 6 INFRA_ERROR: Codex's own Windows sandbox still blocks the `.git` writes the lifecycle needs | [TASK-045](docs/evals/codex-windows-2026-11-08/summary.md), [FIX-041](docs/evals/fix-041.md) |
+
+Caveats:
+
+- The Linux results are provisional: a boundary audit with dummy sentinels passed its probes ([details](docs/evals/linux-boundary-2026-11-08.md)) but does not prove full isolation. The Windows verifier passed the same kind of probes on this host and on hosted Windows runners, with the same limits.
+- Every recorded Claude Code run was on Windows with Git Bash; none was on Linux or macOS, and none has worker-activity records that prove concurrent lanes.
+- Team use remains unverified.
+- "Done" is enforced by the agent following the rules, by the optional lint, and, with `/todo-init --ci`, by `.todo/check.sh` in CI or a pre-push hook. None of that is a sandbox, so read a task before you let an agent run its command.
+- [docs/COMPARISON.md](docs/COMPARISON.md) records historical scores under two weightings and their caveats.
+
+Known limits:
+
+- Planning is shallow: a short plan doc and the tree.
+- The 120-line cap holds about 30 tasks; big trees are decomposed lazily.
+- Sharing claims between clones is left to git.
+- The review step is a self-review when no subagent tool exists.
 
 ## Documentation
 

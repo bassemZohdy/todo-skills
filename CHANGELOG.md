@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FIX-068** (fix): Reject runs that executed no test in `todo-verify.sh`: a collect-only run (`--collect-only`, `--co`, `N tests collected`), a run that only skipped tests, Maven `Tests run: 0` and dotnet `No test is available` were accepted. A run with a real pass among them still counts. Validated: `bash tests/run.sh`. Docs: updated docs/TOOLS.md.
 - **FIX-067** (fix): Close the masking gaps in lint I3: `|| echo`, `|| printf` and `set +e` now fail it, and a new W7 warns on flags that make a runner execute no test (`--collect-only`, `--co`, `--passWithNoTests`, `-DskipTests`, `--no-run`); `|| exit 1` in a chain stays quiet. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FIX-065** (fix): Vet every command of a chain in the lint: an unknown runner after `&&`, `||`, `;`, `|` or `&` warns (W3), and output redirected outside the repository (`> ~/x`, `> /etc/x`, `> ../x`) fails I10, so `todo-replay.sh --run` refuses both; they passed before. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FIX-064** (fix): Make lint I10 refuse downloaded code that reaches a shell through `tee` in a pipe, through `<( )`, or by being saved and then run, and any shell reading `<( )`, so `todo-replay.sh --run` refuses them too; they passed, the first without any warning. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.

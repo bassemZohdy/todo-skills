@@ -43,7 +43,7 @@ Progress: [######!---] 6/9 leaves · 1 active · 1 blocked · 2 roots open · 2 
 printf '%s\n' "$output" | bash tools/todo-verify.sh [--strict] <exit-status> '<command that was run>'
 ```
 
-Classifies a finished `Done when` or regression run. It runs nothing itself. It prints `ACCEPT` (exit 0) or one `REJECT <reason>` line (exit 1) for a non-zero exit status, a command that masks failures (`|| true`, `; true`, `; exit 0`, `|| :`), a named test target (a `tests/`, `test/` or `spec/` path, a script or test file) that does not exist, or output that reports zero tests and no passing test.
+Classifies a finished `Done when` or regression run. It runs nothing itself. It prints `ACCEPT` (exit 0) or one `REJECT <reason>` line (exit 1) for a non-zero exit status, a command that masks failures (`|| true`, `; true`, `; exit 0`, `|| :`), a named test target (a `tests/`, `test/` or `spec/` path, a script or test file) that does not exist, output that reports zero tests and no passing test (including Maven `Tests run: 0` and dotnet `No test is available`), a collect-only run (`--collect-only`, `--co`, or `N tests collected`), or a run that only skipped tests.
 
 `--strict` also rejects output with no recognizable passing count, an unchecked pipe (`cmd | tail` and similar, unless `pipefail` or `PIPESTATUS` is used), `set +e`, and `|| echo` or `|| printf` masks. Without it, runners that print no count are still accepted.
 

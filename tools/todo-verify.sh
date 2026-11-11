@@ -6,7 +6,9 @@
 #   - non-zero exit status;
 #   - a command that masks failures (|| true, ; true, ; exit 0, || :);
 #   - a test target named in the command (a tests/ test/ spec/ path or a script/test file) that does not exist;
-#   - output that reports zero tests and no passing test ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN", ...).
+#   - output that reports zero tests and no passing test ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN", Maven
+#     "Tests run: 0", dotnet "No test is available", ...), a collect-only run (--collect-only, --co, "N tests collected"), or a
+#     run that only skipped tests ("5 skipped" and no pass).
 # Accepts (exit 0, "ACCEPT") anything else, including runners whose output has no recognizable count.
 # Opt-in --strict (first argument) additionally rejects what default mode tolerates:
 #   - output with no recognizable passing-test count at all (ambiguous);
@@ -37,9 +39,11 @@ for w in $body; do
   esac
 done
 
-zero='(^|[^0-9.])0 (tests?|specs?|examples?|passed|passing)([^a-z]|$)|collected 0 items|Ran 0 tests?|Tests: +0 total|no tests? (found|ran|to run)|no test files|NO TESTS RAN|0 tests? (run|executed)'
-pos='(^|[^0-9.])[1-9][0-9]* (tests?|specs?|examples?|passed|passing)([^a-z]|$)|Ran [1-9][0-9]* tests?|^ok[[:space:]]|^PASS[[:space:]]'
+zero='(^|[^0-9.])0 (tests?|specs?|examples?|passed|passing)([^a-z]|$)|collected 0 items|Ran 0 tests?|Tests: +0 total|no tests? (found|ran|to run)|no test files|NO TESTS RAN|0 tests? (run|executed)|Tests run: 0,|No test is available|[0-9]+ tests? collected'
+pos='(^|[^0-9.])[1-9][0-9]* (tests?|specs?|examples?|passed|passing)([^a-z]|$)|Ran [1-9][0-9]* tests?|Tests run: [1-9]|Passed: +[1-9]|^ok[[:space:]]|^PASS[[:space:]]'
 if printf '%s\n' "$out" | grep -qiE "$zero" && ! printf '%s\n' "$out" | grep -qE "$pos"; then reject "the run executed zero tests"; fi
+if printf '%s' "$cmd" | grep -qE '(^| )(--collect-only|--co)( |$)'; then reject "the command only collects tests; none executed: $cmd"; fi
+if printf '%s\n' "$out" | grep -qE '(^|[^0-9.])[1-9][0-9]* skipped' && ! printf '%s\n' "$out" | grep -qE "$pos"; then reject "every test was skipped"; fi
 if [ "$strict" -eq 1 ]; then
   if printf '%s' "$cmd" | grep -qE '(set \+e|\|\| *(echo|printf)\b)'; then reject "strict: command masks failures: $cmd"; fi
   if printf '%s' "$cmd" | grep -qE '[^|]\|[^|&][[:space:]]*(tail|grep|head|cat|tee|sed|awk|cut|sort|uniq|wc|less|more)\b' && ! printf '%s' "$cmd" | grep -qE 'pipefail|PIPESTATUS'; then reject "strict: unchecked pipe hides the exit status: $cmd"; fi

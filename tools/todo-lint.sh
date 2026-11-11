@@ -30,7 +30,7 @@ fi
 # Ref paths (the part before "#") that do not exist next to the backlog file, for W8.
 mr=" "
 base="$(dirname "$todo")"
-for r in $(grep -oE 'Ref: *[^ ]+' "$todo" | sed -e 's/^Ref: *//' -e 's/#.*//' -e 's/$//' | sort -u); do
+for r in $(grep -oE 'Ref: *[^ ]+' "$todo" | tr -d '\r' | sed -e 's/^Ref: *//' -e 's/#.*//' | sort -u); do
   case "$r" in *://*|mailto:*) continue ;; esac
   [ -e "$base/$r" ] || mr="$mr$r "
 done

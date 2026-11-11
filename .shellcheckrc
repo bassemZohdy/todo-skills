@@ -1,0 +1,6 @@
+# Configuration for tests/shellcheck.sh and the shellcheck step of the test workflow (TASK-073).
+# These checks fire on patterns this repository uses on purpose:
+#   SC2016  single quotes keep a command string literal; the tests pass it to eval or sed on purpose
+#   SC2015  "A && B || C" in the one-line ok/bad checks, where C runs on purpose when A or B fails
+#   SC2012  ls to list a few known names, where find would add nothing
+disable=SC2016,SC2015,SC2012

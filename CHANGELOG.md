@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **FIX-063** (fix): Make lint I10 refuse `rm -r`/`-f` inside a subshell or command substitution or by absolute path, and `git -c k=v push`, which passed (the first two without any warning). Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
+
 ## [0.5.0] - 2026-11-08
 
 ### Added

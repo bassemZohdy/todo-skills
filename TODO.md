@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-064** · P0 · high · Make lint I10 catch downloaded code that reaches a shell indirectly: bash <(curl ...), curl x | tee f | sh and curl -o x.sh ... && bash x.sh pass (the first with no warning), and todo-replay.sh --run executes process substitution as SAFE
-  - Done when: one I10 fixture per form fails the lint and the replay test refuses each without running it; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 161 passing; branch todo/FIX-064-make-lint-i10-catch from main; next: drain
 - [ ] **FIX-065** · P1 · mid · Vet every command of a chain, not only the first: pytest tests/a.py && shred README.md, bash tests/ok.sh; touch x and bash tests/ok.sh > ~/.bashrc lint clean, and todo-replay.sh --run ran all three forms in a probe
   - Done when: W3 fires for an unknown runner in any segment after && || ; | or &, a redirection to a path outside the repository fails I10, and the replay test refuses both; `bash tests/run.sh`
 - [ ] **FEAT-066** · P1 · mid · Add a W6 warning for Done when commands that fetch and run remote code through a known runner: npx --yes, pnpm dlx, yarn dlx, bunx, uvx, deno run with a URL, go run pkg@version, pip install and npm install lint clean although verification.md limits them to lockfile packages

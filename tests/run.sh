@@ -602,6 +602,19 @@ printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses
 pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
 if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
 rm -rf "$pit"
+# Shell scripts hold no carriage return (FIX-093): one stray CR makes git treat the file as binary and breaks a copied tool.
+crbad=""
+for f in "$root"/tools/*.sh "$root"/.todo/*.sh "$root"/tests/*.sh "$root"/tests/trials/*.sh; do
+  [ -f "$f" ] || continue
+  [ "$(tr -cd '\r' < "$f" | wc -c)" -eq 0 ] || crbad="$crbad ${f#"$root"/}"
+done
+if [ -z "$crbad" ]; then ok "no shell script under tools, tests or .todo contains a carriage return"; else bad "carriage return in:$crbad"; fi
+# The same lint on a CRLF backlog (a Windows checkout of TODO.md) names a missing Ref path without the carriage return.
+crl="$(mktemp -d)"
+sed 's/$/\r/' "$fx/W8-missing-ref.md" > "$crl/TODO.md"
+crl_out="$(bash "$lint" "$crl/TODO.md" "$crl/none.md" 2>&1)"
+if printf '%s\n' "$crl_out" | grep -qE 'WARN W8: line 7: FEAT-010: Ref path docs/does-not-exist.md does not exist' && [ "$(printf '%s' "$crl_out" | tr -cd '\r' | wc -c)" -eq 0 ]; then ok "W8 names the missing Ref path of a CRLF backlog without the carriage return"; else bad "W8 on a CRLF backlog: $crl_out"; fi
+rm -rf "$crl"
 # .gitignore (TASK-084): generated files stay out of commits, and git agrees the patterns ignore them.
 gicheck() {   # <repo root>: prints one GI line per problem
   local d="$1" p

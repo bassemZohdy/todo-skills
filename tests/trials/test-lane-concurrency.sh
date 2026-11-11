@@ -4,6 +4,7 @@ set -eu
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 repo="$tmp/repo"; mkdir "$repo"; git -C "$repo" init -q
+# shellcheck disable=SC2034
 main="$(git -C "$repo" rev-parse --show-toplevel)"
 printf '1 checkout %s/a a\n2 checkout %s/b b\n3 commit %s/a a\n4 commit %s/b b\n' "$tmp" "$tmp" "$tmp" "$tmp" > "$repo/.git/trial-events"
 execution() { bash "$here/lane-evidence.sh" "$repo" "${1:-}" | sed -n 's/^execution: //p'; }

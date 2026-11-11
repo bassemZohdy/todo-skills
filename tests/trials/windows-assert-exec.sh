@@ -17,6 +17,7 @@ repo_w="$(cygpath -m "$repo")"; runs_w="$(cygpath -m "$runs")"; here_w="$(cygpat
 auth_w="$(cygpath -m "${CODEX_HOME:-$USERPROFILE/.codex}")"
 bash_w="$(cygpath -m "$(command -v bash)")"
 for item in "$repo_w" "$runs_w" "$here_w" "$auth_w"; do
+# shellcheck disable=SC1003
   case "$item" in *'"'*|*'\'*) echo 'INFRA_ERROR: unsupported path characters' >&2; exit 2 ;; esac
 done
 # Node and other native programs inspect ancestor directories; denying the
@@ -28,6 +29,7 @@ shopt -s nullglob
 for item in "$runs"/* "$scenario_dir"/*; do
   [ "$item" != "$scenario_dir" ] && [ "$item" != "$repo" ] || continue
   item_w="$(cygpath -m "$item")"
+# shellcheck disable=SC1003
   case "$item_w" in *'"'*|*'\'*) echo 'INFRA_ERROR: unsupported path characters' >&2; exit 2 ;; esac
   fs="$fs, \"$item_w\"=\"deny\""
 done

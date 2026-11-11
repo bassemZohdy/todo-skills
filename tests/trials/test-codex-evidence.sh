@@ -37,7 +37,10 @@ for s in $scenarios; do
   grep -Eq '^(PASS|FAIL)  ' "$d/assert.log" && ok "$s: the controller's assert.sh output is recorded" || bad "$s: assert.log has no check lines"
 done
 
-n="$(printf '%s\n' $ids | grep -c .)"; u="$(printf '%s\n' $ids | grep . | sort -u | wc -l | tr -d ' ')"
+# shellcheck disable=SC2086
+n="$(printf '%s\n' $ids | grep -c .)"
+# shellcheck disable=SC2086
+u="$(printf '%s\n' $ids | grep . | sort -u | wc -l | tr -d ' ')"
 [ "$n" = 8 ] && [ "$u" = 8 ] && ok "eight different session ids: every scenario ran in a fresh session" || bad "session ids: $n recorded, $u distinct"
 [ -f "$ev/results.json" ] && python3 -I - "$ev/results.json" "$npass" "$nfail" "$ninfra" "$nunv" <<'PY' && ok "results.json agrees with the per-run outcomes" || bad "results.json disagrees with the per-run outcomes"
 import json, sys

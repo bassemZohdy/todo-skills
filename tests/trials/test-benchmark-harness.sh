@@ -60,8 +60,10 @@ PY
 }
 run() { bash "$bench/run.sh" "$@" > "$tmp/last.log" 2>&1; }
 
+# shellcheck disable=SC2035
 scenarios="$(cd "$bench/scenarios" && ls -d */ | tr -d / | tr '\n' ' ')"
-[ "$(echo $scenarios | wc -w | tr -d ' ')" = 6 ] && ok "six scenarios: $scenarios" || bad "expected six scenarios, found: $scenarios"
+[ "$(echo "$scenarios" | wc -w | tr -d ' ')" = 6 ] && ok "six scenarios: $scenarios" || bad "expected six scenarios, found: $scenarios"
+# shellcheck disable=SC2035
 arms="$(cd "$bench/arms" && ls -d */ | tr -d / | tr '\n' ' ')"
 for a in todo-skills lean-baseline no-methodology; do case " $arms " in *" $a "*) ;; *) bad "arm $a is missing";; esac; done
 

@@ -21,6 +21,7 @@ tools/                           Optional scripts users copy into their projects
   todo-lint.sh todo-verify.sh todo-rtm.sh todo-replay.sh todo-report.sh todo-stop-hook.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
+  set-version.sh                 Sets the release version in the manifests, README and tool stamps (Releasing)
   build-codex-package.sh         Builds the OpenAI Plugins Directory archive from plugin/: --claude for the preferred Claude import, else the native Codex ZIP (docs/distribution.md)
   fixtures/                      Lint fixtures: ok-*.md pass, I<n>-*.md fail with I<n>, W<n>-*.md warn
   fixtures/changelog/, report/   A CHANGELOG for the lint fixtures; a hostile backlog for the report
@@ -68,6 +69,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that every tag and commit a CHANGELOG link names exists in git (a clone without tags prints a `SKIP`; the links of 0.1.0 to 0.4.0 name release commits because those versions were never tagged, and the owner can add the tags later) (FIX-082);
+- that every script in `tools/` carries a `todo_skills_version` stamp equal to both manifests and the newest CHANGELOG heading and prints it with `--version`, and that `tests/set-version.sh` moves all of them in one step on a scratch copy and refuses a malformed version (FEAT-088);
 - that the README Status section is a table with a row for Claude Code and for Codex and an existing evidence link on every row (TASK-089);
 - that `.gitignore` lists the status page temp file, ZIP archives and `__pycache__` (TASK-084);
 - that `plugin/README.md` has the marketplace install lines and the two manifests agree on repository, homepage, license and keywords (TASK-083);
@@ -114,7 +116,7 @@ Shell scripts are LF in every checkout (`.gitattributes`: `*.sh text eol=lf`); `
 ## Releasing this repository
 
 1. `/todo-release` on `main` proposes the version from `[Unreleased]`; confirm it, and it commits `chore(release): X.Y.Z`.
-2. Set `"version"` in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` to the same version (Codex caches an install by version), and run `bash tests/run.sh`.
+2. Run `bash tests/set-version.sh X.Y.Z`: it sets `"version"` in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` (Codex caches an install by version), the version statements in README.md, the `todo_skills_version` stamp of each script in `tools/` and the vendored `.todo/todo-lint.sh`. Then run `bash tests/run.sh`, which fails while any of them, or the newest CHANGELOG heading, names another version.
 3. Tag and push by hand: `git tag -a vX.Y.Z -m "X.Y.Z"` and `git push --follow-tags`.
 4. For the Anthropic directory, follow the checklist in [distribution.md](distribution.md); its package-check record is dated and names the version it checked, so redo it when you submit.
 5. Review [agent-compatibility.md](agent-compatibility.md) against the release and update its "Last reviewed … against version" line, saying what was and was not re-run; `tests/run.sh` fails while that line names an older version than the manifests (TASK-074).

@@ -587,6 +587,21 @@ wf_t="$(wfcheck "$wft/bare.yml" windows)"
 if [ "$(printf '%s\n' "$wf_t" | grep -c '^WF')" -eq 3 ]; then ok "the workflow check fails a missing Windows runner, timeout and concurrency group"; else bad "the workflow check missed a gap: $wf_t"; fi
 rm -rf "$wft"
 
+# Pinned actions (TASK-081): every `uses:` line in the workflows names a 40-character commit SHA, and Dependabot keeps them current.
+pincheck() {   # <workflows dir> <dependabot file>: prints one PIN line per problem
+  local line
+  while IFS= read -r line; do
+    printf '%s\n' "$line" | grep -qE 'uses: +[^ ]+@[0-9a-f]{40}( |$)' || echo "PIN not a commit SHA: $line"
+  done < <(cat "$1"/*.yml | tr -d '\r' | grep -E '^ *(- )?uses:' | sed -e 's/^ *- */  /' -e 's/^ *//')
+  grep -qE 'package-ecosystem: *"?github-actions"?' "$2" 2>/dev/null || echo "PIN $2 does not update github-actions"
+}
+pin_out="$(pincheck "$root/.github/workflows" "$root/.github/dependabot.yml")"
+if [ -z "$pin_out" ]; then ok "every workflow action is pinned to a commit SHA and dependabot updates github-actions"; else bad "pinned actions: $(printf '%s' "$pin_out" | tr '\n' ';')"; fi
+pit="$(mktemp -d)"; mkdir -p "$pit/w"
+printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5\n' > "$pit/w/x.yml"
+pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
+if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
+rm -rf "$pit"
 # The skip gate itself: a skip is tolerated locally and fails when CI is set.
 if (unset CI; skipgate 1) && ! (CI=true; skipgate 1) && (CI=true; skipgate 0); then ok "a skipped check fails under CI and is tolerated locally"; else bad "the skip gate does not fail a skipped check under CI"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi

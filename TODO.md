@@ -19,9 +19,8 @@
   - State: branch todo/FEAT-088-stamp-copied-scripts-their from main; next: build children
   - [x] **FEAT-088.1** · low · S · Stamp todo-lint.sh and its vendored copy with the release version and a --version flag, and check the stamp against both manifests and the newest CHANGELOG heading
     - Done when: todo-lint.sh --version prints the manifest version and a stamp that disagrees with the manifests fails the check; `bash tests/run.sh`
-  - [/] **FEAT-088.2** · low · S · Stamp the other five tools (verify, rtm, replay, report, stop-hook) the same way and require every script in tools to be stamped
+  - [x] **FEAT-088.2** · low · S · Stamp the other five tools (verify, rtm, replay, report, stop-hook) the same way and require every script in tools to be stamped
     - Done when: each tool prints its version, and an unstamped script in tools fails the check; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 241 passing; branch todo/FEAT-088.2-stamp-other-five-tools from todo/FEAT-088-stamp-copied-scripts-their; next: read docs
   - [ ] **FEAT-088.3** · mid · S · Add tests/set-version.sh, one helper that sets both manifests, the README version statements and the stamps, and name it in the release steps
     - Done when: the helper run on a scratch copy of the repository makes the version check pass for a new version and refuses a malformed one; `bash tests/run.sh`
 - [ ] **TASK-091** · P2 · mid · Add a two-clone claim scenario to the trial harness: team use is unverified (README Status) and every claim trial runs in one clone; use a bare remote and two clones whose claims and new root IDs collide after a pull

@@ -14,6 +14,9 @@
 # Needs bash, awk, grep, sed, tr, git, and todo-lint.sh next to this script.
 # Exit: 0 nothing to replay or every command passed, 1 a replayed command failed, 2 usage or git error, 3 refused commands
 # (and none failed).
+# --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
+todo_skills_version="0.5.0"
+if [ "${1:-}" = "--version" ]; then echo "todo-replay.sh $todo_skills_version"; exit 0; fi
 run=0
 if [ "${1:-}" = "--run" ]; then run=1; shift; fi
 rev="${1:-}"; cl="${2:-CHANGELOG.md}"

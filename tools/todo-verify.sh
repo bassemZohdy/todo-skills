@@ -16,6 +16,9 @@
 #   - set +e, || echo ..., || printf ... and || exit 0 style masks.
 # Default mode never changes: runners that print no count still pass without --strict.
 # Needs bash, grep and sed.
+# --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
+todo_skills_version="0.5.0"
+if [ "${1:-}" = "--version" ]; then echo "todo-verify.sh $todo_skills_version"; exit 0; fi
 strict=0
 if [ "${1:-}" = "--strict" ]; then strict=1; shift; fi
 rc="${1:-}"; cmd="${2:-}"

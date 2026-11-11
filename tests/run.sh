@@ -635,7 +635,7 @@ if [ "$(printf '%s\n' "$st_t" | grep -c 'does not resolve\|no evidence link\|no 
 rm -rf "$stt"
 # Release stamps (FEAT-088): each stamped tool carries todo_skills_version="X.Y.Z" and prints it with --version; the stamps, both
 # plugin manifests and the newest CHANGELOG heading name one version, so a copied script says which release it came from.
-stamped_tools="todo-lint.sh"
+stamped_tools="$(cd "$root/tools" && ls todo-*.sh)"   # every script in tools/ must carry a stamp
 stampcheck() {   # <tools dir> <plugin dir> <changelog> <tool names...>: prints one STAMP line per disagreement
   local td="$1" pd="$2" cl="$3" want="" v n got s
   shift 3

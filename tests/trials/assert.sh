@@ -31,7 +31,8 @@ if [ -e .git ]; then
   chk "node commits carry Refs: and Reviewed: trailers" '(for c in $(git log --format=%H --all --not $old --grep="^\(feat\|fix\|refactor\|test\|perf\)"); do git log -1 --format=%B $c | grep -q "^Refs: " && git log -1 --format=%B $c | grep -q "^Reviewed: " || exit 1; done)'
   chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$|^Merge branch .main. of ")" ]'
 fi
-if [ "$scenario" != baseline-red ]; then
+case "$scenario" in baseline-red|ts-baseline-red|java-baseline-red) red_baseline=1 ;; *) red_baseline=0 ;; esac
+if [ "$red_baseline" = 0 ]; then
   if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'
   elif [ -f package.json ]; then chk "tests pass on the checked-out branch" 'npm test'
   elif [ -f pom.xml ]; then chk "tests pass on the checked-out branch" 'mvn -q -B test'
@@ -212,6 +213,26 @@ blocked-sibling)
   chk "FEAT-001.1 was not restarted anywhere" '! git grep -q "\[/\] \*\*FEAT-001.1" $(git for-each-ref --format="%(refname)" refs/heads)'
   chk "FEAT-001.2 started on its own branch" 'b=$(git branch --list "todo/FEAT-001.2-*" | tr -d "* "); [ -n "$b" ] && at $b TODO.md | grep -q "\[/\] \*\*FEAT-001.2"'
   chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " "$gd/trial-refs" | cut -d" " -f2)" ]'
+  ;;
+ts-baseline-red|java-baseline-red)
+  chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'
+  rep="${TRIAL_REPORT:-}"
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  if [ "$scenario" = ts-baseline-red ]; then failing='add|npm test|node --'; else failing='AddTest|adds|mvn'; fi
+  chk "report says the baseline is red and names the failing test or command" '[ -s "$rep" ] && grep -Eiq "baseline.{0,40}(red|fail)|(red|fail).{0,40}baseline" "$rep" && grep -Eq "$failing" "$rep"'
+  chk "report suggests a fix (a FIX node or /todo-add --type fix)" '[ -s "$rep" ] && grep -Eq "/todo-add.*fix|FIX" "$rep"'
+  ;;
+ts-interrupted|java-interrupted)
+  if [ "$scenario" = ts-interrupted ]; then r=todo/FEAT-001-add-subtract-multiply-src; src=src/calc.ts; else r=todo/FEAT-001-add-subtract-multiply-calc; src=src/main/java/mini/Calc.java; fi
+  chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l)" = 0 ]'
+  chk "merged child branch deleted" '! git branch --list "todo/FEAT-001.1-*" | grep -q .'
+  chk "root branch has subtract" 'at $r $src | grep -q subtract'
+  chk "FEAT-001.1 is [x] on the root branch" 'at $r TODO.md | grep -q "\[x\] \*\*FEAT-001.1\*\*"'
+  chk "FEAT-001.2 untouched (still [ ], no branch)" 'at $r TODO.md | grep -q "\[ \] \*\*FEAT-001.2\*\*" && ! git branch --list "todo/FEAT-001.2-*" | grep -q .'
+  chk "main untouched (no merge, no work)" '! at main $src | grep -q subtract'
+  chk "merge commit is --no-ff with the skill message" '[ "$(git log --merges --format=%s $r -1)" = "Merge FEAT-001.1 into FEAT-001" ]'
+  chk "still on the root branch, tree clean" '[ "$(git branch --show-current)" = $r ] && clean'
+  chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l)" = 1 ]'
   ;;
 ts-lifecycle)
   chk "FEAT-001 drained into the changelog on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'

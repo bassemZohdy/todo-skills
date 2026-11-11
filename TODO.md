@@ -7,9 +7,6 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [/] **TASK-080** · P2 · low · Make silent gaps in tests/run.sh visible: the frontmatter and status page checks vanish without PyYAML or node, nothing compares the two icon.png copies, the vendored-lint failure message names a path that no longer exists, and .todo/check.sh lacks the shebang its template writes
-  - Done when: run.sh prints a SKIP line and count for each skipped check, fails in CI when one is skipped, and fails when the icon copies differ; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 221 passing; branch todo/TASK-080-make-silent-gaps-visible from main; next: read docs
 - [ ] **TASK-081** · P2 · low · Pin the GitHub Actions in the three workflows to commit SHAs and add a dependabot config for them: they float on the v4 tags today
   - Done when: a check fails on a uses line without a 40-character SHA and on a missing .github/dependabot.yml; `bash tests/run.sh`
 - [ ] **FIX-082** · P2 · low · Repair the CHANGELOG compare links: they name the tags v0.1.0, v0.2.0, v0.3.0 and v0.3.1, but this clone has only v0.4.0 and v0.5.0; print the four git tag commands for the owner (the skills never tag) and check the links

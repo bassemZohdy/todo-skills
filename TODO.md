@@ -17,9 +17,6 @@
 - [ ] **FEAT-088** · P2 · mid · Stamp the copied scripts with their release: users copy tools/*.sh by hand and nothing says which version a copy is, and a release needs hand edits in three places (0.4.0 took a separate manifest-bump commit, 8b5a2fd); add a version line and a --version flag to each tool and one helper that sets the manifests, README and stamps together
   - Done when: run.sh fails when a tool's stamp, either manifest or the newest CHANGELOG heading disagree, and each tool prints its version; `bash tests/run.sh`
   - State: next: decompose
-- [/] **TASK-089** · P2 · low · Restructure the README Status section: one 1,900-character paragraph of trial history becomes a table of agent, platform, result and evidence link, with the known limits as a list
-  - Done when: the README drift check still passes and fails if the agents-with-recorded-trials line or an evidence link is lost; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 236 passing; branch todo/TASK-089-restructure-readme-status from main; next: read docs
 - [ ] **TASK-090** · P2 · mid · Cut what /todo-continue always loads: 54,689 bytes and 8,871 words load for every node and the budget only caps growth (tokens were never measured); move the --worktree and claim-collision branches of git-flow.md into a reference read on demand and lower the budget
   - Done when: the /todo-continue row of the load budget drops by at least 15 percent, the check fails above it, and the skill text checks still pass; `bash tests/run.sh`
 - [ ] **TASK-091** · P2 · mid · Add a two-clone claim scenario to the trial harness: team use is unverified (README Status) and every claim trial runs in one clone; use a bare remote and two clones whose claims and new root IDs collide after a pull

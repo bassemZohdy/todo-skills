@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **TASK-071** · P1 · low · Correct the safety docs: SECURITY.md, README and the core skill call every optional script read-only and SECURITY.md omits todo-replay.sh, which runs commands; DEVELOPMENT.md's layout omits reference/review.md, reference/clarify.md and tools/todo-replay.sh and says tests/run.sh creates no files
-  - Done when: a new check fails when a tools script is missing from SECURITY.md or the DEVELOPMENT.md layout, or a reference file from that layout, and the load budget check still passes; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 200 passing; branch todo/TASK-071-correct-safety-docs from main; next: read docs
 - [ ] **TASK-072** · P1 · low · Run tests/run.sh on Windows in CI and bound the jobs: the maintainer and all Claude Code evidence are on Windows with Git Bash (157 of 157 checks pass there in 49 s), but test.yml covers only Ubuntu and macOS and sets no timeout or concurrency group
   - Done when: a check parses test.yml and fails without a Windows runner, timeout-minutes or a concurrency group; `bash tests/run.sh`
 - [ ] **TASK-073** · P1 · mid · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports

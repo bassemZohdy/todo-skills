@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-068** · P1 · mid · Reject runs that executed no test in todo-verify.sh: pytest --co with 3 tests collected, an all-skipped run with 5 skipped, Maven with Tests run: 0 and dotnet with No test is available all return ACCEPT in default mode
-  - Done when: a vcase row rejects each of the four outputs and every existing ACCEPT row still passes; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 186 passing; branch todo/FIX-068-reject-runs-that-executed from main; next: drain
 - [ ] **FIX-069** · P1 · low · Make the Stop hook's loop guard tolerate whitespace: it matches two exact spellings of stop_hook_active, so with a space before the colon or pretty-printed JSON it blocks again and can loop the session
   - Done when: the hook is silent for spaced, tabbed and multi-line forms of the true flag and still blocks an invalid backlog when the flag is false; `bash tests/run.sh`
 - [ ] **FIX-070** · P1 · low · Widen the credential files lint I10 refuses: only SSH keys and ~/.aws/credentials are named, so cat ~/.netrc, ~/.config/gh/hosts.yml, ~/.npmrc, ~/.docker/config.json and ~/.kube/config pass with at most W1

@@ -72,7 +72,7 @@ class PendingRootTest(unittest.TestCase):
 
     def test_skill_allows_pending_root_and_preserves_non_bare_claim(self):
         instructions = (root / 'plugin/skills/todo-continue/SKILL.md').read_text(encoding='utf-8')
-        flow = (root / 'plugin/skills/todo/reference/git-flow.md').read_text(encoding='utf-8')
+        flow = ''.join((root / 'plugin/skills/todo/reference' / name).read_text(encoding='utf-8') for name in ('git-flow.md', 'git-flow-edge.md'))
         self.assertIn('uncommitted root on the base', instructions)
         self.assertIn('preserve the pending backlog', flow)
 

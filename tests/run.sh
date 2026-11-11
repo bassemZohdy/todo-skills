@@ -602,6 +602,33 @@ printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses
 pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
 if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
 rm -rf "$pit"
+# CHANGELOG links (FIX-082): a tag a link names (vX.Y.Z) must be in `git tag --list`, a commit it names must resolve. A clone
+# without tags cannot tell, so that is reported as a skip, never as a pass.
+linkcheck() {   # <changelog> <git dir>: prints MISSING lines, or NOTAGS when the clone has no tags
+  local cl="$1" gd="$2" tags
+  tags="$(git -C "$gd" tag --list 2>/dev/null)"
+  [ -n "$tags" ] || { echo NOTAGS; return 0; }
+  local r
+  for r in $(tr -d '\r' < "$cl" | grep -E '^\[[^]]+\]: https?://' | awk '{ print $2 }' | sed -E -e 's#^.*/compare/##' -e 's#^.*/releases/tag/##' -e 's#^.*/commit/##' | sed -e 's/\.\.\./ /'); do
+    case "$r" in
+      HEAD) ;;
+      v[0-9]*) printf '%s\n' "$tags" | grep -qxF "$r" || echo "MISSING tag $r" ;;
+      *[!0-9a-f]*|'') ;;
+      *) git -C "$gd" cat-file -e "$r^{commit}" 2>/dev/null || echo "MISSING commit $r" ;;
+    esac
+  done
+}
+lk_out="$(linkcheck "$root/CHANGELOG.md" "$root")"
+if [ "$lk_out" = NOTAGS ]; then skip "CHANGELOG link check (this clone has no git tags: git fetch --tags)"
+elif [ -z "$lk_out" ]; then ok "every tag and commit a CHANGELOG link names exists in git"
+else bad "CHANGELOG links name what git lacks: $(printf '%s' "$lk_out" | tr '\n' ';')"; fi
+lkt="$(mktemp -d)"; git init -q "$lkt/r"; git -C "$lkt/r" -c user.name=t -c user.email=t@example.invalid commit -q --allow-empty -m init; git -C "$lkt/r" tag v1.0.0
+printf '[Unreleased]: https://example.invalid/x/compare/v1.0.0...HEAD\n[0.9.0]: https://example.invalid/x/compare/v0.8.0...v0.9.0\n[0.1.0]: https://example.invalid/x/commit/abcdef1\n' > "$lkt/cl.md"
+lk_t="$(linkcheck "$lkt/cl.md" "$lkt/r")"
+if [ "$(printf '%s\n' "$lk_t" | grep -c '^MISSING')" -eq 3 ]; then ok "the link check fails a missing tag and a missing commit"; else bad "the link check missed a gap: $lk_t"; fi
+git init -q "$lkt/bare"
+if [ "$(linkcheck "$lkt/cl.md" "$lkt/bare")" = NOTAGS ]; then ok "the link check reports a clone without tags instead of passing"; else bad "the link check passed a clone without tags"; fi
+rm -rf "$lkt"
 # The skip gate itself: a skip is tolerated locally and fails when CI is set.
 if (unset CI; skipgate 1) && ! (CI=true; skipgate 1) && (CI=true; skipgate 0); then ok "a skipped check fails under CI and is tolerated locally"; else bad "the skip gate does not fail a skipped check under CI"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi

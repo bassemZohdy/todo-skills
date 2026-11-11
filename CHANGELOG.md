@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FIX-082** (fix): Repair the CHANGELOG compare links: they named the tags v0.1.0 to v0.3.1, which this repository never had (only v0.4.0 and v0.5.0 exist), so the links for 0.1.0 to 0.4.0 now name the release commits; `tests/run.sh` fails when a link names a tag that `git tag --list` lacks or a commit that does not resolve, and reports a skip in a clone without tags. Not tagged or pushed: the four tag commands are left for the owner (the skills never tag). Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md.
 - **FIX-079** (fix): Match whole words in W5: a title with "author" or "tokenizer" no longer warns as a security node, while auth, authentication, authorization, OAuth, login, password, token, secret, credential, permission and session (singular or plural) and "crypt" still do. Three fixtures; the caveat in REFERENCE.md is gone. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FIX-077** (fix): Enforce the documented `State:` grammar and ID scheme in the lint (I3): an unknown State item, a `next:` outside the listed steps, `attempts` above 3/3, a malformed `baseline`, `tier` or `branch`, and an ID outside `FEAT-`, `FIX-` or `TASK-` with at least three digits (`TASK-1`, `BUG-0003`) now fail; six new fixtures, and the `ok-valid` fixture's free-text `next:` became `next: build`. The order of State items is still not checked. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.
 - **FIX-092** (fix): Make `tests/trials/test-linux-codex-evidence.sh` pass on the Windows leg added by TASK-072: its embedded Python started a bare `bash`, which on a Windows runner is probably the WSL launcher and exits 1 (the test job failed there); it now passes Python the bash that runs the script. Validated: `bash tests/trials/test-linux-codex-evidence.sh`.
@@ -198,8 +199,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...HEAD
 [0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.1...v0.4.0
-[0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/bassemZohdy/todo-skills/releases/tag/v0.1.0
+[0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/dfb5ce1...v0.4.0
+[0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/bf8d251...dfb5ce1
+[0.3.0]: https://github.com/bassemZohdy/todo-skills/compare/64362d1...bf8d251
+[0.2.0]: https://github.com/bassemZohdy/todo-skills/compare/b1a05bb...64362d1
+[0.1.0]: https://github.com/bassemZohdy/todo-skills/commit/b1a05bb

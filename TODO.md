@@ -2,6 +2,8 @@
 
 ## 🌳 Task Tree
 
+- [ ] **FIX-093** · P0 · low · Remove the carriage return that FEAT-078 left inside tools/todo-lint.sh: the file is treated as binary and tests/trials/test-shell-line-endings.sh fails on every CI platform since d7f0772
+  - Done when: no shell script under tools, tests or .todo contains a CR byte and the lint still warns on a missing Ref; `bash tests/run.sh`
 - [ ] **TASK-073** · P1 · mid · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports
   - Done when: test.yml runs shellcheck over tools, tests and .todo, run.sh runs it when installed, and a seeded unquoted-variable finding fails it; `bash tests/run.sh`
   - State: next: decompose

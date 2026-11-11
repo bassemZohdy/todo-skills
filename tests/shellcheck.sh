@@ -10,5 +10,5 @@ if ! command -v shellcheck >/dev/null 2>&1; then
   echo "shellcheck is not installed (python3 -m pip install shellcheck-py==0.10.0.1)" >&2
   exit 127
 fi
-if [ "$#" -eq 0 ]; then set -- tools/*.sh .todo/*.sh tests/*.sh; fi
+if [ "$#" -eq 0 ]; then set -- tools/*.sh .todo/*.sh tests/*.sh tests/trials/assert.sh tests/trials/assert-exec.sh tests/trials/codex-exec.sh tests/trials/run-codex-lanes.sh; fi
 shellcheck "$@"

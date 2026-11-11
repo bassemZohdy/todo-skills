@@ -30,6 +30,7 @@ if [ "${TRIAL_LINUX_ISOLATION:-0}" = 1 ]; then
   # This profile is for a Linux container with controller at /controller and
   # all trial data under /runs. Audit its boundaries before trusting results.
   case "$repo" in /runs/*) ;; *) echo 'Linux profile requires a repository under /runs' >&2; exit 2 ;; esac
+# shellcheck disable=SC1003
   case "$repo" in *'"'*|*'\'*) echo 'unsupported character in repo path' >&2; exit 2 ;; esac
   args=(exec --ephemeral --ignore-user-config -m "${TRIAL_CODEX_MODEL:-gpt-6.1-terra}"
     -c 'default_permissions="trial"'

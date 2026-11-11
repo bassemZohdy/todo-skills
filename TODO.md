@@ -5,7 +5,7 @@
 - [ ] **TASK-073** · P1 · mid · L · Add static analysis for the shell code: about 3,900 lines in tools/, tests/ and tests/trials/ have no shellcheck run, and five of the six tools set neither -e nor -u; add a CI step and fix or annotate what it reports
   - Done when: test.yml runs shellcheck over tools, tests and .todo, run.sh runs it when installed, and a seeded unquoted-variable finding fails it; `bash tests/run.sh`
   - State: branch todo/TASK-073-add-static-analysis-shell from main; next: build children
-  - [ ] **TASK-073.1** · mid · S · Add tests/shellcheck.sh, a .shellcheckrc and a CI step that run shellcheck (pinned shellcheck-py) over tools, .todo and tests/*.sh, and fix what it reports there
+  - [x] **TASK-073.1** · mid · S · Add tests/shellcheck.sh, a .shellcheckrc and a CI step that run shellcheck (pinned shellcheck-py) over tools, .todo and tests/*.sh, and fix what it reports there
     - Done when: tests/run.sh runs shellcheck when it is installed, a seeded unquoted variable fails tests/shellcheck.sh, and the in-scope scripts are clean; `bash tests/run.sh`
   - [ ] **TASK-073.2** · low · S · Bring the trial harness scripts assert.sh, assert-exec.sh, codex-exec.sh and run-codex-lanes.sh into the shellcheck scope and fix or annotate what it reports
     - Done when: tests/shellcheck.sh passes with those four scripts in scope and a seeded finding in one of them fails it; `bash tests/run.sh`

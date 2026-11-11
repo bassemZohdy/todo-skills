@@ -263,8 +263,7 @@ if cmp -s "$root/plugin/.claude-plugin/icon.png" "$root/plugin/assets/icon.png";
 if [ ! -f "$root/.todo/check.sh" ] || [ "$(head -n1 "$root/.todo/check.sh" | tr -d '\r')" = '#!/usr/bin/env bash' ]; then ok ".todo/check.sh starts with the bash shebang"; else bad ".todo/check.sh has no '#!/usr/bin/env bash' first line"; fi
 
 # The repository's own backlog must follow its own rules.
-out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"
-if [ $? -eq 0 ]; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi
+if out="$(cd "$root" && bash "$lint" TODO.md CHANGELOG.md 2>&1)"; then ok "this repository's TODO.md and CHANGELOG.md lint clean"; else bad "repo backlog: $out"; fi
 
 # Optional RTM (FEAT-008): docs/RTM.md wins, else README "## RTM", else none; neither is required.
 rtm="$root/tools/todo-rtm.sh"
@@ -400,8 +399,7 @@ grep -q 'spec compliance first' "$root/plugin/skills/todo-continue/SKILL.md" && 
 if [ -z "$rv_bad" ]; then ok "review records spec compliance and quality from one reviewer call, with the self-review fallback"; else bad "two-verdict review:$rv_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
-out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"
-if [ $? -eq 0 ]; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
+if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"
 if [ $? -eq 2 ] && printf '%s' "$out" | grep -q '^FAIL: .*not found'; then ok "lint exits 2 without a TODO.md"; else bad "lint without TODO.md: $out"; fi
 out="$(printf '{}' | TODO_FILE="$fx/ok-resume.md" CHANGELOG_FILE="$fx/no-such-CHANGELOG.md" bash "$hook")"
@@ -635,7 +633,8 @@ if [ "$(printf '%s\n' "$st_t" | grep -c 'does not resolve\|no evidence link\|no 
 rm -rf "$stt"
 # Release stamps (FEAT-088): each stamped tool carries todo_skills_version="X.Y.Z" and prints it with --version; the stamps, both
 # plugin manifests and the newest CHANGELOG heading name one version, so a copied script says which release it came from.
-stamped_tools="$(cd "$root/tools" && ls todo-*.sh)"   # every script in tools/ must carry a stamp
+stamped_tools=()   # every script in tools/ must carry a stamp
+for f in "$root"/tools/todo-*.sh; do stamped_tools+=("$(basename "$f")"); done
 stampcheck() {   # <tools dir> <plugin dir> <changelog> <tool names...>: prints one STAMP line per disagreement
   local td="$1" pd="$2" cl="$3" want="" v n got s
   shift 3
@@ -653,7 +652,7 @@ stampcheck() {   # <tools dir> <plugin dir> <changelog> <tool names...>: prints 
     [ "$(bash "$td/$s" --version 2>&1 </dev/null)" = "$s $got" ] || echo "STAMP $s --version does not print '$s $got'"
   done
 }
-sp_out="$(stampcheck "$root/tools" "$root/plugin" "$root/CHANGELOG.md" $stamped_tools)"
+sp_out="$(stampcheck "$root/tools" "$root/plugin" "$root/CHANGELOG.md" "${stamped_tools[@]}")"
 if [ -z "$sp_out" ]; then ok "the stamped tools, both manifests and the newest CHANGELOG heading name one version, and each tool prints it"; else bad "release stamps: $(printf '%s' "$sp_out" | tr '\n' ';')"; fi
 spt="$(mktemp -d)"; mkdir -p "$spt/tools" "$spt/plugin/.claude-plugin" "$spt/plugin/.codex-plugin"
 sed 's/^todo_skills_version="[^"]*"/todo_skills_version="9.9.9"/' "$root/tools/todo-lint.sh" > "$spt/tools/todo-lint.sh"
@@ -670,10 +669,19 @@ cp "$root"/tools/todo-*.sh "$svt/tools/"; cp "$root/tools/todo-lint.sh" "$svt/.t
 cp "$root/plugin/.claude-plugin/plugin.json" "$svt/plugin/.claude-plugin/"; cp "$root/plugin/.codex-plugin/plugin.json" "$svt/plugin/.codex-plugin/"
 cp "$root/README.md" "$svt/README.md"; printf '## [Unreleased]\n\n## [0.6.0] - 2026-12-01\n' > "$svt/CHANGELOG.md"
 if bash "$sv" 0.6 "$svt" >/dev/null 2>&1 || bash "$sv" v0.6.0 "$svt" >/dev/null 2>&1; then bad "set-version.sh accepted a malformed version"; else
-  if [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools | grep -v 'CHANGELOG heading')" ] && ! grep -q '"version": *"0.6.0"' "$svt/plugin/.claude-plugin/plugin.json"; then ok "set-version.sh refuses a malformed version and changes nothing"; else bad "set-version.sh changed files for a malformed version"; fi
+  if ! stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | grep -qv 'CHANGELOG heading' && ! grep -q '"version": *"0.6.0"' "$svt/plugin/.claude-plugin/plugin.json"; then ok "set-version.sh refuses a malformed version and changes nothing"; else bad "set-version.sh changed files for a malformed version"; fi
 fi
-if bash "$sv" 0.6.0 "$svt" >/dev/null 2>&1 && [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools)" ] && grep -qi 'version 0.6.0' "$svt/README.md" && cmp -s "$svt/.todo/todo-lint.sh" "$svt/tools/todo-lint.sh"; then ok "set-version.sh moves the manifests, README and every stamp to a new version in one step"; else bad "set-version.sh left a version unchanged: $(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" $stamped_tools | tr '\n' ';')"; fi
+if bash "$sv" 0.6.0 "$svt" >/dev/null 2>&1 && [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}")" ] && grep -qi 'version 0.6.0' "$svt/README.md" && cmp -s "$svt/.todo/todo-lint.sh" "$svt/tools/todo-lint.sh"; then ok "set-version.sh moves the manifests, README and every stamp to a new version in one step"; else bad "set-version.sh left a version unchanged: $(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | tr '\n' ';')"; fi
 rm -rf "$svt"
+# Static analysis (TASK-073): the shell scripts in scope are shellcheck-clean, and a seeded unquoted variable fails the same check.
+if command -v shellcheck >/dev/null 2>&1; then
+  if sc_out="$(bash "$root/tests/shellcheck.sh" 2>&1)"; then ok "shellcheck finds nothing in the scripts under tools, .todo and tests"; else bad "shellcheck: $(printf '%s' "$sc_out" | head -20 | tr '\n' ';')"; fi
+  sct="$(mktemp -d)"; printf '#!/usr/bin/env bash\necho $1\n' > "$sct/seeded.sh"
+  if bash "$root/tests/shellcheck.sh" "$sct/seeded.sh" >/dev/null 2>&1; then bad "shellcheck accepted a seeded unquoted variable"; else ok "shellcheck fails a seeded unquoted variable"; fi
+  rm -rf "$sct"
+else
+  skip "shellcheck check (shellcheck is not installed: python3 -m pip install shellcheck-py==0.10.0.1)"
+fi
 # Shell scripts hold no carriage return (FIX-093): one stray CR makes git treat the file as binary and breaks a copied tool.
 crbad=""
 for f in "$root"/tools/*.sh "$root"/.todo/*.sh "$root"/tests/*.sh "$root"/tests/trials/*.sh; do

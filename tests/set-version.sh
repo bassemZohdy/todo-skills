@@ -15,13 +15,17 @@ root="${2:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json README.md; do
   [ -f "$root/$f" ] || { echo "missing $f in $root" >&2; exit 2; }
 done
+# In-place edit that works with GNU and BSD sed (BSD sed -i needs a suffix argument); cat keeps the file's mode.
+subst() {   # <sed -E script> <file>
+  sed -E "$1" "$2" > "$2.sedtmp" && cat "$2.sedtmp" > "$2" && rm -f "$2.sedtmp"
+}
 for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json; do
-  sed -E -i "s/(\"version\" *: *\")[0-9]+\.[0-9]+\.[0-9]+(\")/\1$v\2/" "$root/$f"
+  subst "s/(\"version\" *: *\")[0-9]+\.[0-9]+\.[0-9]+(\")/\1$v\2/" "$root/$f"
 done
-sed -E -i "s/([Vv]ersion )[0-9]+\.[0-9]+\.[0-9]+/\1$v/g" "$root/README.md"
+subst "s/([Vv]ersion )[0-9]+\.[0-9]+\.[0-9]+/\1$v/g" "$root/README.md"
 for f in "$root"/tools/todo-*.sh; do
   [ -f "$f" ] || continue
-  sed -E -i "s/^(todo_skills_version=\")[^\"]*(\")/\1$v\2/" "$f"
+  subst "s/^(todo_skills_version=\")[^\"]*(\")/\1$v\2/" "$f"
 done
 [ ! -f "$root/.todo/todo-lint.sh" ] || cp "$root/tools/todo-lint.sh" "$root/.todo/todo-lint.sh"
 echo "set $v in the manifests, README.md and the stamps under $root"

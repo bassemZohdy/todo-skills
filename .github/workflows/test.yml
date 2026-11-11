@@ -28,6 +28,8 @@ jobs:
           python-version: '3.12'
       - name: Install PyYAML (tests/run.sh fails in CI when a check is skipped)
         run: python3 -m pip install pyyaml==6.0.2
+      - name: Install shellcheck (tests/run.sh fails in CI when its check is skipped)
+        run: python3 -m pip install shellcheck-py==0.10.0.1
       - name: Fixtures, hook and repository checks
         run: bash tests/run.sh
       - name: Trial harness self-test

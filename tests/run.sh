@@ -425,6 +425,11 @@ if [ -f "$replay" ]; then
   out="$(rp --run HEAD)"; rc=$?
   [ "$rc" -eq 3 ] && [ "$(printf '%s\n' "$out" | grep -c '^REFUSED  TASK-005')" -eq 3 ] && [ ! -e "$rt/ran-procsubst" ] \
     && ok "replay: a download run through process substitution or a download then run is refused, never run" || bad "replay download refusal: rc=$rc $out"
+  # FIX-065: every command of a chain is vetted, and a redirect outside the repository is refused; none of them runs.
+  cl_add "- **TASK-006** (chore): Chain. Validated: \`bash tests/ok.sh; touch ran-chain\`; \`bash tests/ok.sh && touch ran-chain2\`; \`bash tests/ok.sh > $rt/ran-redirect\`."
+  out="$(rp --run HEAD)"; rc=$?
+  [ "$rc" -eq 3 ] && [ "$(printf '%s\n' "$out" | grep -c '^REFUSED  TASK-006')" -eq 3 ] && [ ! -e "$rt/ran-chain" ] && [ ! -e "$rt/ran-chain2" ] && [ ! -e "$rt/ran-redirect" ] \
+    && ok "replay: an unknown command later in a chain and a redirect outside the repository are refused, never run" || bad "replay chain refusal: rc=$rc $out"
 fi
 [ -f "$replay" ] || bad "tools/todo-replay.sh is missing"
 rm -rf "$rt"

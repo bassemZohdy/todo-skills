@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **FEAT-066** (feat): Warn (W6) when a `Done when` may download and run remote code through a known runner (`npx --yes`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`); `npx --no-install` stays silent and `todo-replay.sh` refuses a W6 command. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md, docs/TOOLS.md.
 
+### Changed
+
+- **TASK-071** (task): Correct the safety docs: SECURITY.md, README, TOOLS.md, CONTRIBUTING.md and the core skill no longer call every script read-only (`todo-replay.sh --run` runs the commands the lint accepts), SECURITY.md names all six scripts, and the DEVELOPMENT.md layout lists `reference/review.md`, `reference/clarify.md` and `tools/todo-replay.sh`; a check fails when a script or reference file goes unlisted. Validated: `bash tests/run.sh`. Docs: updated SECURITY.md, README.md, CONTRIBUTING.md, docs/DEVELOPMENT.md, docs/TOOLS.md.
+
 ### Fixed
 
 - **FIX-070** (fix): Widen the credential files lint I10 refuses: reads of `~/.netrc`, `~/.npmrc`, `~/.pypirc`, `~/.git-credentials`, `~/.docker/config.json`, `~/.kube/config`, `~/.config/gh/` and `~/.gnupg/` (also by `$HOME` or a home path) passed with at most a W1 warning; a test named after one (`tests/test_netrc.py`) stays accepted. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.

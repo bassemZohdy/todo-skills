@@ -495,6 +495,31 @@ lbt="$(mktemp -d)"
 printf '## Load budget\n\n| Command | Files | Bytes | Words |\n|---|---|---|---|\n| `/todo` | `todo/SKILL.md` | 10 | 10 |\n' > "$lbt/doc.md"
 if loadcheck "$lbt/doc.md" | grep -q '^OVER /todo:'; then ok "the load budget check fails a command over its budget"; else bad "the load budget check accepted a command over its budget"; fi
 rm -rf "$lbt"
+# Safety docs and layout (TASK-071): every script in tools/ is named in SECURITY.md and in the DEVELOPMENT.md layout, and
+# every file in plugin/skills/todo/reference/ is named in that layout, so a new script or reference cannot go unlisted.
+docslist() {   # <security> <development> <tools dir> <reference dir>: prints one MISSING line per unlisted file
+  local sec="$1" dev="$2" f n layout
+  layout="$(tr -d '\r' < "$dev" | awk '/^## Layout/ { on = 1; next } /^## / { on = 0 } on')"
+  for f in "$3"/*.sh; do
+    [ -e "$f" ] || continue
+    n="$(basename "$f")"
+    grep -qF "$n" "$sec" || echo "MISSING $n in SECURITY.md"
+    printf '%s\n' "$layout" | grep -qF "${n%.sh}" || echo "MISSING $n in the DEVELOPMENT.md layout"
+  done
+  for f in "$4"/*.md; do
+    [ -e "$f" ] || continue
+    n="$(basename "$f")"
+    printf '%s\n' "$layout" | grep -qF "$n" || echo "MISSING reference/$n in the DEVELOPMENT.md layout"
+  done
+}
+dl_out="$(docslist "$root/SECURITY.md" "$root/docs/DEVELOPMENT.md" "$root/tools" "$root/plugin/skills/todo/reference")"
+if [ -z "$dl_out" ]; then ok "SECURITY.md and the DEVELOPMENT.md layout name every script in tools/ and every reference file"; else bad "docs omit files: $(printf '%s' "$dl_out" | tr '\n' ';')"; fi
+dlt="$(mktemp -d)"; mkdir -p "$dlt/tools" "$dlt/ref"
+printf 'x\n' > "$dlt/tools/todo-new.sh"; printf 'x\n' > "$dlt/ref/extra.md"
+printf '# Security\ntodo-lint.sh\n' > "$dlt/sec.md"; printf '## Layout\n\ntodo-lint\n\n## Next\n\ntodo-new extra.md\n' > "$dlt/dev.md"
+dl_t="$(docslist "$dlt/sec.md" "$dlt/dev.md" "$dlt/tools" "$dlt/ref")"
+if [ "$(printf '%s\n' "$dl_t" | grep -c '^MISSING')" -eq 3 ]; then ok "the docs check fails a script missing from SECURITY.md and from the layout, and a reference file missing from the layout"; else bad "the docs check missed an unlisted file: $dl_t"; fi
+rm -rf "$dlt"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

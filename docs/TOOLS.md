@@ -1,6 +1,6 @@
 # Tools and CI
 
-The plugin is Markdown only and needs nothing installed. This repository also keeps optional, read-only helper scripts in [`tools/`](../tools/), and `/todo-init --ci` can wire a check into CI or a git hook. Nothing on this page is required: without any of it the agent checks the invariants by reading and runs the tests itself.
+The plugin is Markdown only and needs nothing installed. This repository also keeps optional helper scripts in [`tools/`](../tools/) (read-only, except that `todo-replay.sh --run` runs commands), and `/todo-init --ci` can wire a check into CI or a git hook. Nothing on this page is required: without any of it the agent checks the invariants by reading and runs the tests itself.
 
 The skills never download these scripts. Copy the ones you want into your project yourself (most projects put the lint in `.todo/`), and copy them again when you upgrade: `tests/run.sh` in this repository checks that its own `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and your copy should stay in step the same way. Every script needs only bash and standard tools (awk, grep, sed, tr), never touches the network and never edits files; `todo-replay.sh --run` also runs the Validated commands it accepts, which may do whatever your tests do.
 

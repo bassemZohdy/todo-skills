@@ -21,5 +21,5 @@ The most useful contribution is a trial report. Run the skills on a real project
 ## Ground rules
 
 - The skills never touch the network, tag, or push. A pull request that adds that will be declined.
-- No new required dependencies. Scripts stay optional and read-only.
+- No new required dependencies. Scripts stay optional and read-only (`todo-replay.sh --run` is the one that runs commands, and only ones the lint accepts).
 - Be kind in issues and reviews (see `CODE_OF_CONDUCT.md`).

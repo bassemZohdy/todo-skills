@@ -7,7 +7,7 @@
 #   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
 #   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 progress=0
 if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi
@@ -96,6 +96,8 @@ function checkcmds(i, s, lab,   p, q, c, n, first, w, pres, filt, wi, norm) {
       fail("I10", "line " NR ": " lab ": forbidden command in Done when: " c)
     if (c ~ /(\|\| *(true|:|exit +0)|;[ ]*(true|:|exit +0)[ ]*$|&& *(true|:)[ ]*$)/) fail("I3", "line " NR ": " lab ": the command masks failures (|| true, ; true, ; exit 0): " c)
     if (c ~ /(unittest|pytest|jest|vitest|go test|cargo test|rspec|mocha|dotnet test|(npm|yarn|pnpm|bun)( run)? test|bash tests?\/|make (test|check))[^|]*[|][^|]/ && c !~ /\|\|/) warn("W4", "line " NR ": " lab ": a test runner piped into another command hides its exit status unless pipefail is set; run the runner alone: " c)
+    if (c ~ /(^|[ ;&|(])npx +([^;&|]* )?(--yes|-y)( |$)/ || c ~ /(pnpm|yarn) +dlx( |$)/ || c ~ /(^|[ ;&|(])(bunx|uvx)( |$)/ || c ~ /deno +run +[^;&|]*https?:\/\// || c ~ /go +run +[^ ]+@[^ ]+/ || c ~ /(^|[ ;&|(])pip3? +install( |$)/ || c ~ /-m +pip +install( |$)/ || c ~ /(^|[ ;&|(])npm +(install|i|add)( |$)/)
+      warn("W6", "line " NR ": " lab ": Done when may download and run code from the network; use a package already in the lockfile (npx --no-install) and install dependencies before the task: " c)
     runner = first
     if (c ~ /^cd +[^ ;&|]+ *&& */) { sub(/^cd +[^ ;&|]+ *&& */, "", c); split(c, w, " "); first = w[1]; runner = first
       if (c ~ /^(true|:|echo( .*)?|ls( .*)?|exit 0)$/) fail("I3", "line " NR ": " lab ": vacuous command in Done when: " c) }

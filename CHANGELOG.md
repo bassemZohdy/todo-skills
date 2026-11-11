@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FEAT-066** (feat): Warn (W6) when a `Done when` may download and run remote code through a known runner (`npx --yes`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`); `npx --no-install` stays silent and `todo-replay.sh` refuses a W6 command. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md, docs/TOOLS.md.
+
 ### Fixed
 
 - **FIX-065** (fix): Vet every command of a chain in the lint: an unknown runner after `&&`, `||`, `;`, `|` or `&` warns (W3), and output redirected outside the repository (`> ~/x`, `> /etc/x`, `> ../x`) fails I10, so `todo-replay.sh --run` refuses both; they passed before. Validated: `bash tests/run.sh`. Docs: updated docs/REFERENCE.md.

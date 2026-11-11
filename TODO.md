@@ -7,9 +7,9 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [ ] **FIX-079** · P2 · low · Match whole words in W5: it matches by prefix, so a title with author or tokenizer warns as a security node (a false positive REFERENCE.md documents)
+- [/] **FIX-079** · P2 · low · Match whole words in W5: it matches by prefix, so a title with author or tokenizer warns as a security node (a false positive REFERENCE.md documents)
   - Done when: an ok fixture titled with both words prints no warning, the W5 fixtures and an invalid-login title still warn, and REFERENCE.md drops the caveat; `bash tests/run.sh`
-  - State: branch todo/FIX-079-match-whole-words-w5 from main; next: start FIX-079
+  - State: attempts 0/3; baseline 218 passing; branch todo/FIX-079-match-whole-words-w5 from main; next: read docs
 - [ ] **TASK-080** · P2 · low · Make silent gaps in tests/run.sh visible: the frontmatter and status page checks vanish without PyYAML or node, nothing compares the two icon.png copies, the vendored-lint failure message names a path that no longer exists, and .todo/check.sh lacks the shebang its template writes
   - Done when: run.sh prints a SKIP line and count for each skipped check, fails in CI when one is skipped, and fails when the icon copies differ; `bash tests/run.sh`
 - [ ] **TASK-081** · P2 · low · Pin the GitHub Actions in the three workflows to commit SHAs and add a dependabot config for them: they float on the v4 tags today

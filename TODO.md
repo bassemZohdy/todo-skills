@@ -4,7 +4,7 @@
 
 - [/] **FIX-067** · P1 · low · Close the masking gaps in lint I3: pytest || echo failed lints clean (only todo-verify.sh --strict rejects it), as do the no-test flags pytest --collect-only, jest --passWithNoTests, mvn test -DskipTests and cargo test --no-run
   - Done when: I3 fixtures for || echo, || printf and set +e fail, a fixture with the four no-test flags warns, and every ok fixture still passes; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 181 passing; branch todo/FIX-067-close-masking-gaps-in from main; next: read docs
+  - State: attempts 0/3; baseline 181 passing; branch todo/FIX-067-close-masking-gaps-in from main; next: drain
 - [ ] **FIX-068** · P1 · mid · Reject runs that executed no test in todo-verify.sh: pytest --co with 3 tests collected, an all-skipped run with 5 skipped, Maven with Tests run: 0 and dotnet with No test is available all return ACCEPT in default mode
   - Done when: a vcase row rejects each of the four outputs and every existing ACCEPT row still passes; `bash tests/run.sh`
 - [ ] **FIX-069** · P1 · low · Make the Stop hook's loop guard tolerate whitespace: it matches two exact spellings of stop_hook_active, so with a space before the colon or pretty-printed JSON it blocks again and can loop the session

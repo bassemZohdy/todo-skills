@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W6) must pass with "WARN W<n>:".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W7) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
@@ -20,7 +20,7 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ]; then
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ]; then
     if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
   elif [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi
@@ -325,6 +325,7 @@ if [ -z "$w5_bad" ]; then ok "W5 (no negative case on a high or security node) i
 w6_bad=""
 grep -qE '^\| W6 \|' "$root/docs/REFERENCE.md" || w6_bad="$w6_bad REFERENCE(row)"
 grep -qF 'W6' "$root/docs/TOOLS.md" || w6_bad="$w6_bad TOOLS"
+grep -qE '^\| W7 \|' "$root/docs/REFERENCE.md" || w6_bad="$w6_bad REFERENCE(W7 row)"
 if [ -z "$w6_bad" ]; then ok "W6 (a command that may download and run remote code) is documented"; else bad "W6 docs:$w6_bad"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 # A Done when that cannot run for an environmental reason (TASK-027).

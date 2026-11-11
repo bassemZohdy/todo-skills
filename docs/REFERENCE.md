@@ -148,7 +148,7 @@ Every command checks these first. `.todo/todo-lint.sh` (a copy of [`tools/todo-l
 | I9 | No dependency cycles, counting "a parent waits for its children" |
 | I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, a downloaded script that reaches a shell (piped, even through `tee`; run through `<( )`; or saved and then run), any shell that reads `<( )`, `git push` (also `git -C … push` and `git -c k=v push`), `rm -r`/`-f` also inside `( )`, `$( )` or by absolute path, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, `eval`, `exec` (`bundle exec`, `npm exec`, `pnpm exec` are fine), the one-liner code flags of shells and interpreters (`sh -c`, `bash -c`, `python -c`, `node -e`, `ruby -e`, `perl -e`, `php -r`), `find -exec rm`, `find -delete`, publish or upload commands (`npm`/`yarn`/`pnpm`/`cargo`/`poetry publish`, `twine upload`, `gem push`, `docker`/`podman push`, `nuget push`, `mvn deploy`), output redirected outside the repository (`> ~/x`, `>> /etc/x`, `> ../x`; `/dev/null` is fine), and reads of credential files (SSH keys, cloud credentials) |
 
-The lint also rejects a `Done when` whose command masks failures (`|| true`, `; true`, `; exit 0`, `&& true`) under I3. A lint failure after an edit means the edit is wrong: the agent fixes or undoes it before it stops. A passing lint does not replace judging a command's safety ([VERIFICATION.md](VERIFICATION.md#command-safety)).
+The lint also rejects a `Done when` whose command masks failures (`|| true`, `|| echo …`, `|| printf …`, `; true`, `; exit 0`, `&& true`, `set +e`) under I3. A lint failure after an edit means the edit is wrong: the agent fixes or undoes it before it stops. A passing lint does not replace judging a command's safety ([VERIFICATION.md](VERIFICATION.md#command-safety)).
 
 ### Warnings
 
@@ -162,6 +162,7 @@ The lint prints `WARN` lines that never change its exit code:
 | W4 | A test runner piped into another command, which hides its exit status unless `pipefail` is set |
 | W5 | An open node that is `high` or whose title names a security subject (auth, login, password, token, secret, credential, permission, session, crypt) and whose criteria name no negative case (rejects, denies, fails, refuses, raises, unauthorized, invalid). A wording heuristic: "author" and "tokenizer" also match, and a negative case covered by a child node still warns on the parent |
 | W6 | A command that may download and run code from the network: `npx --yes`/`-y`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`. Use a package already in the lockfile (`npx --no-install`) and install dependencies before the task. `todo-replay.sh` refuses these |
+| W7 | A flag that makes a runner execute no test: `--collect-only`, `--co`, `--passWithNoTests`, `-DskipTests`, `-Dmaven.test.skip`, `--no-run`. The run exits 0 without proving the behavior |
 
 ## Requirements traceability (optional)
 

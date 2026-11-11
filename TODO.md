@@ -2,9 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-070** · P1 · low · Widen the credential files lint I10 refuses: only SSH keys and ~/.aws/credentials are named, so cat ~/.netrc, ~/.config/gh/hosts.yml, ~/.npmrc, ~/.docker/config.json and ~/.kube/config pass with at most W1
-  - Done when: one I10 fixture per added path fails the lint and a test file named tests/test_netrc.py stays accepted; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 194 passing; branch todo/FIX-070-widen-credential-files-lint from main; next: drain
 - [ ] **TASK-071** · P1 · low · Correct the safety docs: SECURITY.md, README and the core skill call every optional script read-only and SECURITY.md omits todo-replay.sh, which runs commands; DEVELOPMENT.md's layout omits reference/review.md, reference/clarify.md and tools/todo-replay.sh and says tests/run.sh creates no files
   - Done when: a new check fails when a tools script is missing from SECURITY.md or the DEVELOPMENT.md layout, or a reference file from that layout, and the load budget check still passes; `bash tests/run.sh`
 - [ ] **TASK-072** · P1 · low · Run tests/run.sh on Windows in CI and bound the jobs: the maintainer and all Claude Code evidence are on Windows with Git Bash (157 of 157 checks pass there in 49 s), but test.yml covers only Ubuntu and macOS and sets no timeout or concurrency group

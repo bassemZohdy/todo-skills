@@ -29,6 +29,7 @@ tests/
 docs/                            Documentation; docs/evals/ holds retained, checksummed trial evidence
 .todo/                           This repository's own check: check.sh and a copy of tools/todo-lint.sh
 .github/workflows/               test.yml (tests: Ubuntu, macOS and Windows with Git Bash), todo-check.yml (backlog lint), windows-verifier-test.yml; each has a concurrency group and a timeout per job, and every `uses:` is pinned to a commit SHA that `.github/dependabot.yml` keeps current (all checked by tests/run.sh)
+.gitignore                       Generated files: docs/status.html.tmp, built ZIP archives, __pycache__
 TODO.md, CHANGELOG.md            This repository's own backlog, run with the skills
 ```
 
@@ -67,6 +68,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that every tag and commit a CHANGELOG link names exists in git (a clone without tags prints a `SKIP`; the links of 0.1.0 to 0.4.0 name release commits because those versions were never tagged, and the owner can add the tags later) (FIX-082);
+- that `.gitignore` lists the status page temp file, ZIP archives and `__pycache__` (TASK-084);
 - that `plugin/README.md` has the marketplace install lines and the two manifests agree on repository, homepage, license and keywords (TASK-083);
 - that the two `icon.png` copies are identical and `.todo/check.sh` starts with its shebang (TASK-080);
 - that `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and that this repository's own `TODO.md` and `CHANGELOG.md` lint clean.

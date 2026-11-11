@@ -1,0 +1,4 @@
+# Generated files (TASK-084)
+docs/status.html.tmp
+*.zip
+__pycache__/

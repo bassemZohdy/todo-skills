@@ -602,6 +602,21 @@ printf 'jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v4\n      - uses
 pin_t="$(pincheck "$pit/w" "$pit/missing.yml")"
 if [ "$(printf '%s\n' "$pin_t" | grep -c '^PIN')" -eq 2 ]; then ok "the pin check fails a floating tag and a missing dependabot config"; else bad "the pin check missed a gap: $pin_t"; fi
 rm -rf "$pit"
+# .gitignore (TASK-084): generated files stay out of commits, and git agrees the patterns ignore them.
+gicheck() {   # <repo root>: prints one GI line per problem
+  local d="$1" p
+  [ -f "$d/.gitignore" ] || { echo "GI .gitignore is missing"; return 0; }
+  for p in 'docs/status.html.tmp' '*.zip' '__pycache__/'; do
+    tr -d '\r' < "$d/.gitignore" | grep -qxF "$p" || echo "GI .gitignore lacks $p"
+  done
+}
+gi_out="$(gicheck "$root")"
+if [ -z "$gi_out" ]; then ok ".gitignore lists the status page temp file, ZIP archives and __pycache__"; else bad "gitignore: $(printf '%s' "$gi_out" | tr '\n' ';')"; fi
+git_t="$(mktemp -d)"
+if [ "$(gicheck "$git_t")" = "GI .gitignore is missing" ]; then ok "the gitignore check fails a missing file"; else bad "the gitignore check passed a missing file"; fi
+printf 'docs/status.html.tmp\n' > "$git_t/.gitignore"
+if [ "$(gicheck "$git_t" | grep -c '^GI')" -eq 2 ]; then ok "the gitignore check fails a missing pattern"; else bad "the gitignore check missed a missing pattern"; fi
+rm -rf "$git_t"
 # Listing (TASK-083): plugin/README.md carries the marketplace install lines, and the two manifests agree on what a listing shows
 # besides the version (repository, homepage, license, keywords).
 listcheck() {   # <plugin dir>: prints one LIST line per problem

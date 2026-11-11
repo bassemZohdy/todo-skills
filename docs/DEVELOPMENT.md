@@ -28,7 +28,7 @@ tests/
   trials/                        Agent trial harness (tests/trials/README.md)
 docs/                            Documentation; docs/evals/ holds retained, checksummed trial evidence
 .todo/                           This repository's own check: check.sh and a copy of tools/todo-lint.sh
-.github/workflows/               test.yml (tests, macOS and Ubuntu), todo-check.yml (backlog lint), windows-verifier-test.yml
+.github/workflows/               test.yml (tests: Ubuntu, macOS and Windows with Git Bash), todo-check.yml (backlog lint), windows-verifier-test.yml; each has a concurrency group and a timeout per job (checked by tests/run.sh)
 TODO.md, CHANGELOG.md            This repository's own backlog, run with the skills
 ```
 
@@ -93,7 +93,7 @@ The budgets are the 2026-11-08 measurement plus about 5%, rounded up. Raise one 
 
 ## CI
 
-- **`test.yml`** (push to `main`, pull requests; Ubuntu and macOS): `bash tests/run.sh`, `bash tests/trials/selftest.sh`, then every `tests/trials/test-*.sh` except `test-codex-isolation.sh` and `test-codex-invocation.sh` (they need a logged-in Codex) `test-linux-boundary.sh` (it needs Docker and the locally built `todo-codex-linux` image) and `test-windows-verifier-isolation.sh` (native Windows only, in its own workflow). The first three are run by hand.
+- **`test.yml`** (push to `main`, pull requests; Ubuntu, macOS and Windows, the last in Git Bash; 20 minutes per job, and a newer push to the same ref cancels the older run): `bash tests/run.sh`, `bash tests/trials/selftest.sh`, then every `tests/trials/test-*.sh` except `test-codex-isolation.sh` and `test-codex-invocation.sh` (they need a logged-in Codex) `test-linux-boundary.sh` (it needs Docker and the locally built `todo-codex-linux` image) and `test-windows-verifier-isolation.sh` (native Windows only, in its own workflow). The first three are run by hand.
 - **`windows-verifier-test.yml`** (push to `main` and `todo/**`, pull requests; windows-2022 and windows-2025): installs Codex CLI 0.167.0, provisions the elevated sandbox on the disposable runner, and runs `test-windows-verifier-isolation.sh`, the probes of the Windows verifier that native-Windows trials use by default (FIX-041).
 - **`todo-check.yml`**: the backlog lint, `bash .todo/todo-lint.sh TODO.md CHANGELOG.md`, the single-lint-job form `/todo-init --ci` writes when CI already runs the tests.
 - **`.todo/check.sh`** runs the lint and `bash tests/run.sh`; `/todo-continue` runs it before a root of this repository lands.

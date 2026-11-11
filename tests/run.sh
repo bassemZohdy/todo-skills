@@ -520,6 +520,22 @@ printf '# Security\ntodo-lint.sh\n' > "$dlt/sec.md"; printf '## Layout\n\ntodo-l
 dl_t="$(docslist "$dlt/sec.md" "$dlt/dev.md" "$dlt/tools" "$dlt/ref")"
 if [ "$(printf '%s\n' "$dl_t" | grep -c '^MISSING')" -eq 3 ]; then ok "the docs check fails a script missing from SECURITY.md and from the layout, and a reference file missing from the layout"; else bad "the docs check missed an unlisted file: $dl_t"; fi
 rm -rf "$dlt"
+# Workflow bounds (TASK-072): test.yml runs on Windows too, and every workflow has a concurrency group and a timeout on each job.
+wfcheck() {   # <workflow file> [need-windows]: prints one WF line per missing property
+  local f="$1" jobs timeouts
+  tr -d '\r' < "$f" | grep -q '^concurrency:' || echo "WF $(basename "$f"): no concurrency group"
+  jobs="$(tr -d '\r' < "$f" | awk '/^jobs:/ { on = 1; next } on && /^  [A-Za-z0-9_-]+:/ { n++ } END { print n + 0 }')"
+  timeouts="$(tr -d '\r' < "$f" | grep -c '^    timeout-minutes: [0-9]')"
+  [ "$jobs" -gt 0 ] && [ "$timeouts" -ge "$jobs" ] || echo "WF $(basename "$f"): $timeouts timeout-minutes for $jobs jobs"
+  if [ -n "${2:-}" ]; then tr -d '\r' < "$f" | grep -q 'windows-' || echo "WF $(basename "$f"): no Windows runner"; fi
+}
+wf_out="$(wfcheck "$root/.github/workflows/test.yml" windows; for w in "$root"/.github/workflows/*.yml; do [ "$(basename "$w")" = test.yml ] || wfcheck "$w"; done)"
+if [ -z "$wf_out" ]; then ok "test.yml runs on Windows and every workflow has a concurrency group and a timeout on each job"; else bad "workflows: $(printf '%s' "$wf_out" | tr '\n' ';')"; fi
+wft="$(mktemp -d)"
+printf 'name: t\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps: []\n' > "$wft/bare.yml"
+wf_t="$(wfcheck "$wft/bare.yml" windows)"
+if [ "$(printf '%s\n' "$wf_t" | grep -c '^WF')" -eq 3 ]; then ok "the workflow check fails a missing Windows runner, timeout and concurrency group"; else bad "the workflow check missed a gap: $wf_t"; fi
+rm -rf "$wft"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

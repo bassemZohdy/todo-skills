@@ -7,9 +7,6 @@
   - State: next: decompose
 - [ ] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-- [/] **TASK-083** · P2 · low · Complete the Claude listing: claude plugin validate advises that plugin/README.md has no marketplace install line, and the Claude manifest lacks the repository and keywords fields the Codex manifest carries
-  - Done when: run.sh fails when plugin/README.md lacks the install line or the two manifests disagree on repository and keywords; `bash tests/run.sh`
-  - State: attempts 0/3; baseline 229 passing; branch todo/TASK-083-complete-claude-listing from main; next: read docs
 - [ ] **TASK-084** · P2 · low · Add a .gitignore (the repository has none) for generated files: docs/status.html.tmp, built ZIP archives and __pycache__
   - Done when: a check fails when .gitignore is missing or lacks one of the three patterns; `bash tests/run.sh`
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets

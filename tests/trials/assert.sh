@@ -4,6 +4,7 @@
 set -u
 dir="${1:?usage: assert.sh <dir> <scenario>}"; scenario="${2:?scenario}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 lint="$root/tools/todo-lint.sh"
 cd "$dir" || exit 1
 # the git directory: .git is a file pointing elsewhere when run-codex.sh moved it out of the sandboxed workspace
@@ -18,6 +19,7 @@ start="$(cat "$gd/trial-start" 2>/dev/null || true)"
 unchanged() { [ "$(git rev-parse HEAD)" = "$start" ] && [ "$(git for-each-ref --format='%(refname) %(objectname)')" = "$(cat "$gd/trial-refs")" ]; }
 clean() { [ -z "$(git status --porcelain)" ]; }
 old="$start $(cut -d' ' -f2 "$gd/trial-refs" 2>/dev/null)"   # everything reachable at the start is not the agent's
+# shellcheck disable=SC2086
 new_commits() { git log --format=%H --all --not $old; }
 lane_ev() { bash "$root/tests/trials/lane-evidence.sh" "$dir"; }                       # hook log written by setup.sh, see lane-evidence.sh
 lane_worktrees() { [ "$(lane_ev | sed -n 's/^worktrees: //p')" -ge 2 ]; }               # at least two lane worktrees really saw work
@@ -216,13 +218,16 @@ blocked-sibling)
   ;;
 ts-baseline-red|java-baseline-red)
   chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'
+# shellcheck disable=SC2034
   rep="${TRIAL_REPORT:-}"
   chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+# shellcheck disable=SC2034
   if [ "$scenario" = ts-baseline-red ]; then failing='add|npm test|node --'; else failing='AddTest|adds|mvn'; fi
   chk "report says the baseline is red and names the failing test or command" '[ -s "$rep" ] && grep -Eiq "baseline.{0,40}(red|fail)|(red|fail).{0,40}baseline" "$rep" && grep -Eq "$failing" "$rep"'
   chk "report suggests a fix (a FIX node or /todo-add --type fix)" '[ -s "$rep" ] && grep -Eq "/todo-add.*fix|FIX" "$rep"'
   ;;
 ts-interrupted|java-interrupted)
+# shellcheck disable=SC2034
   if [ "$scenario" = ts-interrupted ]; then r=todo/FEAT-001-add-subtract-multiply-src; src=src/calc.ts; else r=todo/FEAT-001-add-subtract-multiply-calc; src=src/main/java/mini/Calc.java; fi
   chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l)" = 0 ]'
   chk "merged child branch deleted" '! git branch --list "todo/FEAT-001.1-*" | grep -q .'

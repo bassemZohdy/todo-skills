@@ -15,11 +15,13 @@ if [ "${TRIAL_LINUX_ISOLATION:-0}" != 1 ]; then
 fi
 repo="$(cd "$repo" && pwd -P)"
 case "$repo" in /runs/*) ;; *) echo 'Linux profile requires a repository under /runs' >&2; exit 2 ;; esac
+# shellcheck disable=SC1003
 case "$repo" in *'"'*|*'\'*) echo 'unsupported character in repo path' >&2; exit 2 ;; esac
 fs="{\":root\"=\"read\", \"/root/.codex\"=\"deny\", \"/controller\"=\"read\", \"/runs\"=\"deny\", \"$repo\"=\"write\", \"$repo/.git\"=\"write\""
 report="${TRIAL_REPORT:-}"
 case "$report" in
   /runs/*/evidence/*/report.txt|/runs/*/agent.log)
+# shellcheck disable=SC1003
     case "$report" in *'"'*|*'\'*) echo 'unsupported character in report path' >&2; exit 2 ;; esac
     # A denied parent hides file-level exceptions. Copy just the report outside
     # /runs, where the verifier can read it but its sandbox cannot write it.

@@ -39,11 +39,13 @@ mkdir -p "$runs/$scenario/evidence" || exit 2
 runs="$(cd "$runs" && pwd)"; sd="$runs/$scenario"; repo="$sd/repo"; todo="$repo.todo"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 for p in "$runs" "$ctl" "$codex_home" ${TRIAL_LANE_WRITE:-}; do
+# shellcheck disable=SC1003
   case "$p" in *'"'*|*'\'*) echo "unsupported character in $p" >&2; exit 2 ;; /*) ;; *) echo "not an absolute path: $p" >&2; exit 2 ;; esac
 done
 id="$(date -u +%Y%m%dT%H%M%SZ)-$$${TRIAL_LABEL:+-$TRIAL_LABEL}"
 ev="$sd/evidence/$id"
 mkdir "$ev" 2>/dev/null || { echo "evidence folder $ev already exists; refusing to overwrite"; exit 2; }
+# shellcheck disable=SC2094
 sums() { (cd "$ev" && find . -type f ! -name SHA256SUMS | sed 's|^\./||' | LC_ALL=C sort | while IFS= read -r f; do
   if command -v sha256sum >/dev/null 2>&1; then sha256sum -- "$f"; else shasum -a 256 -- "$f"; fi; done > SHA256SUMS); }
 infra() { printf 'INFRA_ERROR\n' > "$ev/outcome.txt"; echo "$1"; sums; exit 2; }

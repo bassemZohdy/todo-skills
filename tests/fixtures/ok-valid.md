@@ -10,7 +10,7 @@
       - Done when: store round-trips a token; `npm test -- auth/store`
     - [/] **FEAT-002.1.2** · mid · Rotate refresh tokens
       - Done when: reuse of a rotated token fails; `npm test -- auth/rotate`
-      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate from todo/FEAT-002.1-refresh; next: add reuse test
+      - State: attempts 1/3; branch todo/FEAT-002.1.2-rotate from todo/FEAT-002.1-refresh; next: build
   - [ ] **FEAT-002.2** · low · Document the refresh flow
     - Done when: docs build passes; `npm run docs:check`
     - Links: Ref: docs/auth.md#refresh · Depends: FEAT-002.1

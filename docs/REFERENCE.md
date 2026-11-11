@@ -139,7 +139,7 @@ Every command checks these first. `.todo/todo-lint.sh` (a copy of [`tools/todo-l
 |---|---|
 | I1 | At most one `[/]` task, and a `[/]` parent has no open children |
 | I2 | Every ID is unique in `TODO.md` |
-| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no `State:` together with `Blocked:`, a `Blocked:` line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
+| I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no `State:` together with `Blocked:`, a `Blocked:` line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size, a title, an ID of `FEAT-`, `FIX-` or `TASK-` plus at least three digits (children append `.n`), and `State:` items from the documented grammar (`attempts n/3` with n from 0 to 3, `baseline`, `tier`, `branch <name> from <branch>`, `hyp`, `no git`, `files`, `docs`, and a `next:` step from the list; the order of the items is not checked) |
 | I4 | `TODO.md` is at most 120 lines |
 | I5 | No ID is in both `TODO.md` and `CHANGELOG.md` (IDs after `Includes:` count) |
 | I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |

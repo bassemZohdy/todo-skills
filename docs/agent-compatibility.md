@@ -1,6 +1,6 @@
 # Agent compatibility
 
-What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-11, against version 0.5.0. The recorded runs below were made on 0.4.0 or earlier: 0.5.0 added skill text and scripts (the optional reviews, the ambiguity pass, `todo-replay.sh`, lint warnings), and no agent run was repeated for it, so the Claude Code and Codex trial results are evidence for 0.4.0.
+What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-11, against version 0.5.0. The recorded runs below were made on 0.4.0 or earlier: 0.5.0 added skill text and scripts (the optional reviews, the ambiguity pass, `todo-replay.sh`, lint warnings), and no agent run was repeated for it, so the Claude Code and Codex trial results are evidence for 0.4.0. The only agent runs on the 0.5.0 text are the pi runs of 2026-11-12 (section "pi" below).
 
 | Check | Claude Code | Codex |
 |---|---|---|
@@ -10,6 +10,10 @@ What has been checked on each agent, and what has not. Nothing here claims suppo
 | Task lifecycle (plan, build, verify, merge) run by the agent | Yes, by fresh `claude -p` processes (2026-11-07, 17 scenarios, 38 runs, `docs/evals/claude-code-2026-11-07/summary.md`): 13 of 17 scenarios passed on the first run; the failures were harness problems, since fixed or filed. `ci-local` is an INFRA_ERROR because headless Claude Code may not write `.git/hooks`. Verified on Windows 11 with Git Bash only | Eight Linux container scenarios passed in fresh `codex exec` sessions, with the multi-module lanes sequential. An existing-project trial first completed only after a backlog-commit workaround; after the fix for its cause (`docs/evals/fix-035.md`) the same feature on the same project passed in three fresh sessions with no commit between them (`docs/evals/eval-skills-2026-11-08/summary.md`). TypeScript and Java ran one fresh session per node (`run-codex-multi.sh`, FIX-039). Results are provisional: a dummy-sentinel boundary audit passed its probes but is not a proof of full isolation (`docs/evals/linux-boundary-2026-11-08.md`): `docs/evals/codex-linux-2026-11-08/summary.md`. In the earlier Windows sandbox batch, six scenarios were infrastructure errors: `docs/evals/codex-2026-11-07/summary.md`. |
 | Stop hook (`todo-stop-hook.sh`) | Designed for Claude Code hooks | Not applicable: Codex has no equivalent wired up here |
 | Slash commands (`/todo-continue`, ...) | Yes, as skills | Skills in `<project>/.agents/skills` (or `.codex/skills`) are discovered; `.claude/skills` is not. `$todo-status` and plain language run a skill; a literal `/todo-status` is not handled by Codex in `codex exec` (a model may still map it). The interactive TUI was not tested (`docs/evals/codex-2026-11-07/summary.md`) |
+
+## pi (2026-11-12)
+
+pi 1.5.2 with `glm-5.3` (z.ai) ran 28 of the 29 trial scenarios once each plus `blocked-sibling` four times and the agent benchmark, from the same prompts as the other agents (`tests/trials/run-pi.sh`, `docs/evals/benchmark/agents/pi.sh`). Slash commands are not available in print mode: the agent reads `.claude/skills/<name>/SKILL.md` as the prompt tells it. On native Windows pi has only a `powershell` shell tool, so the agent starts Git Bash from it. The assertions ran unisolated on that host and the lifecycle results are one run each; see [docs/evals/pi-glm-2026-11-12/summary.md](evals/pi-glm-2026-11-12/summary.md) for what was and was not verified.
 
 ## Unsupported or unverified
 

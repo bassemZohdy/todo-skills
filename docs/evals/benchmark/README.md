@@ -2,7 +2,7 @@
 
 The benchmark measures whether a methodology pays for itself. It runs the same six requirements under each of three
 methodology "arms" and compares verified outcomes, tokens, turns and time. The harness doesn't depend on any arm, and
-nothing in it has been run with a real agent yet: [`results/results.csv`](results/results.csv) holds only its header
+it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](results/results.csv) still holds only its header
 (see "Status").
 
 ## Layout
@@ -14,7 +14,7 @@ nothing in it has been run with a real agent yet: [`results/results.csv`](result
 | `scenarios/<id>/prepare.sh` | Optional. The controller runs it after the start commit. Scenario 5 uses it to leave an interrupted session behind. |
 | `hidden/<id>/accept.sh`, `hidden/<id>/test_accept.py`, `hidden/lib.sh` | Hidden acceptance tests. The verifier runs them; they never enter the agent's repository. |
 | `arms/<name>/arm.md`, `arms/<name>/setup.sh` | A methodology: instructions placed before the requirement, plus an optional setup script run before the start commit. |
-| `agents/codex.sh`, `agents/claude.sh` | Adapters. Each starts one fresh agent process with `<repo> <prompt-file> <report-file>`. |
+| `agents/codex.sh`, `agents/claude.sh`, `agents/pi.sh` | Adapters. Each starts one fresh agent process with `<repo> <prompt-file> <report-file>`. |
 | `run.sh` | Runner: one run of one arm on one scenario. |
 | `verify.sh` | Trusted verifier. |
 | `usage.sh` | Reads token usage from the CLI's own output. |
@@ -110,7 +110,8 @@ whole harness repository.
 
 ## Status
 
-The harness is tested with a stub agent: `bash tests/trials/test-benchmark-harness.sh` (CI runs it). No real agent run
-has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
+The harness is tested with a stub agent: `bash tests/trials/test-benchmark-harness.sh` (CI runs it). The first real run
+was made on 2026-11-12 with pi and GLM 5.3 (`agents/pi.sh`, 3 runs per cell, isolation `provisional`; every cell is in
+`docs/evals/pi-glm-2026-11-12/benchmark/results.csv`). No Claude Code or Codex run has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
 todo-skills arm needs (TASK-045: 6 of 8 lifecycle runs INFRA_ERROR), and a full protocol is 54 or more agent runs, which is
 the maintainer's cost to choose. See [the update review](../update-review.md), Ruling 3.

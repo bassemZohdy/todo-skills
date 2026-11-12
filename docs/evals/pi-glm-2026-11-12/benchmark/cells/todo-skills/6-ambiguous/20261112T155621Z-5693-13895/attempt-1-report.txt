@@ -1,0 +1,38 @@
+Both files match the schema exactly — the invariant check (I1–I10, by reading; no lint script) passes on the empty tree. Steps 8–9 don't apply (no `--plan`, no `--ci`, and the message states a work request for `todo-add`, not a project goal), so here is the **`/todo-init` report**:
+
+**`/todo-init` report**
+- **Created:** `TODO.md` (empty task tree) and `CHANGELOG.md` (with `## [Unreleased]`) — left uncommitted on purpose; the first tree claim commits them.
+- **Git:** repo, git mode. **Base branch:** `main` (first existing of main/master/trunk/develop; no `Base:` line), tree otherwise clean.
+- **Runtime / test command:** Python; `python3 -m unittest discover -s tests -t .` — source: README `Tests:` line (top precedence). No CI config found, so nothing to cross-check.
+- **Docs:** `README.md` only; `docs/` missing (never created by the skill). **Definition of Done:** none found.
+- **`.todo/todo-lint.sh`:** absent → lint is the manual I1–I10 check. **`.todo/check.sh`:** absent — `/todo-init --ci` can set one up if you want it.
+- **Tree:** empty. **Invariant violations:** none.
+
+---
+
+**Step 2: `/todo-add "Give loyal customers a discount in billing.discount.price"`** — stopped at the **clarify step** (todo-add step 5 / `reference/clarify.md`).
+
+The target module (`billing.discount.price`) and the verification command family (unittest) are derivable, but two **stop triggers** fire before anything may be written to `TODO.md`:
+
+1. **Business rule missing** — nothing in the repo defines "loyal customer" (the README only defines the dict shape `{"id", "orders", "since"}`), and no discount value or shape exists anywhere.
+2. **Incompatible implementations fit** — orders-count vs. tenure as the loyalty rule; percentage vs. fixed-amount discount. The repo chooses between none of them.
+
+So no task was added, `TODO.md` is untouched (still the empty tree), and `/todo-continue` was not run — there is nothing workable yet.
+
+## Questions to clear the ambiguity
+
+1. **What makes a customer "loyal"?** The customer dict offers `orders` (lifetime count) and `since` (join date).
+   - a) **Order count:** `orders` ≥ N (tell me N, e.g. 10) — rewards activity; a brand-new customer with many quick orders qualifies.
+   - b) **Tenure:** `since` at least N years before the order (tell me N) — rewards age; a customer with one old order qualifies.
+   - c) **Both** — strictest; needs both thresholds.
+
+2. **What discount does a loyal customer get on `amount`?**
+   - a) **Percentage** (e.g. 10% off) — scales with order size; needs a rounding rule for fractional results.
+   - b) **Fixed amount off** (e.g. 2) — predictable per order; must decide whether the price clamps at 0 or may go negative.
+
+3. **Boundary behaviour:** inclusive or exclusive threshold?
+   - a) **Inclusive** (`≥` the threshold qualifies) — the common reading; a customer exactly at the cutoff gets the discount.
+   - b) **Exclusive** (`>` only) — stricter.
+   - Or simply give me one worked example (customer dict + `amount` → expected `price(...)`) and I'll derive the rule from it.
+
+Answer these and I'll rerun `todo-add` (by its rules the prefix would be `TASK-001`; say the word if you prefer `--type feat`), then drain the tree with `todo-continue --merge` as you asked. Alternatively, if you'd rather record the question than answer now, I can add the task as `[!]` blocked on these open questions and you unblock it later with `/todo-update <ID> --status ready`.

@@ -1,0 +1,50 @@
+Drain complete; post-edit lint (I1–I10 on the emptied tree) passes; file is valid UTF-8 (`## 🌳 Task Tree`). One invocation of `/todo-continue` is done.
+
+---
+
+## 1) Report
+
+**⚠️ No-git mode** (warned once): *This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them.*
+
+**Node: FEAT-001 · Add subtract to calc.py** (leaf root, P1, low) — **completed and drained.**
+
+| Item | Result |
+|---|---|
+| Baseline (regression before work) | `python3 -m unittest discover -s tests` → 1 test, OK, exit 0 → `baseline 1 passing` |
+| Red (expected missing-symbol) | `python3 -m unittest tests.test_calc.CalcTest.test_subtract` → **`AttributeError: module 'calc' has no attribute 'subtract'`** |
+| Done when (criteria + command) | `subtract(5, 3)` returns 2 ✔; command → 1 test, OK, exit 0 |
+| Regression (full suite, README `Tests:`) | `python3 -m unittest discover -s tests` → 2 tests, OK, exit 0 (baseline 1 → 2; none deleted/skipped) |
+| Review | `Reviewed: self, 0 findings fixed` (no subagent tool in this harness) — spec ok, quality ok |
+| DoD / RTM / `.todo/check.sh` | none exist / none exist / does not exist |
+| Doc drift | added exported symbol `subtract`; `grep -rnF 'subtract' README.md docs` → no hits (no `docs/` dir) |
+| Root review (offer, once) | Qualifying root (added an exported symbol = public interface). Offered: *"review the whole root before it drains? (yes / no)"* — no subagent tool, so per `review.md` it would run in a new session (inputs: `calc.py`, `tests/test_calc.py`, task line). Treated as declined; **declining changes nothing else.** |
+| Files changed | `calc.py` (+`subtract`), `tests/test_calc.py` (+`test_subtract` with `FEAT-001` docstring), `TODO.md` (subtree drained), `CHANGELOG.md` (entry added) |
+| Branch / commit | none — no-git mode |
+| `children done/total` | n/a (leaf root) |
+| Checked-out branch | none (not a git repository) |
+| Merge commands | n/a without git |
+
+**CHANGELOG entry written** under `## [Unreleased]` → `### Added`:
+`- **FEAT-001** (feat): Add subtract to calc.py. Validated: \`python3 -m unittest tests.test_calc.CalcTest.test_subtract\`.`
+
+**Adjacent problems:** none found (no `/todo-add` commands; README's test instructions match the commands that passed).
+**Next workable node:** none — the tree is empty.
+**Suggestion:** clear context; the next session starts fresh from an empty backlog (consider `/todo-plan` or `/todo-add` for new work).
+
+---
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"files: <a root's rolled-up files, else ->"** (todo-continue step 5, no-git State template). The trailing `->` is unclear: "else –" (write a dash placeholder) or "else → [go to the next item, omit it]"? Contrast with `docs:` which says "if any". *Resolution:* wrote `files: -` at start (a fresh root has no rolled-up files), later replaced with the touched files per step 7's "No git: list touched files in `State: files:`".
+
+2. **"A missing `Ref:` … : stop and ask."** (todo-continue step 6). Taken literally, any node without a `Ref:` field (optional per the core schema: "Optional. `Ref: <path#anchor>`") would have to stop — contradicting step 3's phrasing "the `Ref:` path, **if any**, exists". *Resolution:* read it as "a `Ref:` whose path doesn't exist"; FEAT-001 has no `Ref:` at all, so nothing to check and I continued.
+
+3. **"offer the optional root review once (`reference/review.md`, "Root review"; read it only then)"** (step 10.4.1) vs review.md's **"asks once 'review the whole root before it drains? (yes / no)'"** vs its header **"optional, never a required stage"** and **"declining one changes nothing else."** It's unclear whether a single non-interactive invocation must halt mid-node waiting for a yes/no. *Resolution:* since the review is explicitly optional and non-blocking and no subagent tool exists (review would anyway happen "in a new session"), I recorded the offer, treated no answer as declined, and completed the drain. A strict interactive reading would have stopped at step 10.4.1 with the node at `[/]`, `next: drain`.
+
+4. **"one touching security, data migration, concurrency or a public interface"** (step 10.4.1). "Public interface" is undefined here; a 3-line library function could count or not. *Resolution:* used doc-drift.md's definition ("exported symbol, added" is an interface change), so the root qualified and the review was offered (and, per 3, treated as declined).
+
+5. **When `next:` advances during an uninterrupted run.** Step 5 sets `next: read docs`; step 2's resume table maps `read docs` → 6, `build` → 7, `drain` → 10.4; but only the `--plan` path explicitly says "yes sets `next: build`". Nothing says to write `next: build`/`next: drain` in a plain run. *Resolution:* updated `next:` at each transition (read docs → build → drain) so an interruption would resume at the right step; the drain then deleted the subtree, so the intermediate values were transient.
+
+6. **`grep -rnF -- '<name>' README.md docs`** (doc-drift.md) — the exact command fails with exit 2 when `docs/` doesn't exist ("docs: No such file or directory"). *Resolution:* README produced no match lines and a nonexistent directory holds nothing to search, so I concluded zero hits (nothing to report/update); noted the command's exit code is not meaningful without `docs/`.
+
+7. **Step 3 "Baseline. Run the regression command … on the start branch"** — in no-git mode there is no start branch (branch steps are skipped at step 4). *Resolution:* ran the baseline in the working folder before touching code, as verification.md step 1 requires ("Before work starts").

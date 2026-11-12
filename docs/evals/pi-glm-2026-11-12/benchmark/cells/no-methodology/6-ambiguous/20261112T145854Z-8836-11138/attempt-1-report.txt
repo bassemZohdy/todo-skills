@@ -1,0 +1,12 @@
+Done. Since "loyal customers" and the discount size were unspecified, I chose a simple, explicit policy and made it easy to change:
+
+**Policy chosen**
+- **Loyal** = customer has ≥ **10** completed past orders (`orders` field)
+- **Discount** = **10%** off the order amount
+
+**Changes**
+- `billing/discount.py` — `price()` now applies the discount, with `LOYAL_ORDER_THRESHOLD` / `LOYAL_DISCOUNT_RATE` constants and an `is_loyal(customer)` helper; results rounded to 2 decimals; customers missing `orders` are treated as new (full price).
+- `tests/test_discount.py` — added tests: loyal customer gets 10 → 9, threshold is inclusive (10 orders discounted, 9 not), missing `orders` pays full price. All 4 tests pass.
+- `README.md` — documented the policy.
+
+If the intended definition differs — e.g., tenure-based loyalty using `since`, a tiered rate, or a different threshold — just adjust the two constants (or swap the `is_loyal` logic); the call sites and tests only depend on those.

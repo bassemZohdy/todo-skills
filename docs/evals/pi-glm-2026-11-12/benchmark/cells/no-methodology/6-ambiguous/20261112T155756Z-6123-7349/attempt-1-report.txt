@@ -1,0 +1,14 @@
+Done. Since the request was ambiguous, I resolved it with explicit, tunable assumptions:
+
+**Ambiguities & chosen assumptions**
+1. **Who is "loyal"?** → customers with **≥ 10 prior orders** (`customer["orders"]`), the strongest available signal. Tenure (`since`) was left unused.
+2. **Discount size?** → **10% off**, rounded to cents.
+
+**Changes**
+- `billing/discount.py` — added `is_loyal()` and the discount in `price()`; policy lives in two named constants (`LOYAL_ORDER_THRESHOLD = 10`, `LOYAL_DISCOUNT_RATE = 0.10`) so the business rules can be changed in one place. Non-loyal behavior is unchanged.
+- `tests/test_discount.py` — 6 tests: full price for new/below-threshold customers, boundary at exactly 10 orders, 10% off, cent rounding, and a missing `orders` key (defaults to not loyal).
+- `README.md` — documented the policy.
+
+**Verification**: `python -m unittest discover -s tests -t .` → 6/6 OK.
+
+If the intended rules differ (e.g., loyalty by tenure `since`, a tiered rate like 5%/15%, or a discount cap), tell me and I'll adjust — it's a one-line constant change for threshold/rate, and a small function change for tiers.

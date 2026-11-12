@@ -1,0 +1,28 @@
+Insert complete; file keeps its final newline, 8 lines total, left uncommitted (` M TODO.md`) as the skill requires ("Do not commit; the next claim commit carries the backlog edit"). Invariant re-check by reading (no `.todo/todo-lint.sh` exists): I1–I10 all pass — unique IDs, valid 2-line tasks with non-vacuous backticked test-id commands, one section heading, ≤120 lines, no cross-file ID clashes, no deps, no forbidden commands. Work was not started.
+
+## (1) Report (per todo-add step 11)
+
+**Chosen prefix: FIX** — default type rules: rule (2) "bug, crash, crashes, regression or broken anywhere" matches "crashes" in the description (rule (1) and (3) don't match; even if `add()` counted as "add", rule (2) is evaluated first: "the type is the first rule that matches").
+
+**Insertion checks performed**
+- Git mode: git repo, on base branch `main` (clean before the edit) → new root allowed; RTM: none (`docs/` doesn't exist, no `## RTM` in README) → nothing done; no `--ref` given and no governing doc → `Ref` omitted (never invented); no `--from`, `--parent`, `--lane`.
+- Clarify: skipped — behavior, target module (`calc.py`) and verification command were all derivable from the description and repo; `--clarify` not given.
+- Already-done check: grep for `ValueError`/`needs numbers` in code/tests → nothing; only `test_add` (numbers) exists → new work.
+- Split & rate: one change, ≤5 files (calc.py + tests/test_calc.py) → single leaf; complexity `low` ("a guard … whose fix the task line states"); no size (no existing node carries one); no `regression:` clause (README full suite `python3 -m unittest discover -s tests` is the right guard); test id named is the one this node will create.
+- Fit: 8/120 lines. Single new leaf → no confirmation round required.
+
+**Inserted tree and position** — inserted as the **first root, above FEAT-001** (P0 sorts above every P1 root); ID `FIX-002` = next number in the global sequence (highest found anywhere: FEAT-001):
+
+```markdown
+- [ ] **FIX-002** · P0 · low · Make calc.add raise ValueError("add needs numbers") instead of a TypeError when given None
+  - Done when: add(None, 2) raises ValueError("add needs numbers"); `python3 -m unittest tests.test_calc.CalcTest.test_add_rejects_none`
+```
+
+TODO.md now: `# Active Backlog` / `## 🌳 Task Tree` / FIX-002 (P0) / FEAT-001 (P1). Not started, not committed.
+
+## (2) Ambiguities / unclear instructions hit
+
+1. **Overlapping type rules FIX vs FEAT for this phrasing.** Exact text: *"the type is the first rule that matches the description: (1) … (2) fix as the first word, or bug, crash, crashes, regression or broken anywhere → `FIX`; (3) add, implement or support as the first word, or new anywhere → `FEAT`"*. The description is simultaneously an "add()…" request and a "crashes" report, so both (2) and arguably (3) could match. Resolution: "the first rule that matches" makes the order decisive → rule (2) → FIX; independently, the first word is `add()`, not the bare word `add`, so (3) wouldn't match anyway.
+2. **"the word after a leading 'add'" (rule 1).** Exact text: *"its first word, or the word after a leading 'add', starts with test, doc, refactor, rename or chore"*. Unclear whether `add()` counts as "a leading 'add'" (making "crashes" the word to test). Resolution: treated `add()` as not the bare word "add"; either way no effect, since "crashes" starts with none of the listed prefixes.
+3. **Naming a not-yet-existing test.** Exact text: *"a runnable command that targets a test id or path, not a name filter … If the test does not exist yet, name the file or id the node will create."* It allows either a file path or a future id; unclear which is preferred when the test file exists but the test doesn't. Resolution: named the full future test id, matching the existing convention in TODO.md (`tests.test_calc.CalcTest.test_subtract`).
+4. **Latent conflict (not triggered): clarify vs. the run's constraints.** Exact text: *"Ask one message of at most 3 short questions when the behavior, the target module or the verification command cannot be derived… Never guess to avoid asking."* vs. the user's "Do not ask questions" — and core guardrail 7 (*"When a rule here conflicts with an explicit user instruction, state the conflict and ask"*) would itself mandate asking. Not triggered here: all three items were derivable, so no question was needed.

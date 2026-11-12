@@ -1,0 +1,29 @@
+## HEAD
+0a5918f3da854b20da238e03f19193f19df6da3d
+## current branch
+todo/FEAT-001-add-subtract-function-calc
+## branches
+  main                                     496ad3c chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc
+* todo/FEAT-001-add-subtract-function-calc 0a5918f chore(backlog): start FEAT-001
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/race-claim-benign/repo  0a5918f [todo/FEAT-001-add-subtract-function-calc]
+## tags
+## refs
+refs/heads/main 496ad3c5bcfa82b49156cebc7cac1cb0974ac3d0
+refs/heads/todo/FEAT-001-add-subtract-function-calc 0a5918f3da854b20da238e03f19193f19df6da3d
+## log --all --graph
+* 0a5918f  (HEAD -> todo/FEAT-001-add-subtract-function-calc) chore(backlog): start FEAT-001
+* 496ad3c  (main) chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc
+* 6c31097  docs: touch readme (race)
+* 93c48c6  init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

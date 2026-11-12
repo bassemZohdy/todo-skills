@@ -1,0 +1,14 @@
+All 13 tests pass. Summary of the changes:
+
+**`inventory/stock.py`**
+- Added `OutOfStock` exception carrying `sku`, `requested`, and `available` for diagnostics.
+- Added `Stock.reserve(lines)`: it sums quantities per SKU (so duplicate lines accumulate), validates every total against the available level (unknown SKU = 0), and only then applies the decrements — so a failure raises `OutOfStock` with **no** level changed (atomic).
+
+**`orders/service.py`**
+- `place_order(stock, lines)` now calls `stock.reserve(lines)` and returns `{"lines": [...], "status": "placed"}` on success; `OutOfStock` propagates untouched, leaving all levels unchanged. The exception is re-exported for callers' convenience.
+
+**Tests**
+- `tests/test_inventory.py` (7 reserve tests): lowering levels, reserving to zero, unknown SKU, insufficient quantity, duplicate-SKU accumulation, empty lines, and exception details — each failure case asserts levels are unchanged.
+- `tests/test_orders.py` (5 tests): placed status, returned lines payload, stock actually reserved, short-stock propagation with unchanged levels, and unknown SKU in an order.
+
+Test run: `python3 -m unittest discover -s tests -t .` → `Ran 13 tests ... OK`.

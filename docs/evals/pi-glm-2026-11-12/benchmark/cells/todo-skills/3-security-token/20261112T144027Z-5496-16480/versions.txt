@@ -1,0 +1,12 @@
+agent: 1.5.2
+adapter: pi.sh
+model: glm-5.3
+arm: todo-skills
+scenario: 3-security-token
+isolation: provisional
+harness: bae7f51
+git version 2.51.0.windows.1
+GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)
+python: Python 3.13.14
+os: MINGW64_NT-10.0-26300 3.6.4-b9f03e96.x86_64 x86_64
+timeout: 1800s

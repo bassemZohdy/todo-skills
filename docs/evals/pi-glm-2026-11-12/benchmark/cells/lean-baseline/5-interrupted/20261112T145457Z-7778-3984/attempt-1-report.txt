@@ -1,0 +1,14 @@
+Done. Summary:
+
+**What changed**
+- `textutil/slug.py` — finished `slugify` on top of the interrupted wip work (which is preserved in history as commit `b396a92` and its uncommitted lowercasing/dash logic): rejects non-string input with `TypeError`, lowercases, collapses every run of non-`[a-z0-9]` characters to a single dash via `re.sub(r"[^a-z0-9]+", "-", ...)`, then strips leading/trailing dashes.
+- `tests/test_slug.py` — 8 tests: the two spec examples (`'  Hello, World! '` → `'hello-world'`, `'a--b'` → `'a-b'`), run collapsing (`"a ,.-_;:b"`, whitespace), edge-dash stripping, all-punctuation → `""`, empty string, non-ASCII letters (`'Héllö'` → `'h-ll'`), digits kept, and non-string rejection. All new tests were written first and seen failing against the wip code before implementing.
+- `TASKS.md` — plan with all 3 subtasks done; `.gitignore` added (kept `__pycache__` out of the commit after an accidental inclusion, amended away).
+- Commit `67b1012` on top of `b396a92 wip: slugify lowercases`; working tree clean.
+
+**Test command and result**
+`python3 -m unittest discover -s tests -t .` → `Ran 8 tests ... OK`, exit code 0.
+
+**Left open**
+- Non-string input behavior wasn't specified; I chose an explicit `TypeError` (tested). If you'd rather it raise `AttributeError` naturally or coerce `str(text)`, that's a one-line change plus a test tweak.
+- Non-ASCII letters are treated as separators per the strict "ASCII letters or digits" rule (no transliteration, e.g. `é` → `e`); flag it if you want Unicode folding instead.

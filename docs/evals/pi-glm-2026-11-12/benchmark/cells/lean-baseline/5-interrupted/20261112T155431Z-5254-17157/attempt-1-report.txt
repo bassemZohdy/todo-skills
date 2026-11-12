@@ -1,0 +1,13 @@
+## Summary
+
+**Resumed state:** The interrupted session's work was preserved — the `wip: slugify lowercases` commit remains in history, and its uncommitted change (lowercase + space→dash) was carried forward into the final implementation rather than reverted.
+
+**What changed:**
+- `textutil/slug.py` — `slugify` now lowercases, replaces every run of non-`[a-z0-9]` characters with a single dash (`re.sub(r"[^a-z0-9]+", "-", ...)`), and strips leading/trailing dashes.
+- `tests/test_slug.py` — grew from 1 to 10 tests: the two spec examples (`'  Hello, World! '` → `'hello-world'`, `'a--b'` → `'a-b'`), strip-edge-dashes, plus edge/negative cases: empty string, all-separator input → `''`, non-ASCII letters (`'Café'` → `'caf'`), digits kept (`'Version 2.3'` → `'version-2-3'`), mixed separator runs, and non-string input rejected (`TypeError`/`AttributeError`).
+- `TASKS.md` — plan with all 3 subtasks done; `.gitignore` added (an initial accidental `__pycache__` inclusion was amended out of the unpushed commit).
+- Commits: `b162668` (behavior + tests) and `f9ea659` (task bookkeeping).
+
+**Test command:** `python3 -m unittest discover -s tests -t .` (via `python` on this Windows host) — **exit 0, 10 tests OK**.
+
+**Open items:** none blocking; two design decisions worth noting in case you disagree — non-ASCII letters are treated as separators per the "ASCII letters or digits" rule (no transliteration/unicode normalization), and non-string input is left to raise naturally rather than being validated explicitly.

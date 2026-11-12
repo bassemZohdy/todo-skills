@@ -1,0 +1,59 @@
+All done. `/todo-continue --merge` was executed 4 times; the backlog is empty and the root is merged into `main`.
+
+---
+
+## (1) Reports (skill step 11, one per invocation)
+
+**Invocation 1 — FEAT-001.1 · low · Add subtract with a test class SubtractTest**
+- Baseline (`mvn -B test` on `main`, start branch of the unclaimed tree): **1 passing**
+- Red: `cannot find symbol — method subtract(int,int), location: class mini.Calc` (SubtractTest.java:9)
+- Done when: `mvn -B test -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 test, 0 failures, exit 0
+- Regression: `mvn -B test` → **3 tests, 0 failures** (2 passing ≥ baseline 1; AddTest + SubtractTest; none deleted/skipped)
+- Files changed: `src/main/java/mini/Calc.java` (+`subtract`), `src/test/java/mini/SubtractTest.java` (new), `TODO.md`
+- Branches/commits: tree claimed on `todo/FEAT-001-add-subtract-multiply-calc` (`2c1d399`, fast-forwarded to `main`), node branch `todo/FEAT-001.1-add-subtract-test-class` — `d406f1b` start, `a7ebac4` node, `b27e991` merge `Merge FEAT-001.1 into FEAT-001`, child branch deleted. Root review offer: n/a (non-root)
+- Checked-out branch after: `todo/FEAT-001-add-subtract-multiply-calc`; next workable node: FEAT-001.2
+
+**Invocation 2 — FEAT-001.2 · low · Add multiply with a test class MultiplyTest**
+- Baseline (`mvn -B test` on the tree's root branch): **2 passing**
+- Red: `cannot find symbol — method multiply(int,int), location: class mini.Calc` (MultiplyTest.java:9)
+- Done when: `mvn -B test -Dtest=MultiplyTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 test, 0 failures, exit 0
+- Regression: `mvn -B test` → **3 passing** (≥ baseline 2; none deleted/skipped)
+- Files changed: `src/main/java/mini/Calc.java` (+`multiply`), `src/test/java/mini/MultiplyTest.java` (new), `TODO.md`
+- Branch/commits: `todo/FEAT-001.2-add-multiply-test-class` — `fc7d1a0` start, `0edf327` node, `eaf3186` merge `Merge FEAT-001.2 into FEAT-001`, child branch deleted
+- Checked-out branch after: `todo/FEAT-001-add-subtract-multiply-calc`; next workable node: FEAT-001 (integration step)
+
+**Invocation 3 — FEAT-001 · P1 · mid · root, integration step + drain (one invocation, full suite last)**
+- Baseline on its own branch: **3 passing**; integration: children's tests already cover the combined behavior → no new test, no feature code
+- Done when + regression: `mvn -B test` → **3 passing, 0 failures, exit 0** ("both methods work" covered by SubtractTest + MultiplyTest)
+- Refresh from base: `git merge main` → already up to date; nothing rerun
+- Root review: offered once (root adds exported symbols, so it qualifies per `reference/review.md`); no subagent tool exists in this harness, so per review.md the offer is recorded and declined by default — it is optional and changes nothing else
+- Last gate: no `.todo/check.sh` → skipped
+- Drain: CHANGELOG `[Unreleased] → ### Added` entry `- **FEAT-001** (feat): Add subtract and multiply to Calc.java. Validated: `mvn -B test`. Includes: FEAT-001.1, FEAT-001.2.`; FEAT-001 subtree deleted from TODO.md; commit `aa6e703` `chore(backlog): drain FEAT-001`
+- `--merge`: `Merge FEAT-001 into main` (`7cedc8d`) from the main checkout (clean), root branch deleted — children done/total 2/2
+- Final state: `main` checked out, clean; TODO.md = empty tree (two headings); `mvn -B test` on main → 3 passing
+
+**Invocation 4** — nothing left to continue: no `todo/` branches, no interrupted work, no `[/]`, no `[ ]` nodes; the backlog is empty and the root is merged into `main`.
+
+Adjacent problems: none (doc-drift greps for `subtract`/`multiply` in README/docs had no hits; no Definition of Done, no RTM). No `/todo-add` suggestions. Next workable node: **none**. Suggestion: clear context (this run is complete).
+
+---
+
+## (2) Ambiguities / unclear instructions in the skill text
+
+1. **"Report and stop" vs. the user's instruction to keep invoking.** Step 10.3: *"Report and stop; the node stays `[x]` until its root drains."* Each invocation ends with a stop; the user task explicitly said to rerun `/todo-continue` after each report. Resolved: each "stop" ended the invocation; I re-invoked per the user instruction, which the core skill allows ("When a rule here conflicts with an explicit user instruction, state the conflict and ask" — here there was no real conflict, just iteration).
+
+2. **Root review offered to whom?** Step 10.4.1: *"For a `high` root, or one touching security, data migration, concurrency or a public interface, offer the optional root review once (`reference/review.md`, "Root review"; read it only then)."* Two unclear points: (a) whether a `mid` root adding two public static methods to a sample calculator "touches a public interface" — `review.md` says a root qualifies when it touches *"a public interface (a command, flag, endpoint, config key or exported symbol)"*, and `Calc.subtract`/`multiply` are exported symbols, so I treated it as qualifying; (b) in a headless run there is no one to answer *"review the whole root before it drains? (yes / no)"*. Resolved: recorded the offer in the report and declined by default, relying on review.md's *"Neither review is required, and declining one changes nothing else."*
+
+3. **Is a claimed root's integration step a "new node" that gets a `[/]` start?** Step 3: *"Ready check (new nodes only)"*, but the core's lifecycle says *"Order for every node: ready check → branch … → start `[/]` → build → … → complete `[x]"*, while step 10.1 says *"A root is never `[x]`; item 4 drains it."* Resolved: treated the integration step as a start (set `[/]`, wrote `State: attempts 0/3; baseline 3 passing; …`, commit `chore(backlog): start FEAT-001`), then completed via drain (10.4) without ever marking the root `[x]`.
+
+4. **`next:` value for a parent's start.** Step 5 fixes `next: read docs` as the default and the core lists `next: build children` for claimed ancestors, but no value is named for a parent whose children are done (its only remaining work is verify/drain). Resolved: used `next: build` (the integration step is step 7, "Build"); the value was transient since the node finished in the same invocation.
+
+5. **Double-negative `Checked:` rule.** Step 10.2: *"`Checked: <command>` for each command in `Done when` or the regression that is not a known test, lint, typecheck or build runner … and that you judged safe."* Parsing this requires deciding `mvn -B test` is a "known test … runner" (it is, both test and build runner), so it is excluded. Resolved: no `Checked:` lines in the node commits. The wording is easy to read backwards.
+
+6. **Commit title case for identifiers.** git-flow "Commits": *"title lowercase, no final period."* Task titles contain class names ("SubtractTest"), so literal lowercasing produces `feat(calc): add subtract with a test class subtracttest`. Resolved: applied the rule literally (kept the identifier's case in body/test files, lowercased only the subject). It's unclear whether identifiers were meant to be exempt.
+
+7. **Baseline branch for a second child in a claimed tree.** Step 3: *"the nearest ancestor branch that exists (the base for an unclaimed tree)"* — for FEAT-001.2 (claimed tree, no own branch yet) the "nearest ancestor branch" is the root branch, though the text only spells out the unclaimed case, the leaf-with-own-branch case, and the parent case. Resolved: ran the baseline on the root branch (2 passing), consistent with "Every other node stays on its tree's branch."
+
+8. **"Interrupted merge … then lint (the lint script, else the core invariant check)" vs. core "The invariant check ('lint' in the skills)".** Minor terminology wobble ("lint" names both a script and the I1–I10 read); resolved trivially since no `.todo/todo-lint.sh` exists — "lint" always meant checking I1–I10 by reading.
+
+Not skill-text issues but operational friction worth noting: the Done-when command `mvn -B test -Dtest=… -Dsurefire.failIfNoSpecifiedTests=true` must be quoted when run from PowerShell (it misparses as a lifecycle phase otherwise), and TODO.md's CRLF line endings defeated exact-text editing tools, requiring byte-precise scripts (during which one line-join and one emoji encoding were introduced and immediately fixed — all verified via `git diff` before each commit).

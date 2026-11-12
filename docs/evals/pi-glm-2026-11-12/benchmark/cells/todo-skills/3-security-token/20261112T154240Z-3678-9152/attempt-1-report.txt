@@ -1,0 +1,25 @@
+Stopped at the skill's stop rule. Here is the report and the question I'm required to ask.
+
+## Report — /todo-continue --merge (invocation 1, FEAT-001)
+
+**Node:** FEAT-001 · high · Implement `auth.tokens.verify(token, secret, now)` to return the user of a valid token or raise `auth.tokens.InvalidToken` — a leaf root, `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001-implement-auth-tokens-verify from main; next: drain`
+
+**Commands & results**
+- Red: `python3 -m unittest tests.test_tokens` → 9 VerifyTest errors, first: `NotImplementedError` raised by `verify` (expected reason)
+- Done when: `python3 -m unittest tests.test_tokens` → **10 tests, OK**
+- Regression: `python3 -m unittest discover -s tests -t .` → **10 tests, OK** (baseline: 1 passing; +9 new, none deleted/skipped)
+
+**Files changed:** `auth/tokens.py` (+18/−1 — `verify` with constant-time `hmac.compare_digest`, every failure path raising only `InvalidToken`), `tests/test_tokens.py` (+72/−13 — valid case, `now == expires_at` boundary, expired, wrong secret, tampered signature, tampered payload, 2/4/0-part tokens, non-integer expiry, empty user)
+
+**Branch/commits:** `todo/FEAT-001-implement-auth-tokens-verify` (checked out here): `aef018c` claim (published to `main` by fast-forward), `48519dc` start, `d02e908` `feat(auth): implement auth.tokens.verify`. Refresh from base: already up to date. Working tree holds only the uncommitted backlog edit (`next: drain`) — it rides with the drain commit.
+
+**Stopped at step 10.4.1** — the root qualifies for the optional root review (`high` complexity, security, exported symbol), and the skill says to ask once, before the drain and merge. No subagent tool is available in this session, so per `reference/review.md` the review would run in a new session from these inputs: `git diff main...todo/FEAT-001-implement-auth-tokens-verify`, the root's task line and `Done when`.
+
+**Adjacent problems:** none. **Next workable node:** none until FEAT-001 drains (it is the whole tree).
+
+## Question I must ask before continuing
+
+**Review the whole root before it drains? (yes / no)**
+
+- **no** → I'll proceed immediately: last gate (`.todo/check.sh` doesn't exist, so just the lint), drain FEAT-001 into `CHANGELOG.md` under `## [Unreleased]` → `### Added`, delete the subtree, commit `chore(backlog): drain FEAT-001`, then (with `--merge`) merge into `main` and delete the branch — after which `todo-continue --merge` will find nothing left.
+- **yes** → start a fresh session with the diff and task line above, fix any valid findings on this branch, rerun `Done when` + regression, then drain and merge.

@@ -1,0 +1,16 @@
+## Summary
+
+**What changed**
+- `pricing/total.py` — removed the second stacked `if subtotal >= 200: total *= 0.9` block, which applied the 10% discount twice for orders ≥ 200. Now one eligibility check: `subtotal >= 100` → single 10% off.
+- `tests/test_total.py` — added 5 regression tests: the reported case (`250 → 225.0`), boundary `200 → 180.0`, `199 → 179.1` (last value still single-discounted), `1000 → 900.0` (large order, once), and `0 → 0`. Verified they failed on the old code (`202.5 != 225.0`, `162.0 != 180.0`, `810.0 != 900.0`) before fixing.
+- `TASKS.md` — all 3 subtasks done.
+
+**Test command and result**
+`python3 -m unittest discover -s tests -t .` → `Ran 7 tests ... OK`, exit code 0.
+
+**Commits**
+- `fd91927` test: add regression tests for double discount on orders ≥ 200 (fail on current code)
+- `9f4dcd2` fix: apply the 10% order discount exactly once for orders ≥ 100
+
+**Open questions**
+None — the requirement fully specified the rule and threshold, and no security/authorization surface is involved in this pure function.

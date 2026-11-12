@@ -1,0 +1,18 @@
+Done — the tree is fully drained and merged. Final report:
+
+## `/todo-continue --merge` (run 3) — FEAT-001 drained
+
+- **Node:** FEAT-001 · Reserve stock when placing an order (integration step, children 2/2)
+- **Commands:** `python3 -m unittest discover -s tests -t .` → **8 tests, OK** (baseline at integration: 8; suite grew 2 → 8 across the tree, none deleted/skipped/weakened)
+- **Files changed (tree total):** `inventory/stock.py`, `orders/service.py`, `tests/test_inventory.py`, `tests/test_orders.py`
+- **Git:** root branch `todo/FEAT-001-reserve-stock-when-placing`; drain commit `3132b67` (`chore(backlog): drain FEAT-001`, `Includes: FEAT-001.1, FEAT-001.2`); merged into `main` as `bccd2f0` (`--merge`, no-ff), root branch deleted. Now on **`main`**, clean tree (only untracked `__pycache__`), nothing pushed.
+- **CHANGELOG.md** gained under `## [Unreleased]` → `### Added`: `- **FEAT-001** (feat): Reserve stock when placing an order. Validated: \`python3 -m unittest discover -s tests -t .\`. Includes: FEAT-001.1, FEAT-001.2.` — **TODO.md** is back to the empty tree, so nothing remains to continue.
+
+## Whole run summary
+1. `/todo-init` — bootstrapped TODO.md/CHANGELOG.md (uncommitted, carried by the claim); detected `python3 -m unittest discover -s tests -t .` from the README `Tests:` line; base `main`; no DoD, no lint/check scripts.
+2. `/todo-add` — split the requirement by module into FEAT-001 (integration, `low`) → FEAT-001.1 inventory (`mid`) and FEAT-001.2 orders (`mid`, `Depends: FEAT-001.1`). Writing the tree without a separate confirmation round: your instruction to add this requirement and drive it to drain served as the confirmation todo-add asks for.
+3. `/todo-continue --merge` ×3 — each leaf red→green (FEAT-001.1 red: `ImportError: cannot import name 'OutOfStock'`; FEAT-001.2 red: `AssertionError: 3 != 1`), self-reviewed (0 findings), verified, merged into the root branch; then the root integrated, refreshed (no-op), drained, and merged into `main`.
+
+Behavior delivered: `Stock.reserve(lines)` lowers each level atomically or raises `OutOfStock` changing nothing (unknown SKU counts as 0, duplicate SKU lines accumulate); `place_order(stock, lines)` reserves through it and returns `{"lines": [...], "status": "placed"}`, with `OutOfStock` propagating and every level unchanged.
+
+**Adjacent problems:** none. **Next workable node:** none (backlog empty). **Stop rules:** none fired — no questions to ask. Suggest clearing context; future items go through `/todo-add` on `main`.

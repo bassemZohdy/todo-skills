@@ -1,0 +1,30 @@
+Both parts of the run are done. The invocation stopped after finishing the interrupted merge, per the skill.
+
+## (1) Report (step 11)
+
+**`/todo-continue` — completed one node's interrupted merge, stopped.**
+
+- **Node:** **FEAT-001.1** · low · "Add subtract with a test" — was `[x]` on `todo/FEAT-001.1-add-subtract-test` but never merged into its parent (interrupted merge; interrupted work comes first).
+- **Commands and results:**
+  - `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-add-subtract-test` → exit 0, "Merge made by the 'ort' strategy" (3 files, +12/−1)
+  - `git branch -d todo/FEAT-001.1-add-subtract-test` → exit 0 (was `01b181c`)
+  - **No tests run** — the rule for an interrupted merge says "No tests here; the parent's integration step runs them," so there is no regression-vs-baseline result this invocation.
+- **Files changed (merged in):** `src/calc.ts` (adds `subtract`), `tests/subtract.test.ts` (new), `TODO.md` (FEAT-001.1 → `[x]`, `State:` removed).
+- **Branch / commit:** merge commit `e555895` "Merge FEAT-001.1 into FEAT-001" on `todo/FEAT-001-add-subtract-multiply-src`; child branch deleted. Prior node commit `01b181c` ("feat(calc): add subtract", body `Refs: FEAT-001.1`, `Reviewed: self, 0 findings fixed`) was left untouched.
+- **Parent root FEAT-001:** children done/total **1/2**.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-src` (tree clean).
+- **Lint:** no `.todo/todo-lint.sh`; invariants I1–I10 checked by reading on the merged TODO.md — all pass (FEAT-001.1 `[x]` with no State, no `[x]` root, no `[/]` node).
+- **Root merge commands:** none to print — root FEAT-001 has not drained (FEAT-001.2 still open).
+- **Adjacent problems:** none (no `/todo-add` suggestions).
+- **Next workable node:** **FEAT-001.2** · low · "Add multiply with a test".
+- **Suggestion:** clear context before continuing (`/todo-continue`), so the next node starts fresh.
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **Report demands data the path forbids collecting.** Step 11: *"commands and results (regression against the baseline)"* vs. step 2: *"No tests here; the parent's integration step runs them."* Resolved: reported the merge/delete commands and explicitly stated no tests were run and why, instead of inventing a baseline comparison.
+2. **"do nothing else" vs. "lint, report and stop".** Core: *"finish that merge and do nothing else (`/todo-continue` step 2)"*, while step 2 says *"finish it as step 10 item 3, lint, report and stop."* Read together, lint and report are part of finishing, not "something else." Resolved: merge → lint → report → stop, nothing more.
+3. **Lint timing unclear.** Step 2: *"finish it as step 10 item 3, lint, report and stop"* — step 10 item 3 itself contains no lint step, and it's ambiguous whether lint runs before or after the merge. Resolved: ran the invariant check before (step 1 of the skill) and after the merge, treating "lint" as following "finish it".
+4. **"Active node" undefined for this path.** Step 1: *"If it fails only on the active node's `State:` line…"* — for an interrupted merge the node is `[x]`, not `[/]`/active. Not triggered (invariants passed); noted but no resolution needed.
+5. **Step 11 item "the merge commands for a root without `--merge`"** (git-flow: *"Without `--merge`, print `git switch <base> && git merge --no-ff …`"*) — unclear whether it applies to any root or only a drained root. Resolved as N/A: FEAT-001 hasn't drained (FEAT-001.2 open), so there is no root merge to print yet; stated that in the report.
+6. **Prior node commit's body not re-verified.** Step 10.2 requires `Red:`/`Checked:` lines on node commits, and the merged commit `01b181c` lacks a `Red:` line, but the interrupted-merge path (step 10 item 3 only: switch, merge, delete) gives no authority to amend another session's commit. Resolved: left the commit untouched and disclosed its body in the report.
+7. **Relative-path fallback phrasing.** *"If the core is not a skill, read `../todo/SKILL.md` and those files from `../todo/reference/`"* — "not a skill" is odd wording (it always exists as a folder here), and `../todo/` from `.claude/skills/todo-continue/` resolves correctly; resolved by reading `.claude/skills/todo/SKILL.md` and its reference files directly.

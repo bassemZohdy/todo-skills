@@ -1,0 +1,24 @@
+## HEAD
+27c24c4cdf94f5ee71224fa78e7821dbb8b9485e
+## current branch
+main
+## branches
+* main 27c24c4 init with a red baseline
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi2/ts-baseline-red/repo  27c24c4 [main]
+## tags
+## refs
+refs/heads/main 27c24c4cdf94f5ee71224fa78e7821dbb8b9485e
+## log --all --graph
+* 27c24c4  (HEAD -> main) init with a red baseline
+* a2b0a81  init typescript project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./package.json
+./src/calc.ts
+./tests/add.test.ts

@@ -1,0 +1,36 @@
+Stopped right after the start commit, per your instruction. Here is everything:
+
+## 1. Report (`/todo-continue`, run without flags)
+
+**Stopped at:** end of step 5 — the start commit `chore(backlog): start FEAT-001.2` (earlier-than-skill stop: skill would continue at step 6 "read docs", but you instructed me not to build).
+
+**Node:** FEAT-001.2 · low · Add multiply with a test (tree FEAT-001, claimed by `todo/FEAT-001-subtract-multiply`, published on `main` @ fa3daa7)
+
+- **Step 1 (git mode + invariants):** git repo; base = `main` (no `Base:` line, no user-named base). No `.todo/todo-lint.sh` → read-check I1–I10: pass. Working tree clean.
+- **Step 2 (selection):**
+  - Interrupted merge: none (no `[x]` node on any tree branch). Interrupted drain: none. No `[/]` node on any branch.
+  - **FEAT-001.1 — skipped, `[!]`**: blocked on branch `todo/FEAT-001.1-subtract-test` @ 9fe4108 → counts as `[!]` everywhere. `Blocked: the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready`
+  - FEAT-001 (root): not workable (children open; also waits on blocked FEAT-001.1's ancestors rule).
+  - **FEAT-001.2: first workable `[ ]` node → selected** (sibling's `[!]` blocks only ancestors, not siblings).
+- **Step 3 (ready check):** lint clean; no `Ref:`; tree clean; tree claimed → stay on the tree's branch (`todo/FEAT-001-subtract-multiply`); no `Depends:`. **Baseline** (`python3 -m unittest discover -s tests`, README `Tests:` line, run on the nearest existing ancestor branch, the root branch): **1 test, OK → `baseline 1 passing`**.
+- **Step 4 (branch first):** created `todo/FEAT-001.2-add-multiply-test` from `todo/FEAT-001-subtract-multiply` (tree claim already on base; no missing ancestor branches).
+- **Step 5 (start):** FEAT-001.2 → `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001.2-add-multiply-test from todo/FEAT-001-subtract-multiply; next: read docs`; lint re-checked: pass; commit **c6224ed `chore(backlog): start FEAT-001.2`** (TODO.md only, staged by path).
+
+**Commands and results:** baseline regression `python3 -m unittest discover -s tests` → Ran 1 test, OK (baseline 1, not re-run after — no code changed). FEAT-001.2's `Done when` (`python3 -m unittest tests.test_calc.CalcTest.test_multiply`): **not run** (stopped before step 6).
+
+**Files changed:** `TODO.md` (2 insertions, 1 deletion) — nothing else.
+**Branch / commit:** `todo/FEAT-001.2-add-multiply-test` @ c6224ed; **checked-out branch:** `todo/FEAT-001.2-add-multiply-test`; tree clean.
+**Adjacent problems:** none → no `/todo-add` suggestions.
+**Next workable node:** FEAT-001.2 itself (resume at step 6, `next: read docs`); nothing else is workable (FEAT-001.1 blocked → `/todo-update FEAT-001.1 --status ready` to unblock; FEAT-001 waits for its children).
+**Suggestion:** clear context before the next `/todo-continue`; it resumes the `[/]` node from its `State:`.
+
+## 2. Ambiguities / contradictions / unclear instructions
+
+1. **"First load the `todo` core skill… If the core is not a skill, read `../todo/SKILL.md`"** — unclear what "is a skill" means with slash commands unavailable. Resolved: read `.claude/skills/todo/SKILL.md`, `reference/git-flow.md`, `reference/verification.md` directly (lane refs skipped; no lane flag).
+2. **Indent contradiction:** core says **"A node at level L has its header indented `2L` spaces and its fields `2L+2`"** (root = level 1 → 2 spaces), yet the core's own schema example and this repo's TODO.md put the root header at 0 spaces. Resolved: matched the existing file / canonical example (fields at header indent + 2).
+3. **Step 5: "replace `State:`"** — FEAT-001.2 had no `State:` line to replace. Resolved: added the line (core: "A later claim replaces the whole line" implies the first claim writes it).
+4. **Slug mismatch with pre-existing branches:** the algorithm ("turn punctuation into spaces… drop the words a, an, the, to, of, and, for, with, keep the first 4 words") yields `add-subtract-multiply-calc` for FEAT-001 and `add-subtract-test` for FEAT-001.1, but the existing branches are `todo/FEAT-001-subtract-multiply` and `todo/FEAT-001.1-subtract-test`. Resolved: applied the algorithm literally to the new node ("Add multiply with a test" → `add-multiply-test`); a reader mirroring the sibling would have picked `multiply-test`.
+5. **Step 3 baseline: "Run the regression command… on the start branch: the nearest ancestor branch that exists"** — at step 3 the node's own branch doesn't exist yet (created in step 4). Resolved: ran it on the nearest existing ancestor branch (the root branch) before creating the node branch, matching the step order (3 → 4).
+6. **Step 2: "`[!]` nodes (also those `[!]` only on their own branch) are skipped"** — the parenthetical is opaque on its own. Resolved via the core's clearer rule: **"A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait), even where another branch still shows it `[ ]`"** — which is exactly this repo's situation, and it leaves FEAT-001.2 workable (sibling, not ancestor).
+
+No other skill-text issues encountered (the PowerShell `NativeCommandError` around the baseline output is host stderr-wrapping noise, not a skill problem).

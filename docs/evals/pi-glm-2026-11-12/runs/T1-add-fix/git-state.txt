@@ -1,0 +1,23 @@
+## HEAD
+31b6328a4bbed085f2ab465d50135a416564a235
+## current branch
+main
+## branches
+* main 31b6328 init with one root
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi2/add-fix/repo  31b6328 [main]
+## tags
+## refs
+refs/heads/main 31b6328a4bbed085f2ab465d50135a416564a235
+## log --all --graph
+* 31b6328  (HEAD -> main) init with one root
+## status --porcelain
+ M TODO.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

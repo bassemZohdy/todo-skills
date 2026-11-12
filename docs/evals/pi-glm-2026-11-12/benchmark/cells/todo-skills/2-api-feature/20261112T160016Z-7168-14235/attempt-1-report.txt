@@ -1,0 +1,28 @@
+The tree is drained and merged. Everything went through the todo-* skills end to end; **no stop rule forced a blocking question** — the only skill "asks" were optional offers, listed below.
+
+## `/todo-init` report
+- **Created** (uncommitted, as backlog files): `TODO.md` (empty tree), `CHANGELOG.md` (Keep a Changelog, `## [Unreleased]`).
+- **Git mode**: yes; base branch `main` (first of main/master/…); tree clean. Offer: a `Base: main` README line — not written without your yes (base is unambiguous here).
+- **Test command**: `python3 -m unittest discover -s tests -t .` — source: README `Tests:` line (already present, so no line added). No CI config found; no `Definition of Done` heading anywhere; no RTM; no `.todo/todo-lint.sh`, no `.todo/check.sh` (mentioning once: `/todo-init --ci` can set one up).
+- Pre-planning: your message already stated goal/done-state, scope and single-lane nature, so no questions were needed; offer of `docs/plans/PROJECT.md` stands if you want one.
+- Invariants: pass.
+
+## `/todo-add` report
+- Type **FEAT** ("Add…" → new capability), single leaf (2 files, one context window), complexity `mid`, no size, no `Ref` (no `docs/`), no RTM, no clarification needed (behavior/module/command all derivable), not already done (grep confirmed). Single leaf → no confirmation required.
+- Inserted as the only root: **FEAT-001 · P1 · mid · Add GET /items/<id> to shop.api.handle**.
+
+## `/todo-continue --merge` (run 1) — FEAT-001
+- **Baseline** on main: 1 test passing. Branch `todo/FEAT-001-add-get-items-id`; claim commit `a6dd74e` (backlog files by path) fast-forwarded to main; start `2cf6e6e` (`attempts 0/3; baseline 1 passing`).
+- **Red**: 4 new tests added — first failing assertion `AssertionError: 404 != 400` (`test_get_fractional_id_returns_400`).
+- **Green**: `shop/api.py` — `/items/<id>` route: whole-number check (`[0-9]+`) → 400 `{"error": "invalid id"}`; unknown id → 404 `{"error": "not found"}`; known id → 200 + item; `GET /items` untouched. No refactor needed.
+- **Review**: self (no subagent tool available) — spec ok, quality ok, 0 findings. Doc-drift (public endpoint added): `README.md:3` mentions `shop.api.handle` — statement still accurate, nothing to change.
+- **Verify**: `python3 -m unittest discover -s tests -t .` → **Ran 5 tests, OK** (≥ baseline 1, none deleted/skipped). Node commit `4c2c70a` (`feat(shop): add get items by id endpoint`, Refs/Red/Reviewed body).
+- **Drain**: refresh from main already up to date; CHANGELOG entry under new `### Added`; subtree removed from TODO.md; lint pass; drain commit `c43c9f1`.
+- **Merge** (`--merge`): main clean, base unmoved → `Merge FEAT-001 into main` (`45246c5`), branch deleted. Checked out: `main`, clean.
+
+## `/todo-continue --merge` (run 2, confirmation)
+Tree is empty — nothing workable; loop ended. Final suite on main: **5 tests, OK**.
+
+## Notes for you (none are blockers)
+- **Optional root review declined on your behalf**: FEAT-001 qualified (it adds a public endpoint) and todo-continue offers a review before the drain; your instruction to run until drained was treated as "no" (declining changes nothing else). If you want one, I can review `git diff 675492b..45246c5` now.
+- Adjacent problems: none. Next workable node: none. Suggestion: clear context — the backlog state lives entirely in `TODO.md`/`CHANGELOG.md`/git.

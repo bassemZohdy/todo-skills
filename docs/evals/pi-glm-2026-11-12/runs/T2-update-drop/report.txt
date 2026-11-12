@@ -1,0 +1,30 @@
+All checks passed and the drop is applied. Here is the report.
+
+## (1) Skill report — `/todo-update FEAT-002 --status drop --note "duplicate of FEAT-001"`
+
+**Pre-checks** (all passed):
+- Git mode: repo, base = `main` (no README `Base:` line, `main` exists), main checkout, clean tree.
+- Invariant check I1–I10 (no `.todo/todo-lint.sh`, so by reading): pass.
+- `FEAT-002` in CHANGELOG.md? No → not a reopen. In TODO.md? Yes.
+- Drop refusals: not `[/]`, not `[x]`, not a claimed root (no `State:` naming a branch in `git show main:TODO.md`), no descendants at all. Unclaimed tree → edited on the base. No own `todo/FEAT-002*` branch exists → no commits to list, nothing to delete. Reason present in `--note`. ✅
+
+**Proposal (confirmed by the user's "yes"):**
+- Drop: `- [ ] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title` (with `Done when: round_to(2.345, 2) returns 2.35; \`python3 -m unittest tests.test_calc.CalcTest.test_round_to\`` and `From: FEAT-000`)
+- Subtree: none.
+- Tasks referencing `FEAT-002` in `Depends:`/`From:`: none → no references to remove or re-point. (Its own `From: FEAT-000` points to a CHANGELOG ID, not a dropped one, and is deleted with the node.)
+
+**Applied:**
+- `TODO.md`: deleted FEAT-002 (3 lines). Ancestor sizes: none (root, no size). Remaining tree: only FEAT-001.
+- `docs/plans/PROJECT.md` exists → appended to `## Revisions`: `- 2026-11-12 · duplicate of FEAT-001 · dropped FEAT-002` (so the ID is never reused).
+- RTM: none (no `docs/RTM.md`, no README `## RTM`) → nothing to remove. CHANGELOG.md untouched (dropped tasks are never written there).
+- Lint re-run (I1–I10 by reading): pass.
+- Git: on the base branch → left uncommitted as backlog edits (`M TODO.md`, `M docs/plans/PROJECT.md`).
+
+**One-line confirmation:** Dropped **FEAT-002** (duplicate of FEAT-001) — no subtree, no references re-pointed, no branch to delete; revision logged in `docs/plans/PROJECT.md`, changes left uncommitted on `main`.
+
+## (2) Ambiguities / unclear points in the skill text
+
+1. **Where a drop of an *unclaimed* tree's node happens is never stated in the drop rule.** The drop bullet only says *"a node inside a claimed tree is dropped on its parent's branch"*; the base rule lives one paragraph earlier but is scoped to other statuses: *"`ready`, `blocked` and `revert` act where the node's state lives … A node of an unclaimed tree is changed only on the base."* **Resolution:** applied that base rule to drop as well (edited on `main`), which matches the drop bullet's own *"on the base leave it uncommitted (a backlog edit)"*.
+2. **Confirmation timing vs. pre-supplied confirmation.** The skill says *"List the node, its whole subtree, and every task that names any dropped ID … and ask for confirmation"*, but the run was launched with the confirmation already given ("yes"). **Resolution:** treated the drop as confirmed, presented the full listing in this report, and applied the change in the same run rather than stopping to re-ask.
+3. **`<IDs>` plural is undefined**: *"append `- <date +%F> · <reason> · dropped <IDs>`"*. It doesn't say whether subtree IDs are included. **Resolution:** wrote every dropped ID (here only `FEAT-002`, since there is no subtree); with a subtree I would have listed node + descendants.
+4. **Two reply specs for a drop.** The tail of the skill says *"reply with the updated task lines (or a one-line confirmation for a drop)"* while the drop bullet demands a node/subtree/reference listing at confirmation time. **Resolution:** gave both — the listing above plus the one-line confirmation — since the confirmation listing and the final reply collapse into one message when the user pre-confirms.

@@ -1,0 +1,21 @@
+All subtasks done, working tree clean. 
+
+## Summary
+
+**What changed**
+
+- `auth/tokens.py` — implemented `verify(token, secret, now)`:
+  - Returns the user when the token is byte-identical to what `sign` produces and `now < expires_at`.
+  - Raises `InvalidToken` (only ever `InvalidToken`) for: non-string token, wrong part count (including dotted user names → 4 parts), empty user (even with a valid signature), non-canonical integer expiry (strict ASCII `-?\d+`, rejecting `+100`, ` 100`, `10_0`, unicode digits), expiry at/past the boundary (`now >= expires_at`), and signature mismatch (wrong secret, tampered user/expiry/signature, non-ASCII signature).
+  - Signature comparison uses `hmac.compare_digest` on ASCII-encoded bytes — constant time.
+- `tests/test_tokens.py` — 20 tests: happy path, expiry boundary, per-rejection-case coverage, tampered payloads that are correctly re-signed (so only the intended check can reject them), and a mock assertion that `compare_digest` is actually used.
+- `TASKS.md` — plan with per-subtask statuses (all done); `.gitignore` added and `__pycache__` untracked.
+- One commit per finished subtask (`c4085cb` → `a16af34`).
+
+**Test command & result**: `python3 -m unittest discover -s tests -t .` → **Ran 20 tests, OK, exit code 0**.
+
+**Assumptions made (no blocking questions arose — the spec covered all rejection cases, the boundary, and the timing requirement):**
+
+1. Non-canonical but `int()`-parseable expiries (`+100`, `" 100"`, `"10_0"`, `"١٢٣"`) are treated as malformed. `sign` can never emit them, so this can't reject a legitimately signed token.
+2. A user name containing `.` makes the token split into >3 parts → malformed → `InvalidToken`, per the "three parts" rule.
+3. A malformed `secret` argument (e.g. non-string) is a caller programming error and is not converted to `InvalidToken`; the spec scopes "never another exception" to token problems.

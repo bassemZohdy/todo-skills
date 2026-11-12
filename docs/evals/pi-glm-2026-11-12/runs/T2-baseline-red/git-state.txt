@@ -1,0 +1,24 @@
+## HEAD
+e58564ee99575a40db9d21c86840e596001322c0
+## current branch
+main
+## branches
+* main e58564e init with a red baseline
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/baseline-red/repo  e58564e [main]
+## tags
+## refs
+refs/heads/main e58564ee99575a40db9d21c86840e596001322c0
+## log --all --graph
+* e58564e  (HEAD -> main) init with a red baseline
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

@@ -1,0 +1,27 @@
+## HEAD
+0b99a0c490b22f2557c2caaf19ce9844938d23c1
+## current branch
+main
+## branches
+* main                0b99a0c chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+  todo/FEAT-001-rival 0b99a0c chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/race-claim-conflict/repo  0b99a0c [main]
+## tags
+## refs
+refs/heads/main 0b99a0c490b22f2557c2caaf19ce9844938d23c1
+refs/heads/todo/FEAT-001-rival 0b99a0c490b22f2557c2caaf19ce9844938d23c1
+## log --all --graph
+* 0b99a0c  (HEAD -> main, todo/FEAT-001-rival) chore(backlog): claim FEAT-001 on todo/FEAT-001-rival
+* c35e6c0  init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

@@ -1,0 +1,26 @@
+`/todo-continue --merge` (invocation 1) — stepping through the skill:
+
+**Step 1 — git & invariants:** git repo ✓; TODO.md passes I1–I10 (read check; no lint script).
+
+**Step 2 — select by status:** no `todo/` branches exist → no interrupted merge/drain to finish, and the core's interrupted-work sweep is skipped on base. No `[/]` node. First workable `[ ]` node = **TASK-001** (no children, no `Depends:`, root unclaimed — `git show main:TODO.md` shows no committed TODO.md, so no claim; it's an uncommitted root on base in the main checkout, which is allowed).
+
+**Step 3 — ready check:** lint clean ✓; no `Ref:`; **clean-tree check ✗** — `git status` shows `M textutil/slug.py`, the interrupted session's uncommitted change. Per `reference/git-flow.md` ("Clean tree": untracked, backlog and generated files don't count; *"Any other change: stop and offer commit, stash or `--worktree`"*), this is a tracked, non-backlog change → **the skill stops and asks**. No branch is created, nothing is committed, nothing is reverted. (The `[/]` resume rule can't apply: TASK-001 isn't yet `[/]` on a branch, and the ready check gates branch creation.)
+
+---
+
+## Final report
+
+**Completed:**
+- `/todo-init` — created `TODO.md` + `CHANGELOG.md` (left uncommitted as backlog files); detected test command `python3 -m unittest discover -s tests -t .` from the README `Tests:` line; base branch `main`.
+- `/todo-add` — inserted root **TASK-001** (`P1 · low`): *Finish textutil.slug.slugify, preserving the existing WIP commit and uncommitted change: lowercase, replace each run of non-ASCII-alphanumeric characters with a single dash, strip leading and trailing dashes* — `Done when: slugify('  Hello, World! ') returns 'hello-world', slugify('a--b') returns 'a-b', slugify('Hello') returns 'hello'; python3 -m unittest discover -s tests -t .`
+- `/todo-continue --merge` — **stopped at the ready check (step 3): the tree is not clean.**
+
+**Why it stopped:** the interrupted session's uncommitted change to `textutil/slug.py` (adds `import re`, `text.replace(" ", "-")`) makes the working tree dirty. It is not a backlog or generated file, so the clean-tree rule fires and forbids me from committing, stashing or discarding it on my own — and you asked me not to lose it. The wip commit `37e1d6f` is untouched and safe in history either way.
+
+**Question — how do you want the uncommitted WIP handled so TASK-001 can start?**
+
+1. **Commit it on `main`** (recommended): `git commit -m "wip: slugify dashes" -- textutil/slug.py` — nothing lost, TASK-001 then builds on top of it and the flow can run to the drain and the `--merge` into main.
+2. **Stash it**: `git stash push -- textutil/slug.py` — preserved in the stash, but the node would re-implement from HEAD (where `slugify` only lowercases), and popping the stash later would conflict with the finished implementation.
+3. **`--worktree`**: TASK-001 runs in a separate worktree, the dirty file stays in this checkout — but it would not be part of the node's work, and the final root merge into `main` still requires a clean main checkout, so it only defers the same problem.
+
+Reply with your choice (e.g. "1"), and I'll apply it and rerun `/todo-continue --merge` until TASK-001 drains to `CHANGELOG.md` and merges into `main`.

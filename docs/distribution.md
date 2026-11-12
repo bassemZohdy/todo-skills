@@ -5,10 +5,34 @@
 | Claude Code plugin marketplace (this repo) | Available | `/plugin marketplace add bassemZohdy/todo-skills` |
 | Codex plugin marketplace (this repo) | Available, verified on codex-cli 0.167.0 | `codex plugin marketplace add bassemZohdy/todo-skills` |
 | skills CLI | Available (discovery of all nine skills verified from the repository root and from `plugin/`, 2026-11-07) | `npx skills add bassemZohdy/todo-skills` |
+| skills.sh | Listed 2026-11-13, all nine skills (the site lists a repository from `npx skills add` installs; there is no submit form) | `npx skills add bassemZohdy/todo-skills` |
+| ClawHub (OpenClaw) | Published 2026-11-13, nine skills under `@bassemzohdy`, MIT-0; the core skill's slug is `todo-core`. See below | `openclaw skills install @bassemzohdy/todo-core` |
 | OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0, upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
 Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
+
+## ClawHub (OpenClaw)
+
+Published 2026-11-13 from the repository with ClawHub's "Import from GitHub" (Publish, Add a skill, Import skills), which reads
+`plugin/skills/<name>/SKILL.md`. Listings are under https://clawhub.ai/bassemZohdy, one per skill; the page of each skill shows its
+install command, for example `openclaw skills install @bassemzohdy/todo-core`.
+
+- **Slugs.** Eight skills keep their names (`todo-add`, `todo-continue`, `todo-init`, `todo-plan`, `todo-release`, `todo-report`,
+  `todo-status`, `todo-update`). ClawHub gave the core skill `todo` the slug `todo-2` (apparently `todo` was already
+  taken), and it was renamed to `todo-core` (the old `todo-2` URL redirects). The slug is only the listing's name: the skill's own `name:` in
+  `SKILL.md` is still `todo`, which the command skills load by that name. Whether an OpenClaw install keeps that name was not
+  tested: check it before telling users to install single skills, and keep the advice to install all nine together.
+- **License.** ClawHub publishes everything under MIT-0 (no attribution) and asks the publisher to confirm the right to do so. The
+  repository stays MIT; the ClawHub copies are MIT-0.
+- **Short summary.** ClawHub limits it to 500 characters; the `description` of the core skill is 514, so the listing carries a
+  shortened summary written for it (382 characters). The `SKILL.md` description is unchanged.
+- **Scans.** A new version is not installable until ClawHub's secret and security checks finish (the core skill showed "pending
+  publication" for a few minutes).
+- **Updating.** A listing does not follow the repository. After a release, open the skill's page, choose Settings, then New
+  Version, or import again from GitHub, and check that the version matches the plugin manifests.
+- **Not done:** an install from ClawHub on a clean OpenClaw was not run, and no OpenClaw trial exists, so the README does not
+  claim OpenClaw support beyond the listing.
 
 ## Anthropic directory submission
 

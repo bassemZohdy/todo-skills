@@ -1,0 +1,9 @@
+All 5 tests pass. 
+
+**What I did:**
+- **`textutil/slug.py`** — finished the interrupted work in place, preserving both the `wip` commit and the uncommitted lowercasing step. `slugify` now lowercases, uses `re.sub(r"[^a-z0-9]+", "-", text)` to replace every run of non-ASCII-alphanumeric characters with a single dash (so `"a--b"` → `"a-b"`), and strips leading/trailing dashes via `.strip("-")` (so `"  Hello, World! "` → `"hello-world"`).
+- **`tests/test_slug.py`** — kept the existing `test_lowercases` and added tests for run collapsing, mixed input with surrounding whitespace/punctuation, digit retention, and the all-punctuation → empty-string edge case.
+
+**Test run:** `python3 -m unittest discover -s tests -t .` → `Ran 5 tests ... OK`
+
+The changes remain uncommitted on top of `b3fb130 wip: slugify lowercases`, so the prior session's commit and work are intact.

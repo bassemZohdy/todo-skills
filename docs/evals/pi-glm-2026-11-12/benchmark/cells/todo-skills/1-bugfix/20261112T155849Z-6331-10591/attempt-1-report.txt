@@ -1,0 +1,20 @@
+All done — the tree is drained and merged into `main` (TODO.md is intact; the earlier mojibake was just console encoding). Final report:
+
+## /todo-continue --merge report — FIX-001
+
+- **Node:** FIX-001 · Apply the 10% discount exactly once for orders of 100 or more (leaf root, P1, low)
+- **Commands & results:**
+  - Baseline (on main): `python3 -m unittest discover -s tests -t .` → 2 passing
+  - Red: `python3 -m unittest tests.test_total` → `AssertionError: 202.5 != 225.0` (expected reason, not an attempt)
+  - Done when: `python3 -m unittest tests.test_total` → **3 tests, OK**
+  - Regression (full suite, README `Tests:` line): `python3 -m unittest discover -s tests -t .` → **3 passing** (baseline 2, none deleted/skipped/weakened)
+- **Files changed:** `pricing/total.py` (removed the second stacked `>= 200` discount so the 10% applies exactly once for ≥ 100), `tests/test_total.py` (new regression test `test_order_of_200_or_more_gets_ten_percent_off_once`, tagged `FIX-001`)
+- **Git:** branch `todo/FIX-001-apply-10-discount-exactly` from main — claim `120998a` (fast-forwarded to main), start `afe4cbf`, node commit `3ede54d` (`fix(pricing): apply the volume discount exactly once`), drain `6e3007f`, then `--merge` → `0732c70 Merge FIX-001 into main`; node branch deleted. Refresh from base was already up to date; no `.todo/check.sh` to gate on.
+- **Drain:** CHANGELOG.md gained `### Fixed` → `- **FIX-001** (fix): … Validated: python3 -m unittest tests.test_total.`; TODO.md is back to the empty tree
+- **Checked-out branch:** `main`, clean
+- **Review:** self, spec ok / quality ok, 0 findings
+- **Adjacent problems:** none
+- **Next workable node:** none — the backlog is empty
+- Suggest clearing context before the next backlog run. (`/todo-release` can cut a version from `[Unreleased]` whenever you want; that requires your confirmation.)
+
+No stop rules fired along the way, so there are no open questions — the full requested flow (`todo-init` → `todo-add` → `todo-continue --merge` to drain) completed autonomously.

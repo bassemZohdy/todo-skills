@@ -1,0 +1,25 @@
+Preconditions pass, so I've reached **Step 2: Propose the version** — which requires stopping for user confirmation.
+
+## 1) Report
+
+**Preconditions (Step 1)**
+- Git mode; base branch is `main` (no `Base:` line in README; default `main`/`master`/`trunk`/`develop`) and it **is** checked out ✓
+- `git status --porcelain` is empty — nothing but backlog/untracked files allowed, and there aren't even those ✓
+- Invariant check: no `.todo/todo-lint.sh`, so I checked I1–I10 by reading; `TODO.md` is a valid empty tree (just `# Active Backlog` + `## 🌳 Task Tree`) — all pass ✓
+- `[Unreleased]` has `- ` entries (2) ✓
+- No `[/]` task and no claimed tree in either `TODO.md` or `git show main:TODO.md` — no warning needed ✓
+
+**Version proposal (Step 2)**
+- Previous version: `## [0.1.0]` (local tag `v0.1.0` exists; no `v0.2.0` tag)
+- Entries under `[Unreleased]`: no `BREAKING CHANGE`, no type+`!`, no `### Removed`; `### Added` entry **FEAT-002** (feat) and `### Fixed` entry **FIX-001** (fix)
+
+> **Proposed version: 0.2.0** — minor bump: `[Unreleased]` contains an `### Added` entry (FEAT-002), with nothing breaking.
+>
+> Confirm **0.2.0**, or name another version? (Per the skill, I do nothing until you answer; a decline ends the command.)
+
+## 2) Ambiguities / unclear instructions in the skill text
+
+1. **"a type followed by an exclamation mark (written by hand, for example feat followed by !)"** — In this project's format the type appears parenthesized per the core template (`**FEAT-002** (feat): …`), so it's unclear whether the pattern to scan for is `feat!`, `(feat!)`, or a commit-subject style `feat!:`. I resolved it as: any type token immediately followed by `!` anywhere in an entry's text (covers all three readings). No such token exists here, and since the previous version is `0.x` a breaking marker would only yield a minor anyway — the classification is unaffected.
+2. Minor note: **"`date +%F`"** (Step 3) is a POSIX command assuming a Unix shell; my shell is PowerShell, where it only works because Git's `date.exe` is on PATH (it returned `2026-11-12`). Resolved without issue, but the instruction is environment-dependent.
+
+Stopping here per the skill: **Confirm version 0.2.0, or name another?**

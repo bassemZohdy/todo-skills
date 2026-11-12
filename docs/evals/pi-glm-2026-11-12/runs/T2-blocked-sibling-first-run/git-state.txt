@@ -1,0 +1,33 @@
+## HEAD
+163fcdbfbd85d29ab683f7067481627be04730d7
+## current branch
+todo/FEAT-001.2-add-multiply-test
+## branches
+  main                              0347199 init with claimed tree
+  todo/FEAT-001-subtract-multiply   0347199 init with claimed tree
+  todo/FEAT-001.1-subtract-test     b516b92 chore(backlog): block FEAT-001.1
+* todo/FEAT-001.2-add-multiply-test 163fcdb chore(backlog): start FEAT-001.2
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/blocked-sibling/repo  163fcdb [todo/FEAT-001.2-add-multiply-test]
+## tags
+## refs
+refs/heads/main 03471999f3bcebd9977605f672c39272661f7d43
+refs/heads/todo/FEAT-001-subtract-multiply 03471999f3bcebd9977605f672c39272661f7d43
+refs/heads/todo/FEAT-001.1-subtract-test b516b92d1d4e8e09c41487d825a0242be783c583
+refs/heads/todo/FEAT-001.2-add-multiply-test 163fcdbfbd85d29ab683f7067481627be04730d7
+## log --all --graph
+* 163fcdb  (HEAD -> todo/FEAT-001.2-add-multiply-test) chore(backlog): start FEAT-001.2
+| * b516b92  (todo/FEAT-001.1-subtract-test) chore(backlog): block FEAT-001.1
+|/  
+* 0347199  (todo/FEAT-001-subtract-multiply, main) init with claimed tree
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

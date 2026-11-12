@@ -1,0 +1,29 @@
+Merge completed cleanly, child branch deleted, working tree clean. Lint: no `.todo/todo-lint.sh` exists, so I checked invariants I1–I10 by reading the post-merge `TODO.md` — all pass (single `[x]` leaf with no children, unique IDs, valid `Done when` commands, no TODO/CHANGELOG ID overlap, no forbidden commands, 11 lines ≤ 120).
+
+---
+
+## (1) Report — `/todo-continue` (one invocation)
+
+**Selected path:** Step 2, first case — **Interrupted merge**. On `todo/` branch `todo/FEAT-001-subtract-multiply`, the tree's branch `todo/FEAT-001.1-subtract-test` (e277ec4 `feat(calc): add subtract`) showed FEAT-001.1 as `[x]` but was not an ancestor of its parent's branch (`git merge-base --is-ancestor` exit 1) → the merge into the parent had stopped. Per the skill: finish it as step 10 item 3 (merge only), then lint, report and stop.
+
+- **Node:** FEAT-001.1 · Add subtract with a test (non-root, now merged into its parent)
+- **Commands and results:**
+  - Invariant check (step 1, before acting): pass by reading I1–I10 (no lint script present)
+  - `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-subtract-test` → clean ("Merge made by the 'ort' strategy", no conflicts)
+  - `git branch -d todo/FEAT-001.1-subtract-test` → deleted (was e277ec4)
+  - Lint after merge: I1–I10 pass by reading
+  - **Tests: not run** (the skill says "No tests here; the parent's integration step runs them") — Done when / regression: not run
+- **Files changed by the merge:** `calc.py` (+`subtract`), `tests/test_calc.py` (+`test_subtract`), `TODO.md` (FEAT-001.1 `[ ]` → `[x]`). No files edited by me.
+- **Branch / commit:** merge commit `302824c` "Merge FEAT-001.1 into FEAT-001" on `todo/FEAT-001-subtract-multiply`; child branch deleted
+- **Checked-out branch:** `todo/FEAT-001-subtract-multiply` (clean tree)
+- **Adjacent problems:** none observed
+- **Next workable node:** FEAT-001.2 · Add multiply with a test (FEAT-001's integration step waits for it; after that, the root FEAT-001 can complete/drain)
+- Suggest clearing context before the next `/todo-continue`.
+
+## (2) Ambiguities / unclear instructions hit
+
+1. **"finish it as step 10 item 3 (the merge only)"** (step 2, first bullet) vs. step 10 item 3, which reads "**Non-root node:** switch to the parent's branch, `git merge --no-ff` …, `git branch -d` the child … Report and stop". It was unclear whether "**the merge only**" excludes the `git branch -d` (and the "switch" if already on the parent's branch). Resolution: treated "the merge only" as excluding items 10.1/10.2 (the node's completion work, already done on the child branch), and executed item 3 as written — merge `--no-ff` + branch delete — since the core says "finish that merge" via item 3, which includes the delete.
+2. **"then lint (the lint script, else the core invariant check), report and stop"** (same bullet) — *what* to lint and *when* was unstated. Resolution: ran the invariant check (I1–I10 by reading, since no `.todo/todo-lint.sh` exists) on the post-merge `TODO.md` of the parent branch.
+3. **"Interrupted merge (on a `todo/` branch …)"** (step 2, first bullet) — ambiguous which branch the agent must be on: the interrupted child's branch or any `todo/` branch. I was on the *parent's* branch, not the child's. Resolution: read it as "discovered while on any `todo/` branch" and followed item 3's "switch to the parent's branch" literally (already there, no switch needed).
+4. **"If it fails only on the active node's `State:` line"** (step 1) — "the active node" is undefined here, since this state has no `[/]` task. Resolution: treated as vacuous because the invariant check passed, so no repair/ask path was needed.
+5. **"No tests here; the parent's integration step runs them"** (step 2, first bullet) vs. core guardrail 3, "**No node is closed without running its `Done when` and its regression and seeing both pass**" — a surface tension, since this path closes out a node's merge without running anything. Resolution: followed the explicit step-2 instruction (the node's verification had already passed on its own branch per its commit); reported regression as "not run".

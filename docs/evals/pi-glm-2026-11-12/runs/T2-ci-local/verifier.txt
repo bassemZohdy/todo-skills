@@ -1,0 +1,1 @@
+verifier: UNISOLATED (TRIAL_WINDOWS_ISOLATION=0): not equal to the isolated Windows batches

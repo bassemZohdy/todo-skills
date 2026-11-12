@@ -1,0 +1,34 @@
+Release complete. Here's the report the skill asks for, followed by the ambiguity notes.
+
+## 1) `/todo-release` report
+
+**Version:** `0.2.0` (confirmed by the user; matches the proposal: previous version `0.1.0`, `[Unreleased]` contains an `### Added` entry with `(feat)` → minor)
+
+**Preconditions passed:** git repo; base branch `main` checked out (main checkout); `git status --porcelain` empty; no `[/]` task or claimed tree in `TODO.md` or `git show main:TODO.md` (empty tree); `[Unreleased]` had 2 entries; invariant check (I1–I10, by reading — no `.todo/todo-lint.sh`) passed; no local `v0.2.0` tag.
+
+**New version section written in `CHANGELOG.md`:**
+
+- Heading: `## [0.2.0] - 2026-11-12` (date via `date +%F`)
+- Subheadings: `### Added`, `### Fixed`
+- A fresh empty `## [Unreleased]` (no subheadings) was placed above it; older sections untouched
+- Links updated from base URL `https://github.com/example/minical`:
+  - `[Unreleased]: https://github.com/example/minical/compare/v0.2.0...HEAD`
+  - `[0.2.0]: https://github.com/example/minical/compare/v0.1.0...v0.2.0` (not a first release)
+
+**Version files:** none found — the grep for the previous version `0.1.0` (package.json/pyproject.toml/Cargo.toml/pom.xml) exited 1. Nothing to bump.
+
+**Commit:** invariant check re-run after the edit (I5/I7 clean) → committed `CHANGELOG.md` only as `f79e302` `chore(release): 0.2.0` (no body); tree clean afterwards.
+
+**Run these yourself when ready (not run by the skill):**
+```
+git tag -a v0.2.0 -m "0.2.0"
+git push --follow-tags
+```
+
+## 2) Ambiguities / unclear instructions
+
+1. **Link-line placement, "under it":** *"add `[X.Y.Z]: <base URL>/compare/v<previous>...vX.Y.Z` under it"*. Ambiguous whether "under it" means directly under the `[Unreleased]:` line or at the bottom of the link block (after `[0.1.0]:`). **Resolution:** placed it directly under the `[Unreleased]:` line (literal reading, and it matches the newest-first ordering of the existing link block: Unreleased, 0.2.0, 0.1.0).
+2. **POSIX commands on Windows (environment, not the skill's fault):** step 3's `date +%F` and step 4's `grep -rnF …` are Unix commands; in PowerShell `date` is a `Get-Date` alias and `+%F` fails. **Resolution:** ran both through Git-for-Windows `bash`/`grep` in PATH (`bash -c "date +%F"` → `2026-11-12`; grep exited 1 → none found).
+3. **Minor wording oddity (no impact):** *"a type followed by an exclamation mark (written by hand, for example feat followed by !)"* is awkwardly phrased (presumably means `feat!:`), but no `!` or `BREAKING CHANGE` appeared in the entries, so it needed no resolution.
+
+No contradictions or blocking ambiguities were hit; the skill ran cleanly end-to-end.

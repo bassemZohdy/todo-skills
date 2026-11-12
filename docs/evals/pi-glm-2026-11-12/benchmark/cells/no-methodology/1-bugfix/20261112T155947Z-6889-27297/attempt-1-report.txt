@@ -1,0 +1,20 @@
+All 4 tests pass. Summary:
+
+**Bug** (`pricing/total.py`): The discount was applied in two separate `if` blocks — orders ≥ 100 got 10% off, and orders ≥ 200 got another 10% off, so `order_total(250)` returned `250 * 0.9 * 0.9 = 202.5`.
+
+**Fix**: Removed the second `if subtotal >= 200` block so the 10% discount is applied exactly once for any order ≥ 100, and smaller orders get no discount:
+
+```python
+def order_total(subtotal):
+    """Return the amount to charge for an order. Orders of 100 or more get 10% off."""
+    total = subtotal
+    if subtotal >= 100:
+        total = total * 0.9
+    return round(total, 2)
+```
+
+**Regression tests** (`tests/test_total.py`): Added two tests that fail on the old code and pass on the fixed code:
+- `test_order_of_200_gets_discount_exactly_once`: `order_total(200) == 180.0` (was 162.0)
+- `test_order_of_250_gets_discount_exactly_once`: `order_total(250) == 225.0` (was 202.5)
+
+Test run: `Ran 4 tests ... OK`

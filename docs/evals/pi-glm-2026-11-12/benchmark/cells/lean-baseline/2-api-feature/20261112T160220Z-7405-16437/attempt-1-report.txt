@@ -1,0 +1,16 @@
+Done. Summary:
+
+**What changed**
+- `shop/api.py` — added routing for `GET /items/<id>`: a strict whole-number check (`^-?\d+$`) on the path segment; 200 + item when the id exists, 404 `{"error": "not found"}` when it doesn't, 400 `{"error": "invalid id"}` when the segment isn't a whole number. `GET /items` untouched.
+- `tests/test_api.py` — 15 tests covering: known ids (both items), unknown ids (incl. `0`, `-1`), invalid ids (`abc`, `1.5`, `1x`, `+1`, ` 1`), leading-zero `01` → resolves, trailing slash / sub-paths / non-GET → 404, plus the original list regression.
+- `TASKS.md` — plan with all 3 subtasks done; `.gitignore` for `__pycache__`.
+
+**Test command and result**
+`python3 -m unittest discover -s tests -t .` → `Ran 15 tests ... OK` (exit 0). Working tree clean; 3 commits, one per subtask.
+
+**Decisions made on unspecified boundaries** (flagging per your method — the spec's examples were unambiguous, so I didn't block, but these are open to change):
+1. **`/items/01`** — leading zeros accepted and canonicalized (`01` → item 1, 200). Alternative: reject as 400 invalid id.
+2. **`/items/-1`** — negative whole numbers count as whole → unknown → 404, not 400. Alternative: treat negatives as invalid → 400.
+3. **`/items/+1`, `/items/%201`** — rejected as 400 (strict digit syntax), even though Python's `int()` would accept them. Alternative: accept via lenient `int()` parsing → 200.
+4. **`/items/` (empty id) and `/items/1/`** — don't match the item-route shape → 404. Alternative: treat the empty segment as an id → 400.
+5. **Non-GET methods on `/items/<id>`** — 404 (no method routing exists in this handler); alternative would be 405, but the module has no 405 convention.

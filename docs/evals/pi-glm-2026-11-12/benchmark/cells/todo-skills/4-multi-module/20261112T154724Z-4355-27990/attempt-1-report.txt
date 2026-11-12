@@ -1,0 +1,18 @@
+All done — the tree is drained and merged. Final report:
+
+## /todo-continue report — FEAT-001
+
+- **Node:** `FEAT-001` · P1 · mid (leaf root) — *Add Stock.reserve with OutOfStock rollback and reserve stock in place_order*
+- **Commands & results:**
+  - Baseline (before branch): `python3 -m unittest discover -s tests -t .` → 2 passing
+  - Red: `python3 -m unittest tests.test_inventory.StockReserveTest tests.test_orders.PlaceOrderReserveTest -v` → `ImportError: cannot import name 'OutOfStock' from 'inventory.stock'` (expected missing-symbol failure)
+  - Done when (green): 5/5 OK · Regression: **7/7 OK** (baseline 2; nothing deleted, skipped, or weakened)
+  - Post-merge suite on `main`: 7/7 OK
+- **Files changed:** `inventory/stock.py` (`OutOfStock`, `Stock.reserve` — aggregates duplicate SKU lines, checks all lines, then applies: all-or-nothing, unknown SKU = 0), `orders/service.py` (`place_order` reserves first; `OutOfStock` propagates with levels untouched), `tests/test_inventory.py` (+`StockReserveTest`, 3 tests), `tests/test_orders.py` (+`PlaceOrderReserveTest`, 2 tests)
+- **Commits** on `todo/FEAT-001-add-stock-reserve-outofstock`: claim `9d24a35` (published to base via ff) → start `0f145ed` → `156c9fb feat(inventory): …` (body: `Refs`/`Red`/`Reviewed: self, 0 findings fixed`) → drain `71fb111`; root merged with `--merge`: **`d7df9ff Merge FEAT-001 into main`**, branch deleted. Checked out: **`main`**, clean (only untracked `__pycache__`, which don't count)
+- **Drain:** CHANGELOG.md → one entry under `## [Unreleased]` → `### Added`; TODO.md → empty tree (lint passes, I5 holds)
+- **Docs:** no drift hits (no `docs/`, README names none of the changed symbols); no README/docs changes in the diff → no `Docs:` in the entry
+- **Adjacent problems:** none to queue as `/todo-add`
+- **Next workable node:** none — backlog is empty
+
+Two judgment calls to flag (neither blocked anything): (1) the requirement fit the scope rule as a **single leaf root** (one change, 4 files), so todo-add's multi-node confirmation never triggered; (2) the root touches a public interface, so the **optional** root review was due to be offered once before the drain — I treated your instruction to run `--merge` through to `main` as a recorded decline ("declining one changes nothing else"); say the word if you'd like that review in a fresh session anyway. No questions outstanding.

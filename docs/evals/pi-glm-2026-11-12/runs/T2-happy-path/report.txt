@@ -1,0 +1,29 @@
+# (1) Report — `/todo-continue --merge` (one invocation)
+
+**FEAT-001 · Add subtract to calc.py** — leaf root, `low`, completed and merged.
+
+| Step | Result |
+|---|---|
+| Invariant check (I1–I10, no `.todo/todo-lint.sh` → by reading) | PASS before start, PASS after drain edit |
+| Baseline (`python3 -m unittest discover -s tests`, README `Tests:` line, on main) | **1 passing** (test_add) |
+| Red (test written first, exact `Done when` id kept, FEAT-001 in docstring) | `AttributeError: module 'calc' has no attribute 'subtract'` — expected missing-symbol failure |
+| Green | `subtract(a, b)` added to calc.py |
+| Done when `python3 -m unittest tests.test_calc.CalcTest.test_subtract` | exit 0, 1 test ran, OK |
+| Regression `python3 -m unittest discover -s tests` | exit 0, **2 passing** vs baseline 1 — no test deleted/skipped/weakened |
+| Review (self — no subagent tool available) | spec ok / quality ok, 0 findings |
+| Documentation drift (added exported symbol `subtract`) | `grep -rnF -- 'subtract' README.md docs` — no hits; nothing to update |
+| RTM / Definition of Done / `.todo/check.sh` | none exist → steps skipped |
+
+**Files changed:** `calc.py`, `tests/test_calc.py`, `TODO.md`, `CHANGELOG.md`.
+**Branch & commits:** `todo/FEAT-001-add-subtract-calc-py` — claim `096e0a0` (published to main by ff), start `054fa8e`, node `e48eeb7` (`feat(calc): add subtract to calc.py`, body `Refs: FEAT-001` / `Red:` / `Reviewed: self, 0 findings fixed`), drain `f111f05` (`chore(backlog): drain FEAT-001`). **Root review offer (once): review the whole root before it drains? (yes / no)** — non-interactive run, treated as declined ("declining one changes nothing else"); the root had already drained/merged when asked. **Merge:** `--merge` given → refreshed (already up to date), last gate vacuous, drained, `Merge FEAT-001 into main` (`9d3335c`, --no-ff) from the clean main checkout, branch deleted. **Children done/total:** leaf root (0/0). **Checked-out branch:** `main`, clean (post-merge regression re-run: 2 passing, OK).
+**Adjacent problems:** none. **Next workable node:** none (tree is empty). **Suggestion:** clear context — the tree is empty; next step would be `/todo-add` or `/todo-release` after you confirm.
+
+# (2) Ambiguities / contradictions / unclear instructions
+
+1. **Interactive root-review offer mid-flow, no non-interactive default** — todo-continue 10.4.1: "For a `high` root, or one touching security, data migration, concurrency or a public interface, offer the optional root review once (`reference/review.md`, "Root review"; read it only then)"; review.md: "asks once 'review the whole root before it drains? (yes / no)'". A `low` one-function root qualifies only because it added an "exported symbol", and no behavior is specified when no user is present to answer, though the offer sits between the node commit and the drain/merge. **Resolution:** asked once in this report; treated the non-interactive context as "no" because review.md states "Neither review is required, and declining one changes nothing else", and continued the drain + merge.
+
+2. **Last gate when `.todo/check.sh` does not exist** — todo-continue 10.4.2: "**Last gate:** if `.todo/check.sh` exists, read it: only the shebang, comments, `set -eu`, `cd`, the lint line, an optional `.todo/todo-replay.sh` line and test commands that pass command safety …; otherwise show what fails and ask." The "otherwise" could attach to the file's absence (stop and ask) or only to the content check (disallowed constructs). **Resolution:** read as attaching to the content check ("show what fails" implies the file was read and something in it failed); with no `check.sh` there is nothing to run, so the gate was vacuous and skipped. The separate regression already ran green.
+
+3. **Blank-line placement for a newly created CHANGELOG heading** — core "CHANGELOG entry": "Create the heading if missing, in Keep a Changelog order (…), with one blank line before and after it". Ambiguous whether "after it" means directly after the `###` heading (which would contradict "Inserted as the first `- ` item of the matching `###` list … no blank line between entries") or after the entry list at end-of-file. **Resolution:** blank line between `## [Unreleased]` and `### Added`; entry directly under the heading; file ends with a single final newline (core: "keep the file's final newline"), no trailing blank line.
+
+4. **`next:` value for a leaf root completing without interruption** — step 5 sets `next: read docs`, and `next:`'s allowed values include `build` and `drain`, but no step assigns `drain` (or anything) to a node that proceeds straight through to completion; step 9 only says "update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`)". **Resolution:** with no failure cycles, `State:` was left unchanged (`next: read docs`) after start; the whole subtree (including State) was deleted by the drain, so no stale state persisted.

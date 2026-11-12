@@ -1,0 +1,23 @@
+The refresh is a no-op (base hasn't moved), so nothing to rerun. And here the skills stop me:
+
+**Stop — root review offer.** FEAT-001 is a `high` root touching security, and `/todo-continue` step 10.4.1 requires offering the optional root review once before the drain (per `reference/review.md`). This is a question I must ask rather than answer for you, so I'm stopping here with the full report. (Note: this session has no subagent tool, so if you want the review it would run in a fresh session given the inputs below; declining changes nothing else.)
+
+## Report — /todo-continue --merge (run 1, stopped at 10.4.1)
+
+- **Node:** FEAT-001 · Implement `auth.tokens.verify(token, secret, now)` … (leaf root, `[/`, `next: drain`)
+- **Commands & results:**
+  - Baseline: `python3 -m unittest discover -s tests -t .` → 1 passing (green)
+  - Red: `python3 -m unittest tests.test_tokens` → 7 new tests failed with `NotImplementedError` (expected reason)
+  - Done when: `python3 -m unittest tests.test_tokens` → **8 tests, OK**
+  - Regression: `python3 -m unittest discover -s tests -t .` → **8 tests, OK** (baseline 1, none deleted/skipped)
+- **Files changed:** `auth/tokens.py` (verify: three-part parse, empty-user/non-integer-expiry checks, `hmac.compare_digest` signature check, `now >= expires_at` expiry check, returns user), `tests/test_tokens.py` (+`VerifyTest`, 7 tests covering accept + every rejection case incl. the `now == expires_at` boundary)
+- **Branch/commits:** `todo/FEAT-001-implement-auth-tokens-verify` (checked out): `1dbdb10` claim (published to `main` by fast-forward), `082c24f` start, `768465c` `feat(auth): implement tokens.verify with invalidtoken rejections` (Reviewed: self, 0 findings). Working tree clean (`__pycache__` = generated, ignored by the check).
+- **Adjacent problems:** none.
+- **Remaining after your answer:** last gate (no `.todo/check.sh` exists), drain FEAT-001 to `CHANGELOG.md` `[Unreleased]` → `### Added`, delete it from TODO.md, and — with `--merge` — merge the root into `main` from the main checkout.
+
+## Questions
+
+**Review the whole root before it drains? (yes / no)**
+
+- **yes** → I'd note it; the review itself needs a fresh session (no subagent tool here). Inputs: the root diff `git diff main...todo/FEAT-001-implement-auth-tokens-verify`, the FEAT-001 task line, no plan doc, no `Ref:`.
+- **no** → I continue `/todo-continue --merge` immediately: drain FEAT-001 into CHANGELOG.md and merge it into `main`.

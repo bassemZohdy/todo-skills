@@ -1,0 +1,30 @@
+I read the repo before touching anything. Baseline: clean tree at commit `8d403b5`, current test suite passes (`Ran 1 test ... OK`).
+
+**Repository shape**
+- `shop/api.py` — `handle(method, path)` returns `(status, body)`; `ITEMS = {1: pen, 2: notebook}`; only `GET /items` is routed, everything else falls through to `404 {"error": "not found"}`.
+- `tests/test_api.py` — one test: `GET /items` returns 200 with ids `[1, 2]`.
+
+The happy paths (`/items/1` → 200, `/items/99` → 404, `/items/abc` and `/items/1.5` → 400, `/items` still works) are unambiguous. But the id-parsing rule "not a whole number → 400" has boundary cases where the two natural implementations disagree: a strict digits-only check (`^\d+$`) versus Python's lenient `int()` (which accepts `-1`, `+1`, leading/trailing whitespace, and underscores like `1_0`). Per your method, I'm stopping before writing any code or file.
+
+**Questions**
+
+1. **Negative ids** — e.g. `GET /items/-1`: `400 {"error": "invalid id"}` or `404 {"error": "not found"}`?
+   - *Strict (400):* "whole number" read as non-negative integer; simplest rule, ids are lookup keys so a negative can never exist.
+   - *Lenient (404):* "whole number" read as any integer; `-1` is well-formed but absent, so "not found".
+   - *My default: 400 (strict)* — it matches the mathematical reading of "whole number" and keeps the invalid-input channel for everything that can't be an id.
+
+2. **Non-canonical digit forms** — leading zeros (`/items/01`), plus sign (`/items/+1`), and strings `int()` silently accepts (`" 1"`, `"1_0"`): normalize and look up (200), or reject with 400?
+   - *Normalize:* forgiving, matches `int()` behavior; but multiple URL forms alias one item, and forms like `1_0` → item 10 are surprising in a URL.
+   - *Reject:* one canonical URL per item (`/items/1`), predictable; a request for `/items/01` gets 400 even though item 1 exists.
+   - *My default: reject (400)* for anything other than plain digits — no aliases, no whitespace/underscore surprises.
+
+3. **Empty id** — `GET /items/` (trailing slash, empty segment): treat as invalid id (400), or fall through to the generic 404?
+   - *400:* consistent with "the id part must be a whole number".
+   - *404:* the path simply isn't a routed resource; keeps `400` only for present-but-malformed ids.
+   - *My default: 400* — it is a malformed id in a routed path shape.
+
+4. **Non-GET methods on `/items/<id>`** — e.g. `POST /items/1`: the requirement only specifies `GET`. Keep the existing fallthrough (`404 not found`) for non-GETs on item paths?
+   - *404 fallthrough (my default):* no behavior promised, so no change; arguably a future `405` concern, out of scope here.
+   - *Method-specific status:* would need new expectations for POST/PUT/DELETE on both known and unknown ids — more surface than the requirement asks for.
+
+If these defaults look right, just say "proceed with defaults" (or correct any of them) and I'll write `TASKS.md`, then do strict TDD per subtask with the exact test command `python3 -m unittest discover -s tests -t .`, committing each subtask as it goes green.

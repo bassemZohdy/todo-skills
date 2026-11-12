@@ -1,0 +1,28 @@
+Done — stopped immediately after the start commit, exactly as instructed. Final lint re-check: still one `[/]`, all of I1–I10 pass.
+
+## 1) Report
+
+**Conflict resolution (before `/todo-continue`)** — `git pull --no-rebase` conflicted in TODO.md (both sides had added a root `FEAT-003`). Resolved per `reference/git-flow-edge.md` "Git conflicts": kept the union of task blocks; two roots shared `FEAT-003`, so I kept the one already in the base (the teammate's divide task, published on `origin/main`) and renumbered the newer local one (my unpushed power task) to **FEAT-004** (next free root number: highest FEAT-/FIX-/TASK- number in TODO.md, CHANGELOG.md, docs/plans and commit subjects = 003, +1). No `Depends:`/`From:` pointed into the renumbered root (its `Depends: FEAT-002` was untouched), and it was unclaimed, so no stop-and-ask. Merge concluded with `git commit --no-edit` → `3588046`; lint (I1–I10 by reading — no `.todo/todo-lint.sh` in this project): pass. **Never pushed.**
+
+**`/todo-continue` — stopped early at step 5 (start commit), by explicit user instruction**
+
+- **Node:** `FEAT-002` · P1 · low · Add a multiply function to calc.py with a test (leaf root)
+- **Selection:** FEAT-001 skipped — `claimed by todo/FEAT-001-peer-work` (branch not in this clone, so no resume hint); no interrupted work (no `todo/*` branches before mine); FEAT-002 was the first workable node
+- **Commands and results:** baseline = README `Tests:` `python3 -m unittest discover -s tests` → **1 test, OK** (`baseline 1 passing`); Done when not yet run (stopped before step 6)
+- **Files changed:** `TODO.md` only
+- **Branch / commits:** `todo/FEAT-002-add-multiply-function-calc`; `4dbac0b` `chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc` (fast-forwarded onto local `main` to publish), `b20c988` `chore(backlog): start FEAT-002` — marker `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-002-add-multiply-function-calc from main; next: read docs`
+- **Checked-out branch:** `todo/FEAT-002-add-multiply-function-calc` (clean tree)
+- **Children done/total:** n/a (leaf root); **root merge commands:** n/a (root not finished — no drain, no merge, nothing pushed)
+- **Adjacent problems:** none. The ID collision itself was resolved by the rules (power task now FEAT-004, still `Depends: FEAT-002`)
+- **Next workable node:** `FEAT-003` (divide, P1, unclaimed). FEAT-004 waits on FEAT-002; FEAT-001 is claimed by the peer
+- Suggest clearing context before resuming the build of FEAT-002
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"The skills' own git commands never touch the network: no fetch, pull or push" (core, Git mode; echoed in guardrail 5) vs. the user instruction to run `git pull --no-rebase`.** Guardrail 7 says on conflict with an explicit user instruction, "state the conflict and ask." Resolved by scope: the ban covers commands *the skills* run on their own; this pull was the user's own directed git action (and the remote is a local path, no real network), so I ran it as instructed without asking. I flag the tension here per guardrail 7. Related: guardrail 6 ("The base branch receives only tree claims (fast-forward), …") doesn't list a pull's merge commit on the base — same resolution (user's sharing step, not a skill action).
+2. **"keep the one already in the base, renumber the newer one" (git-flow-edge.md, Git conflicts) — "the base" is ambiguous mid-merge** (merge base? `HEAD`/ours? the remote-tracking side?). Resolved as: "the base" = the base branch as shared, i.e. `origin/main` (the teammate's divide task), and "newer" = the side not yet in the base (my unpushed power task) — the only reading that keeps the published IDs stable.
+3. **"renumber the newer one and its subtree" doesn't say to what number.** The conflict rule never references the ID-allocation rule ("Next root number = highest … found in TODO.md, CHANGELOG.md, docs/plans/*.md and, in git mode, commit subjects (`git log --all --format=%s`) … plus 1"). Resolved by cross-referencing the core "IDs" section: highest found = FEAT-003 (appears in commit subjects on both sides) → renumber to FEAT-004. Note the subtlety that commit subjects must be counted *after* the merge, or you'd pick a colliding number.
+4. **"keep the union of task blocks" doesn't state document order after a renumber.** The core's "Order" rule (roots P0 → P1 → P2, then by ID number) lives under "Lanes" and isn't pointed to from the conflict rules. Resolved by applying it: divide (P1, FEAT-003) before power (P2, FEAT-004) — which also matches both sides' original ordering.
+5. Minor: **"rewrite every `Depends:` and `From:` that pointed into it"** doesn't say whether the renumbered root's *own* `Depends:` line is in scope (it isn't — mine pointed to FEAT-002, which kept its ID). Resolved by reading "pointed into it" literally: left `Depends: FEAT-002` unchanged.
+
+None of these blocked the run; all were resolved within the skills' own cross-references.

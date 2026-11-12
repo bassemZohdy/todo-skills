@@ -1,0 +1,13 @@
+    C:\Users\<user>\Code\todo-skills-workspace\bench-hidden\3-security-token\test_accept.py:31: ResourceWarning: unclosed file <_io.TextIOWrapper name='auth\\tokens.py' mode='r' encoding='utf-8'>
+      self.assertIn("compare_digest", open(os.path.join("auth", "tokens.py"), encoding="utf-8").read())
+    ResourceWarning: Enable tracemalloc to get the object allocation traceback
+    ......
+    ----------------------------------------------------------------------
+    Ran 6 tests in 0.004s
+    
+    OK
+PASS  the hidden acceptance tests pass
+    agent tests: exit 0, 17 ran
+PASS  the agent's tests pass
+    with permissive_tokens.py for auth/tokens.py: exit 1, 17 ran
+PASS  the agent's tests reject a permissive verify()

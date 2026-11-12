@@ -1,0 +1,26 @@
+## HEAD
+899868426c035eb2891176a8e44d50964d700a04
+## current branch
+main
+## branches
+* main 8998684 init
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/ci-local/repo  8998684 [main]
+## tags
+## refs
+refs/heads/main 899868426c035eb2891176a8e44d50964d700a04
+## log --all --graph
+* 8998684  (HEAD -> main) init
+## status --porcelain
+?? .todo/
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./.todo/check.sh
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

@@ -1,0 +1,28 @@
+Done — one invocation, one node (`FEAT-001`), fully drained and merged. Working tree clean, on `main`.
+
+## 1) Report (per todo-continue step 11)
+
+**FEAT-001 · Add subtract to calc.py** (P1 · low · leaf root — built, verified, drained, merged into base)
+
+**Commands & results**
+| Command | Result |
+|---|---|
+| `python3 -m unittest discover -s tests` (baseline) | Ran 1 test — OK → `baseline 1 passing` |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (red, before impl.) | Ran 1 test — `AttributeError: module 'calc' has no attribute 'subtract'` (expected missing-symbol failure) |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (Done when) | Ran 1 test — OK, exit 0 |
+| `python3 -m unittest discover -s tests` (regression) | Ran 2 tests — OK (baseline 1 → 2; none deleted/skipped/weakened) |
+
+**Files changed**: `calc.py` (+`subtract(a,b)`), `tests/test_calc.py` (+`test_subtract` with `# FEAT-001`), `TODO.md`, `CHANGELOG.md`
+**Branch & commits**: `todo/FEAT-001-add-subtract-calc-py` (branch deleted after merge) — `9f952cd` claim, `200bc20` start, `5870fbb` `feat(calc): add subtract to calc.py` (self-review: spec ok, quality ok, 0 findings), `57366fd` drain; base merge `0eaf50f` "Merge FEAT-001 into main" (with `--merge`, so no merge commands to print). Refresh from base was already up to date; no `.todo/check.sh` last gate; no DoD/RTM/doc-drift applicable.
+**Checked-out branch**: `main` (clean)
+**Children**: n/a (leaf root)
+**Adjacent problems**: none (no `/todo-add --from` suggestions)
+**Next workable node**: none — the tree is empty (`# Active Backlog` / `## 🌳 Task Tree` only)
+**Suggestion**: clear context before the next `/todo-continue` (state was fully committed; nothing pending).
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **Undefined "W3"** — step 10.2: *"and `Checked: <command>` for each W3 command you judged safe (`reference/git-flow.md`, "Commits")"*. "W3" appears nowhere in the core skill, `git-flow.md`, or `verification.md` (which defines only W1, W2, W5 as lint warnings). **Resolution**: no lint script exists to emit a W3 warning, so I recorded `Checked:` lines for the two commands I judged safe and actually ran (Done when + regression).
+2. **"Public interface" triggers** — step 10.4.1: *"or one touching security, data migration, concurrency or a public interface"* (root review) and doc drift: *"Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, renamed, removed or with a changed meaning)"*. Adding the exported symbol `subtract` adds to the public interface but renames/removes/changes nothing. **Resolution**: read the parenthetical as restricting "changed" to rename/remove/meaning-change, so a pure addition triggers neither the root review offer nor `doc-drift.md`; outcome-wise nothing else would differ (no `docs/`, README names no symbols), except a stricter reading would add an offer of an optional root review.
+3. **State at verify time** — step 9: *"update `State:` after every cycle"*, but the schema's `next:` values give no explicit post-verify value for a root, and step 10.1 says *"A root is never `[x]`; item 4 drains it."* **Resolution**: set `next: drain` (the lifecycle's next step), left the marker `[/]`, and committed that TODO.md state in the node commit; the drain then deleted the subtree.
+4. Minor — README `Tests:` line: *"the README's `Tests:` line if there is one"* — here it is embedded mid-sentence (`A tiny calculator library. Tests: `python3 -m unittest discover -s tests`.`), not a standalone line. **Resolution**: took the backticked command following `Tests:` as the regression command.

@@ -1,0 +1,7 @@
+    Traceback (most recent call last):
+      File "C:\Users\<user>\Code\todo-skills-workspace\bench-hidden\4-multi-module\test_accept.py", line 3, in <module>
+        from inventory.stock import OutOfStock, Stock
+    ImportError: cannot import name 'OutOfStock' from 'inventory.stock' (C:\Users\<user>\AppData\Local\Temp\tmp.m1xdB5PTVs\repo\inventory\stock.py)
+FAIL  the hidden acceptance tests pass
+    agent tests: exit 0, 2 ran
+FAIL  the agent's tests pass

@@ -1,0 +1,51 @@
+All done. Both roots built, verified, drained and merged; worktrees removed; branches deleted; nothing pushed.
+
+---
+
+## (1) Report
+
+**No subagent tool is available, so per `reference/lanes.md` I acted as coordinator and ran each lane's work myself, one lane after another, in its worktree.**
+
+**Mode:** git repo, base `main`. Invariants I1–I10 pass (no `.todo/todo-lint.sh`; checked by reading). No RTM, no Definition of Done, no `Models:` line, no `.todo/check.sh`. Baseline on the base (both lanes share the same regression and start branch): `mvn -B test` → **2 passing** (AddTest, UpperTest).
+
+### Lane `core` — FEAT-001 · P1 · low · Add subtract to the core module (Calc.java) — FINISHED
+- **Red:** `cannot find symbol — symbol: method subtract(int,int), location: class mini.core.Calc` (SubtractTest.java:[9,29]).
+- **Done when:** `mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 test run, 0 failures, exit 0 (green; re-verified after refresh). One earlier invocation failed before any test ran — PowerShell split the `-D` flag (Maven: "Unknown lifecycle phase '.failIfNoSpecifiedTests=true'"); not a red run, resolved by quoting the two `-D` arguments.
+- **Regression:** `mvn -B test` → 3 passing (baseline 2) in the worktree; re-verified green after refresh from base.
+- **Files:** `core/src/main/java/mini/core/Calc.java` (+`subtract`), `core/src/test/java/mini/core/SubtractTest.java` (new, ID in test name `feat001_…`). Review: self, spec ok, quality ok, 0 findings. Doc drift: no `subtract` hits in README/docs.
+- **Commits:** `143ac40` claim (ff'd to main) → `0949899` start → `868211e` feat(core): add subtract (Refs/Red/Reviewed) → `282e236` Merge main into FEAT-001 (clean) → `65ce190` drain FEAT-001 → **`9a82672` Merge FEAT-001 into main** (`--merge`, from the main checkout). Worktree `../repo.todo/FEAT-001` removed, branch deleted.
+- **Blocked:** none. **Still open:** none.
+
+### Lane `text` — FEAT-002 · P1 · low · Add shout to the text module (Text.java) — FINISHED
+- **Red:** `cannot find symbol — symbol: method shout(java.lang.String), location: class mini.text.Text` (ShoutTest.java:[9,33]).
+- **Done when:** `mvn -B test -pl text -Dtest=ShoutTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 test run, 0 failures, exit 0 (green; re-verified after refresh; the same PowerShell quoting caveat applied).
+- **Regression:** `mvn -B test` → 3 passing in the worktree; after refresh (base at 3 passing) → **4 passing**, none deleted or skipped.
+- **Files:** `text/src/main/java/mini/text/Text.java` (+`shout`), `text/src/test/java/mini/text/ShoutTest.java` (new, ID in test name `feat002_…`). Review: self, spec ok, quality ok, 0 findings. Doc drift: no `shout` hits.
+- **Commits:** `ad749f8` claim (ff'd to main) → `2a99bd9` start → `32dde3d` feat(text): add shout → `2efc0c5` Merge main into FEAT-002 (TODO.md conflict, resolved per lanes rule: kept FEAT-002's block, dropped the drained FEAT-001 ID) → `cf5235d` drain FEAT-002 → **`a895e84` Merge FEAT-002 into main**. Worktree `../repo.todo/FEAT-002` removed, branch deleted.
+- **Blocked:** none. **Still open:** none.
+
+### Overall
+- Final state: checked-out branch **`main` @ `a895e84`**, clean tree; no `todo/` branches or worktrees remain; nothing pushed/tagged.
+- `TODO.md`: empty tree (two headings). `CHANGELOG.md`: two `### Added` entries (FEAT-002, FEAT-001). Final regression on base: `mvn -B test` → **4 passing** vs baseline 2.
+- **Merge commands without `--merge`:** n/a (`--merge` was given and both merges ran).
+- **Adjacent problems:** none (no `/todo-add` suggestions).
+- **Next workable root per lane:** none (`core`, `text`, and `main` are all empty).
+- Suggestion: clear context; the backlog is empty — `/todo-add` for new work, `/todo-release` when you want to cut a version.
+
+---
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **"`Done when`, in full, exactly as written"** (`reference/verification.md`, protocol step 5) vs. shell reality — the exact text `` mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true `` cannot be executed verbatim in PowerShell: the shell splits `-Dsurefire.failIfNoSpecifiedTests=true` and Maven aborts with "Unknown lifecycle phase '.failIfNoSpecifiedTests=true'" before any test runs. **Resolution:** treated that first failure as a "Done when that cannot run" transport failure (per verification.md: outside the task's behavior, so not red and not an attempt), then re-ran the identical Maven invocation with the two `-D` arguments quoted so Maven received the command exactly as written.
+
+2. **"Run steps 1-3 for the first workable node of every lane that has one … Stop if a lane's baseline is red."** (`reference/lanes.md`, step 1) — step 3's baseline runs per lane, but here both lanes had the identical regression command and the identical start branch (the base, both trees unclaimed), so it's unclear whether it must be run once or twice. **Resolution:** ran `mvn -B test` once on the base and recorded the same "baseline 2 passing" for both lanes.
+
+3. **"skips step 3 (the coordinator's baseline holds)"** (`reference/lanes.md`, step 3) — todo-continue's step 3 is the entire "Ready check" (lint, `Ref:` exists, tree clean, where-to-start, base dependency, baseline), not just the baseline. **Resolution:** taken literally — the coordinator performed the full ready check for each lane's first node; in the worktrees the whole of step 3 was skipped.
+
+4. **"runs steps 1, 2, 4-9 and step 10 items 1-3 (complete and merge into the parent)"** (`reference/lanes.md`, step 3) vs. todo-continue step 10: "1. **Non-root node:** … Set `[x]` …" and "(A root is never `[x]`; item 4 drains it.)" and "3. **Non-root node:** switch to the parent's branch…" — which parts of "items 1-3" apply to a leaf root is unclear. **Resolution:** for a leaf root only item 2 (the node commit, root left `[/]`) applies; no `[x]` marker, no parent merge.
+
+5. **"replace `State:` with … `next: read docs`"** and **"update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`)"** (todo-continue steps 5/9) vs. **"leaving the root `[/]` with `next: drain` in its `State:` (committed: a leaf root sets it in its node commit …; never a separate commit)"** (`reference/lanes.md`, step 3) — nothing says when/if to write or commit the intermediate `next: build` value that the schema lists. **Resolution:** the start commit set `next: read docs`; `next: build` was transient and never separately committed; the node commit carried TODO.md straight to `next: drain` in the same commit.
+
+6. **"drains a finished root to CHANGELOG.md as one entry"** (todo-continue description) vs. **"**stops before the root's drain** (step 10, item 4)"** for the lane worker, with the coordinator draining (`reference/lanes.md`, steps 3–4). **Resolution:** treated lanes.md as the specific rule overriding the general description — lane work stopped at `next: drain`; the coordinator drained each root in its worktree.
+
+7. **"`Checked: <command>` for each command in Done when or the regression that is not a known test, lint, typecheck or build runner"** (todo-continue step 10.2) — Maven `mvn -B test` is simultaneously a test runner and a build tool, so whether it counts as "a known test … runner" is unclear. **Resolution:** treated `mvn -B test` as a known test runner → no `Checked:` lines in the node commits.

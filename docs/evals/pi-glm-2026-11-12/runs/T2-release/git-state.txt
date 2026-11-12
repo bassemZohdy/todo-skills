@@ -1,0 +1,25 @@
+## HEAD
+f79e3027ae9d7988dbf88cc3a19f1c9fe466cd35
+## current branch
+main
+## branches
+* main f79e302 chore(release): 0.2.0
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi3/release/repo  f79e302 [main]
+## tags
+v0.1.0
+## refs
+refs/heads/main f79e3027ae9d7988dbf88cc3a19f1c9fe466cd35
+refs/tags/v0.1.0 f38565b227ae7317865b4f6cb3579e8dcabdc540
+## log --all --graph
+* f79e302  (HEAD -> main) chore(release): 0.2.0
+* f38565b  (tag: v0.1.0) init with a released 0.1.0 and unreleased work
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

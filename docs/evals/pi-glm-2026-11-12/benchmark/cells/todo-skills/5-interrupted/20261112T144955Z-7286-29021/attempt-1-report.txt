@@ -1,0 +1,34 @@
+The ready check stops here: `M textutil/slug.py` is a tracked, non-backlog, non-generated modification — the git-flow clean-tree rule does not ignore it, and `/todo-continue` step 3 says "tree clean by the git-flow definition (otherwise stop and ask)". Per your instruction to follow every stop rule, I've stopped without branching, committing, or touching anything.
+
+---
+
+## What ran
+
+### `/todo-init` — done
+- **Created** (uncommitted backlog files, to be carried by the first tree claim): `TODO.md` (empty tree) and `CHANGELOG.md` (Keep a Changelog + `[Unreleased]`). `docs/` is missing — reported, not created.
+- **Git mode**, base branch **`main`** (default; matches your instruction). Working tree is **not clean**: `M textutil/slug.py` — the interrupted session's uncommitted change, untouched.
+- **Test command**: `python3 -m unittest discover -s tests -t .` — source: the README `Tests:` line (already present, so no offer to add one). No CI config exists, so nothing to cross-check. Runtime: `python3` 3.13.14.
+- **Definition of Done**: none found (README / CONTRIBUTING / docs).
+- `.todo/todo-lint.sh`: absent → invariants checked by reading (pass). `.todo/check.sh`: absent → if you want lint+tests wired into CI or a pre-push fallback, run `/todo-init --ci`.
+- Tree: **empty** at init time. Pre-planning: your request already states the goal and done-state (finish `slugify` per the exact spec; suite green), nothing else in scope, no parallel lanes for a single task — no open questions; `docs/plans/PROJECT.md` not written (say the word if you want it).
+
+### `/todo-add` — done
+Chosen prefix: **FEAT** (finishing the implementation = new capability; commit type `feat`, CHANGELOG `### Added`). Single leaf (2 files), complexity `low`, P1, ID `FEAT-001` (next global number 001 — no IDs anywhere in TODO.md/CHANGELOG.md/docs/commit subjects). Inserted as the only root; nothing committed (rides with the tree claim). Lint re-run: pass.
+
+> ```markdown
+> - [ ] **FEAT-001** · P1 · low · Finish textutil.slug.slugify: lowercase the text, collapse every run of characters that are not ASCII letters or digits into a single dash, and strip leading and trailing dashes
+>   - Done when: slugify('  Hello, World! ') returns 'hello-world' and slugify('a--b') returns 'a-b'; `python3 -m unittest tests.test_slug`
+> ```
+
+### `/todo-continue --merge` — **stopped at step 3 (ready check: clean tree)**
+Selection went: no interrupted merges/drains or `[/]` nodes (no `todo/` branches exist, and that scan is skipped on the base anyway) → FEAT-001 is the first workable node (unclaimed tree; the root is an uncommitted root on the base in the main checkout, so it would start from `main` carrying the backlog edits into the claim). Then the clean-tree check failed:
+
+- `textutil/slug.py` is **modified but uncommitted** — this is the interrupted session's in-progress work (`import re`, lowercase, space→dash). Git-flow: "Any other change: stop and offer commit, stash or `--worktree`." The last commit `ffe2762 wip: slugify lowercases` is safe on `main` either way; it's the uncommitted diff that needs your call. Nothing was changed, committed, stashed, or deleted.
+
+**Questions — how should I handle the uncommitted `textutil/slug.py` change before `/todo-continue --merge` can proceed?**
+
+1. **Commit it** (my suggestion, preserves the interrupted work in history and lets the branch build on it): e.g. `git add textutil/slug.py` + `git commit -m "wip: slugify dash separators"` on `main` — then I rerun `/todo-continue --merge`, which branches from `main` and finishes the function on top of it. Commit message/branch of your choice?
+2. **Stash it**: `git stash push -m "wip slugify" -- textutil/slug.py` — tree becomes clean; the work stays recoverable, but the branch would rewrite the function from the committed state and the stash may conflict later.
+3. **`--worktree`**: work happens in a separate worktree, leaving this checkout untouched — but note the final `--merge` into `main` requires a clean main checkout, so it would just move the same question to the end.
+
+Answer with 1, 2, or 3 (and any message wording for option 1), and I'll resume `/todo-continue --merge` until FEAT-001 is drained to `CHANGELOG.md` and merged into `main`.

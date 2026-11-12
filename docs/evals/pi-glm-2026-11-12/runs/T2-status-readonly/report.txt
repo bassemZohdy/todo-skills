@@ -1,0 +1,42 @@
+All checks done — here is the report.
+
+## 1. `/todo-status` report
+
+```
+/todo-status (repo: main @ 607a4d1, clean tree, base branch: main)
+
+Invariants: I1–I10 pass (read check — no .todo/todo-lint.sh present)
+Progress: [###-------] 1/3 leaves · 0 active · 0 blocked · 2 roots open · 1 drained in [Unreleased]
+
+Lane main [----------] 0/2
+- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py [----------] 0/1
+- [ ] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title [----------] 0/1
+    Links: From: FEAT-000
+
+Active: none
+
+Next: **FEAT-001** · low · Add subtract to calc.py — run `/todo-continue`
+      Done when: `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+      (FEAT-002 is also workable; FEAT-001 is first by P1 → P2, then ID.)
+
+Blocked: none
+
+Recently drained (## [Unreleased], newest 5):
+- **FEAT-000** (feat): Add add() to calc.py. Validated: `python3 -m unittest tests.test_calc`.
+```
+
+Notes on how it was derived: no lane/priority claims — base `TODO.md` (`git show main:TODO.md`) has no `State:` naming a branch, so no tree is claimed; no `[/]` or `[!]` nodes; FEAT-002's `From: FEAT-000` is satisfied (FEAT-000 is in CHANGELOG.md). The overall bar counts the drained root FEAT-000 as a done leaf (1 done / 3 total = 3 cells rounded down).
+
+## 2. Ambiguities / contradictions in the skill text
+
+1. **I5 vs. I7 on `From:` links (real contradiction under a strict reading).** Core I5: *"No ID appears in both TODO.md and CHANGELOG.md (IDs after `Includes:` count)"* — FEAT-000 literally appears in TODO.md (in FEAT-002's `Links: From: FEAT-000`) and in CHANGELOG.md. But I7 requires *"Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md"*, which only makes sense if link references to CHANGELOG IDs are legal. **Resolution:** read I5 as task-header IDs only (link mentions don't count); invariant passes.
+
+2. **What "It" counts, and whether drained leaves enter the denominator.** todo-status: *"**Overall:** … It also counts the roots already drained into `## [Unreleased]`, as done …"* while per-root/per-lane say *"over the leaves beneath it / over the leaves of its roots"*. Unclear whether "It" is only the Overall line and whether `<total>` also grows. **Resolution:** drained leaves count in Overall's done **and** total (otherwise the fraction is broken: 1/3, not 1/2); per-root/per-lane bars cover only TODO.md leaves (drained roots are no longer in the tree).
+
+3. **Rounding base for the bar.** *"10 cells: `#` for done leaves (rounded down)"* — rounded down from what? **Resolution:** `floor(done/total × 10)` → floor(1/3×10) = 3 `#` cells.
+
+4. **"when `[Unreleased]` has fewer."** *"then the latest version section when `[Unreleased]` has fewer"* — fewer than what (N?), and whether the version section fills up to N or is shown in full. **Resolution:** fill newest-first up to N; moot here (no version sections exist, `[Unreleased]` has 1 entry).
+
+5. **Invariant-check output format.** *"Run the invariant check and give the result in one line"* — with no lint script the check is the manual I1–I10 read; unclear how much detail "the result" carries. **Resolution:** one pass/fail line naming the mode (read check vs. lint script).
+
+6. **Minor wording in Tree step.** *"in git mode read claims from the base branch (`git show <base>:TODO.md`, core "Which node is next"), so a tree branch also shows other trees as claimed"* — the cross-reference ("core …") and "a tree branch also shows…" are confusing until the core skill is read. **Resolution:** claims = root `State:` naming a branch in the base branch's TODO.md; moot since we're on the base with no claims.

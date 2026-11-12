@@ -1,0 +1,25 @@
+I read the repo first, as required. It's a small two-package codebase:
+
+- `inventory/stock.py` — `Stock(levels)` with `available(sku)` (unknown SKU → 0), levels copied into a private dict.
+- `orders/service.py` — `place_order(stock, lines)` currently just returns `{"lines": list(lines), "status": "placed"}` without touching stock.
+- `tests/test_inventory.py`, `tests/test_orders.py` — minimal happy-path tests; test command `python3 -m unittest discover -s tests -t .` works from the repo root.
+- Clean git tree, single seed commit.
+
+The core happy/sad paths are fully specified (atomic reserve, `OutOfStock` with no changes, unknown SKU = 0, propagation through `place_order`). But a few boundary behaviors of the input space are not specified, and per your method I'm stopping before writing anything to ask:
+
+1. **Repeated SKU within one reservation** — e.g. `reserve([("pen", 2), ("pen", 2)])` with 3 pens.
+   - (a) Treat the request as one atomic whole: sum quantities per SKU before checking → 4 > 3, `OutOfStock`, nothing changes. Safest reading of "changes nothing when any line asks for more than is available"; coincides with checking each line against the running level while lowering.
+   - (b) Check each line independently against the *initial* level: 2 ≤ 3 twice → allowed, level drops to −1. Permits over-reservation; only sensible if callers can never send duplicate SKUs.
+   - Default I'd pick: (a).
+
+2. **Zero / negative / non-integer quantities** — the spec only defines behavior for "more than is available".
+   - (a) Reject negative quantities (and possibly zero) with `ValueError` before touching levels. Prevents a caller *raising* stock via a negative line, but introduces an exception type the spec doesn't mention.
+   - (b) Zero = harmless no-op, negative = reject. Pragmatic middle ground.
+   - (c) Process as-is: a negative line passes the `qty > available` check and increases the level. Literal reading, but turns `reserve` into a stock-injection path.
+   - Default I'd pick: (b); floats/non-numeric left to Python's natural comparison/`TypeError` rather than custom validation, unless you want strict `int` checking.
+
+3. **`OutOfStock` payload** — should the exception carry details (sku, requested, available) so callers can report which line failed, or is a bare exception enough? Carrying details is friendlier and cheap; a bare raise is the minimal literal spec. Default: carry details as attributes, message included.
+
+4. **`reserve` return value** — `None` (pure mutation, default), or return something useful (e.g. the reserved lines / `self`)? `place_order`'s contract only needs the mutation and the exception.
+
+If you're happy with the defaults (1a, 2b, details on the exception, `reserve` returns `None`), say so and I'll write `TASKS.md` and proceed test-first through the subtasks.

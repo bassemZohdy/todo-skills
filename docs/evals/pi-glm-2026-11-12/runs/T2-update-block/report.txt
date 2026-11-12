@@ -1,0 +1,28 @@
+Re-ran the invariant check (I1–I10) by reading the edited file — all pass (`[!]` has its `Blocked:` line, no State+Blocked conflict, 4 lines max, 10 lines total, newline preserved). We are on the base branch, so the backlog edit stays uncommitted per the skill. Stopping here — no other node picked up.
+
+## (1) Report
+
+**`/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"` — done.**
+
+- Marker changed `[ ]` → `[!]`; no `State:` existed, so `Blocked:` was added as the last field line of the node.
+- Manual block (no failing command), so the middle part is `n/a (manual)`; the note supplied only a reason, so the action is the skill's default.
+- Tree is unclaimed and we are on the base (`main`), so the edit was made in the checked-out `TODO.md` and **left uncommitted** (a backlog edit); nothing was committed, pushed, tagged, or staged.
+- Updated task lines:
+
+```markdown
+- [!] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title
+  - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
+  - Links: From: FEAT-000
+  - Blocked: waiting for the product decision on rounding → n/a (manual) → resolve this, then run /todo-update FEAT-002 --status ready
+```
+
+To unblock later: `/todo-update FEAT-002 --status ready`.
+
+## (2) Ambiguities / unclear instructions encountered
+
+1. **I5 vs. I7 contradiction on `From:` references.** Core I5: *"No ID appears in both TODO.md and CHANGELOG.md (IDs after `Includes:` count)"* vs. I7: *"Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md"*. In this repo `FEAT-000` appears in CHANGELOG.md **and** in TODO.md's `From: FEAT-000` line, which a literal reading of I5 flags. **Resolution:** read I5 as applying to tree-entry (node) IDs only, not `From:`/`Depends:` references, since I7 explicitly blesses such references into CHANGELOG and the core's own schema example shows `From: FIX-001`. Invariant check therefore passed; nothing changed.
+2. **What counts as "the last failing command".** *"set `[!]`, replace `State:` … with `Blocked:` … built from `--note` and the last failing command"* — it doesn't say from where the failing command is taken. No command had failed in this session, so I used the very next sentence's fallback (*"For a manual block with no failing command, write `n/a (manual)`"*), which resolved it.
+3. **Backtick formatting of the manual middle part.** Core Blocked format is *"`<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`"* followed by *"A manual block writes `n/a (manual)` in the middle"*. Unclear whether `n/a (manual)` should be backticked like a command. **Resolution:** wrote it plain (unbackticked), as it replaces the command+error pair and is not a command.
+4. **"(written without quotes)"** in *"the action is `resolve this, then run /todo-update <ID> --status ready` (written without quotes)"*. **Resolution:** wrote the action text verbatim into the `Blocked:` line without any surrounding quotation marks (also reading it as not meaning "strip the inner quotes of the user's note").
+5. **Dangling cross-reference for the blocked status.** The blocked bullet says: *"on a `[/]` node, together with its changed files by explicit path, as `/todo-continue` 'Test failures' does"* — but todo-update instructs loading `/todo-continue` (steps 3–5) only for `--status in-progress`, and git-flow.md only for `ready`/`in-progress`. So the blocked path cites a document it never tells you to load. **Resolution:** not applicable here (FEAT-002 was `[ ]`, and on the base the edit stays uncommitted anyway), so nothing was loaded and no staging occurred.
+6. **Minor:** *"Check git (core, 'Git mode')"* then a base-branch determination rule that lives in the core; the todo-update text never explicitly says "determine the base branch" for `blocked`, though it matters (*"on the base leave it uncommitted … on any other branch, name the base and stop"*). **Resolution:** applied the core's rule (no README `Base:` line, no user-named base → first of `main`, … → `main`), confirmed the checked-out branch is the base, and left the edit uncommitted.

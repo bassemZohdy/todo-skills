@@ -1,0 +1,23 @@
+## Report
+
+**Work completed this session (all through the todo skills):**
+
+1. **`/todo-init`** — created `TODO.md` + `CHANGELOG.md` (left uncommitted, as backlog files); detected test command `python3 -m unittest discover -s tests -t .` from the README `Tests:` line; base branch `main`, git mode, no DoD/RTM/CI/lint scripts.
+2. **`/todo-add`** — type rules gave prefix **TASK** (first word "Placing", no rule 1–3 match) → inserted leaf root **TASK-001** (P1 · mid; fits one leaf: 4 files, one context window, so no split and no confirmation needed).
+3. **`/todo-continue --merge`** — ran TASK-001 end to end:
+   - Baseline on `main`: **2 tests OK** → branch `todo/TASK-001-reserve-stock-when-placing`, claim commit `8276f68` fast-forwarded onto `main`, start commit `a397c73`
+   - Red: `ImportError: cannot import name 'OutOfStock' from 'inventory.stock'` → Green: `inventory/stock.py` (`OutOfStock`, atomic `Stock.reserve`, unknown SKU = 0), `orders/service.py` (`place_order` reserves through it), new tests in **both packages** carrying TASK-001 in docstrings
+   - Verify: `python3 -m unittest discover -s tests -t .` → **7 tests, OK, exit 0** (baseline 2 → 7, none deleted/skipped); self-review spec ok / quality ok; doc-drift search (new exported symbols) found no README/docs hits
+   - Node commit `5dee98a` `feat(inventory): reserve stock when placing an order`; refresh from base: already up to date
+   - **Stopped at step 10.4.1** — see question below. Not yet done: last gate, drain to CHANGELOG.md, merge into `main`.
+
+**Where things stand:** on branch `todo/TASK-001-reserve-stock-when-placing` (TASK-001 `[/]`, `next: drain`); `main` holds the published claim. Next workable node: none until TASK-001 drains. Adjacent problems: none. Clearing context before the next `/todo-continue` is fine — `State:` carries everything needed to resume.
+
+## Question (required stop before the drain)
+
+TASK-001 qualifies for the optional root review because it adds exported symbols (a public interface: `Stock.reserve`, `OutOfStock`, `place_order`'s changed contract). Per `reference/review.md` I must ask once:
+
+**Review the whole root before it drains? (yes / no)**
+
+- **no** → rerun `/todo-continue --merge`: it records your answer, runs the last gate (no `.todo/check.sh` exists), drains TASK-001 into `CHANGELOG.md` under `## [Unreleased]` → `### Changed` (TASK prefix; commit type `feat`), deletes it from TODO.md, commits `chore(backlog): drain TASK-001`, and merges into `main` (`Merge TASK-001 into main`).
+- **yes** → note I have no subagent tool in this session, so per `review.md` I would provide the review inputs (the whole root diff `git diff main...todo/TASK-001-reserve-stock-when-placing`, the tree's task lines) for a review in a fresh session; valid findings inside the task line get fixed and re-verified before the drain.

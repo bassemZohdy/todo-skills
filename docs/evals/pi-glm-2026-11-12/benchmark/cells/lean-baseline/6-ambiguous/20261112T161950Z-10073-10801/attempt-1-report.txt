@@ -1,0 +1,27 @@
+I've read the repository. Baseline: 1 test passes (`python3 -m unittest discover -s tests -t .` → OK, exit 0). Current code:
+
+- `billing/discount.py` — `price(customer, amount)` returns `amount` unchanged.
+- `README.md` — a customer is `{"id": 7, "orders": 12, "since": "2021-03-01"}`.
+
+Per the method, the requirement "Give loyal customers a discount" is missing business rules and boundary behaviour, so I'm stopping before writing any code or file. Questions:
+
+1. **What makes a customer "loyal"?** The customer dict offers three candidate signals, which lead to incompatible implementations:
+   - **(a) Order count** — e.g. `orders >= 10`. Simple and deterministic, but a customer with many cheap orders beats a long-tenured infrequent buyer.
+   - **(b) Tenure via `since`** — e.g. customer ≥ 1 year old. Rewards long relationship, but a once-a-year buyer qualifies and a heavy new buyer never does; also needs a clock/now source (testability concern).
+   - **(c) Both** — e.g. `orders >= 10 AND tenure ≥ 1 year`. Strictest, but excludes high-volume recent customers.
+   - Which rule (and threshold) should I use?
+
+2. **What is the discount?** Flat amount off (e.g. −2, can exceed/near the order value and needs a floor at 0) vs. percentage (e.g. 10% off, self-limiting but produces fractional results). Which one and what size? Should it be hardcoded or configurable (constant vs. parameter with a default)?
+
+3. **Rounding for fractional results?** If percentage-based: round-half-up to 2 decimals (money-friendly, e.g. `Decimal`), banker's rounding, or plain float truncation (drifts and can produce values like 8.700000000000001)?
+
+4. **Boundary behaviour of inputs:**
+   - `amount <= 0` (or non-numeric): should `price` return it as-is, clamp to 0, or raise `ValueError`?
+   - Missing/invalid loyalty fields (e.g. no `orders` key, `since` malformed, `orders: None`): treat as not loyal, or raise `ValueError`/`KeyError`?
+   - Should the discount apply to the *current* order only, or is the current order counted toward the loyalty threshold (off-by-one on the boundary: does the 10th order already get the discount)?
+
+5. **Is this a pricing *library* function with implicit policy, or should policy be explicit?** I.e. keep the signature `price(customer, amount)` with rules baked in (simple, matches existing test), vs. add a `policy`/`loyalty(customer)` parameter so callers/tests can vary thresholds (more flexible, but changes the API surface).
+
+My default proposal if you have no preference: **(1c)** `orders >= 10` and tenure ≥ 365 days from `since`; **(2)** 10% off as a module constant; **(3)** round half-up to 2 decimals; **(4)** `amount <= 0` → `ValueError`, malformed customer data → `ValueError`, current order not counted toward the threshold; **(5)** keep the existing signature.
+
+Answer whichever questions you care about (or just say "use your defaults") and I'll write TASKS.md and proceed test-first.

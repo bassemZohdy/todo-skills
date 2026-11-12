@@ -1,0 +1,28 @@
+Done — stopped right after the start commit, as instructed. Here is what happened and the report.
+
+## Run summary
+
+Steps executed: 1 (git mode + invariants I1–I10 by reading — pass; no `.todo/todo-lint.sh`), 2 (selected first workable `[ ]` node `FEAT-001`, unclaimed per `git show main:TODO.md`), 3 (ready check + baseline on `main`: `python3 -m unittest discover -s tests` → **Ran 1 test, OK** = `baseline 1 passing`), 4 (branch → claim commit → **fast-forward failed**: `main` had moved with a rival commit `6c31097 docs: touch readme (race)`; per `git-flow-edge.md` "Failed fast-forward" the root was *not* claimed there → **"The base only moved"**: `git rebase main todo/FEAT-001-…` clean, lint re-checked, `--ff-only` retried from `main` → success; baseline retaken on the branch → green, 1 passing), 5 (start commit). Stopped before step 6 per the trial instruction.
+
+## Report (todo-continue step 11)
+
+- **ID / title:** `FEAT-001` · P1 · low — Add a subtract function to calc.py with a test (leaf root)
+- **Early stop:** after step 5 (start commit), as instructed by the task; the skill itself would continue at step 6 (`next: read docs`)
+- **Commands and results:** baseline regression `python3 -m unittest discover -s tests` → `Ran 1 test … OK` (1 passing; re-run after the rebase: same). `Done when` command: **not run** (stopped before build)
+- **Files changed:** `TODO.md` only (marker `[ ]`→`[/]`, `State:` line)
+- **Branch / commits:** `todo/FEAT-001-add-subtract-function-calc` — claim `496ad3c` (rebased from `1b62d91`, published to `main` via ff-only), start `0a5918f` (`chore(backlog): start FEAT-001`)
+- **children done/total:** n/a (leaf)
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-function-calc` (tree clean)
+- **Merge commands:** none (root not finished; no drain)
+- **Adjacent problems:** none (`6c31097` touched only README.md, no test/README-setup disagreement)
+- **Next workable node:** `FEAT-001` itself — resume: `[/]`, `next: read docs` → step 6
+- **Suggestion:** clear context before resuming (the state survives in `TODO.md`)
+
+## Ambiguities / unclear instructions
+
+1. **README as "backlog file" vs. re-baseline rule** — `git-flow-edge.md`: "If the base changed any file other than backlog files, take the baseline again on the root branch". The core makes README a backlog file only conditionally: "README.md is staged by a backlog commit only while `git diff README.md` adds exactly those lines" (the `Tests:`/`Base:` lines written by a todo-* skill). The rival commit added an unrelated line ("Race note."), so README was a *changed* file but not a todo-skill backlog change — ambiguous whether it counts. **Resolution:** I re-ran the baseline on the root branch anyway (safe under both readings); it was green (1 passing).
+2. **Slug word order** — `git-flow.md`: "drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain". For the title "Add a subtract function to calc.py with a test" it's unclear whether the first-4 cap applies before or after dropping stop words (before-dropping would give `add-subtract-function-calc` too here — actually identical in this case only by luck of ordering; applying the stated order after dropping). **Resolution:** followed the sentence's order literally: drop stop words first, then keep first 4 → `todo/FEAT-001-add-subtract-function-calc`.
+3. **Transient claim `next:` for a leaf root** — `git-flow.md` tree-claim step 3 says "(leaf root: `next: start <ROOT-ID>`)" while `/todo-continue` step 5 immediately replaces `State:` with "`next: read docs`". Minor: it makes `next: start <ID>` a transient value that never gates anything for a leaf root. **Resolution:** wrote `next: start FEAT-001` in the claim commit, then replaced the whole `State:` line at the start commit, per each rule as written. No conflict.
+4. **User stop vs. skill continuation** — the skill's step 5 flows into step 6, but the trial instruction said "stop right after the start commit… Do not build." Core guardrail 7 says "When a rule here conflicts with an explicit user instruction, state the conflict and ask." **Resolution:** no substantive conflict (stopping early is safe and leaves the tree consistent); I stopped after the start commit and noted it in the report rather than asking, since the instruction was explicit and read-only at the boundary.
+
+Also noted: the repo has live git hooks (`post-checkout`, `push-to-checkout`) — untouched, as required; and the fast-forward race itself was benign (README-only commit, no rival claim on `FEAT-001`).

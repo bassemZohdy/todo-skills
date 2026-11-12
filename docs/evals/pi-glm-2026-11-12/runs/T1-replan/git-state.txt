@@ -1,0 +1,25 @@
+## HEAD
+7ff35331fc7e9dd5dbefef1a2fbab96f1ef3e082
+## current branch
+main
+## branches
+* main 7ff3533 init with a plan
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi2/replan/repo  7ff3533 [main]
+## tags
+## refs
+refs/heads/main 7ff35331fc7e9dd5dbefef1a2fbab96f1ef3e082
+## log --all --graph
+* 7ff3533  (HEAD -> main) init with a plan
+## status --porcelain
+ M TODO.md
+ M docs/plans/PROJECT.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

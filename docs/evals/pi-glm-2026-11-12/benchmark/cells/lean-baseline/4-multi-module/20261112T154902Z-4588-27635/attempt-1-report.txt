@@ -1,0 +1,19 @@
+## Summary
+
+**Requirement check first (step 1):** No blocking questions — the spec pinned the contract (atomicity, exception type/propagation, return shape, unknown-SKU-is-0, test command). Unstated boundaries were resolved as documented defaults, not ambiguities worth halting on (see below).
+
+**What changed**
+- `inventory/stock.py` — added `OutOfStock` exception and `Stock.reserve(lines)`: validates every line (negative quantity → `ValueError`), aggregates per-SKU demand and checks it against availability (unknown SKU = 0), and only then lowers levels — so a failed reserve never mutates state.
+- `orders/service.py` — `place_order(stock, lines)` now calls `stock.reserve(lines)` first; returns `{"lines": [...], "status": "placed"}` on success, lets `OutOfStock` propagate untouched, and re-exports it for callers.
+- `tests/test_inventory.py` (9 tests) and `tests/test_orders.py` (8 tests) — happy paths, exact-amount reservation, insufficient stock raises + levels unchanged, unknown SKU, duplicate SKUs counted cumulatively, empty/zero-quantity no-ops, and negative input rejected. `.gitignore` added; `TASKS.md` tracks all subtasks as done.
+
+**Test command & result:** `python3 -m unittest discover -s tests -t .` → **16 tests, OK, exit 0**.
+
+**Commits:** `7bdcb2a` (inventory reserve + OutOfStock), `31cc3af` (place_order reserves), `2aad806` (TASKS.md final).
+
+**Decisions made where the spec was silent** (flagging in case you'd choose differently):
+1. Duplicate SKUs in one call count cumulatively — `[("pen",2),("pen",2)]` against 3 is short. (Sequential-vs-aggregate turned out observationally identical; aggregation avoids ever writing a negative level.)
+2. Negative quantities are invalid input → `ValueError`, nothing changed (reserving −1 would otherwise *raise* stock).
+3. Empty/zero-quantity lines succeed as no-ops, including zero for an unknown SKU.
+
+**Left open:** nothing for this scenario; a real system would want un-reservation on order cancellation and persistence/concurrency safety, both out of scope here.

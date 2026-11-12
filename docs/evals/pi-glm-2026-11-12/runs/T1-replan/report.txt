@@ -1,0 +1,42 @@
+Applied and verified. Lint (I1–I10, by reading — no `.todo/todo-lint.sh` in the project) passes on the edited `TODO.md`; final newlines kept; nothing committed, per Revise step 4 / Plan step 5 (the next tree claim commit will carry these backlog edits).
+
+---
+
+## 1) Report (`/todo-plan --revise` result)
+
+**Reason** (verbatim): `FEAT-003 (web dashboard) is out of scope, drop it`
+**Change applied on confirmation "yes, apply it"** (on base branch `main`, clean tree, no claimed trees, no RTM):
+
+- **Dropped** `FEAT-003` · P2 · low · Add a web dashboard for the calculator — deleted from `TODO.md`; the ID is never reused (it now lives in the **Revisions** line, which the ID rule counts).
+- No `Depends:`/`From:` referenced FEAT-003, so nothing had to be re-pointed (I7). No other nodes changed; FEAT-001/FEAT-002 are untouched `[ ]` roots.
+- `docs/plans/PROJECT.md`: created the missing **Out of scope** section (at its Plan-step-3 position, between **Goal** and **Lanes**) and appended the revision bullet.
+
+**New tree** (`TODO.md`):
+
+```markdown
+# Active Backlog
+
+## 🌳 Task Tree
+
+- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - Links: Ref: docs/plans/PROJECT.md
+- [ ] **FEAT-002** · P1 · low · Add a command line interface to the calculator
+  - Done when: cli prints the sum; `python3 -m unittest tests.test_cli`
+  - Links: Ref: docs/plans/PROJECT.md
+```
+
+**Plan doc diff** (`docs/plans/PROJECT.md`): `+ ## Out of scope` / `+ The web dashboard (dropped as FEAT-003).` between Goal and Lanes; `+ - 2026-11-12 · FEAT-003 (web dashboard) is out of scope, drop it · Dropped FEAT-003 from the task tree; added Out of scope naming the web dashboard (FEAT-003)` under **Revisions**.
+
+**Not committed** — backlog edits (`TODO.md`, `docs/plans/PROJECT.md`) stay uncommitted until the next tree-claim commit, as the skill requires. Next root number, if ever needed, is FEAT-004.
+
+## 2) Ambiguities / unclear instructions in the skill text
+
+- **"If the core is not a skill, read `../todo/SKILL.md`. If the core is not available as a skill, read…"** (todo-plan header vs todo-add's parallel line "If the core is not available as a skill"). There's no stated way to tell whether "the core is a skill" in this harness (no slash commands here). **Resolution:** the two skills word it differently but converge, so I unconditionally read `../todo/SKILL.md` — harmless either way.
+- **"A plan-doc section the change needs (for example **Out of scope** for dropped work) is created if missing, at its place in the Plan step 3 order; other missing sections are left alone."** — "needed" is undefined; the plan doc here was also missing **Scope**, **Decisions** and **Open questions**, and it's arguable whether a drop "needs" **Scope** for the doc and tree to "agree afterwards". **Resolution:** treated only **Out of scope** as needed (it's the one named for dropped work) and left **Scope** and the others alone, inserting **Out of scope** at its Plan-step-3 slot (between **Goal** and **Lanes**).
+- **"a dropped node … its ID is never reused (the Revisions line names it, which the ID rule counts)"** — "which the ID rule counts" is cryptic on first read. **Resolution:** interpreted via the core ID rule ("Next root number = highest … found in `TODO.md`, `CHANGELOG.md` …, `docs/plans/*.md` … plus 1"), i.e. naming FEAT-003 in `docs/plans/PROJECT.md` keeps it counted as used, so the next root is FEAT-004. No conflict in practice.
+- **"Dates are `date +%F`"** vs. Revise step 4's `- <date +%F> · …` — literally instructs to run a shell command for a date rather than stating the format; on Windows/PowerShell `date +%F` is not native. **Resolution:** ran `date +%F` via the shell (Git Bash style worked, giving `2026-11-12`) and used that value.
+- **"Show every proposal in full before asking for confirmation." / "Wait for confirmation."** — in this trial the confirmation ("yes, apply it") was given before the proposal could be shown interactively. **Resolution:** I still composed and presented the full proposed diff (drop FEAT-003; the two plan-doc edits) and then applied it exactly as confirmed; nothing beyond the confirmed diff was written.
+- Minor: **"lint, and report the new tree"** doesn't define the report's format. **Resolution:** reported the full new tree verbatim plus the plan-doc changes and the no-commit state, matching how the skill's other steps report trees.
+
+No contradictions between the skill files were hit beyond the wording issues above; the base-branch/claimed-tree rules ("New roots, and changes to unclaimed trees, are written only on the base") resolved cleanly since we're on `main` with no claims.

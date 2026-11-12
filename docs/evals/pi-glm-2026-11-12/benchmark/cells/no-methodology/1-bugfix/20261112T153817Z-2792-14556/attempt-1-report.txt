@@ -1,0 +1,11 @@
+All 4 tests pass. Summary:
+
+**Bug** — `pricing/total.py` had two sequential `if` blocks (`subtotal >= 100` then `subtotal >= 200`), so orders ≥ 200 got 10% off twice (250 → 202.5).
+
+**Fix** — removed the second `>= 200` block; every order ≥ 100 gets a single 10% discount, smaller orders none.
+
+**Regression tests** — added to `tests/test_total.py`:
+- `test_large_order_gets_discount_exactly_once`: `order_total(250) == 225.0` (would return 202.5 on the old code)
+- `test_order_at_200_boundary_gets_discount_exactly_once`: `order_total(200) == 180.0`
+
+Test run: `Ran 4 tests ... OK`.

@@ -1,0 +1,36 @@
+## 1) Report (early stop at step 3 — Baseline)
+
+**Stopped at:** Step 3 "Ready check → Baseline" — the regression baseline is red, and the selected node is a `FEAT`, not a `FIX`, so per the skill I changed nothing and stopped. (Steps 1–2 completed: invariants I1–I10 pass; no interrupted merge/drain, no `[/]` node, no claimed trees.)
+
+**Selected node:** `FEAT-001.1` · low · Add subtract with a test (first workable node; root FEAT-001 waits for open children; depth-first order).
+
+**Baseline command:** `npm test` (README `Tests:` line; the node has no `regression:` line, so the full suite applies)
+
+**Baseline result: RED — 1 test, 0 pass, 1 fail**
+- Failing test: `add` — `tests/add.test.ts:5` — `AssertionError: -1 !== 3`
+- Cause (read-only diagnosis): `src/calc.ts` `add()` returns `a - b` instead of `a + b`
+
+**Files changed:** none. **Branch:** `main` (still checked out, clean). **Commits:** none — stopped before any branch or file change, per `reference/verification.md` protocol step 1.
+
+**Suggested next command (per the skill, to run on the base — not run by me):**
+```
+/todo-add "fix the failing baseline: add (tests/add.test.ts:5)" --type fix --priority P0
+```
+
+**Next workable node:** none — the red baseline blocks every node in the tree until the `FIX` above lands.
+
+**Adjacent problems:** none beyond the baseline itself (reported above).
+
+**Suggestion:** clear context before running `/todo-add` / the next `/todo-continue`.
+
+## 2) Ambiguities / unclear points in the skill text
+
+1. **"Red: a `FIX` node whose `Done when` runs at least one failing test may start with `baseline red: <ids>`. Otherwise change nothing more, report 'baseline red' … and stop."** — Ambiguous about *which* node the FIX exception is evaluated against: the already-selected node (selection happens in step 2, before the baseline in step 3) or whether selection should skip ahead to a FIX node that targets the failing test (there is none in this tree). Resolved literally: selection (step 2) picks the first workable node regardless of type, and only then does the baseline gate run; FEAT-001.1 is a FEAT, so the "otherwise … stop" branch applies. This matches `reference/verification.md` step 1 ("A red baseline stops the node before any branch or file change; fix it first with a `FIX` node").
+
+2. **"Run the regression command … on the start branch: the nearest ancestor branch that exists"** — For a new node in an unclaimed tree no `todo/` branches exist yet, so "the nearest ancestor branch that exists" is undefined at this point. Resolved as the start point the same step defines for an unclaimed tree ("starts from the base"), i.e. `main`, and ran `npm test` there.
+
+3. **`/todo-add "fix the failing baseline: <failing test ids>"`** — "<failing test ids>" is unclear for a runner like `node --test`, which reports a name plus a `file:line` location (`test at tests\add.test.ts:5:1`), not an id. Resolved by using the test name with its file:line: `add (tests/add.test.ts:5)`. Also, since slash commands are unavailable here and the skill says only "suggest", I printed the command instead of running it (consistent with "never add them yourself").
+
+4. **Step 1: "If it fails only on the active node's `State:` line…"** — "the active node" presumes a `[/]` node exists; here there is none. Resolved as vacuous (invariants passed, so the clause never fired); no action needed.
+
+Nothing else — the rest of the loaded texts (core SKILL.md, `reference/git-flow.md`, `reference/verification.md`) were internally consistent with the path I took.

@@ -1,0 +1,35 @@
+All done — both lanes verified, drained, and merged. Final report and findings below.
+
+---
+
+## (1) Report (`/todo-continue --all-lanes --merge`)
+
+**No subagent tool is available in this harness** (and the README has no `Models:` line, so no model routing/escalation either), so per `reference/lanes.md` the main thread acted as coordinator **and** ran each lane's work itself, one lane after another, in each lane's worktree.
+
+Setup (steps 0–2): git mode on; invariant check I1–I10 clean (manual — no `.todo/todo-lint.sh`); no claims in `git show main:TODO.md` → nothing to resume; both lanes' first workable nodes are leaf roots FEAT-001 (`math`) and FEAT-002 (`text`); shared baseline on the base `main`: **1 passing**; tree claims `a557480` (FEAT-001) and `afed2aa` (FEAT-002) each fast-forwarded onto `main`; worktrees created at `../repo.todo/FEAT-001`, `../repo.todo/FEAT-002`; main checkout stayed on `main` throughout.
+
+**Lane `math` — FEAT-001 · Add subtract to calc.py — FINISHED (drained + merged)**
+- Done when `python3 -m unittest tests.test_calc.CalcTest.test_subtract`: red first — `AttributeError: module 'calc' has no attribute 'subtract'` — then **OK (1 test)**.
+- Regression `python3 -m unittest discover -s tests`: **2 passing** vs baseline 1 (no test deleted/skipped); after refresh vs base count 1: still 2 OK. Final base: **3 passing**.
+- Files: `calc.py` (+`subtract`), `tests/test_calc.py` (test with ID in docstring).
+- Commits: `a557480` claim → `730c4e9` start → `3b03610` `feat(calc): add subtract to calc.py` (root left `[/]` `next: drain`) → `cad9f8f` `Merge main into FEAT-001` → `290d2e1` `chore(backlog): drain FEAT-001` → `657a1f6` `Merge FEAT-001 into main`. Worktree removed, branch deleted.
+
+**Lane `text` — FEAT-002 · Add shout to text.py — FINISHED (drained + merged)**
+- Done when `python3 -m unittest tests.test_text.TextTest.test_shout`: red first — `ModuleNotFoundError: No module named 'text'` — then **OK (1 test)**.
+- Regression: **2 passing** vs baseline 1; after refresh vs base count 2: **3 passing**.
+- Files: `text.py` (new), `tests/test_text.py` (new, ID in docstring).
+- Commits: `afed2aa` claim → `12794e2` start → `2a183a0` `feat(text): add shout to text.py` → `05c9941` `Merge main into FEAT-002` (TODO.md conflict vs FEAT-001's drained block resolved per rules: kept FEAT-002's `[/]` block, dropped drained FEAT-001) → `9981b10` `chore(backlog): drain FEAT-002` → `17935c1` `Merge FEAT-002 into main`. Worktree removed, branch deleted.
+
+**Per-lane summary:** blocked: none · still open: none · merge commands: n/a (`--merge` given; both roots merged into `main`) · next workable root per lane: none (`math`, `text` both empty; task tree is empty).
+**Other:** review was self-review (`Reviewed: self, 0 findings fixed`) — no subagent; doc-drift search for `subtract`/`shout` in README/docs: 0 hits; no RTM, no Definition of Done, no `.todo/check.sh` (last gate n/a); adjacent problems: none — no `/todo-add` commands; README's `Tests:` line agrees with the passing commands. Checked-out branch: `main` (clean, at `17935c1`). Git hooks were left untouched. Suggestion: clear context before the next run.
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **Subagent-presupposing lane text.** `todo-continue` description: *"except lane runs, where one subagent per lane works one root of that lane"* and lanes step 3: *"Start one subagent per lane, all at once (with --seq, one at a time); with a Models: line, on the model for the highest complexity in that lane's root"*. Two different fallbacks exist (`--delegate`: *"Without a subagent tool or a Models: line, say so and work in this thread"*; lanes: only *"Without a subagent tool"*). **Resolution:** stated the lack in the first line, ran all lane work myself sequentially in each worktree, following the lane-agent rules (skip step 3 and the tree claim; stop before drain).
+2. **Per-lane vs shared baseline.** Step 3: *"Run the regression command … on the start branch: the nearest ancestor branch that exists (the base for an unclaimed tree)"* + lanes step 1: *"Run steps 1-3 for the first workable node of every lane"*. Unclear whether one run on the shared base satisfies both lanes. **Resolution:** one run on `main` (identical start branch/commit) → `baseline 1 passing` for both.
+3. **`next:` progression without `--plan`.** Step 5 sets *"next: read docs"*; the only defined transitions are the plan flow (*"yes sets `next: build`"*) and the drain handoff — nothing says when `build` is set in a non-plan run. **Resolution:** no intermediate TODO.md commit between start and node commit; the node commit carries `next: drain` as lanes requires (*"committed: a leaf root sets it in its node commit …; never a separate commit"*).
+4. **Double-negative `Checked:` rule.** Step 10.2: *"`Checked: <command>` for each command in Done when or the regression that is not a known test, lint, typecheck or build runner … and that you judged safe"*. **Resolution:** parsed `python3 -m unittest …` as a known test runner → no `Checked:` lines in either node commit.
+5. **Conflict-rules pointer chain.** Lanes step 4: *"resolved by the coordinator with the conflict rules there"* ("there" = git-flow.md), but git-flow.md says *"On any conflict, read `reference/git-flow-edge.md`, 'Git conflicts', before resolving."* **Resolution:** read both and applied them together (union/keep-this-root's-block, drop drained IDs; never `--ours`/`--theirs` wholesale).
+6. **"expect them for every root after the first."** Lanes step 4 predicts conflicts; FEAT-001's refresh had none, FEAT-002's did. **Resolution:** treated as advisory, resolved the one real conflict per the rules.
+7. **"public interface" in the root-review offer.** Step 10.4.1: *"For a `high` root, or one touching security, data migration, concurrency or a public interface, offer the optional root review once"*. Both roots add exported symbols (a "public interface" under doc-drift's wording: *"a command, flag, endpoint, config key or exported symbol"*). **Resolution:** judged the review offer aimed at risky roots; these are `low`-complexity two-function diffs, so I did not pause to offer the optional review — disclosed here (the optional root review per `reference/review.md` can still be requested). I did apply the doc-drift step, which uses the explicit "exported symbol" wording (0 hits).
+8. **Minor no-op instruction.** Lanes step 2: *"then switch back to the base before the next root"* — after *"git switch <base> && git merge --ff-only <root branch>"* you are already on the base. **Resolution:** verified branch state, no redundant switch.

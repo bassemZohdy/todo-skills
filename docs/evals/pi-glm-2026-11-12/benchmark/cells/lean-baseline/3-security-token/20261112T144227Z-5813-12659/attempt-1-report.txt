@@ -1,0 +1,17 @@
+## Summary
+
+**No blocking questions.** The spec fully stated the data shape (module docstring), every rejection case, the expiry boundary (`now >= expires_at`), constant-time comparison, and the test command, so I proceeded straight through TDD.
+
+**What changed**
+- `auth/tokens.py` — implemented `verify(token, secret, now)`: splits the token, rejects non-string tokens, wrong part count, empty user, and non-integer expiry with `InvalidToken`; rejects expired tokens at `now >= expires_at`; recomputes the HMAC-SHA256 over the raw `"<user>.<expires_at>"` payload and compares it with `hmac.compare_digest` (constant time); returns the user name on success. No other exception type can escape for any token input.
+- `tests/test_tokens.py` — grew from 1 to 28 tests: happy path (incl. `now = expires_at - 1`, `now = 0`), expiry rejections (boundary, +1, far future), malformed rejections (empty/None/int token, 1/2/4 parts, empty user, non-integer/empty/float/letter expiry, garbage signature), signature rejections (different and near-miss secret, tampered user/expiry/signature, uppercased sig, wrong sig length), and two spy tests proving the comparison goes through `hmac.compare_digest` (these failed while `==` was in place).
+- `TASKS.md` — plan with all 4 subtasks done.
+
+**Test command and result:** `python3 -m unittest discover -s tests -t .` → **28 tests, OK, exit 0**.
+
+**Commits:** one per finished subtask (`278f902`, `2d25fc5`, `e134482`, plus the TASKS.md close-out).
+
+**Assumptions / left open**
+- A user name containing `.` cannot round-trip (sign produces 4 parts → verify treats it as malformed). The spec's "not three parts" rule implies this; not changed.
+- Non-string `secret` or incomparable `now` (trusted caller inputs) will raise their natural exceptions — the "never another exception" rule was scoped to the listed token conditions.
+- The signature is checked after parsing/expiry; both orders raise the identical `InvalidToken`, so no information leak distinguishes them.

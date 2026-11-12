@@ -1,0 +1,13 @@
+Done — all 5 tests pass.
+
+**`shop/api.py`** — added routing for `GET /items/<id>`:
+- Whole-number id found in `ITEMS` → `200` with the item
+- Whole number not in `ITEMS` → `404` with `{"error": "not found"}`
+- Non-integer string like `abc` or `1.5` → `400` with `{"error": "invalid id"}`
+- `GET /items` behavior unchanged
+
+**`tests/test_api.py`** — added `GetItemTest` covering all four cases (known id, unknown id, `abc`, `1.5`) alongside the existing list test.
+
+```
+Ran 5 tests in 0.000s — OK
+```

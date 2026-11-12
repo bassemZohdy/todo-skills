@@ -1,0 +1,38 @@
+**Stop.** `/todo-continue` halts at the ready check (step 3), before any branch, claim or marker change. Everything the interrupted session left is intact: commit `0a99f10 wip: slugify lowercases` stays on `main`, and the uncommitted `textutil/slug.py` edit was neither reverted nor committed.
+
+---
+
+## Final report
+
+**`/todo-init`** — created `TODO.md` (empty tree) and `CHANGELOG.md` (`[Unreleased]` only), uncommitted by design. Git mode, base `main` (named by you = default). Test command `python3 -m unittest discover -s tests -t .`, source: README `Tests:` line (no markers/pyproject/CI found; `docs/` missing; no Definition of Done; no `.todo/` scripts — mention: `/todo-init --ci` can add `check.sh`). Invariants: pass. Pre-planning skipped (no `--plan`; your message routes one fully-specified task to `/todo-add`, not an open goal for `/todo-plan`).
+
+**`/todo-add`** — inserted root **TASK-001** (`P1 · low · TASK`, chosen because the description starts with "Finish"; single leaf, 2 files; no size by default; no `Ref:` since no docs exist):
+
+- [ ] **TASK-001** · P1 · low · Finish textutil.slug.slugify: lowercase the text, replace every run of characters that are not ASCII letters or digits with a single dash, and strip leading and trailing dashes
+  - Done when: slugify('  Hello, World! ') returns 'hello-world' and slugify('a--b') returns 'a-b'; `python3 -m unittest tests.test_slug`
+
+Not already done (current output: `'--hello,-world!-'` and `'a--b'`; suite baseline 1 test OK). Invariants re-checked: pass. Uncommitted, as the skills require.
+
+**`/todo-continue --merge`** — stopped at **step 3, ready check: tree not clean**. `git status` shows `textutil/slug.py` modified:
+
+```diff
++import re
++
++
+ def slugify(text):
+-    return text.lower()
++    text = text.lower()
++    return text.replace(" ", "-")
+```
+
+Per the git-flow clean-tree rule, backlog files (`TODO.md`, `CHANGELOG.md`) and generated files (`__pycache__/`) don't count, but this is a tracked source change the interrupted session left uncommitted. The skill says: **stop and ask; never revert or commit it**. No branch was created and TASK-001 stays `[ ]`, so nothing is lost.
+
+## Questions for you
+
+The uncommitted `textutil/slug.py` change (on top of the already-committed `0a99f10 wip: slugify lowercases`, which stays regardless) — how should I proceed?
+
+1. **Commit it on `main`** (e.g. another `wip:` commit) — the node's branch then builds on top of it;
+2. **Stash it** (`git stash push -m "interrupted slugify wip" textutil/slug.py`) — recoverable later with `git stash pop`, the node re-does the work on its branch;
+3. **`/todo-continue --worktree`** — work proceeds in a separate worktree while the edit stays in this checkout (note: the final `--merge` into `main` still requires this checkout clean, so it would need committing or stashing before the root lands anyway).
+
+Answer with 1, 2 or 3 (or your own instruction), and I'll rerun `/todo-continue --merge` from there — TASK-001 is the next workable node.

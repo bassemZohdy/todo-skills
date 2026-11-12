@@ -68,7 +68,7 @@ With a subagent tool, a fresh-context reviewer does both in one call, given only
 ## Documentation drift
 
 - If the implementation must deviate from the `Ref` doc, the agent stops and lets you choose: change the code, or update the doc in this node.
-- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol: renamed, removed or with a changed meaning), it searches README and `docs/` (not `docs/plans/`) for each changed name with `grep -rnF -- '<name>' README.md docs`, and reports each hit as `<file>:<line>: <name> - <what to change>`.
+- Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol: added, renamed, removed or with a changed meaning), it searches README and `docs/` (not `docs/plans/`) for each changed name with `grep -rnF -- '<name>' README.md docs`, and reports each hit as `<file>:<line>: <name> - <what to change>`.
 - Hits that fit within the task line are updated in the node and listed as `Docs: updated <file>` in the CHANGELOG entry; the rest become `/todo-add "update <file>:<line> for <name>" --type task --from <ID>` commands in the report. Only a hit that the `Done when` or the Definition of Done names blocks the node, and drift that already existed never does.
 - README setup or test instructions that disagree with the commands that passed are reported.
 

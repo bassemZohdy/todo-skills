@@ -80,7 +80,7 @@ A task is **2 to 4 lines**: what to do, how it is validated, optional links and 
 
 Only these four fields exist; a task never has both State and Blocked. More than 4 lines is design prose and belongs in `docs/` (link it with `Ref:`). If a task needs more, split it.
 
-Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged (or being merged) into its parent, waiting for its root to drain.
+Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]` verified and merged (or being merged) into its parent, waiting for its root to drain. To change a marker, replace only the character between the brackets: the `- ` before it, the ID and the indentation stay as they are (a task line that loses its `- ` fails I3), and re-read the line after the edit.
 
 ### Tree, levels and complexity
 

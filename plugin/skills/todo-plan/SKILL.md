@@ -34,4 +34,4 @@ Use when the user thinks the plan is not proper, at any time, even mid-tree.
 
 ## Independent design review (optional, never a required stage)
 
-For a `high` root, or one that touches security, data migration, concurrency or a public interface, offer once a design review before the first build node starts; read `../todo/reference/review.md` ("Design review") only then. Never ask for it on other roots and never block a plan on it.
+For a `high` root, or one that touches security, data migration or concurrency or changes an existing public interface (adding one does not count), offer once a design review before the first build node starts; read `../todo/reference/review.md` ("Design review") only then. Never ask for it on other roots and never block a plan on it.

@@ -56,7 +56,7 @@ Dropping a single node is also possible with `/todo-update <ID> --status drop --
 
 ## Design review (optional)
 
-For a `high` root, or one that touches security, data migration, concurrency or a public interface, `/todo-plan` offers once a review before the first build node starts. You can also ask for one ("review this plan", `--review`, or a line under Open questions). It is never required and never blocks the plan.
+For a `high` root, or one that touches security, data migration or concurrency, or that renames, removes or changes the meaning of an existing public interface (a root that only adds one does not qualify), `/todo-plan` offers once a review before the first build node starts. You can also ask for one ("review this plan", `--review`, or a line under Open questions). It is never required and never blocks the plan.
 
 - **Fresh-context reviewer:** a new subagent gets only the plan doc, the root and its children as written in `TODO.md`, and the `Ref` path. It reads and comments; it never edits files or runs tests. Without a subagent tool, the agent offers a review in a new session from the same files.
 - **External tool:** a design-review skill or tool the project already uses runs on the same inputs instead. This repository neither bundles nor requires one.
@@ -64,7 +64,7 @@ For a `high` root, or one that touches security, data migration, concurrency or 
 
 ## Root review (optional)
 
-For the same kind of root, `/todo-continue` asks once, after the root is refreshed from the base and before its last gate and drain, whether to review the whole root. A fresh-context reviewer (or a new session, without a subagent tool) gets the whole root diff (`git diff <base>...<root branch>`), the plan doc and the root's `Ref`, and returns spec compliance and quality findings. Valid findings inside the root's task line are fixed on the root branch before the drain, after which `Done when` and the regression run again. Findings outside it become `/todo-add --from <ROOT-ID>` suggestions. Declined findings go under the plan doc's Open questions. It is never required and never offered for other roots. Both reviews are described in `plugin/skills/todo/reference/review.md`.
+For the same kind of root, `/todo-continue` asks once, after the root is refreshed from the base and before its last gate and drain, whether to review the whole root. It waits for the answer; a request that already says "no root review" (or a line under Open questions) is not asked, which is how an unattended run avoids the stop. A fresh-context reviewer (or a new session, without a subagent tool) gets the whole root diff (`git diff <base>...<root branch>`), the plan doc and the root's `Ref`, and returns spec compliance and quality findings. Valid findings inside the root's task line are fixed on the root branch before the drain, after which `Done when` and the regression run again. Findings outside it become `/todo-add --from <ROOT-ID>` suggestions. Declined findings go under the plan doc's Open questions. It is never required and never offered for other roots. Both reviews are described in `plugin/skills/todo/reference/review.md`.
 
 ## Lanes
 

@@ -356,10 +356,12 @@ pl="$root/plugin/skills/todo-plan/SKILL.md"; rvw="$root/plugin/skills/todo/refer
 rr_bad=""
 [ -f "$rvw" ] || rr_bad="$rr_bad review.md(missing)"
 for s in 'never a required stage' 'never block a plan on it' 'EGM' 'neither bundles nor requires' '## Design review' '## Root review' \
-         'whole root diff' 'git diff <base>...<root branch>' 'the plan doc' 'never offered for a `low` or `mid` root' 'new session'; do
+         'whole root diff' 'git diff <base>...<root branch>' 'the plan doc' 'never offered for a `low` or `mid` root' 'new session'          'adding a new one does not qualify' 'no root review'; do
   grep -qF -- "$s" "$rvw" 2>/dev/null || rr_bad="$rr_bad review.md('$s')"
 done
 grep -qF 'reference/review.md' "$pl" || rr_bad="$rr_bad todo-plan(pointer)"
+# FIX-099: a root that only adds a public interface does not qualify; both commands that offer a review say so.
+for f in "$pl" "$ct"; do grep -qF 'changes an existing public interface (adding one does not count' "$f" || rr_bad="$rr_bad $(basename "$(dirname "$f")")(trigger not narrowed)"; done
 grep -qF 'reference/review.md' "$ct" && grep -qF 'root review' "$ct" || rr_bad="$rr_bad todo-continue(pointer)"
 grep -qF '`reference/review.md`' "$root/plugin/skills/todo/SKILL.md" || rr_bad="$rr_bad core(reference table)"
 # Ambiguity pass and stop triggers (FEAT-058): one reference, loaded only for an unclear request, with the checklist, the

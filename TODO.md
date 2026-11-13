@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-104** · P1 · low · Say in todo-continue step 11 what a red-baseline stop reports as the next workable node and as the regression result, since no green baseline exists to compare against
-  - Done when: step 11 names the red-baseline case and a pin in tests/run.sh fails without it; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed
-  - State: attempts 0/3; baseline 244 passing; branch todo/FIX-104-say-in-todo-continue from main; next: read docs
 - [ ] **FIX-105** · P1 · low · Define which form of a failing test id is written after a red baseline when the runner prints two (unittest, Surefire, node --test): five pi reports chose differently
   - Done when: todo-continue step 3 and verification.md name the form to use with one example per runner, pinned in tests/run.sh; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed

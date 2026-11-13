@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FIX-106** · P1 · low · Close three todo-init gaps: what to report as runtime and package manager when no marker file exists, that step 4 and ci.md agree on running check.sh once with --ci, and whether the Tests: line is offered when the README names the command without a Tests: marker
-  - Done when: todo-init and ci.md state each rule once and tests/run.sh pins the three; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed
-  - State: branch todo/FIX-106-close-three-todo-init from main; next: start FIX-106
 - [ ] **FIX-107** · P1 · low · Close three lanes.md gaps for a run without a subagent tool: which step 3 the lane work means, that all lane work comes before the first drain, and that refresh conflicts are possible, not expected, for every later root
   - Done when: lanes.md states the three and tests/run.sh pins them; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed

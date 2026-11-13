@@ -13,6 +13,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
+| Plan stop, breakdown, and a node blocked by a regression it cannot fix | `plan-stop`, `decompose`, `regress-block` | Python; pi runs only, below |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |

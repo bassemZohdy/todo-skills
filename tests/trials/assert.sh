@@ -33,7 +33,8 @@ if [ -e .git ]; then
   chk "node commits carry Refs: and Reviewed: trailers" '(for c in $(git log --format=%H --all --not $old --grep="^\(feat\|fix\|refactor\|test\|perf\)"); do git log -1 --format=%B $c | grep -q "^Refs: " && git log -1 --format=%B $c | grep -q "^Reviewed: " || exit 1; done)'
   chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$|^Merge branch .main. of ")" ]'
 fi
-case "$scenario" in baseline-red|ts-baseline-red|java-baseline-red) red_baseline=1 ;; *) red_baseline=0 ;; esac
+# regress-block ends on a branch whose regression is red by design: the node is blocked, not finished.
+case "$scenario" in baseline-red|ts-baseline-red|java-baseline-red|regress-block) red_baseline=1 ;; *) red_baseline=0 ;; esac
 if [ "$red_baseline" = 0 ]; then
   if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'
   elif [ -f package.json ]; then chk "tests pass on the checked-out branch" 'npm test'
@@ -179,6 +180,26 @@ dirty-tree)
   rep="${TRIAL_REPORT:-}"
   chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
   chk "report says the tree is not clean and offers commit, stash or --worktree" '[ -s "$rep" ] && grep -Eiq "clean|uncommitted" "$rep" && grep -Eiq "stash|worktree" "$rep"'
+  ;;
+plan-stop)
+  chk "the node's branch is checked out with claim, start and plan commits" 'git branch --show-current | grep -Eq "^todo/FEAT-001-[a-z0-9-]+$" && git log --format=%s $start..HEAD | tr "\n" "|" | grep -Eq "^chore\(backlog\): plan FEAT-001\|chore\(backlog\): start FEAT-001\|chore\(backlog\): claim FEAT-001 on todo/FEAT-001-[a-z0-9-]+\|$"'
+  chk "the plan commit carries the plan as its body" '[ -n "$(git log -1 --format=%b HEAD | tr -d "[:space:]")" ]'
+  chk "FEAT-001 is [/] with next: plan proposed" 'grep -A3 "^- \[/\] \*\*FEAT-001\*\*" TODO.md | grep -q "State: .*next: plan proposed"'
+  chk "no code written and the tree is clean" 'git diff --quiet $start -- calc.py tests && clean'
+  chk "main holds only the claim" '[ "$(git log --format=%s $start..main | grep -c .)" = 1 ] && git log --format=%s $start..main | grep -q "^chore(backlog): claim FEAT-001 on "'
+  ;;
+decompose)
+  chk "FEAT-001 has at least two children, each with a complexity" '[ "$(grep -Ec "^  - \[ \] \*\*FEAT-001\.[0-9]+\*\* · (low|mid|high) · " TODO.md)" -ge 2 ]'
+  chk "every child has a Done when that runs a unittest command" '[ "$(grep -c "^    - Done when: .*python3 -m unittest " TODO.md)" -ge "$(grep -Ec "^  - \[ \] \*\*FEAT-001\.[0-9]+\*\*" TODO.md)" ]'
+  chk "next: decompose is gone and the root is still open" '! grep -q "next: decompose" TODO.md && grep -q "^- \[ \] \*\*FEAT-001\*\* · P1 · mid · " TODO.md'
+  chk "broken down, not built: no branch, no commit, no code" 'unchanged && git diff --quiet -- calc.py tests && [ -z "$(git status --porcelain | grep -v "^ M TODO.md$")" ]'
+  ;;
+regress-block)
+  chk "the node's branch is checked out and FEAT-001 is [!] with a Blocked line" 'git branch --show-current | grep -Eq "^todo/FEAT-001-[a-z0-9-]+$" && grep -A3 "^- \[!\] \*\*FEAT-001\*\*" TODO.md | grep -Eq "Blocked: .+ → .+ → .+"'
+  chk "the block is committed as chore(backlog): block FEAT-001 and the tree is clean" 'git log --format=%s $start..HEAD | grep -qx "chore(backlog): block FEAT-001" && clean'
+  chk "the frozen-interface test is untouched and no test is skipped" 'git diff --quiet $start HEAD -- tests/test_contract.py && ! grep -rqE "skip|expectedFailure" tests/*.py'
+  chk "Done when is unchanged" 'grep -q "Done when: subtract(5, 3) returns 2; .python3 -m unittest tests\.test_calc\.CalcTest\.test_subtract.$" TODO.md'
+  chk "main holds only the claim: no subtract, no drain, no merge" '[ "$(git log --format=%s $start..main | grep -vc "^chore(backlog): claim FEAT-001 on ")" = 0 ] && ! at main calc.py | grep -q "def subtract" && ! at main CHANGELOG.md | grep -q FEAT-001'
   ;;
 baseline-red)
   chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'

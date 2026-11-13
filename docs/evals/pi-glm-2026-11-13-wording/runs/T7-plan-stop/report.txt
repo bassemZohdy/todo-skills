@@ -1,0 +1,32 @@
+Stopped after one invocation, at step 6 (`--plan` plan stop), no code written.
+
+## 1. Report (`/todo-continue --plan`)
+
+**Stopped at step 6 (Plan)** — per `--plan`, the plan is proposed and the run stops before any code is written; the next run asks for the approval.
+
+- **Node:** `FEAT-001` · P1 · low · **Add subtract to calc.py** (leaf root) — started, now `[/]`, `next: plan proposed`
+- **Invariant check (step 1):** pass (I1–I10 by reading; no `.todo/todo-lint.sh`)
+- **Baseline (step 3, on `main` before branching):** `python3 -m unittest discover -s tests` → green, **1 passing** → `baseline 1 passing`
+- **Done when command:** not run (no code written yet — plan stop)
+- **Git (step 4):** unclaimed tree → branch `todo/FEAT-001-add-subtract-calc-py` created from `main`; tree claim `65c755e` published to `main` via fast-forward (succeeded); start commit `75b6cb0` (`chore(backlog): start FEAT-001`); plan commit `0c45bb8` (`chore(backlog): plan FEAT-001`)
+- **Files changed:** `TODO.md` only (backlog edits)
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-calc-py`; worktree clean
+
+**Plan (proposed, awaiting approval):**
+1. Files: `calc.py` (add `subtract(a, b)`), `tests/test_calc.py` (new `test_subtract` in `CalcTest`).
+2. Red: write `test_subtract` asserting `calc.subtract(5, 3) == 2`; run it → fails with missing-symbol error (`module 'calc' has no attribute 'subtract'`).
+3. Green: implement `subtract(a, b): return a - b` next to `add`.
+4. Verify: `python3 -m unittest tests.test_calc.CalcTest.test_subtract`, then regression `python3 -m unittest discover -s tests` (baseline 1 → expect 2 passing).
+5. Risks: none; one-function addition on a leaf, no public-interface change to document.
+
+- **Adjacent problems:** none
+- **Next workable node:** `FEAT-001` itself — next run resumes at step 6 (`next: plan proposed`) and asks "approve the plan? (yes / change: …)"
+- **Suggestion:** clear context before the next run; rerun `/todo-continue` to approve the plan.
+
+## 2. Ambiguities / contradictions / unclear instructions
+
+1. **Does `--plan` stop before or after the git claim?** The flag says "after reading, propose a plan and stop before any code is written", which could mean stopping right after reading docs, yet the step order runs steps 1–5 (branch, tree claim published to the base, start `[/]`) before step 6. Resolution: followed the step numbering and "(step 6)" pointer — steps 1–5 executed, stopping inside step 6.
+2. **`next:` written twice in one invocation.** Step 5 mandates `State:` ending `next: read docs`, and step 6/plan-step immediately says "set `next: plan proposed`". Resolution: performed both in order, as separate commits (`start` then `plan`), ending with `next: plan proposed`.
+3. **Body of the plan commit.** Step "Commits" in git-flow.md says backlog commits have "no body except `Refs:` and `Includes:` on a drain and the plan on `chore(backlog): plan <ID>`" — unclear whether `Refs:` is also wanted; the sentence structure suggests the plan is the only body there. Resolution: body = the plan text only, no `Refs:`.
+4. **"the next workable node" at a `[/]` stop (step 11).** "Workable" is defined only for `[ ]` nodes, and the node is now `[/]`. Resolution: reported the node itself as the resume target (next run resumes at step 6), since it is the only node in the tree.
+5. Minor: `--plan` plus an already-`next: plan proposed` state is underspecified (plan-step's first branch would ask for approval while the flag text says "the next run asks for the approval"). Not hit on this run (first invocation); noted only.

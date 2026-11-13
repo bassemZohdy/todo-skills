@@ -93,6 +93,8 @@ The benchmark's `todo-skills` arm was rerun too: `5-interrupted` passed 6 of 6 (
 
 Later that day TASK-110 cut the text every `/todo-continue` run loads by 12 percent, moving rarely used branches into reference files that are read on demand. Fresh pi agents reran all 31 scenarios and the six benchmark scenarios of the `todo-skills` arm on that text: 31 of 31 and 6 of 6 passed. None of those runs reaches a moved branch, so TASK-113 added `plan-stop`, `decompose` and `regress-block`; each passed on the text before the cut and on the text after it, one run each, and on the new text each agent opened the reference file its branch points to. Results, the measured cost and what was not exercised: [docs/evals/pi-glm-2026-11-13-load-cut/summary.md](evals/pi-glm-2026-11-13-load-cut/summary.md).
 
+Those runs raised wording gaps; FIX-114 (the plan stop, the breakdown and a blocked node) and FIX-115 (six sentences two or more reports called unclear) closed them, and 17 more fresh runs on the reworded text passed: [docs/evals/pi-glm-2026-11-13-wording/summary.md](evals/pi-glm-2026-11-13-wording/summary.md).
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

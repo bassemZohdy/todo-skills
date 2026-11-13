@@ -1,0 +1,31 @@
+Both the write and the uncommitted-on-base requirement check out. Final invariant re-check by reading (no `.todo/todo-lint.sh` exists → I1–I10 by reading): all pass — unique IDs FEAT-001.1–.3, priority only on the root, complexities `low`, each task 2 lines with a non-vacuous test-id command, 10 lines ≤ 120, no `[x]`/cycles/forbidden commands, even 2/4-space indent, whole file still exactly `# Active Backlog` + one `## 🌳 Task Tree`. Stopping here, as "Decompose" step 3 mandates.
+
+---
+
+## (1) Report — `/todo-continue` (decompose of FEAT-001)
+
+**ID/title:** FEAT-001 · P1 · mid · Add subtract, multiply and divide to calc.py, each with its own test — was `State: next: decompose`, so it was **broken down, not built** (todo-continue step 2 → plan-step "Decompose").
+
+**Children written after your "yes"** (tree is unclaimed, worked on base `main`):
+
+- `[ ]` **FEAT-001.1** · low · Add subtract to calc.py — Done when: calc.subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+- `[ ]` **FEAT-001.2** · low · Add multiply to calc.py — Done when: calc.multiply(2, 3) returns 6; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`
+- `[ ]` **FEAT-001.3** · low · Add divide to calc.py — Done when: calc.divide(6, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_divide`
+
+No `Depends:` (document order is obvious), no sizes (none carried/requested), no per-child `regression:` (the root's full-suite guard suffices).
+
+**Commands/results:** invariants I1–I10 pass before and after the edit (no lint script; by reading). Sanity run `python3 -m unittest tests.test_calc.CalcTest.test_add` → 1 test, OK (only to validate the test-id command form I wrote; not a baseline). **Regression: not run** — no code path ran on this invocation.
+
+**Files changed:** `TODO.md` only (+6/−1: three children added, `State: next: decompose` line deleted — the whole line, nothing else in it). **Branch/commit:** none — edit left uncommitted on base `main` as Decompose prescribes (the next claim carries it). **Checked-out branch:** `main`.
+
+**Adjacent problems:** none. **Next workable node:** FEAT-001.1 (tree unclaimed, no dependencies). **Suggestion:** clear context before the next `/todo-continue`, which will claim the FEAT-001 tree, branch, and build FEAT-001.1.
+
+## (2) Ambiguities / contradictions hit
+
+1. *"A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down."* (core, scope rule) — internally contradictory: a node "too big to split" is then split. Also, by the scope rule ("a leaf is one change that fits one context window and touches at most 5 files") FEAT-001 arguably fits one leaf (2 files), so decomposing it into three could conflict with "Anything bigger is a parent". Resolved by treating the deliberate `next: decompose` marker plus the title's "each with its own test" as an explicit instruction that each operation is its own task, and splitting into three leaves.
+2. *"Split it with steps 7-8 of the `todo-add` skill"* where todo-add step 7 says *"Rate each node's complexity with the core table… a parent is rated by its integration step"*, vs Decompose step 3: *"deleting `next: decompose` from the node's `State:` (the whole line when nothing else is in it)"* — unclear whether re-rating the now-container parent (integration step is mechanical → `low`) is authorized, since step 3 lists only the State deletion. Resolved: left the parent's existing `mid` (an allowed parent rating — "usually `low` or `mid`") and made the minimal mandated edit.
+3. *"Work on the base for an unclaimed tree (as `/todo-continue` step 3, 'Where to start')"* (Decompose step 1) — the pointer imports step 3's where-to-start rule, but step 3 also contains the ready check and baseline; since the decompose detour branches from todo-continue step 2 (before step 3), it's unclear whether a baseline must run first. Resolved: no baseline before decomposing (the Decompose section never asks for one; the baseline belongs to the first child's start).
+4. *"Then stop."* (Decompose step 3) vs step 11 *"Report, short (on an early stop: which step and why…)"* — a completed decomposition isn't clearly an "early stop", yet some report items (regression vs baseline, branch/commit, merge commands) can't apply. Resolved: reported a short step-11-shaped report with "not run"/"none" for the inapplicable items.
+5. Minor overlap: Decompose step 3's confirmation wording vs todo-add step 9's ("wait for confirmation before writing") — consistent in substance; I followed the Decompose wording (the section that governs), and the pre-supplied "yes" counted as the confirmation.
+
+No other contradictions or unclear instructions were hit; the git identity fallback and worktree rules were never needed (no commits, no worktrees).

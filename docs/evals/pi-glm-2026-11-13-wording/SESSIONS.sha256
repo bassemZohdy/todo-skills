@@ -1,0 +1,17 @@
+1635a2a8965d90978e77725e7762aa8be74be53d5366d1e0d651269e2f104431  runs/T6-decompose/session.jsonl.gz
+7d5fb4f06d62e959f653b059ac8bd6517f71e2a25ebd20f87813ab7b7b5b0da3  runs/T6-plan-stop/session.jsonl.gz
+7039198d6abb9fe52a7f415bd2661260e12b743aead69f1e86c7efd2d943fa8e  runs/T6-regress-block/session.jsonl.gz
+170aba810e4fac936d40e722c2418b1153cacb9f2793b391415334c0b59006f7  runs/T7-plan-stop/session.jsonl.gz
+75b130a99953bc35a4eb8e8ef2ffc6faf35306084b9b261de55b1ea21b5f4425  runs/T7-regress-block/session.jsonl.gz
+e75e203b325d43d6a551df3fa8ff9b9f6127d244c468e123dcd3a9dabc8c1e17  runs/T8-ci-github/session.jsonl.gz
+a0a209182d6f7bffe42954fe2d39e4d0f550f94d4119369cea6ac1081b557228  runs/T8-ci-local/session.jsonl.gz
+7e0f535c287919462a9c3fe3308b3168d62ef96a1ae292babe988c7f8e31b11c  runs/T8-happy-path/session.jsonl.gz
+dbb8e5e7d0004821e985c064ed3abd127a021cdd3c35b7fcc941dda1931b7c82  runs/T8-interrupted-merge/session.jsonl.gz
+bf9c994eccc445c9fc334cc3fc84c14ff66bfa2f1e3d30f3028c872445844580  runs/T8-java-interrupted/session.jsonl.gz
+b197fc4108b4760588598fb64927886b49d872207a3d65c5bebde374a1edceb1  runs/T8-monorepo/session.jsonl.gz
+b172985731c6ee707bdcec625cdd87516b69c182957c4a8c8565d142f9b18796  runs/T8-multi-module/session.jsonl.gz
+fc078eee3921f44fe9e4fb5596e6bd6ea8bd0f8ca10875152414e0689074cde7  runs/T8-no-git/session.jsonl.gz
+2eee940d5f6f53a177a18780ece9d4813b0efae17d3f1c4cf1a2e0bddc092c51  runs/T8-refresh-from-base/session.jsonl.gz
+b33adb07e75f9f849200d12a89796b9fa721b35579d72b6e206c11d8442211d4  runs/T8-release-ask/session.jsonl.gz
+1fb8dd9cf09d4a6e4e260110537e9ac917e8c0a18dff51825faf2d6c9a7446b0  runs/T8-release/session.jsonl.gz
+8f6692230f32be54464d90a4e83d0fe07063fc0a2c0a5fc02685a052eb8f00a4  runs/T8-ts-interrupted/session.jsonl.gz

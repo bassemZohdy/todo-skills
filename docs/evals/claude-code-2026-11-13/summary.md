@@ -5,7 +5,7 @@ TASK-112 asked for the trial scenarios to be rerun on the revised skill text wit
 ## What ran
 
 - **Text:** `main` at `94a035e` (after FIX-115), run from a frozen worktree. All 34 scenarios of `tests/trials/setup.sh`, including `leftover-work`, `dirty-tree`, `plan-stop`, `decompose` and `regress-block`.
-- **Agent:** Claude Code 2.1.323, `claude -p` through `tests/trials/run-claude.sh` with the CLI's default model, `--permission-mode acceptEdits`, `--setting-sources project,local --strict-mcp-config` (no user plugins or MCP servers in the agent), three scenarios at a time. Windows 11 with Git Bash, assertions unisolated (`TRIAL_WINDOWS_ISOLATION=0`).
+- **Agent:** Claude Code 2.1.323, `claude -p` through `tests/trials/run-claude.sh` with the CLI's built-in default model (`--setting-sources project,local` leaves out the user settings, so no model is configured, and the exact model id was not recorded), `--permission-mode acceptEdits`, `--setting-sources project,local --strict-mcp-config` (no user plugins or MCP servers in the agent), three scenarios at a time. Windows 11 with Git Bash, assertions unisolated (`TRIAL_WINDOWS_ISOLATION=0`).
 - **One run per scenario**, plus one rerun of each scenario that failed.
 
 ## Results
@@ -20,7 +20,7 @@ TASK-112 asked for the trial scenarios to be rerun on the revised skill text wit
 
 **`ci-local`.** Claude Code's headless mode refuses a write under `.git/hooks` as a sensitive file; the agent did what `reference/ci.md` says for that case and printed the two hook lines, so the only failing assertion is "pre-push hook runs check.sh". This is the INFRA limit that the 2026-11-07 batch already recorded ([summary](../claude-code-2026-11-07/summary.md)), not a defect of the text; `run-claude.sh` still scores it FAIL, as that batch's follow-up noted.
 
-The three new scenarios passed on the first run. On `decompose` the agent read `reference/plan-step.md`. The reports of `plan-stop` and `regress-block` do not name a reference file, and Claude Code's final text is all that is kept, so this batch cannot show which files it opened (pi's session logs can).
+The lane scenarios `lanes` and `multi-module` passed, but both assertion logs say `lane execution: unverified`: separate worktrees were used and no worker-activity records exist, so these runs do not show that lanes ran concurrently (TASK-087 stays open on that point). The three new scenarios passed on the first run. On `decompose` the agent read `reference/plan-step.md`. The reports of `plan-stop` and `regress-block` do not name a reference file, and Claude Code's final text is all that is kept, so this batch cannot show which files it opened (pi's session logs can).
 
 ## What the reports say
 
@@ -28,7 +28,7 @@ Ambiguity sections are shorter than pi's and cover mostly the same ground: the o
 
 ## Codex
 
-A probe of `tests/trials/run-codex.sh` on `happy-path` with the host's own Codex (codex-cli 0.167.2) stopped at the baseline step: inside Codex's Windows sandbox the Windows Store `python3` shim is "Permission denied", so no test could run, and the agent reported a red baseline. That is the host, not the skills, and it fails four assertions (`CX-happy-path` in `runs.csv`). The 2026-11-08 Windows batch used an elevated sandbox and the Linux batch a container; neither was set up again here, and a container run needs Codex configured inside it. TASK-116 holds the Codex half.
+A probe of `tests/trials/run-codex.sh` on `happy-path` with the host's own Codex (codex-cli 0.167.2) stopped at the baseline step: inside Codex's Windows sandbox the Windows Store `python3` shim is "Permission denied", so no test could run, and the agent reported a red baseline. That is the host, not the skills, and it fails four assertions (`CX-happy-path` in `runs.csv`). A second probe put a virtual environment with its own `python3.exe` first on `PATH`, using the default isolation: the Store Python behind a virtual environment is just as unreachable for the sandbox ("The file cannot be accessed by the system"), the outcome was INFRA_ERROR and the agent again stopped at the baseline. The 2026-11-08 batch needed a regular Python 3.13 install for this; this host has only the Store one. That second probe's evidence is not archived here; the run folder is in the maintainer's workspace. The 2026-11-08 Windows batch used an elevated sandbox and the Linux batch a container; neither was set up again here, and a container run needs Codex configured inside it. TASK-116 holds the Codex half.
 
 ## Evidence integrity
 

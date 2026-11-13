@@ -34,7 +34,9 @@ head='# Active Backlog
 
 ## 🌳 Task Tree
 '
-[ "$scenario" = no-git ] || git init -q -b main
+# LF in the working copy on every host: with core.autocrlf=true (Git for Windows) the first branch switch rewrote TODO.md
+# with CRLF, an agent's exact-match edit then failed, and it rewrote the whole file (docs/evals/pi-glm-2026-11-12).
+[ "$scenario" = no-git ] || { git init -q -b main; git config core.autocrlf false; }
 
 # The red-baseline and interrupted variants start from the lifecycle project of their language (TASK-086).
 kind="$scenario"
@@ -106,7 +108,7 @@ team-claim)
   git init -q --bare -b main .team/origin.git
   g remote add origin "$dir/.team/origin.git"
   g push -q -u origin main
-  git clone -q .team/origin.git .team/peer
+  git clone -q -c core.autocrlf=false .team/origin.git .team/peer
   ( cd .team/peer
     awk '{print} /Done when: subtract works/ {print "  - State: branch todo/FEAT-001-peer-work from main; next: build children"}' TODO.md > TODO.new && mv TODO.new TODO.md
     git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-peer-work"

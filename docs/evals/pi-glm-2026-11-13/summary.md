@@ -110,3 +110,11 @@ This folder holds a subset of each run: the report, the assertion log and the Gi
 - One run per scenario and text version, except the two lifecycle scenarios on T4 and `5-interrupted`.
 - The other two benchmark arms were not rerun, so the 2026-11-12 totals are not updated.
 - The light path of the decision record is a proposal; nothing was measured for it.
+
+## Closed without being done
+
+Three backlog tasks that cite this summary were removed from `TODO.md` on 2026-11-13 without being implemented. The claim commit of TASK-112 gave short reasons; these are the accurate ones. Each can be put back with `/todo-add`.
+
+- **TASK-109** (start a node with no `Ref` on `next: build`): dropped on the recommendation of the maintainer's assistant; the owner was told and asked for the remaining tasks to be completed, which is not an explicit yes. The seven reports that found `next: read docs` stale all followed the sentence added to step 9 by FIX-098, and "no governing doc" cannot be known at step 5, so the rule as written would have changed nothing in the fixtures (they have a README).
+- **FEAT-111** (fold the start commit into the claim commit, skip the refresh): as written it would put `[/]` on the base through the claim's fast-forward. A sound variant, no separate start commit for a `low` leaf root, would save about 2 of the 28 model calls of a run, but resume and interrupted-work detection read the `[/]`, `baseline` and `next:` that the start commit writes, and about ten trial scenarios use that commit as their stop point or assert it. The saving was judged too small for that change; it was not tried.
+- **TASK-085** (slim what an install clones): `/plugin marketplace add` does clone the whole repository, so the premise holds. The cost is small: a shallow clone of the public repository takes about 3 seconds and checks out 24 MB in 3,049 files, 2,796 of them under `docs/evals`. Moving them to another branch would touch eight trial tests and the documentation links for that; the history keeps the objects either way. Not done; the owner never picked a target.

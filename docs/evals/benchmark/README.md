@@ -2,8 +2,8 @@
 
 The benchmark measures whether a methodology pays for itself. It runs the same six requirements under each of three
 methodology "arms" and compares verified outcomes, tokens, turns and time. The harness doesn't depend on any arm, and
-it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](results/results.csv) still holds only its header
-(see "Status").
+it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](results/results.csv) holds those runs
+(see "Published results" and "Status").
 
 ## Layout
 
@@ -19,6 +19,8 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm
 | `verify.sh` | Trusted verifier. |
 | `usage.sh` | Reads token usage from the CLI's own output. |
 | `summarize.sh` | Statistics per arm and scenario. |
+| `publish.sh` | Publishes the runs of a table into `results/results.csv` and checks every published row against its evidence. |
+| `results/results.csv`, `results/sources.csv` | The published real runs, and for each the table it came from and the hash `run.sh` recorded. |
 
 ### Scenarios
 
@@ -61,8 +63,7 @@ bash docs/evals/benchmark/summarize.sh ~/bench-runs/results.csv
 ```
 
 Keep `~/bench-runs` outside the agent's writable area and outside the temporary folder (see
-`tests/trials/codex-exec.sh` for why). To publish results, copy the runs folder under `docs/evals/benchmark/results/`
-with its `results.csv`. Never write rows by hand.
+`tests/trials/codex-exec.sh` for why). To publish results, see "Published results" below. Never write rows by hand.
 
 ## What each run records
 
@@ -107,6 +108,19 @@ whole harness repository.
 - Report the **median, mean and spread** (`summarize.sh`), the first-attempt and final PASS counts, and the outcomes. Make no claim of a significant difference from samples this small.
 - Report INFRA_ERROR and UNVERIFIED runs; never drop them. An arm whose runs are mostly INFRA_ERROR measures the environment, not the method.
 - **Decision record.** When real results exist and `lean-baseline` matches `todo-skills` on verified outcomes at materially lower tokens, write that down in `docs/evals/` and *propose* which todo-skills steps could become optional. Don't implement that from the benchmark alone.
+
+## Published results
+
+`results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row's evidence is missing or changed, or when an arm and a scenario have no scored row.
+
+```bash
+bash docs/evals/benchmark/publish.sh add <runs>/results.csv <evidence root>   # every run of the table, or none
+bash docs/evals/benchmark/publish.sh check --coverage
+```
+
+- **Evidence.** A run's full evidence folder holds the agent's session and a bundle of its repository, which can name the host and the user. What is committed is a reviewed subset (the report, the verifier log, the usage), kept in the dated folder of its batch under `docs/evals/`. `<evidence root>` is that folder, written relative to `results/`. Copying a whole runs folder here is possible too, but check it for secrets and personal data first.
+- **Hashes.** A published row is the run's own row with `evidence_dir` pointing at the published folder and `evidence_sha256` computed from that folder's file listing, so a published file that changes or goes missing fails the check. The hash `run.sh` recorded for the complete run is kept in `results/sources.csv` with the table the row came from.
+- **What is in it now** (67 rows, all pi with GLM 5.3, isolation `provisional`): the 56 rows of 2026-11-12 (three arms, three runs per cell, two of them INFRA_ERROR) and the 11 rows of 2026-11-13 (`todo-skills` arm only, on the revised skill text). The `todo-skills` rows therefore mix two versions of the skills: `5-interrupted` is 0 of 3 on the first and 6 of 6 on the second. Summarize a source table, not the published one, when comparing arms.
 
 ## Status
 

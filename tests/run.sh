@@ -424,6 +424,11 @@ grep -qF 'the `--ci` step runs `.todo/check.sh` once' "$ti106" && ! grep -qF 'ma
 grep -qF 'a sentence that names the command without `Tests:` does not count' "$ti106" || ti_bad="$ti_bad tests-offer"
 if [ -z "$ti_bad" ]; then ok "todo-init says what to report without a marker file, runs check.sh once with --ci and when to offer the Tests: line (FIX-106)"; else bad "todo-init gaps (FIX-106):$ti_bad"; fi
 
+# Lanes without a subagent tool (FIX-107): which item the lane work is, all lane work before the first drain, and
+# refresh conflicts as possible, not expected.
+ln107="$root/plugin/skills/todo/reference/lanes.md"
+if grep -qF 'the lane work of item 3' "$ln107" && grep -qF 'all lanes first, then item 4' "$ln107" && grep -qF 'possible for every root after the first' "$ln107" && ! grep -qF 'expect them for every root' "$ln107"; then ok "lanes.md says how a run without a subagent tool orders the lane work and the drains (FIX-107)"; else bad "lanes.md gaps for a run without a subagent tool (FIX-107)"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

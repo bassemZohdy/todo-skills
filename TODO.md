@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FIX-107** · P1 · low · Close three lanes.md gaps for a run without a subagent tool: which step 3 the lane work means, that all lane work comes before the first drain, and that refresh conflicts are possible, not expected, for every later root
-  - Done when: lanes.md states the three and tests/run.sh pins them; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed
-  - State: branch todo/FIX-107-close-three-lanes-md from main; next: start FIX-107
 - [ ] **FIX-108** · P1 · low · Close four cross-reference gaps: the blocked path of todo-update cites todo-continue Test failures without loading it, step 10 item 2 applies to a root too, the commit scope for nested source folders, and where the task ID goes when Done when names a test class or file
   - Done when: each rule is stated where it is used, inside the load budget, with a pin in tests/run.sh; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed

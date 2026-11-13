@@ -2,7 +2,7 @@
 
 Loaded by `/todo-plan` and `/todo-continue` only for a root that qualifies. Part of the `todo` core skill.
 
-A root **qualifies** when its complexity is `high` or it touches security, data migration, concurrency or a public interface (a command, flag, endpoint, config key or exported symbol). It is never offered for a `low` or `mid` root that touches none of these. Each review is offered once per root, and the user can also ask for one ("review this plan", "review this root", `--review`, or a line under the plan doc's **Open questions**). Neither review is required, and declining one changes nothing else.
+A root **qualifies** when its complexity is `high`, it touches security, data migration or concurrency, or it renames, removes or changes the meaning of an existing public interface (a command, flag, endpoint, config key or exported symbol); adding a new one does not qualify. It is never offered for a `low` or `mid` root that touches none of these. Each review is offered once per root, and the user can also ask for one ("review this plan", "review this root", `--review`, or a line under the plan doc's **Open questions**). Neither review is required, and declining one changes nothing else.
 
 **Reviewer.** With a subagent tool, a new agent gets only the inputs listed below. It reads and comments, returning spec compliance findings first, then quality findings. It never edits files or runs tests. Without a subagent tool, say so and offer a review in a new session started from those same inputs.
 
@@ -16,6 +16,6 @@ A root **qualifies** when its complexity is `high` or it touches security, data 
 
 ## Root review (before the drain)
 
-- **When:** `/todo-continue`, after a qualifying root's refresh from the base (step 10.4.1) and before the last gate, asks once "review the whole root before it drains? (yes / no)". A recorded answer is not asked again: a plan doc line under **Open questions**, or an earlier reply in this conversation.
+- **When:** `/todo-continue`, after a qualifying root's refresh from the base (step 10.4.1) and before the last gate, asks once "review the whole root before it drains? (yes / no)". A recorded answer is not asked again: a plan doc line under **Open questions**, or an earlier reply in this conversation (so a request that says "no root review" is never stopped by it). Without an answer, stop with the question; the next `/todo-continue` goes on from there.
 - **Inputs:** the whole root diff (`git diff <base>...<root branch>`; no git: the root's `files:`), the plan doc it links, the root's `Ref`, and the tree's task lines.
 - **Outcome:** a valid finding inside the root's task line is fixed on the root branch. Commit it as `fix(<scope>): <title>` with `Refs: <ROOT-ID>`, then rerun the root's `Done when` and the regression before the last gate. A finding outside the root's task line goes to the report as a `/todo-add "<description>" --from <ROOT-ID>` command. A declined finding becomes a bullet under the plan doc's **Open questions** (no plan doc: the report). Fixing findings is not an attempt, and the root is not blocked unless a fix makes `Done when` or the regression fail ("Test failures").

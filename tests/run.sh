@@ -416,6 +416,14 @@ if grep -qF 'after a red-baseline stop the failing run itself' "$ct11" && grep -
 vr105="$root/plugin/skills/todo/reference/verification.md"
 if grep -qF 'fullest name the runner' "$vr105" && grep -qF 'test_calc.CalcTest.test_add' "$vr105" && grep -qF 'AddTest.adds' "$vr105" && grep -qF 'add (tests/add.test.ts)' "$vr105"    && grep -qF 'ids as `reference/verification.md` step 1 writes them' "$root/plugin/skills/todo-continue/SKILL.md"; then ok "a failing test id has one defined form, with an example per runner (FIX-105)"; else bad "the form of a failing test id is not defined with an example per runner (FIX-105)"; fi
 
+# todo-init gaps (FIX-106): runtime and package manager without a marker file, check.sh run once with --ci in both
+# files, and the Tests: offer when the README only names the command.
+ti106="$root/plugin/skills/todo-init/SKILL.md"; ti_bad=""
+grep -qF 'Without a marker file, report the runtime the test command implies' "$ti106" || ti_bad="$ti_bad runtime-without-marker"
+grep -qF 'the `--ci` step runs `.todo/check.sh` once' "$ti106" && ! grep -qF 'may run `.todo/check.sh` once' "$ti106" && grep -qF 'run it once after writing' "$root/plugin/skills/todo/reference/ci.md" || ti_bad="$ti_bad check-once"
+grep -qF 'a sentence that names the command without `Tests:` does not count' "$ti106" || ti_bad="$ti_bad tests-offer"
+if [ -z "$ti_bad" ]; then ok "todo-init says what to report without a marker file, runs check.sh once with --ci and when to offer the Tests: line (FIX-106)"; else bad "todo-init gaps (FIX-106):$ti_bad"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

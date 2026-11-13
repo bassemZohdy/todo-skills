@@ -164,12 +164,21 @@ ci-github|ci-local)
     chk "pre-push hook runs check.sh" 'grep -q "check.sh" "$gd/hooks/pre-push" && [ -x "$gd/hooks/pre-push" ]'
   fi
   ;;
-happy-path)
+happy-path|leftover-work)
+  [ "$scenario" != leftover-work ] || chk "the leftover change was carried into the node, not stashed" '[ -z "$(git stash list)" ]'
   chk "subtract and its test on main" 'at main calc.py | grep -q "def subtract" && at main tests/test_calc.py | grep -q "def test_subtract"'
   chk "FEAT-001 drained on main with the core format" 'at main CHANGELOG.md | entry FEAT-001 && ! at main TODO.md | grep -q FEAT-001'
   chk "main history: claim, then the root merge" 'git log --first-parent --format=%s $start..main | tr "\n" "|" | grep -Eq "^Merge FEAT-001 into main\|chore\(backlog\): claim FEAT-001 on todo/FEAT-001-[a-z0-9-]+\|$"'
   chk "root branch has start, node commit and drain" 'git log --format=%s main^2 | head -3 | tr "\n" "|" | grep -Eq "^chore\(backlog\): drain FEAT-001\|feat\([a-z0-9._-]+\): .*\|chore\(backlog\): start FEAT-001\|$"'
   chk "no todo branches left, on main, clean" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git branch --show-current)" = main ] && clean'
+  ;;
+dirty-tree)
+  chk "nothing committed: no branch, no commit" 'unchanged'
+  chk "the unexplained change is still there, not stashed, and the backlog is untouched" 'git diff -- calc.py | grep -q "scratch: maybe cache" && [ -z "$(git stash list)" ] && git diff --quiet -- TODO.md CHANGELOG.md'
+  # As for baseline-red, the repository alone proves nothing: the report must say why the command stopped.
+  rep="${TRIAL_REPORT:-}"
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  chk "report says the tree is not clean and offers commit, stash or --worktree" '[ -s "$rep" ] && grep -Eiq "clean|uncommitted" "$rep" && grep -Eiq "stash|worktree" "$rep"'
   ;;
 baseline-red)
   chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'

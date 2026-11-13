@@ -400,6 +400,14 @@ done
 grep -q 'spec compliance first' "$root/plugin/skills/todo-continue/SKILL.md" && grep -q 'one call' "$root/plugin/skills/todo-continue/SKILL.md" || rv_bad="$rv_bad todo-continue(order or single call)"
 if [ -z "$rv_bad" ]; then ok "review records spec compliance and quality from one reviewer call, with the self-review fallback"; else bad "two-verdict review:$rv_bad"; fi
 
+# Leftover work (FEAT-100): the one exception to the clean-tree stop needs the user's request or the task line, is not
+# available with --worktree, and is documented where the clean tree is.
+gf="$root/plugin/skills/todo/reference/git-flow.md"; lw_bad=""
+grep -qF '**Leftover work**' "$gf" && grep -qF "the user's request or the task line states" "$gf" && grep -qF 'not with `--worktree`' "$gf" || lw_bad="$lw_bad git-flow.md"
+grep -qF 'unless it is leftover work' "$root/plugin/skills/todo-continue/SKILL.md" || lw_bad="$lw_bad todo-continue"
+grep -qF '**Leftover work:**' "$root/docs/GIT-FLOW.md" && grep -qF 'It never decides this by itself' "$root/docs/GIT-FLOW.md" || lw_bad="$lw_bad docs/GIT-FLOW.md"
+if [ -z "$lw_bad" ]; then ok "leftover work is adopted only when the request or the task line says so"; else bad "leftover work rule:$lw_bad"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

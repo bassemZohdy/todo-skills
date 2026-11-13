@@ -16,6 +16,8 @@ case "$scenario" in
   replan)             task='Run `/todo-plan --revise "FEAT-003 (web dashboard) is out of scope, drop it"`. The user confirms the proposed diff: "yes, apply it".' ;;
   ci-github|ci-local) task='Run `/todo-init --ci`. The user says yes to every offer and confirmation.' ;;
   happy-path)         task='Run `/todo-continue --merge`. Stop after one invocation.' ;;
+  leftover-work)      task='A previous session was interrupted: the uncommitted change in calc.py is unfinished work on FEAT-001. Keep it and finish it. Run `/todo-continue --merge`. Stop after one invocation.' ;;
+  dirty-tree)         task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   baseline-red)       task='Run `/todo-continue`. Stop after one invocation.' ;;
   no-git)             task='Run `/todo-continue`. Stop after one invocation.' ;;
   add-fix)            task='Run `/todo-add "add() crashes with a TypeError traceback when given None; it should raise ValueError(\"add needs numbers\")" --priority P0`. Do not ask questions; the description is complete.' ;;

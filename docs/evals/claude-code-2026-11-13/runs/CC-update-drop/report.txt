@@ -1,0 +1,54 @@
+Dropping FEAT-002 is done. I did it on `main` and left it uncommitted, as the skill says for a backlog edit on the base.
+
+## (1) Report
+
+FEAT-002 is dropped. Its only reason was "duplicate of FEAT-001".
+
+- **Checks before the drop:**
+  - It was `[ ]`, had no children, and was not a claimed root.
+  - Nothing in `Depends:` or `From:` named it, so no references needed re-pointing.
+  - It had no `todo/` branch.
+  - It was not in CHANGELOG.md.
+  - Lint by reading: there is no `.todo/todo-lint.sh`, so I checked I1–I10 by reading and they pass. Its `From: FEAT-000` points at an existing CHANGELOG entry.
+- **Confirmation:** I listed the node and the single `From:` link, then you replied "yes".
+- **Changes:**
+  - I deleted the FEAT-002 lines (the header, `Done when:` and `Links:`) from `TODO.md`. FEAT-001 is now the only root.
+  - I appended this line to `## Revisions` in `docs/plans/PROJECT.md`, so the ID is never reused: `- 2026-11-13 · duplicate of FEAT-001 · dropped FEAT-002`.
+- **Not done:**
+  - No commit, since the base branch gets none.
+  - No CHANGELOG entry.
+  - No branch deletion.
+  - No RTM edit, since there is no RTM.
+- **After the edit:** git shows `TODO.md` and `docs/plans/PROJECT.md` as modified. Lint passes again by reading. I did not start any work.
+
+## (2) Ambiguities
+
+1. **"drop" requires a reason, but `--note` is also described as a field edit.**
+   - Quoted: "`--note` with `ready`, `in-progress` or `revert` is refused" (the Field edits section); "Require a reason in `--note`, otherwise ask" (drop).
+   - Resolved: the refusal list leaves out `drop` and `blocked`, so I treated `--note` with `drop` as the reason.
+   - This is only implied by the omission.
+2. **"Listing, then asking for confirmation" versus a confirmation already given.**
+   - Quoted: "List the node, its whole subtree, and every task that names any dropped ID … and ask for confirmation."
+   - Resolved: I showed the list and then applied your "yes".
+   - The skill does not say whether a confirmation given up front, before the list is shown, is enough.
+3. **A drop leaves the base uncommitted.**
+   - Quoted: "on the base leave it uncommitted (a backlog edit)".
+   - This is clear. But the backlog edit is also supposed to "stay uncommitted until the next commit a skill makes on a `todo/` branch". Nothing says what happens to it if the user never makes one.
+4. **Offering to create `PROJECT.md`.**
+   - Quoted: "otherwise offer to create `docs/plans/PROJECT.md`".
+   - It already existed, so this did not apply.
+5. **The `## Revisions` heading was the file's last line.**
+   - Quoted: "append `- <date +%F> · <reason> · dropped …` to its `## Revisions`".
+   - There was no blank line after the heading and no existing entries, so I appended the line directly under it.
+   - The skill does not say whether to add a blank line. `PROJECT.md` also has no `docs/plans/<ROOT-ID>-*` neighbours to compare against.
+6. **The order of "update any ancestor sizes" and "lint" is unclear when the dropped node is a root.**
+   - There are no ancestors, so I skipped it.
+   - The skill says the parent-with-no-children rule applies to a parent, not a root.
+7. **Line endings and final newline.**
+   - Quoted: "keep the file's line endings".
+   - I used `sed` on `TODO.md` rather than the Edit tool. The core prefers native file tools but allows the shell for "the file commands a skill names", and `sed` is not on that list.
+   - The result was fine: LF endings were preserved. But strictly I deviated from the guidance.
+8. **The core and the skill disagree on how `--status ready` treats a `[ ]` root.** Not relevant to this run, but I noticed it.
+   - The lifecycle table says "`ready` on the root releases the claim" for every `[ ]` root in a claimed tree.
+   - The skill says only a `[ ]` root whose `State:` names a branch is released.
+   - I did not need to resolve it.

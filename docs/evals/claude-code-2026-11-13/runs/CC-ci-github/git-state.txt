@@ -1,0 +1,28 @@
+## HEAD
+421a24ea0e71d20d45d7a43c8855f927b4220496
+## current branch
+main
+## branches
+* main 421a24e init
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/ci-github/repo  421a24e [main]
+## tags
+## refs
+refs/heads/main 421a24ea0e71d20d45d7a43c8855f927b4220496
+## log --all --graph
+* 421a24e  (HEAD -> main) init
+## status --porcelain
+?? .github/
+?? .todo/
+## stash
+## files (excluding .git and .claude)
+./.github/workflows/todo-check.yml
+./.gitignore
+./.todo/check.sh
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

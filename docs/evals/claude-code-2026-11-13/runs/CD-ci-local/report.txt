@@ -1,0 +1,72 @@
+## (1) Report
+
+**`/todo-init --ci` report**
+
+- **Created:** `.todo/check.sh` (executable). Nothing else. `TODO.md` and `CHANGELOG.md` already existed, so I left them as they were.
+- **Pre-push hook:** not written. The environment refused the write to `.git/hooks/pre-push` as a sensitive file. Per `ci.md`, here is what to do by hand. Create `.git/hooks/pre-push` with these two lines:
+  ```
+  #!/usr/bin/env bash
+  bash .todo/check.sh || exit 1
+  ```
+  Then run `chmod +x .git/hooks/pre-push`.
+- **Mode:** git, on `main`.
+- **Base branch:** `main`. This is the default, and the README has no `Base:` line.
+- **Working tree:** clean apart from the untracked `.todo/`.
+- **Runtime and package manager:** Python, no package manager. There is no marker file such as `pyproject.toml`, so the runtime is implied by the test command.
+- **Test command:** `python3 -m unittest discover -s tests`. It comes from the README `Tests:` line, so no `Tests:` line needs adding.
+- **CI command:** no CI config exists, so there is nothing to mismatch.
+- **`check.sh` run:** I ran it once and it passed (1 test, OK).
+- **`check.sh` contents:** it holds only the test line. `.todo/todo-lint.sh` is missing, so the lint line was skipped.
+- **Lint script:** `.todo/todo-lint.sh` does not exist. Save `tools/todo-lint.sh` from https://github.com/bassemZohdy/todo-skills there. I did not download it. Until it exists, the invariant check was done by reading.
+- **CI chosen:** local fallback. There is no CI file and no `origin` remote, so I wrote no GitHub workflow.
+- **Docs:** `README.md` exists. `docs/` does not, and I did not create it. `CONTRIBUTING.md` does not exist.
+- **Definition of Done:** none exists.
+- **Tree:** empty. There are no roots, no active node and no blocked IDs.
+- **Invariants:** none violated.
+- **Next step for you:** commit `.todo/` yourself, either on `main` or through a pull request. The skill does not commit it. The untracked `.todo/` does not block `/todo-continue`.
+
+## (2) Ambiguities and contradictions
+
+1. **Test line in `check.sh` when no lint exists.**
+   - Quote: "`bash .todo/todo-lint.sh TODO.md CHANGELOG.md   # only when .todo/todo-lint.sh exists`"
+   - Quote: "if it fails, write only the lint line (when `.todo/todo-lint.sh` exists), show the test line"
+   - It was unclear whether to write the test line when it passes the safety check but the lint is absent. I wrote only the test line, since `<test command>` is unconditional.
+
+2. **"Command safety" check on the test command.**
+   - Quote: "Check that command against 'Command safety'". The rule says to "read what it executes first" for scripts.
+   - `python3 -m unittest discover -s tests` is not a script file, but it runs `tests/test_calc.py`. I took that as fine because it is a test command. I did not read `tests/test_calc.py` or `calc.py` first; I ran the command directly.
+
+3. **Order of the safety check and the run.**
+   - The text says "Check ... (read it now)" and then "run it once after writing". I did not read `verification.md` until after I had written the file, but before I ran it. That is harmless but loosely ordered.
+
+4. **Writing the hook.**
+   - Quote: "written only on a yes, in its own tool call, then `chmod +x`... If the hook cannot be written (... your environment refuses writes under `.git/`), print its two lines".
+   - The write was refused. I did not try a shell workaround such as `cat >` through Bash, because the text anticipates the refusal. It is unclear whether a Bash fallback is allowed. I treated the refusal as final.
+
+5. **`--ci` in the `ci.md` table.**
+   - Quote: "no CI file and an `origin` whose URL host is `github.com`" versus "No CI file, and no `origin` on `github.com`".
+   - There is no remote here, so row 5 clearly applies. No ambiguity for this repo.
+
+6. **README `Tests:` placement.**
+   - Quote: "(a `Tests:` inside a sentence counts as that line...)" versus the report line "a sentence that names the command without `Tests:` does not count".
+   - It is consistent here, since the README has `Tests:` inside a sentence.
+
+7. **Mentioning CI "once in the report".**
+   - Quote: "Without `--ci`, mention it once in the report if `.todo/check.sh` does not exist."
+   - Not applicable with `--ci`.
+
+8. **Report timing.**
+   - Quote: "Do steps 8-9 first ... then print the report once".
+   - I treated step 9 (CI) as running before the report. Step 8 (pre-planning) was skipped, since there was no `--plan` and no stated goal.
+
+9. **Hook chmod and `test -x` check.**
+   - Quote: "then `chmod +x .git/hooks/pre-push` and check it with `test -x`".
+   - This is moot because the file was not written.
+
+10. **Stray blank line in `TODO.md`.**
+    - The existing `TODO.md` ends with a trailing blank line after the heading. The spec says "An empty tree is the two headings and no tasks".
+    - I treated it as a valid empty tree and changed nothing.
+
+11. **Clean-tree wording.**
+    - Quote: "whether the tree is clean".
+    - `.todo/` is untracked, and `ci.md` says it "do[es] not block `/todo-continue`", while the core says only backlog files are ignored by the check. I reported it as clean apart from `.todo/`.

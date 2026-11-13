@@ -1,0 +1,32 @@
+## HEAD
+bcf1c027aa72103781e03409b7b5c87dae1bbb45
+## current branch
+main
+## branches
+* main bcf1c02 chore(backlog): restore LF line endings
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/happy-path/repo  bcf1c02 [main]
+## tags
+## refs
+refs/heads/main bcf1c027aa72103781e03409b7b5c87dae1bbb45
+## log --all --graph
+* bcf1c02  (HEAD -> main) chore(backlog): restore LF line endings
+*   f51b74f  Merge FEAT-001 into main
+|\  
+| * 429bb74  chore(backlog): drain FEAT-001
+| * 8a9d04f  feat(calc): add subtract
+| * df6a7a8  chore(backlog): start FEAT-001
+|/  
+* d937998  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+* 9a8ac2c  init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

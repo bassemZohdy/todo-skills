@@ -95,6 +95,8 @@ Later that day TASK-110 cut the text every `/todo-continue` run loads by 12 perc
 
 Those runs raised wording gaps; FIX-114 (the plan stop, the breakdown and a blocked node) and FIX-115 (six sentences two or more reports called unclear) closed them, and 17 more fresh runs on the reworded text passed: [docs/evals/pi-glm-2026-11-13-wording/summary.md](evals/pi-glm-2026-11-13-wording/summary.md).
 
+Claude Code then ran all 34 scenarios on that text (`claude -p`, Windows 11 with Git Bash, one fresh run each): 32 passed on the first run, `happy-path` failed once because the agent wrote CRLF line endings with a Python script and passed on the rerun, and `ci-local` failed twice because headless Claude Code may not write `.git/hooks` (the skill printed the hook, as it says to). The three newest scenarios passed first time. Codex was probed once and could not run `python3` in its Windows sandbox, so the Codex half stays open (TASK-116). [docs/evals/claude-code-2026-11-13/summary.md](evals/claude-code-2026-11-13/summary.md).
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

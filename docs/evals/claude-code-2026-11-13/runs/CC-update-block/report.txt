@@ -1,0 +1,49 @@
+**(1) Report**
+
+FEAT-002 is now blocked. The lint-by-reading check (I1–I10) passed before and after the edit. There is no `.todo/todo-lint.sh`.
+
+```
+- [!] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title
+  - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
+  - Links: From: FEAT-000
+  - Blocked: waiting for the product decision on rounding → n/a (manual) → resolve this, then run /todo-update FEAT-002 --status ready
+```
+
+- **Git:** git mode on `main`, which is the base. FEAT-002 is in an unclaimed tree, so the change is made on the base. Per the skill it is left uncommitted as a backlog edit.
+- **Autonomous execution:** stopped, and I picked up no other node. FEAT-001 is untouched.
+
+**(2) Ambiguities and unclear instructions**
+
+1. **Pending `[!]` on a `[ ]` node.**
+   - Text: "`--status blocked`: set `[!]`, replace `State:` (or add as the last field line) with `Blocked:`".
+   - Unclear: it never says whether blocking is allowed on a `[ ]` node that isn't workable, or on a root, and the lifecycle table only implies it.
+   - Resolution: I read the table row "`[ ]` workable | … `blocked`" as allowing it, and proceeded.
+2. **Blocked line format with no command.**
+   - Text: "`<reason> → <command in backticks> <error, at most 5 lines joined with " / "> → <action required>`" against "otherwise the middle part is `n/a (manual)`, written without backticks".
+   - Unclear: the core format requires a backticked command, but the manual case omits it. I took the exception as the rule for manual blocks.
+3. **Note text as the reason.**
+   - Text: "built from `--note`" and "If `--note` gives only a reason".
+   - Unclear: whether the reason is the note verbatim, lowercased, or trimmed.
+   - Resolution: I used it verbatim.
+4. **Action text wording.**
+   - Text: "`resolve this, then run /todo-update <ID> --status ready` (written without quotes)".
+   - Unclear: it's ambiguous whether "without quotes" also means the command stays without backticks.
+   - Resolution: no quotes and no backticks, with `<ID>` substituted.
+5. **Loading `todo-continue`.**
+   - Text: "For `--status in-progress` also read `../todo-continue/SKILL.md`…".
+   - Unclear: not applicable here, since this is not an in-progress change.
+   - Resolution: not loaded.
+6. **Order of checks.**
+   - Text: "Run the invariant check first" against "With neither `--status` nor `--note`, show the node's lines".
+   - Unclear: the ID-in-CHANGELOG and unknown-ID checks come after the lint, but their order relative to the base-only rule is not stated.
+   - Resolution: I applied them in the order written.
+7. **Clean tree for a base edit.**
+   - Text: "on the base leave it uncommitted (a backlog edit)".
+   - Unclear: it doesn't say whether the pre-existing clean tree matters or whether to warn that the edit stays uncommitted.
+   - Resolution: I mentioned it in the report.
+8. **Title special characters.**
+   - Text: the title of FEAT-002 contains `<with>`, `"quotes"`, `&` and `</script>`.
+   - Unclear: this is data rather than skill text, so no rule is violated. I left it verbatim.
+9. **"Judge the marker in the checked-out `TODO.md`."**
+   - Text: this sits next to "A node of an unclaimed tree is changed only on the base".
+   - Resolution: no contradiction here, since both gave the same answer.

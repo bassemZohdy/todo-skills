@@ -1,0 +1,39 @@
+**Report: FEAT-001 · Add subtract to calc.py**
+
+- **Leftover work:** the uncommitted `calc.py` stub (`subtract` raising `NotImplementedError`) was kept as FEAT-001's work. The request said so, so the clean-tree check did not stop the run.
+- **Baseline:** green, 1 test passing, taken with the stub in place.
+- **Red:** the new `test_subtract` failed with `NotImplementedError` from the stub.
+- **Green:** I changed the stub to `return a - b`.
+  - `python3 -m unittest tests.test_calc.CalcTest.test_subtract` passed.
+  - `python3 -m unittest discover -s tests` passed with 2 tests, which is baseline 1 plus the new one. Nothing was deleted or skipped.
+- **Files changed:** `calc.py`, `tests/test_calc.py`, `TODO.md`, `CHANGELOG.md`.
+- **Review:** self-review, 0 findings.
+- **Branch and commits:** the work was on `todo/FEAT-001-add-subtract-calc-py`, now merged into `main` with `--no-ff` and deleted. The commits are:
+  - claim: `e7276e9`
+  - start: `ed5fd0b`
+  - feat: `8755579` (`feat(calc): add subtract`)
+  - drain: `946b13e`
+  - merge: `8625b21`
+- **CHANGELOG:** one FEAT-001 entry under `### Added`. FEAT-001 is gone from `TODO.md`, so the tree is empty.
+- **Checked out:** `main`, clean.
+- **Adjacent problems:** none.
+- **Next workable node:** none.
+- **Suggestion:** clear context before the next task.
+
+**Ambiguities and unclear instructions**
+
+1. **Leftover work and the claim step.**
+   - Quoted text: "let `git switch -c` carry them to the node's branch" (git-flow) and "fast-forward of the base" (step 4). With calc.py modified, the base switch/merge is ambiguous.
+   - Resolution: I created the branch with the changes carried, committed only `TODO.md` by path, and fast-forwarded `main`. I used `git stash` around the `main` switch, which the text doesn't mention, and I'm not sure it was needed.
+2. **Red for leftover work.**
+   - Quoted text: "tests it lacks are still written red first" and "`Red: <first failing assertion or missing-symbol error>`".
+   - Resolution: the stub already existed, so the red was `NotImplementedError` rather than a missing symbol. I treated that as an acceptable "first failing error" and wrote that in the commit body.
+3. **Slug.**
+   - Quoted text: "turn punctuation into spaces… keep the first 4 words that remain".
+   - Resolution: I applied it literally and got `add-subtract-calc-py`.
+4. **Root review.** Quoted text: "offer the optional root review once". FEAT-001 is `low` and touches none of the listed risk areas, so I skipped the offer.
+5. **No `.todo/check.sh`, no lint script.** I checked the invariants by reading, as the core allows.
+6. **Drain commit scope.** Quoted text: "Non-root node… Set `[x]`… (A root is never `[x]`; item 4 drains it.)" and "No git: items 2 and 3". For a leaf root, no `[x]` step applies. I did item 2, then the drain, then the merge, which seems intended.
+7. **Line endings.** The Windows file tool wrote CRLF into `tests/test_calc.py`, which was LF. I converted it back and the diff is then 3 lines. The core says to keep line endings but doesn't say how to handle tooling that changes them.
+8. **Placement of the "Skip steps 3-5" rule.** The `[/]`-resume rule says skip steps 3-5, but this node was `[ ]`. The leftover-work flow therefore runs the full steps 3-5, which is consistent. I found no contradiction.
+9. **Test-name carrying the ID.** Quoted text: "carry the ID in the test name, or in a docstring or comment". I used a docstring `"""FEAT-001"""`.

@@ -1,0 +1,23 @@
+## HEAD
+2b1a81e728dca86f49d170738741b805eb7f7e35
+## current branch
+main
+## branches
+* main 2b1a81e init with one root
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/add-fix/repo  2b1a81e [main]
+## tags
+## refs
+refs/heads/main 2b1a81e728dca86f49d170738741b805eb7f7e35
+## log --all --graph
+* 2b1a81e  (HEAD -> main) init with one root
+## status --porcelain
+ M TODO.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

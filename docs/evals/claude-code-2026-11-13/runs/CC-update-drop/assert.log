@@ -1,0 +1,13 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+PASS  FEAT-002 is gone from TODO.md and not in CHANGELOG
+PASS  FEAT-001 untouched
+PASS  nothing committed on the base
+PASS  the dropped ID is recorded in the plan's Revisions
+
+11 passed, 0 failed

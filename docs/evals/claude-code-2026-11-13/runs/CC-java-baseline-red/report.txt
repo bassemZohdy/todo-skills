@@ -1,0 +1,36 @@
+**1. Report**
+
+`/todo-continue` stopped at step 3 (ready check, baseline) with a red baseline. It changed nothing: no branch, no commit, no edit to `TODO.md`. `target/` was created by the test run, but it is in `.gitignore` and `git status` showed no other changes.
+
+- **Selected node:** `FEAT-001.1` (low), "Add subtract with a test class SubtractTest". It is the first workable `[ ]` node. The tree is unclaimed and on `main`.
+- **Checks before the baseline:** git mode is on. I checked the invariants by reading, since `.todo/todo-lint.sh` doesn't exist, and I1–I10 hold. There is no `Ref:` and the tree is clean.
+- **Baseline command:** `mvn -B test`. It comes from the README `Tests:` line and is a safe test command.
+- **Baseline result:** red. 1 test ran and 1 failed: `AddTest.adds`.
+  - First failing assertion: `AddTest.adds:9 expected: <3> but was: <-1>`.
+  - The cause is `Calc.add` returning `a - b`.
+- **Why it stops:** `FEAT-001.1` is a `FEAT`, not a `FIX`, so it may not start on a red baseline. The skill says not to select another node.
+- **Files, branch, commit:** none. The checked-out branch is `main`. No merge commands apply.
+- **Suggested fix** (run on the base):
+  `/todo-add "fix the failing baseline: AddTest.adds" --type fix --priority P0`
+- **Adjacent problems:** none beyond the baseline failure.
+- **Next workable node:** none until the fix lands.
+- **Next step:** clear the context before the next run.
+
+**2. Ambiguities and contradictions**
+
+1. **Quoted text:** "Otherwise (do not select another node) change nothing more, report 'baseline red'…" (step 3).
+   - The baseline run itself creates `target/` and changes nothing tracked. "Change nothing more" could be read to forbid that.
+   - I treated build output as fine because `.gitignore` covers it and the clean-tree rule ignores `target/`.
+2. **Quoted text:** "Check git and run the invariant check (core)" (step 1) together with "otherwise check I1-I10 by reading".
+   - Without the lint script, how thorough the reading has to be is left open. I checked each invariant briefly by eye.
+3. **Quoted text:** "Run the regression command … where the node starts, before its branch exists: on the base for an unclaimed tree."
+   - The step doesn't say whether to run the command if the tree is dirty or if the baseline is already known to be red from an earlier run. I ran it as written.
+   - The ordering in step 3 is also loose. "Lint clean … tree clean" come before "Where to start", but the baseline has to run on the base after switching to it. I was already on `main`, so this didn't matter here.
+4. **Quoted text:** "report 'baseline red' with the command and its failing tests" versus step 11, "after a red-baseline stop the failing run itself".
+   - It isn't clear whether "the failing run itself" means the full output or a summary. I gave a summary plus the first failing assertion.
+5. **Quoted text:** "suggest `/todo-add "fix the failing baseline: <failing test ids>" …` (ids as `reference/verification.md` step 1 writes them)".
+   - The Surefire example `AddTest.adds` is clear. The class here has no package prefix in the summary line, so I used the summary's form, `AddTest.adds`, not `mini.AddTest.adds`.
+6. **Quoted text:** "Check that it really runs tests before using it as the baseline" (verification step 6).
+   - The run executed 1 test, so this was fine. The skill doesn't say what to do with a command that fails to run at all. A later sentence says to stop "as for a red baseline".
+7. **Quoted text:** "First load the `todo` core skill and read `reference/git-flow.md` and `reference/verification.md`".
+   - I read the files directly because slash commands are unavailable. I didn't need `routing.md`, `lanes.md` or `failures.md`, because no flag was given and no verification run failed. A red baseline at step 3 might arguably count as a failure that calls for `failures.md`. The text says only step 9 failures do, so I skipped it.

@@ -1,0 +1,23 @@
+## HEAD
+c1c85f4156a4d1f66684681f99215e8a6268cecb
+## current branch
+main
+## branches
+* main c1c85f4 init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/status-readonly/repo  c1c85f4 [main]
+## tags
+## refs
+refs/heads/main c1c85f4156a4d1f66684681f99215e8a6268cecb
+## log --all --graph
+* c1c85f4  (HEAD -> main) init with two roots
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

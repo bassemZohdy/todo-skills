@@ -1,0 +1,23 @@
+## HEAD
+249962cc82d48f6c3b639fd745b44cef68574999
+## current branch
+main
+## branches
+* main 249962c init with a root to break down
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/decompose/repo  249962c [main]
+## tags
+## refs
+refs/heads/main 249962cc82d48f6c3b639fd745b44cef68574999
+## log --all --graph
+* 249962c  (HEAD -> main) init with a root to break down
+## status --porcelain
+ M TODO.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

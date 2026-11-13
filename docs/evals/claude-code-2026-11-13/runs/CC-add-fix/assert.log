@@ -1,0 +1,14 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+PASS  a P0 FIX-002 root with a complexity (one global ID sequence)
+PASS  FIX-002 placed before the P1 root
+PASS  its Done when targets a test id
+PASS  FEAT-001 untouched
+PASS  no code changed, nothing committed
+
+12 passed, 0 failed

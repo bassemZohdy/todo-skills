@@ -1,0 +1,28 @@
+## HEAD
+373eb147e6ce60dbb69b03bafff6c06ed8b2c178
+## current branch
+todo/FEAT-001-add-subtract-multiply-calc
+## branches
+  main                                     d086596 init with claimed tree
+* todo/FEAT-001-add-subtract-multiply-calc 373eb14 Merge FEAT-001.1 into FEAT-001
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/interrupted-merge/repo  373eb14 [todo/FEAT-001-add-subtract-multiply-calc]
+## tags
+## refs
+refs/heads/main d086596ade046826363c8073c0500de13767388f
+refs/heads/todo/FEAT-001-add-subtract-multiply-calc 373eb147e6ce60dbb69b03bafff6c06ed8b2c178
+## log --all --graph
+*   373eb14  (HEAD -> todo/FEAT-001-add-subtract-multiply-calc) Merge FEAT-001.1 into FEAT-001
+|\  
+| * f3b1b71  feat(calc): add subtract
+|/  
+* d086596  (main) init with claimed tree
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

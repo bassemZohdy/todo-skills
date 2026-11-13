@@ -1,0 +1,34 @@
+Everything is committed. Here is the report.
+
+## (1) Report
+
+**FEAT-001, "Add subtract to calc.py": blocked (`[!]`), not merged, not drained.** `--merge` had nothing to merge because the root did not finish.
+
+- **Baseline:** `python3 -m unittest discover -s tests` passed 2 tests (the README `Tests:` command).
+- **Red:** `test_subtract` failed first with an AttributeError (`calc.subtract` was missing).
+- **Green:** I added `subtract` to `calc.py`. `python3 -m unittest tests.test_calc.CalcTest.test_subtract` passes.
+- **Regression:** red, 2 of 3 passing. `tests.test_contract.ContractTest.test_public_names` fails because the public names are now `['add', 'subtract']` instead of the frozen `['add']`.
+- **Why blocked at once:** the failure is a test this node doesn't own, broken by the change the task asks for. `failures.md` says that blocks immediately without using up attempts. I did not touch the contract test.
+- **Files changed:** `calc.py`, `tests/test_calc.py` and `TODO.md`.
+- **Branch and commits:** `todo/FEAT-001-add-subtract-calc-py`. `main` was fast-forwarded to the claim commit, so it holds the claim `State:` line. The branch has these commits:
+  - start
+  - block
+  - a fix commit (`096cf5d`)
+
+  The first block commit (`57c4ac4`) wrongly truncated `TODO.md`. That was a mistake in my own script. The fix commit restores it.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-calc-py`.
+- **Next workable node:** none.
+- **To unblock:** either approve a public-interface change at the 2.0 review (update the contract test in its own task), or drop or rework FEAT-001. Then run `/todo-update FEAT-001 --status ready`.
+- **Adjacent problems:** none.
+- Clearing context is a good idea before the next run.
+
+## (2) Ambiguities in the skill text
+
+1. **Block commit contents.** The quote is "committed with the node's changed files as `chore(backlog): block <ID>`". It doesn't say whether that means committing the code that broke the regression, or only `TODO.md`. I committed the code and the new test too, because the text says to commit the node's changed files.
+2. **Commit scope.** The git-flow rules say node commits use `<type>(<scope>): …` with a `Refs:` body, while this block commit uses `chore(backlog)`. A `chore(backlog)` commit that carries code files seems to contradict "backlog commits … have no body". I used the `chore(backlog)` subject with no body.
+3. **Failing-test id format.** The skill says `reference/verification.md` step 1 writes ids like `test_calc.CalcTest.test_add`. The `Blocked:` format wants "failing test ids". I used the dotted `tests.test_contract…` form. The README discover command gives `test_contract.ContractTest…` instead.
+4. **Frozen-interface case.** The skills say nothing about a test that deliberately guards the public interface (a "frozen until 2.0" comment). I treated it as "a test the node does not own that the change the task asks for breaks". The skill doesn't tell me to ask the user instead.
+5. **Baseline for a leaf root.** Step 3 says to run the baseline "on the base for an unclaimed tree". Step 4 then creates the branch. That was clear. But "(do not select another node)" and the later "Red: … stop" rule are only for a red baseline, so nothing covers a regression that goes red mid-node apart from `failures.md`.
+6. **Claim commit.** `State: … next: start FEAT-001` for a leaf root is clear. But the claim line has no `attempts` or `baseline` items, and step 5 says the later claim "replaces" the line. That is fine, but "replacing one that exists" reads awkwardly next to "in this order".
+7. **Merge flag with a block.** Step 10.4 and the flag text don't say what `--merge` does when the root blocks. I did nothing.
+8. **Dotted Done-when path.** `tests.test_calc…` worked even though `tests/` has no `__init__.py` (it works as a namespace package). The "Done when cannot run" rule didn't apply.

@@ -1,0 +1,74 @@
+## HEAD
+336d721a3514c83f633747fbf376c0868f729ad5
+## current branch
+main
+## branches
+* main 336d721 Merge FEAT-002 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/multi-module/repo  336d721 [main]
+## tags
+## refs
+refs/heads/main 336d721a3514c83f633747fbf376c0868f729ad5
+## log --all --graph
+*   336d721  (HEAD -> main) Merge FEAT-002 into main
+|\  
+| * 20ce1a1  chore(backlog): drain FEAT-002
+| *   ac23cbf  Merge main into FEAT-002
+| |\  
+| |/  
+|/|   
+* |   6f82a2c  Merge FEAT-001 into main
+|\ \  
+| * | 08bca4e  chore(backlog): drain FEAT-001
+| * |   44c418c  Merge main into FEAT-001
+| |\ \  
+| |/ /  
+|/| |   
+| * | 718f93a  feat(core): add subtract to Calc
+| * | e876b74  chore(backlog): start FEAT-001
+| | * 5354862  feat(text): add shout to the text module
+| | * 52eeb47  chore(backlog): start FEAT-002
+| |/  
+|/|   
+* | 6325e7f  chore(backlog): claim FEAT-002 on todo/FEAT-002-add-shout-text-module
+|/  
+* 08a2b44  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-core-module
+* 79e2a01  init multi-module project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./core/pom.xml
+./core/src/main/java/mini/core/Calc.java
+./core/src/test/java/mini/core/AddTest.java
+./core/src/test/java/mini/core/SubtractTest.java
+./core/target/classes/mini/core/Calc.class
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./core/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./core/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./core/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./core/target/surefire-reports/TEST-mini.core.AddTest.xml
+./core/target/surefire-reports/TEST-mini.core.SubtractTest.xml
+./core/target/surefire-reports/mini.core.AddTest.txt
+./core/target/surefire-reports/mini.core.SubtractTest.txt
+./core/target/test-classes/mini/core/AddTest.class
+./core/target/test-classes/mini/core/SubtractTest.class
+./pom.xml
+./text/pom.xml
+./text/src/main/java/mini/text/Text.java
+./text/src/test/java/mini/text/ShoutTest.java
+./text/src/test/java/mini/text/UpperTest.java
+./text/target/classes/mini/text/Text.class
+./text/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./text/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./text/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./text/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./text/target/surefire-reports/TEST-mini.text.ShoutTest.xml
+./text/target/surefire-reports/TEST-mini.text.UpperTest.xml
+./text/target/surefire-reports/mini.text.ShoutTest.txt
+./text/target/surefire-reports/mini.text.UpperTest.txt
+./text/target/test-classes/mini/text/ShoutTest.class
+./text/target/test-classes/mini/text/UpperTest.class

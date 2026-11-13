@@ -1,0 +1,45 @@
+**Report: stopped at step 4 (tree claim). No start commit was made.**
+
+- **Node:** FEAT-001, "Add a subtract function to calc.py with a test". Its root was unclaimed, so I started a tree claim.
+- **Baseline:** green. `python3 -m unittest discover -s tests` ran 1 test and it passed.
+- **Race:** I created the root branch `todo/FEAT-001-add-subtract-function-calc` from main. After that, the repo's `post-checkout` hook put a rival claim commit on main. That commit (cb4c60c) sets `State: branch todo/FEAT-001-rival from main`. I did not edit the hook.
+- **Claim commit and fast-forward:**
+  - I made my claim commit, a8058ab, and ran `git merge --ff-only` on main. It failed with "Not possible to fast-forward".
+  - Following `git-flow-edge.md`, "Failed fast-forward", I re-read `git show main:TODO.md`. It names the rival's branch, so the claim was lost, not just outrun by a moved base.
+  - My branch held exactly one claim commit that touched only the `State:` line of `TODO.md`. That makes it a bare claim branch, so I force-deleted it with `git branch -D`.
+- **Final state:**
+  - The checked-out branch is main, and the tree is clean.
+  - The branches are `main` and `todo/FEAT-001-rival`.
+  - FEAT-001 is claimed by `todo/FEAT-001-rival`. If that is your work, run `git switch todo/FEAT-001-rival` and rerun `/todo-continue` to resume.
+  - Nothing else in the tree is workable.
+- **Files changed:** none. Commits on main: only the rival's claim.
+- **Adjacent problems:** none.
+- **Next workable node:** none, since FEAT-001 is the only node and it is claimed. Consider clearing context.
+
+## Ambiguities
+
+1. **Slug rule.**
+   - Quote: "turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`) … keep the first 4 words that remain".
+   - Resolved: "Add a subtract function to calc.py with a test" gives `add-subtract-function-calc`. The rule is clear, but it is easy to miscount.
+
+2. **The step 1 invariant check when `.todo/todo-lint.sh` is missing.**
+   - Quote: "otherwise check I1-I10 by reading".
+   - Resolved: I read the file and found no violations. The text doesn't say whether to report this explicitly.
+
+3. **Where the baseline runs, and whether the tree claim comes first.**
+   - Quote: "Run the regression command … where the node starts, before its branch exists" (step 3), against "Order … ready check → branch (in an unclaimed tree: tree claim published to the base first)".
+   - Resolved: I ran the baseline on main before creating the branch. In a race like this one, the claim then fails after the baseline was already taken, so the baseline run turns out to be wasted.
+
+4. **The deletion in "Failed fast-forward" depends on a definition in a different section.**
+   - Quote: "If your root branch is a bare claim branch (above), delete it".
+   - Resolved: "above" points to the definition under "Existing root branch", which is easy to miss. I checked the three criteria there and they held.
+
+5. **Whether a failed fast-forward is a reportable stop.**
+   - Quote: "Report the claimant or collision and stop, on the base" (git-flow-edge.md), against step 11's "on an early stop: which step and why".
+   - Resolved: I treated it as an early stop and reported it that way. The skill doesn't say whether to use the full report format.
+
+6. **No hint that the rival branch exists in this clone.**
+   - The core says to add "if this is your work: `git switch <branch>`" when the claimed branch exists locally. It does here, so I added the hint. Nothing tells you whether that wording suits a branch you just lost a race to.
+
+7. **A stray command of mine.**
+   - I accidentally ran `git branch -f x` and then `git branch -D x` in one command. It created and deleted a throwaway branch, `x`, with no lasting effect. This is not a skill ambiguity.

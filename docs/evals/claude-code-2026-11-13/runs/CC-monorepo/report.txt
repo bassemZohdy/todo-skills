@@ -1,0 +1,37 @@
+## (1) Reports
+
+**`/todo-init`**
+- **Created:** `TODO.md` (empty tree). `CHANGELOG.md` already existed with `## [Unreleased]`, so I left it alone.
+- **Git:** git mode, base branch `main`. The tree was clean at the start.
+- **Runtime and test command:** Python (unittest) with a Makefile. The test command is `make test`, taken from a README sentence ("Run `make test`…"), not from a `Tests:` line. It matched the Makefile `test` target. The Makefile runs unittest discover in each package. The CI command is unknown because there is no CI config.
+- **README `Tests:` line:** I added `Tests: \`make test\`` after the Packages line, on your yes.
+- **Docs:** `README.md` is present. `docs/` is missing, and I didn't create it. There is no Definition of Done.
+- **Scripts:** `.todo/todo-lint.sh` and `.todo/check.sh` don't exist. I checked the invariants by reading. `--ci` wasn't requested, so I only noted that `check.sh` is absent.
+- **Tree:** empty, no violations.
+
+**`/todo-add`**
+- **Task:** `FEAT-001 · P1 · low · Add a power function calc.power(base, exp) to the api package`. The type is FEAT by the "add" rule, and it's a single leaf.
+- **Done when:** calc.power(2, 3) returns 8; `cd packages/api && python3 -m unittest tests.test_calc.CalcTest.test_power`. The regression is the full suite.
+
+**`/todo-continue --merge`**
+- **FEAT-001:** done and merged into `main` with `--merge`. The root branch was deleted.
+- **Baseline and red:** the baseline was 2 passing. The new test failed first with `AttributeError: module 'calc' has no attribute 'power'`.
+- **Verification:** `Done when` passed, and the full `make test` run showed 3 passing against the baseline of 2. Review was by myself with 0 findings.
+- **Files:** `packages/api/calc.py` and `packages/api/tests/test_calc.py` changed. The `CHANGELOG.md` `[Unreleased]` → `### Added` entry was inserted first, and the subtree was removed from `TODO.md`.
+- **Docs:** doc-drift grep for `power` in `README.md` found no hits.
+- **Commits:** `claim`, `start`, `feat(api): add calc.power function`, `drain`, `Merge FEAT-001 into main`, and a final `chore(api): normalize line endings to LF`.
+- **Line-ending slip:** my Python rewrites on Windows turned `TODO.md` and `test_calc.py` into CRLF, and I'd already merged. I fixed it on `main` with a follow-up commit, not a reset. This was my mistake, not a skill problem.
+- **Next:** no workable node, the tree is empty. The tree is clean and nothing was pushed.
+
+## (2) Ambiguities and contradictions
+
+1. **Where to put `Tests:`.** The text is "Place it under an existing `Tests` heading, or at the end of the first section if no such heading exists". It doesn't say whether "first section" means the content under the top `#` heading or the first `##` section. I read it literally: the end of the intro, right after the Packages line.
+2. **Test command source versus table.** The text is "the README `Tests:` line, then a command stated in README.md…, then … the first matching row above". Here README states `make test` and the table also gives `make test`, so the result is the same. I wasn't sure whether to name the source as the README sentence or the Makefile marker, and I named the README sentence.
+3. **Order of init steps.** Step 7 says to prepare the report, "Do steps 8-9 first… then print the report once". Steps 8-9 were not triggered, so I treated them as no-ops.
+4. **Slug rule.** The text is "turn punctuation into spaces… drop the words a, an, the, to, of, and, for, with, keep the first 4 words". `calc.power(base, exp)` becomes `calc power base exp`, so the slug is `add-power-function-calc`. This is clear, but it truncates the title. It is a minor surprise, not a real ambiguity.
+5. **Complexity for `power`.** The core table says `low` is "a guard or small function whose fix the task line states", and `mid` is the default when unsure. I chose `low` because the function is trivial.
+6. **README diff check.** The text is "staged… while `git diff README.md` adds exactly those lines, optionally after a blank line". My diff added the `Tests:` line plus a blank line, but the blank line comes before the line in the file and after it in the diff output. It was ambiguous whether this counted, and I decided it did.
+7. **Merge step ordering for a leaf root.** `git-flow` says "Refresh before a root lands… then drain", while `todo-continue` 10.4.1 says "Refresh from the base". Both agree, so there is no conflict.
+8. **Commit with `Refs:` on the claim and start commits.** `git-flow` says backlog commits "have no body except `Refs:` and `Includes:` on a drain". I gave claim and start no body, and only the drain got `Refs:`. A literal reading allows `Refs:` only on drains, and that is what I did.
+9. **`Done when` with `cd … &&` and a test id.** `tests.test_calc.CalcTest.test_power` resolves because `tests/` has no `__init__.py`. That works as a namespace package. The skill assumes a test id will resolve, and it didn't mention namespace packages.
+10. **Line endings.** The core says "keep the file's line endings", but it gives no tip for avoiding the Windows CRLF rewrite when using Python or `printf` through Git Bash. That's why I made the mistake above.

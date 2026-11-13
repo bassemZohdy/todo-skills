@@ -141,7 +141,7 @@ Every command checks these first. `.todo/todo-lint.sh` (a copy of [`tools/todo-l
 | I2 | Every ID is unique in `TODO.md` |
 | I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no `State:` together with `Blocked:`, a `Blocked:` line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size, a title, an ID of `FEAT-`, `FIX-` or `TASK-` plus at least three digits (children append `.n`), and `State:` items from the documented grammar (`attempts n/3` with n from 0 to 3, `baseline`, `tier`, `branch <name> from <branch>`, `hyp`, `no git`, `files`, `docs`, and a `next:` step from the list; the order of the items is not checked) |
 | I4 | `TODO.md` is at most 120 lines |
-| I5 | No ID is in both `TODO.md` and `CHANGELOG.md` (IDs after `Includes:` count) |
+| I5 | No task ID in `TODO.md` is also a `CHANGELOG.md` entry ID or `Includes:` ID (IDs named only in `Depends:` or `From:` do not count) |
 | I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
 | I7 | Every ID in `Depends:` or `From:` exists in `TODO.md` or `CHANGELOG.md` |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indentation, no `[x]` root, no `[x]` node with open children, and any size matches the tree |

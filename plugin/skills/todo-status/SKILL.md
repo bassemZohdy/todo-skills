@@ -6,7 +6,7 @@ argument-hint: "[--search <text>] [--last <N>]"
 
 # /todo-status
 
-First load the `todo` core skill (tree format, IDs, invariants). If it is not available as a skill, read `../todo/SKILL.md`.
+First load the `todo` core skill (tree format, IDs, invariants). If you cannot load a skill by name, read `../todo/SKILL.md`.
 
 This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`. In a non-git folder print the core's no-git warning. An invariant violation is reported, never repaired.
 
@@ -17,15 +17,15 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 3. **Active** ("none" without a `[/]` node): the `[/]` node and its ancestors (shown as in progress), its `State:` line, and in git mode whether `git status` shows changes and which branch is checked out. In no-git mode show its `State:` and `files:` only.
 4. **Next**: if a `[/]` node exists, `/todo-continue` resumes it: show "resume <ID>". Otherwise show the first workable `[ ]` node (ID, title, Done when command). If none, say what blocks the tree.
 5. **Blocked**: each `[!]` node with its `Blocked:` reason and action required.
-6. **Recently drained**: the newest `--last <N>` entries of CHANGELOG.md (default 5): `## [Unreleased]` first, then the latest version section when `[Unreleased]` has fewer.
+6. **Recently drained**: the newest `--last <N>` entries of CHANGELOG.md (default 5): `## [Unreleased]` first, then the latest version section when `[Unreleased]` has fewer than N.
 
 ## Progress
 
 Derived on every run and never written to TODO.md or any other file. The unit is a leaf (a task without children); a leaf root counts itself.
 
-- **Bar:** 10 cells: `#` for done leaves (rounded down), `!` for blocked `[!]` leaves (rounded, at least one when any leaf is blocked, at most the cells left), `-` for the rest, then `<done>/<total>`. For example `[######!---] 6/9`.
+- **Bar:** 10 cells: `#` for done leaves (10 × done / total, rounded down), `!` for blocked `[!]` leaves (rounded, at least one when any leaf is blocked, at most the cells left), `-` for the rest, then `<done>/<total>`. For example `[######!---] 6/9`.
 - **Per root** over the leaves beneath it, and **per lane** over the leaves of its roots. Done means `[x]`.
-- **Overall:** the line `Progress: [<bar>] <done>/<total> leaves · <n> active · <n> blocked · <n> roots open · <n> drained in [Unreleased]`. It also counts the roots already drained into `## [Unreleased]`, as done: their leaves are the IDs after `Includes:` that are no other included ID's parent (the entry's own ID when it has no `Includes:`); entries without an ID do not count. When `.todo/todo-lint.sh` exists, run `bash .todo/todo-lint.sh --progress` and print its line instead of computing it; the numbers must agree.
+- **Overall:** the line `Progress: [<bar>] <done>/<total> leaves · <n> active · <n> blocked · <n> roots open · <n> drained in [Unreleased]` (roots open: roots in `TODO.md`; drained: entries; the bar uses this line's totals). Its `<done>` and `<total>` also count the leaves of roots already drained into `## [Unreleased]`: these are the IDs after `Includes:` that are no other included ID's parent (the entry's own ID when it has no `Includes:`); entries without an ID do not count. When `.todo/todo-lint.sh` exists, run `bash .todo/todo-lint.sh --progress` and print its line instead of computing it; the numbers must agree.
 
 ## Search
 

@@ -94,7 +94,7 @@ Checked: make smoke
 
 - Never take one side wholesale (`--ours`/`--theirs`) on `TODO.md` or `CHANGELOG.md`.
 - **CHANGELOG.md:** keep both sides' entries and drop duplicates of the same ID.
-- **TODO.md:** keep the union of task blocks. If two roots share an ID, keep the one already in the base and renumber the newer one with its subtree, rewriting every `Depends:` and `From:` that pointed into it; if the renumbered root is claimed, stop and ask. An ID now in both files is removed from `TODO.md`.
+- **TODO.md:** keep the union of task blocks. If two roots share an ID, keep the one already published (in a pull: the incoming side), give the other and its subtree the next free root number (counted after the merge), keep the root order, and rewrite every `Depends:` and `From:` elsewhere that named the old IDs; if the renumbered root is claimed, stop and ask. An ID now in both files is removed from `TODO.md`.
 - **Source files:** inside the node's scope, resolve minimally and rerun `Done when`; otherwise stop and ask.
 - One agent per working tree. Use `--worktree` or lanes for parallel work.
 

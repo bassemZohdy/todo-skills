@@ -6,7 +6,7 @@ argument-hint: "[--plan] [--ci]"
 
 # /todo-init
 
-First load the `todo` core skill (tree format, invariants, guardrails). If it is not available as a skill, read `../todo/SKILL.md`.
+First load the `todo` core skill (tree format, invariants, guardrails). If you cannot load a skill by name, read `../todo/SKILL.md`.
 
 ## Steps
 
@@ -53,9 +53,9 @@ First load the `todo` core skill (tree format, invariants, guardrails). If it is
    Precedence: the README `Tests:` line, then a command stated in README.md or CONTRIBUTING.md, then the CI config's command, then the first matching row above. When the command comes from somewhere other than the table (for example a README sentence giving `python3 -m unittest`), name that source. If none is stated, report "unknown" and ask the user once; never invent one. Also report the test command CI runs (`.github/workflows`, `.gitlab-ci.yml`, `Jenkinsfile`), so the regression command can match it, and flag a mismatch. If README does not state the command after `Tests:` (on its own line or in a sentence), offer to add a `Tests:` line (`Tests: \`<command>\``) so every later run uses the same command; write it only on the user's yes. Place it under an existing `Tests` heading, or at the end of the first section if no such heading exists; preserve unrelated text. That line is a backlog file (core): the first tree claim commits it, so it does not block the clean-tree check.
 
    Do not run the suite (the `--ci` step may run `.todo/check.sh` once to show it works). Apart from that optional `Tests:` line and `.todo/check.sh` (`--ci`), do not persist the detected command. It is reported, and reused as the default regression command and when `todo-add` proposes `Done when` lines.
-5. In a git repo, report the base branch (core "Git mode"; offer the README `Base:` line there) and whether the tree is clean.
+5. In a git repo, report the base branch (core "Git mode", which says when to offer the README `Base:` line) and whether the tree is clean.
 6. Check for a heading named exactly `Definition of Done` followed by a checklist (list items) in README.md, CONTRIBUTING.md or `docs/`; a heading that only describes the feature does not count. Report where it is, or that none exists. Never create one.
-7. Run the invariant check (core). Prepare the report: what was created, git or no-git mode, base branch, runtime / package manager / test command and its source, doc files found, Definition of Done location, whether `.todo/todo-lint.sh` exists and whether `.todo/check.sh` exists, the tree summary (roots with `children done/total`, active node, blocked IDs; "empty" for an empty tree) and any invariant violations. Ask the questions of steps 8-9 first, then print the report once, after the answers.
+7. Run the invariant check (core). Prepare the report: what was created, git or no-git mode, base branch, runtime / package manager / test command and its source, doc files found, Definition of Done location, whether `.todo/todo-lint.sh` exists and whether `.todo/check.sh` exists, the tree summary (roots with `children done/total`, active node, blocked IDs; "empty" for an empty tree) and any invariant violations. Do steps 8-9 first (their questions, and their writes on a yes), then print the report once, with what they wrote.
 
 8. **Pre-planning** (only with `--plan`, or when the tree is empty and the user's `/todo-init` message states a project goal). Ask once, at most 3 short questions the repo does not answer: the goal and done-state, what is out of scope, and which parts could run as parallel lanes. Offer to save the answers as `docs/plans/PROJECT.md`; write it only on the user's yes. Then point to `/todo-plan` for the tree.
 9. **CI** (only with `--ci`, or when the user asks for it). Read `reference/ci.md` from the core's folder (`../todo/reference/ci.md`) and follow it: `.todo/check.sh` (lint + tests), the CI job that fits the repository, or the local pre-push fallback. Every file only on the user's yes. Without `--ci`, mention it once in the report if `.todo/check.sh` does not exist.

@@ -6,7 +6,7 @@ argument-hint: <description> [--priority P0|P1|P2] [--ref <docs-path>] [--type f
 
 # /todo-add
 
-First load the `todo` core skill (tree format, scope rule and complexity, IDs, invariants, guardrails) and read `reference/verification.md` from its folder ("Writing a Done when"). If the core is not available as a skill, read `../todo/SKILL.md` and `../todo/reference/verification.md`.
+First load the `todo` core skill (tree format, scope rule and complexity, IDs, invariants, guardrails) and read `reference/verification.md` from its folder ("Writing a Done when"). If you cannot load a skill by name, read `../todo/SKILL.md` and `../todo/reference/verification.md`.
 
 Defaults: priority `P1`. Unless `--type` is given, the type is the first rule that matches the description: (1) its first word, or the word after a leading "add", starts with test, doc, refactor, rename or chore → `TASK`; (2) fix as the first word, or bug, crash, crashes, regression or broken anywhere → `FIX`; (3) add, implement or support as the first word, or new anywhere → `FEAT`; (4) otherwise `TASK`. With `--parent`, the type is the parent's prefix, and `--priority`, `--lane` and `--type` are refused (children inherit them). Show the chosen prefix in the result.
 

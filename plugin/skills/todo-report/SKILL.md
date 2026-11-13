@@ -5,7 +5,7 @@ description: Generate an interactive HTML status page for the project at docs/st
 
 # /todo-report
 
-First load the `todo` core skill (tree format, lanes, git mode). If it is not a skill, read `../todo/SKILL.md`.
+First load the `todo` core skill (tree format, lanes, git mode). If you cannot load a skill by name, read `../todo/SKILL.md`.
 
 Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that is renamed or removed) (ask before creating `docs/` if it is missing), from the template `template.md` in this skill's folder (an HTML page inside a fenced block). Never edits TODO.md, CHANGELOG.md or any other file. No network, no fetch.
 
@@ -17,7 +17,7 @@ Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that 
    - `__TODO__`: the full text of `TODO.md`.
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
    - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.
-   - `__META__`: one `key: value` per line, only those you actually know (leave a key out rather than writing "none"): `project` (repo or folder name), `generated` (today's date), `base`, `branch` (checked out), `mode` (git or no-git), `tests` (the detected test command, see `/todo-init` step 4), `lint` (pass or the failures), `Definition of Done` (where it is), `claim` (one line per claimed root: `<ID> -> <branch>`, add `(stale)` if the branch is gone), `branches` (open `todo/*` branches), `version` (newest released CHANGELOG version).
+   - `__META__`: one `key: value` per line, only those you actually know (leave a key out rather than writing "none"): `project` (repo or folder name), `generated` (today's date), `base`, `branch` (checked out), `mode` (git or no-git), `tests` (the detected test command, see `/todo-init` step 4), `lint` (pass or the failures), `Definition of Done` (where `/todo-init` step 6 finds it), `claim` (one line per claimed root: `<ID> -> <branch>`, add `(stale)` if the branch is gone), `branches` (local `todo/*` branches), `version` (newest released CHANGELOG version).
 4. Report the path in one line, and that opening the file in a browser shows it. Mention that it is a snapshot: rerun `/todo-report` to refresh. Suggest committing it only if the team wants it versioned.
 
 Do not summarise the data in chat beyond the one-line counts (roots, in progress, blocked, drained).

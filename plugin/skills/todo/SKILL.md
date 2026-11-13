@@ -16,7 +16,7 @@ The repository is a closed-loop state machine built from files that already exis
 | Checks (optional) | `.todo/check.sh`, `.todo/todo-lint.sh`, CI job | Lint + tests, run by CI, a pre-push hook and `/todo-continue` | `check.sh` written by `/todo-init --ci` on a yes; `todo-lint.sh` copied in by the user; committed by the user |
 | Version store | git | Branch or worktree per task. Nothing reaches the base branch unverified | See "Git mode" |
 
-Prefer native file tools (Read/Edit/Write) for file edits; however you edit, change only the intended lines and keep the file's final newline. Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`, `cmp`, `mv`, and `rm` of a skill's own temporary file).
+Prefer native file tools (Read/Edit/Write) for file edits; however you edit, change only the intended lines and keep the file's line endings and final newline. Commands in the skills are POSIX: on Windows run them, `Done when` included, through Git Bash (`bash -c`). Use the shell only for `git`, test and `Done when` commands, the optional scripts, and the file commands a skill names (`cp`, `chmod`, `mkdir -p`, `date`, `grep`, `cmp`, `mv`, and `rm` of a skill's own temporary file).
 
 **Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md` named by a `Ref:`, and the README `Tests:` and `Base:` lines written by a todo-* skill. README.md is staged by a backlog commit only while `git diff README.md` adds exactly those lines, optionally after a blank line; README edits a node makes under "Documentation drift" are that node's files and are committed with it; any other README change is the user's: it counts for the clean-tree check and is never staged by a backlog commit. Backlog edits stay uncommitted until the next commit a skill makes on a `todo/` branch (the tree claim, usually), which stages them by explicit path. New roots, and any change to a node of an unclaimed tree, are made only on the base branch; on a `todo/` branch the skills refuse them and name the base. The clean-tree check (`reference/git-flow.md`) ignores them.
 
@@ -84,7 +84,7 @@ Markers: `[ ]` open, `[/]` active (at most one in the file), `[!]` blocked, `[x]
 
 ### Tree, levels and complexity
 
-A node at level L has its header indented `2L` spaces and its fields `2L+2`. Maximum 3 levels.
+A node at level L (a root is level 0) has its header indented `2L` spaces and its fields `2L+2`. Maximum 3 levels.
 
 **Scope rule.** Every leaf is one change that fits one context window and touches at most 5 files; bigger work is split into children (`/todo-add`). A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down.
 
@@ -161,7 +161,7 @@ Order for every node: **ready check → branch (in an unclaimed tree: tree claim
 
 ## CHANGELOG entry (written only by a root drain)
 
-Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before and after it:
+Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before and after it (also between it and its first entry):
 
 ```markdown
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.
@@ -194,7 +194,7 @@ Loaded only when a command needs them, from `reference/` (`../todo/reference/` f
 | I2 | Every ID is unique in TODO.md |
 | I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no State together with Blocked, a Blocked line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
 | I4 | TODO.md is at most 120 lines |
-| I5 | No ID appears in both TODO.md and CHANGELOG.md (IDs after `Includes:` count) |
+| I5 | No task ID in TODO.md is also a CHANGELOG.md entry ID or `Includes:` ID (IDs named only in `Depends:` or `From:` do not count) |
 | I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, and any size given matches the tree |

@@ -6,7 +6,7 @@ Read on demand from `reference/git-flow.md`, only when its pointers send you her
 
 If the fast-forward in step 4 failed, stay on the base and read `git show <base>:TODO.md` again:
 
-- **Lost or collided:** the root's `State:` there names another branch, or a root absent from the starting base has appeared there with the same ID. If your root branch is a bare claim branch, delete it with `git branch -D` (the only forced delete the skills make). Otherwise leave it and report it; preserve the pending backlog on that branch and print `git checkout <branch> -- <those paths>` so the user can restore it on the base after resolving any ID collision. Report the claimant or collision and stop, on the base.
+- **Lost or collided:** the root's `State:` there names another branch, or a root absent from the starting base has appeared there with the same ID. If your root branch is a bare claim branch, delete it with `git branch -D` (the only forced delete the skills make). Otherwise (only then) leave it and report it: preserve the pending backlog on that branch and print `git checkout <branch> -- <those paths>` so the user can restore it on the base after resolving any ID collision. Report the claimant or collision and stop, on the base.
 - **The base only moved:** `git rebase <base> <root branch>` (this checks out the root branch; if it stops on a conflict, resolve `TODO.md`/`CHANGELOG.md` with the conflict rules below and `GIT_EDITOR=true git rebase --continue`, and for any other file `git rebase --abort`, `git switch <base>`, report and stop), lint, then `git switch <base> && git merge --ff-only <root branch>` once more and switch back to the root branch. If the base changed any file other than backlog files, take the baseline again on the root branch; if it is red and the node may not start red (`/todo-continue` step 3), stop and report (the claim stays; `/todo-update <ROOT-ID> --status ready` releases it). If this fails too, stop on the base and tell the user (your unpublished branch may stay; a rerun deletes it at step 2).
 
 ## `--worktree`
@@ -17,6 +17,6 @@ The main checkout is never switched; its unrelated changes are ignored by the cl
 
 - Never take one side wholesale (`--ours`/`--theirs`) on TODO.md or CHANGELOG.md.
 - **CHANGELOG.md**: keep both sides' entries, drop duplicates of the same ID.
-- **TODO.md**: keep the union of task blocks. If two roots share an ID, keep the one already in the base, renumber the newer one and its subtree, and rewrite every `Depends:` and `From:` that pointed into it; if the renumbered root is claimed, stop and ask instead. If an ID is now in both files, remove it from TODO.md.
+- **TODO.md**: keep the union of task blocks. If two roots share an ID, keep the one already published (in a pull: the incoming side), give the other and its subtree the next free root number (core "IDs", counted after the merge), keep the core's root order, and rewrite every `Depends:` and `From:` elsewhere that named the old IDs; if the renumbered root is claimed, stop and ask instead. If an ID is now in both TODO.md and CHANGELOG.md, remove it from TODO.md.
 - **Source files**: inside the node's scope, resolve minimally and rerun `Done when`; otherwise stop and ask.
 - One agent per working tree. Use `--worktree` or lanes (`/todo-continue --all-lanes`) for parallel work.

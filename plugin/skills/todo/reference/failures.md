@@ -5,11 +5,12 @@ Read on demand from `/todo-continue` ("Test failures"), only when a verification
 ## Test failures
 
 - Diagnose first: reproduce, read the first failing assertion, write one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, rerun.
-- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started; the first red run is not one.
+- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started; the red run of step 7 (the new test failing before the implementation) is not one.
 - **Escalation** (`reference/routing.md`): with a `Models:` line and work in a subagent (`--delegate`, lanes), each failed attempt raises the next one a tier (`low` → `mid` → `high`), recorded as `tier:`. Without routing, say in the report that a stronger model might help.
 - You may change code and the tests this node creates, within the task line.
 - Forbidden: editing `Done when`, deleting, skipping or weakening tests, `|| true`, loosened assertions, a narrower command.
-- A failure outside the node (a flaky test, a regression beyond the task line), and the third failed attempt (list each hypothesis), block the node: `[!]`, `State:` replaced by a `Blocked:` line in the core format (secrets redacted; no git: a root's `files:`/`docs:` go into the action part as `(files: …; docs: …)`), committed with the node's changed files as `chore(backlog): block <ID>`; stop. Roots block the same way.
+- **Outside the node** is a failure that no change within the task line and the tests this node creates can turn green: a flaky test, a regression beyond the task line, or a test the node does not own that the change the task asks for breaks. It blocks at once; the remaining attempts are not used up on it.
+- A failure outside the node, and the third failed attempt (list each hypothesis), block the node: `[!]`, `State:` replaced by a `Blocked:` line in the core format (secrets redacted; no git: a root's `files:`/`docs:` go into the action part as `(files: …; docs: …)`), committed with the node's changed files as `chore(backlog): block <ID>`; stop. Roots block the same way.
 - Run commands only under the safety rules in `reference/verification.md`.
 
 ## A Done when that cannot run

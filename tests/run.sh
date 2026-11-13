@@ -453,6 +453,16 @@ for f in todo-add todo-plan; do grep -qF 'reference/done-when.md' "$root/plugin/
 for s in 'lint W1' 'lint W2' 'lint W5' 'runnable shell command'; do grep -qF -- "$s" "$lc_ref/done-when.md" 2>/dev/null || lc_bad="$lc_bad done-when.md('$s')"; done
 grep -qF '"Existing root branch"' "$lc_ref/git-flow.md" && grep -q '^## Existing root branch' "$lc_ref/git-flow-edge.md" && grep -qF '**Bare claim branch:**' "$lc_ref/git-flow-edge.md" || lc_bad="$lc_bad existing-root-branch"
 if [ -z "$lc_bad" ]; then ok "the rare branches moved out of the /todo-continue load keep their pointers and rules (TASK-110)"; else bad "moved rare branches (TASK-110):$lc_bad"; fi
+# FIX-114: what the first agent runs of the plan stop, the breakdown and a blocked node asked
+# (docs/evals/pi-glm-2026-11-13-load-cut/summary.md): what makes a plan proposed and whether the first --plan run asks,
+# what becomes of next: decompose, where the new children are committed, and when a failure is outside the node.
+f14_bad=""
+for s in 'says `next: plan proposed`' 'without asking' 'deleting `next: decompose`' 'stays uncommitted'; do grep -qF -- "$s" "$lc_ref/plan-step.md" || f14_bad="$f14_bad plan-step.md('$s')"; done
+for s in 'the red run of step 7' '**Outside the node**' 'a test the node does not own' 'blocks at once'; do grep -qF -- "$s" "$lc_ref/failures.md" || f14_bad="$f14_bad failures.md('$s')"; done
+for s in 'the red run of step 7' 'a test the node does not own'; do grep -qF -- "$s" "$root/docs/VERIFICATION.md" || f14_bad="$f14_bad VERIFICATION.md('$s')"; done
+# The always-loaded text must not promise what the reference files take back (seen in the first runs on the FIX-114 text).
+for s in 'the next run asks for the approval (step 6)' 'at once when the failure is outside the node'; do grep -qF -- "$s" "$lc_ct" || f14_bad="$f14_bad todo-continue('$s')"; done
+if [ -z "$f14_bad" ]; then ok "the plan stop, the breakdown and the block answer what the first agent runs asked (FIX-114)"; else bad "plan stop, breakdown, block (FIX-114):$f14_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi

@@ -2,10 +2,10 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-113** · P1 · mid · Add trial scenarios for three paths no scenario reaches: the --plan stop, breaking down a node with next: decompose, and a block after a regression outside the node
+- [/] **TASK-113** · P1 · mid · Add trial scenarios for three paths no scenario reaches: the --plan stop, breaking down a node with next: decompose, and a block after a regression outside the node
   - Done when: each new scenario sets up, an untouched setup fails its assertions, and tests/trials/README.md and docs/trials.md list it; `bash tests/trials/selftest.sh`
   - Links: From: TASK-110
-  - State: branch todo/TASK-113-add-trial-scenarios-three from main; next: start TASK-113
+  - State: attempts 0/3; baseline 249 passing; branch todo/TASK-113-add-trial-scenarios-three from main; next: read docs
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets
   - Done when: tracked files under docs/evals fall below the agreed count, every README and docs link still resolves, and a dangling evidence link fails the check; `bash tests/run.sh`
   - State: next: decompose

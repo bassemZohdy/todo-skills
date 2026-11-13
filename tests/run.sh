@@ -467,7 +467,7 @@ if [ -z "$f14_bad" ]; then ok "the plan stop, the breakdown and the block answer
 f15_bad=""; f15_sk="$root/plugin/skills"
 for s in 'already names the test' 'the `[x]` node the core check found' 'switch to it unless it is checked out' 'without git also `files:`'; do grep -qF -- "$s" "$f15_sk/todo-continue/SKILL.md" || f15_bad="$f15_bad todo-continue('$s')"; done
 for s in 'a `Tests:` inside a sentence counts as that line' 'or when both hold:'; do grep -qF -- "$s" "$f15_sk/todo-init/SKILL.md" || f15_bad="$f15_bad todo-init('$s')"; done
-grep -qF -- 'as in (feat!): at the start of an entry' "$f15_sk/todo-release/SKILL.md" || f15_bad="$f15_bad todo-release(breaking-change marker)"
+grep -qF -- 'as in (feat!) at the start of an entry' "$f15_sk/todo-release/SKILL.md" || f15_bad="$f15_bad todo-release(breaking-change marker)"
 if [ -z "$f15_bad" ]; then ok "six sentences that reports called unclear say what is meant (FIX-115)"; else bad "unclear sentences (FIX-115):$f15_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).

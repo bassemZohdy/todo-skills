@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-114** · P1 · low · Close four gaps on the plan stop, the breakdown and a blocked node, found by the first agent runs of those paths: what makes a plan proposed and whether the first --plan run asks, what becomes of next: decompose, where the new children are committed, and when a failure is outside the node
-  - Done when: plan-step.md and failures.md state each of the four, docs/VERIFICATION.md agrees, and the new wording is pinned; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#what-the-reports-say-on-t5 · From: TASK-113
-  - State: attempts 0/3; baseline 251 passing; branch todo/FIX-114-close-four-gaps-on from main; next: read docs
 - [ ] **FIX-115** · P1 · low · Reword six sentences that two or more reports on the cut text called unclear: the test ID when Done when names the test, the parent's branch already checked out, the State items updated during a run, a Tests: inside a sentence, the planning questions on an empty tree, and the breaking-change marker
   - Done when: each sentence is reworded in its skill, every load budget still holds, and the new wording is pinned; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#what-the-reports-say-on-t5 · From: TASK-110

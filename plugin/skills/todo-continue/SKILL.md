@@ -60,7 +60,7 @@ The order of every node is the core's "Lifecycle by status".
        3. Drain: (a) insert one entry as the core's "CHANGELOG entry" says; (b) delete the subtree from TODO.md; (c) lint; (d) commit both files as `chore(backlog): drain <ID>`, body `Refs: <ID>` (and `Includes: <IDs>` with descendants).
        4. With `--merge`, merge into the base as git-flow "Root" says; otherwise print those commands. Never push.
        No git: items 2 and 3 (a)-(c).
-11. **Report**, short (on an early stop: which step and why, and only the items that apply): ID and title, commands and results (regression against the baseline; say "not run" when the path ran no tests), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"), and a suggestion to clear context.
+11. **Report**, short (on an early stop: which step and why, and only the items that apply): ID and title, commands and results (regression against the baseline; after a red-baseline stop the failing run itself; "not run" when the path ran no tests), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"; after a red-baseline stop, none until the fix lands), and a suggestion to clear context.
 
 ## Test failures
 

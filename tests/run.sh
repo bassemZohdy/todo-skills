@@ -408,6 +408,10 @@ grep -qF 'unless it is leftover work' "$root/plugin/skills/todo-continue/SKILL.m
 grep -qF '**Leftover work:**' "$root/docs/GIT-FLOW.md" && grep -qF 'It never decides this by itself' "$root/docs/GIT-FLOW.md" || lw_bad="$lw_bad docs/GIT-FLOW.md"
 if [ -z "$lw_bad" ]; then ok "leftover work is adopted only when the request or the task line says so"; else bad "leftover work rule:$lw_bad"; fi
 
+# Red-baseline report (FIX-104): step 11 says what a stop at a red baseline reports, since no green baseline exists.
+ct11="$root/plugin/skills/todo-continue/SKILL.md"
+if grep -qF 'after a red-baseline stop the failing run itself' "$ct11" && grep -qF 'after a red-baseline stop, none until the fix lands' "$ct11"; then ok "the report of a red-baseline stop names the failing run and no next node (FIX-104)"; else bad "todo-continue step 11 does not say what a red-baseline stop reports (FIX-104)"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

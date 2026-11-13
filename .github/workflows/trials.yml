@@ -1,0 +1,49 @@
+name: trials
+# Manual only (TASK-118). Probes the machines the agent trials of docs/trials.md would run on: installs the Codex and Claude Code
+# CLIs at the versions the recorded batches used and reports what the trials would find. It signs in to nothing and reads no
+# secret, so it costs nothing. The agent-free harness checks already run on both systems in test.yml.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: trials-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - name: Install the Codex CLI
+        run: npm install --global @openai/codex@0.167.2
+      - name: Install the Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code@2.1.323
+      - name: What the trials would find
+        run: |
+          {
+            echo "### $(uname -sm)"
+            echo '```'
+            bash --version | head -1
+            git --version
+            python3 --version
+            node --version
+            codex --version
+            claude --version
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Codex commands (to find out whether it has a sandbox probe that needs no login)
+        run: codex --help | tee -a "$GITHUB_STEP_SUMMARY"

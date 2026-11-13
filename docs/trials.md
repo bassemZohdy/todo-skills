@@ -10,11 +10,11 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Execution and merges | `happy-path`, `ts-lifecycle`, `java-lifecycle` | Python; Node 22; Java 17 + Maven |
 | Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling` | Python |
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
-| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones are set up and checked by the selftest only, no agent run yet) |
+| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
-| Team use (two clones, one bare remote) | `team-claim` | Python; set up and checked by the selftest only, no agent run yet |
+| Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
 | Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |

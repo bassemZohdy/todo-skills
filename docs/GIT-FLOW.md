@@ -52,7 +52,7 @@ Lane runs (`--all-lanes`) use the same layout, one worktree per lane root, kept 
 
 ## Commit messages
 
-**Node commits:** `<type>(<scope>): <title>`, where the type is `feat`, `fix` or the fitting conventional type for a `TASK`, the scope is the package in a monorepo, otherwise the module or top-level directory of the main change (never `tests`), and the title is lowercase without a final period. The body:
+**Node commits:** `<type>(<scope>): <title>`, where the type is `feat`, `fix` or the fitting conventional type for a `TASK`, the scope is the package in a monorepo, otherwise the module or top-level directory of the main change (never `tests`; inside a source root such as `src/`, the module, not `src`), and the title is lowercase without a final period. The body:
 
 ```text
 Refs: FEAT-002.1

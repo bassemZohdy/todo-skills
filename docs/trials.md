@@ -91,6 +91,8 @@ Every ambiguity section of the 2026-11-12 reports was read again, the skill text
 
 The benchmark's `todo-skills` arm was rerun too: `5-interrupted` passed 6 of 6 (it had failed 3 of 3, stopping on the uncommitted work), the other five scenarios 1 of 1 each. Scratch repositories now keep LF line endings on Windows; the CRLF rewrite behind the one failure of 2026-11-12 did not come up again.
 
+Later that day TASK-110 cut the text every `/todo-continue` run loads by 12 percent, moving rarely used branches into reference files that are read on demand. Fresh pi agents reran all 31 scenarios and the six benchmark scenarios of the `todo-skills` arm on that text: 31 of 31 and 6 of 6 passed. None of those runs reaches a moved branch, so TASK-113 added `plan-stop`, `decompose` and `regress-block`; each passed on the text before the cut and on the text after it, one run each, and on the new text each agent opened the reference file its branch points to. Results, the measured cost and what was not exercised: [docs/evals/pi-glm-2026-11-13-load-cut/summary.md](evals/pi-glm-2026-11-13-load-cut/summary.md).
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

@@ -1,0 +1,34 @@
+Post-edit lint re-check (by reading, I1–I10): still clean — exactly one `[/]` (FEAT-001.2, a leaf), fields valid, line count fine. Stopping here per the trial instruction (right after the start commit; steps 6+ not run, nothing built).
+
+---
+
+## 1) Report (per todo-continue step 11, early-stop form)
+
+**Stopped at:** step 5 (start commit), by trial instruction "stop right after the start commit … Do not build" — the skill itself would continue at step 6 (`next: read docs`).
+
+| Item | Value |
+|---|---|
+| Node | **FEAT-001.2** · low · Add multiply with a test (leaf of FEAT-001) |
+| Selection | FEAT-001.1 is `[!]` on `todo/FEAT-001.1-add-subtract-test` (manual block: "the product owner must decide how subtract rounds") → counts `[!]` everywhere, skipped; **its sibling stayed workable**. Root FEAT-001 waits (children not all `[x]`). No interrupted merge/drain, no `[/]` to resume; tree claim (`todo/FEAT-001-add-subtract-multiply-calc`) is the branch the checkout was on → not another session's. |
+| Ready check | Lint (I1–I10, no `.todo/todo-lint.sh`) clean; no `Ref:`; tree clean; stayed on parent's branch (claimed tree); no `Depends:`. |
+| Baseline (regression) | `python3 -m unittest discover -s tests` (README `Tests:` line; Done when has no `regression:`) on the root branch, pre-branch: **1 test, OK → `baseline 1 passing`** |
+| Branch | `todo/FEAT-001.2-add-multiply-test` created from `todo/FEAT-001-add-subtract-multiply-calc` |
+| Start commit | `8b462f8` `chore(backlog): start FEAT-001.2` — TODO.md only: FEAT-001.2 → `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001.2-add-multiply-test from todo/FEAT-001-add-subtract-multiply-calc; next: read docs` (verified: diff touches only those lines) |
+| Done when | not run (build not started) |
+| Files changed | `TODO.md` (this commit; no other pending backlog edits) |
+| Checked-out branch | `todo/FEAT-001.2-add-multiply-test` (clean) |
+| Next workable node | **FEAT-001.2 itself** — now `[/]`; resume with `/todo-continue` (continues at `next: read docs`). FEAT-001.1 waits on the manual decision, then `/todo-update FEAT-001.1 --status ready`; root FEAT-001 waits for both children. |
+| Adjacent problems | none found (suggest clearing context before resuming) |
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"baseline <n> passing" vs a red/none baseline is unspecified for count wording** — not hit; trivial. *(Removed — not actually encountered.)*
+
+Actual items, each minor:
+
+1. **Skill flow vs. trial instruction.** The skill says it "Execute[s] the next workable node … end to end" and step 5 flows into step 6 with no stop; the trial instruction says "stop right after the start commit … Do not build." Per core guardrail 7 ("When a rule here conflicts with an explicit user instruction, state the conflict and ask") this is a user-instruction override: resolved by stopping after step 5 and reporting as an early stop, not by asking (the instruction was explicit and unambiguous).
+2. **"its root is not claimed by another branch"** (core, Which node is next) — the claim names `todo/FEAT-001-add-subtract-multiply-calc`, which was the *checked-out* branch; the text defines claiming via `git show <base>:TODO.md` but never explicitly says a claim by the branch you are already on is "yours". Resolved via the adjacent rule "A branch in this clone can belong to another session, so it is never resumed **from the base** automatically" — being on the tree's branch = this session's tree; proceeded rather than skipping with the resume hint.
+3. **Step 3's baseline wording, "Run the regression command (`reference/verification.md`, protocol step 6)"** — step 6 of verification.md itself defines the command as "the node's `regression:` command, or the project's full suite", so "the regression command" is doubly defined (Done-when-embedded vs README-derived). FEAT-001.2 has no `regression:` item, so both readings converge on the README `Tests:` line; resolved by running `python3 -m unittest discover -s tests` (1 passing).
+4. **"Commit `chore(backlog): start <ID>` with any pending backlog edits"** (step 5) — slightly ambiguous whether "pending backlog edits" includes the TODO.md edit that step 5 just made; git-flow's "Staging" ("Pending edits that earlier todo-* commands made to backlog files belong in the next claim or **start commit**") resolves it: yes, the TODO.md change is the commit's payload. Committed TODO.md by explicit path, no body (backlog commits have none).
+
+No contradictions blocked progress; every other instruction (blocked-sibling handling, branch-first order, slug derivation, State field order, commit format) was unambiguous in the loaded texts.

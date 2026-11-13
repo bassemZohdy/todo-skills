@@ -1,0 +1,29 @@
+## Report — /todo-continue --merge (run 1), stopped at step 10.4.1
+
+**FEAT-001 · Implement auth.tokens.verify(token, secret, now)** — built and fully verified; **stopped before the drain by a stop rule** (details below).
+
+| Item | Result |
+|---|---|
+| Baseline | 1 passing (SignTest), green on `main` |
+| Red | 8 tests ran, 7 new errored with `NotImplementedError` from the `verify` stub — the expected reason |
+| Done when | `python3 -m unittest tests.test_tokens` → **8 tests, OK** |
+| Regression | `python3 -m unittest discover -s tests -t .` → **8 tests, OK** (baseline 1, none deleted/skipped/weakened) |
+| Review | self (no subagent tool), spec ok / quality ok, 0 findings; doc-drift grep for `verify`: no hits |
+| Files | `auth/tokens.py`, `tests/test_tokens.py` (+ TODO.md state) |
+| Branch/commits | `todo/FEAT-001-implement-auth-tokens-verify`: `e6c4fa1` claim (ff-published to `main`), `5dcc933` start, `373f4c3` `feat(auth): implement verify` |
+| Checked out | `todo/FEAT-001-implement-auth-tokens-verify` (tree clean; only `__pycache__` generated files) |
+
+The implementation: split into exactly three parts → non-empty user → integer expiry → `now >= expires_at` rejects → HMAC-SHA256 recomputed and compared with `hmac.compare_digest` (constant time) → returns the user. Every rejection case is covered by a dedicated test, including the `now == expires_at` boundary; `assertRaises(InvalidToken)` means any other exception would fail the tests.
+
+**Why I stopped:** the root qualifies for the optional root review (complexity `high`, touches security), and `reference/review.md` says to ask once before the drain and, without an answer, *stop with the question*. You hadn't recorded an answer, and your instructions said to honor every stop rule — so the tree is **not yet drained to CHANGELOG.md and not yet merged into main**. After your answer, one more `/todo-continue --merge` finishes it: last gate (no `.todo/check.sh` exists) → CHANGELOG entry → drain commit → merge into `main` and delete the branch.
+
+**Adjacent problems:** none.
+
+### Question (stops the run)
+
+**Review the whole root before it drains? (yes / no)**
+
+- **No** → say so and rerun `/todo-continue --merge`; FEAT-001 drains into `CHANGELOG.md` and merges into `main` as-is.
+- **Yes** → note I have no subagent tool, so per `reference/review.md` the review runs in a new session from these inputs: the whole root diff (`git diff main...todo/FEAT-001-implement-auth-tokens-verify`), the root's task lines, and its `Ref` (none). Valid findings get fixed on the branch with `Done when` + regression rerun; then the drain proceeds.
+
+I suggest clearing context before the next run; the branch's `State: next: drain` records exactly where to resume.

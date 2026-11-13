@@ -1,0 +1,2 @@
+# Evidence is stored byte for byte so SHA256SUMS stays valid on every platform.
+* -text

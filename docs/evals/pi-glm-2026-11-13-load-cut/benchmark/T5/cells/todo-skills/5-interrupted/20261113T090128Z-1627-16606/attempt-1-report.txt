@@ -1,0 +1,18 @@
+Refresh: **already up to date** (base hasn't moved since the claim), nothing to rerun; tree clean apart from generated `__pycache__`. Per `reference/review.md`, this is the mandatory stop point — a qualifying root must be offered a root review once before the drain, and with no recorded answer I stop and ask.
+
+## Status: stopped at the root-review offer (todo-continue step 10.4.1)
+
+**Question for you — review the whole root before it drains? (yes / no)**
+
+- This root qualifies because `slugify` is an existing exported symbol whose meaning changes (lowercase-only → full slug semantics). Per the skill I ask once; your reply (e.g. "no, continue") will be recorded and never asked again, and the next `/todo-continue --merge` resumes exactly here: last gate (no `.todo/check.sh`, so none) → drain FEAT-001 into `CHANGELOG.md` → merge into `main`.
+- There is no subagent tool in this session, so a "yes" would mean a review in a fresh session fed the root diff (`git diff main...todo/FEAT-001-finish-textutil-slug-slugify`), the plan doc (none), the root's `Ref` (none), and the tree's task lines. Declining changes nothing else.
+
+### What has happened so far
+
+1. **`/todo-init`** — created `TODO.md` + `CHANGELOG.md` (uncommitted until the claim); base `main`; test command `python3 -m unittest discover -s tests -t .` from the README `Tests:` line; no CI config, no DoD heading, no lint script; `.todo/check.sh` missing (`/todo-init --ci` can add one); tree not clean due to the interrupted WIP (handled as leftover work, see below).
+2. **`/todo-add`** — inserted root **FEAT-001 · P1 · low · Finish textutil.slug.slugify** with `Done when: slugify('  Hello, World! ') returns 'hello-world' and slugify('a--b') returns 'a-b'; python3 -m unittest discover -s tests -t .`
+3. **`/todo-continue --merge`** (run 1) — baseline **1 passing** on `main` with the WIP in place; branch `todo/FEAT-001-finish-textutil-slug-slugify`; claim `e9e0102` published to `main` by fast-forward; start `43f31b0`; tests written red-first (4 failures, first: `AssertionError: 'a--b' != 'a-b'`); implemented `re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")`; verified **5 passing, OK** (baseline 1, none deleted/skipped); self-review spec ok / quality ok, 0 findings; no doc drift (no `slugify` references in README/docs); node commit `aa722f0`; refresh from `main` already up to date.
+4. **Interrupted WIP preserved**: commit `065bed3` ("wip: slugify lowercases") remains in history, and its uncommitted change was carried onto the branch and folded into `aa722f0` rather than reverted.
+5. **`/todo-continue --merge`** (run 2, after your answer) will drain FEAT-001 to `CHANGELOG.md` under `### Added` and `--merge` it into `main`; further runs will then report the empty tree.
+
+Answer the question above and I'll resume from there.

@@ -1,0 +1,38 @@
+The root blocked, so no drain, no base merge (`--merge` only applies "when a **root** finishes"), and per "Test failures" I stop here — one invocation.
+
+---
+
+## (1) Report
+
+**`/todo-continue --merge` — FEAT-001 · Add subtract to calc.py → BLOCKED `[!]`** (leaf root; did not finish, so no drain and no base merge; `--merge` inert)
+
+**Commands and results**
+| Command | Result |
+|---|---|
+| `python3 -m unittest discover -s tests` (baseline, on `main` pre-branch) | Ran 2 tests, **OK** → `baseline 2 passing` |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (red) | **ERROR**: `AttributeError: module 'calc' has no attribute 'subtract'` (expected missing-symbol) |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (Done when) | Ran 1 test, **OK** |
+| `python3 -m unittest discover -s tests` (regression) | Ran 3 tests, **FAILED (failures=1)** — vs. baseline 2 passing, now 2 passing + 1 failing: `test_contract.ContractTest.test_public_names`: `AssertionError: Lists differ: ['add', 'subtract'] != ['add']` |
+
+**Files changed:** `calc.py` (adds public `subtract`), `tests/test_calc.py` (adds `test_subtract`, ID in comment/docstring since `Done when` fixes the name), `TODO.md` (claim → start → `Blocked:`).
+
+**Branch & commits** (checked-out branch at stop: `todo/FEAT-001-add-subtract-calc-py`, clean):
+- `3250cf2` `chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py` — published to `main` via `--ff-only` (base now at `3250cf2`)
+- `4d616fa` `chore(backlog): start FEAT-001`
+- `f4ad369` `chore(backlog): block FEAT-001` (node's files + TODO.md, by path)
+
+**Why blocked:** regression beyond the task line. `tests/test_contract.py` freezes `calc`'s public names to `["add"]` "until the 2.0 review"; the public `subtract` that `Done when` requires cannot pass it, and that pre-existing test may not be deleted, skipped or weakened. Review: `Reviewed: self, 0 findings fixed` (spec and quality ok). Doc drift: no hits for `subtract` in README.md (no `docs/` exists).
+
+**Adjacent problems** (to run on the base — I did not add them):
+- `/todo-add "unfreeze calc's public interface to allow subtract (2.0 review)" --type task --from FEAT-001`
+
+**Next workable node:** none (the only root is `[!]`; everything waits). After the freeze is lifted and merged on main: `/todo-update FEAT-001 --status ready`, then rerun. **Suggestion: clear context before the next invocation.**
+
+## (2) Ambiguities / contradictions hit
+
+1. **"An attempt is a failed verification run after implementing started; the first red run is not one."** — "the first red run" is undefined (the intentional TDD red run, or the first failed verification?). Resolved as the TDD red-phase run (the missing-symbol failure before implementing), so the regression failure counted as attempt 1; moot since the block replaces `State:` entirely.
+2. **"A failure outside the node (a flaky test, a regression beyond the task line), and the third failed attempt … block the node"** — debatable whether a failure *caused by* this node's own required change is "outside the node" (which blocks immediately) vs. an in-node failure (up to 3 attempts). Resolved as outside-the-node/immediate block: the failing test is not one this node created, is not named by its task line, and the only fix is forbidden by "You may change code and the tests this node creates, within the task line" + "Forbidden: editing `Done when`, deleting, skipping or weakening tests" (updating the frozen list would be a "loosened assertion").
+3. **"make the smallest change that tests it, rerun"** — no permissible change exists to test the hypothesis (hiding `subtract` breaks `Done when`; touching `test_contract.py` is forbidden). Resolved by treating the reproduce rerun + the assertion text (`['add', 'subtract'] != ['add']`) as confirming the hypothesis, then blocking without burning cosmetic attempts.
+4. **"backlog commits (`chore(backlog): …`) have no body except `Refs:` and `Includes:` on a drain and the plan on `chore(backlog): plan <ID>`"** vs. the block commit carrying the node's code files ("committed with the node's changed files as `chore(backlog): block <ID>`" — no body specified). Resolved: no body on the block commit, per the literal git-flow rule.
+5. **Step 9 gate ordering** — "Regression green … Each item of the project's Definition of Done … Documentation drift (below)" lists doc drift after the regression gate, but the block rule says "stop" on the outside-the-node failure. Resolved by running the (cheap, reporting-only) doc-drift search before stopping, so the report is complete; nothing else was done after the failed regression.
+6. Minor: step 5 writes `next: read docs` but nothing says to advance `next:` to `build` mid-run ("a run with no failed cycle need not advance `next:`"). Resolved: left `next:` untouched (it was replaced by the `Blocked:` line at the end anyway).

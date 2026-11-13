@@ -1,0 +1,40 @@
+All checks done — LF endings and final newlines preserved, post-drain lint (I1–I10 by reading; no `.todo/todo-lint.sh` exists) passes: empty tree, no ID clash with CHANGELOG. One invocation, one node (FEAT-001) completed and drained.
+
+---
+
+## 1. Report (/todo-continue)
+
+**Warning (no-git mode, once per command):** "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them."
+
+**ID / title:** FEAT-001 · P1 · low · Add subtract to calc.py (leaf root, selected as first workable `[ ]` node; no `[/]`, `[!]`, interrupted work)
+
+**Baseline** (step 3, verification protocol 6 — README `Tests:` line): `python3 -m unittest discover -s tests` → Ran 1 test, OK → `baseline 1 passing`
+
+**Red:** added `tests/test_calc.py::CalcTest.test_subtract` (ID in comment, since `Done when` fixes the test name); first failing error quoted: `AttributeError: module 'calc' has no attribute 'subtract'`
+
+**Commands and results:**
+- Done when: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` → Ran 1 test, OK, exit 0 (tests ran)
+- Regression: `python3 -m unittest discover -s tests` → Ran 2 tests, OK, exit 0 (baseline 1 → 2 passing; none deleted, skipped or weakened)
+
+**Review:** self (no subagent tool available), 0 findings — spec: both hunks trace to the task line, test asserts `Done when`; quality: clean.
+
+**Other gates:** no `Definition of Done` heading; no RTM; doc drift checked (added exported symbol `subtract`): `grep -rnF -- 'subtract' README.md docs` → no hits, nothing to update; no `.todo/check.sh` (last gate skipped).
+
+**Files changed:** `calc.py`, `tests/test_calc.py`, `TODO.md` (drained), `CHANGELOG.md` (drain entry)
+
+**Branch / commit / children / merge:** none — no-git mode. `children done/total`: n/a (leaf root). Root drained: entry `- **FEAT-001** (feat): Add subtract to calc.py. Validated: \`python3 -m unittest tests.test_calc.CalcTest.test_subtract\`.` under `## [Unreleased] → ### Added`; subtree deleted from TODO.md.
+
+**Adjacent problems:** none found (no `/todo-add` suggestions).
+**Next workable node:** none — the tree is empty.
+**Suggestion:** clear context before the next command (this one is finished; `/todo-continue` again would report an empty tree).
+
+## 2. Ambiguities / contradictions / unclear instructions
+
+1. **Step 5, no-git `State:` template** — "No git: `attempts 0/3; baseline …; no git; files: <a root's rolled-up files, or \`-\`>; docs: <rolled-up docs, if any>; next: read docs`". Ambiguous whether `docs:` appears with a placeholder or is omitted when there are no rolled-up docs, and what a root's "rolled-up files" are before any child ran (there are none yet). Resolved: omitted `docs:` entirely ("if any" + the schema's items are optional) and wrote `files: -` at start, `files: calc.py, tests/test_calc.py` once built (per step 7).
+2. **Step 9 vs step 7 on `State:` updates** — step 9 says "update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`)" — `files:` is missing from that list, yet step 7 mandates "No git: list touched files in `State: files:`". Resolved: followed step 7 (updated `files:` during build) and read step 9's list as non-exhaustive.
+3. **Step 8's reviewer availability** — "With a subagent tool, a fresh-context reviewer does both in one call… Without one, review yourself." This harness has no subagent tool; resolved by reviewing myself and reporting `Reviewed: self`-equivalent ("self, 0 findings fixed"). The contrast with `--delegate` ("Without a subagent tool or a `Models:` line, say so and work in this thread") made this easy but step 8 itself doesn't say to announce it; I announced it in the report.
+4. **Doc-drift trigger for a plain function** — "Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, added, …)". Unclear whether adding a function to a single-file library counts as an "exported symbol". Resolved: treated `subtract` in `calc.py` (the library's public API alongside `add`) as an exported symbol, read `reference/doc-drift.md` and ran its grep (no hits, nothing to do).
+5. **"CHANGELOG entry" `Validated:` part** — "Validated: (the root's `Done when` commands, each in backticks, without a `regression:` command)". The `Done when` here is criteria plus one backticked command (`subtract(5, 3) returns 2; \`python3 -m unittest …\``); unclear whether the criteria text belongs in the entry. Resolved: included only the backticked command ("commands" + the schema's "at least one exact command in backticks").
+6. **Git-only checks in no-git mode** — steps like the "Tree clean by the git-flow definition" ready check and the "Interrupted merge/drain" selection have no stated no-git fallback; resolved via the core's blanket rule "no-git mode: skip every git step" (nothing untracked-but-relevant existed anyway, only `tests/__pycache__`, a generated file).
+
+None of these blocked the run.

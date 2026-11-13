@@ -1,0 +1,51 @@
+All work is complete. Final state verified: only `main` remains, tree clean, suite green on main (3 passing), root branch deleted after the merge.
+
+---
+
+## (1) Reports
+
+### Invocation 1 — `/todo-continue --merge` → **FEAT-001.1 · Add subtract with a test**
+
+- **Baseline** (on `main`, before branching): `npm test` → **1 passing**
+- **Red** (test-first): `SyntaxError: The requested module '../src/calc.ts' does not provide an export named 'subtract'`
+- **Done when**: `node --experimental-strip-types --test tests/subtract.test.ts` → exit 0, 1 test, 1 pass
+- **Regression**: `npm test` → **2 passing** (baseline 1, +1, none deleted/skipped)
+- **Files changed**: `src/calc.ts`, `tests/subtract.test.ts` (new), `TODO.md`
+- **Branch/commits**: tree claim `e4fed3b` (published to `main` via `--ff-only`), start `f6be4f9`, node commit `4ba72f1` `feat(calc): add subtract` (`Reviewed: self, 0 findings fixed`)
+- **Merged**: `Merge FEAT-001.1 into FEAT-001` (`b07aaa1`) into `todo/FEAT-001-add-subtract-multiply-src`; child branch deleted; checked out: root branch
+- Adjacent problems: none. Next workable node: **FEAT-001.2**. Suggest clearing context before continuing.
+
+### Invocation 2 → **FEAT-001.2 · Add multiply with a test**
+
+- **Baseline** (on root branch, before branching): `npm test` → **2 passing**
+- **Red**: `SyntaxError: The requested module '../src/calc.ts' does not provide an export named 'multiply'`
+- **Done when**: `node --experimental-strip-types --test tests/multiply.test.ts` → exit 0, 1 test, 1 pass
+- **Regression**: `npm test` → **3 passing** (baseline 2, +1)
+- **Files changed**: `src/calc.ts`, `tests/multiply.test.ts` (new), `TODO.md`
+- **Branch/commits**: start `c307c6a`, node commit `a3b1bff` `feat(calc): add multiply` (`Reviewed: self, 0 findings fixed`)
+- **Merged**: `Merge FEAT-001.2 into FEAT-001` (`60b2f60`); child branch deleted; checked out: root branch
+- Adjacent problems: none. Next workable node: **FEAT-001 (integration step)**. Suggest clearing context.
+
+### Invocation 3 → **FEAT-001 · root: integration step + drain + merge** (`children done/total: 2/2`)
+
+- **Baseline** (on its own branch): `npm test` → **3 passing**; start `2261e7f`
+- **Integration**: Done when `npm test` = regression (same command) → exit 0, **3 passing**; no new test needed (children's tests cover "both functions work"), no feature code
+- **Refresh from base**: `Merge main into FEAT-001` → already up to date, nothing rerun. No root review offered (root is `mid`, adds interfaces only). No `.todo/check.sh` → no last gate
+- **Drain**: CHANGELOG `### Added` entry for FEAT-001 (`Validated: npm test`, `Includes: FEAT-001.1, FEAT-001.2`); subtree deleted from TODO.md; lint clean; commit `a755dc3` `chore(backlog): drain FEAT-001`
+- **Merge (--merge)**: executed `git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-multiply-src && git branch -d todo/FEAT-001-add-subtract-multiply-src` → merge `8fa5e8f`; branch deleted; nothing pushed
+- Checked-out branch: **main** (clean). Next workable node: **none — tree is empty**.
+
+### Invocation 4 (final check) → nothing left to continue; TODO.md holds only the two headings; `npm test` on `main`: 3 passing.
+
+---
+
+## (2) Ambiguities / unclear points in the skill text
+
+1. **`Validated:` for a root whose Done-when command is also the regression command.** Core: "`Validated:` (the root's `Done when` commands, each in backticks, without a `regression:` command)". FEAT-001's only command `npm test` is simultaneously the project's regression (README `Tests:`). **Resolution:** the exclusion targets commands introduced by a `regression:` clause, which the root has none of, so I listed `npm test` in `Validated:`.
+2. **`Checked:` lines for test-runner commands.** Step 10.2: "one `Checked: <command>` line for each `Done when` or regression command that you judged safe but that is not a test, lint, typecheck or build runner (`python -m unittest`, `node --test`, `make test` and other test targets need none…)". `npm test` and `node --experimental-strip-types --test` aren't in the literal list. **Resolution:** read `npm test` as "other test targets" and `node --test`-style invocation as a test runner → no `Checked:` lines.
+3. **Whether the root's integration step gets its own step-10.2 commit.** Step 10.2: "Every node, a root too: commit its files and any changed `TODO.md` by path (skip if nothing changed)" vs. 10.4's drain commit and verification.md's "A root's integration step and drain happen in one invocation". After the root's start commit the integration changed no files. **Resolution:** applied "(skip if nothing changed)" — no separate node commit; the drain commit is the root's completion commit.
+4. **Review scope at the integration step.** Step 8: "Review the whole change (`git diff`…)". At the root's integration, the working-tree `git diff` is empty (all work is in the children's commits, each reviewed). **Resolution:** treated the children's reviews plus the merged-tree full-suite verification as the whole-change review; the empty diff produced no findings.
+5. **Root-review vs doc-drift on added interfaces.** Step 10.4.1: "…changes an existing public interface (adding one does not count here, though it does for documentation drift below)" — the parenthetical is self-resolving but initially reads as a contradiction. **Resolution:** adding `subtract`/`multiply` triggered the doc-drift greps (README: no hits, nothing to report/update) but not the optional root review.
+6. Minor: the loop instruction "Report and stop" (step 10.3) vs. running the command repeatedly per the harness task. **Resolution:** treated each invocation as ending at its report, re-invoking fresh — consistent with the skill, which caps itself at "at most one node per invocation".
+
+None of these blocked progress; all gates (Done when, regression vs. baseline, lint/invariants I1–I10, command safety) passed at every node.

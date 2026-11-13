@@ -1,0 +1,41 @@
+The root is drained and the tree is clean. Per step 10.4.4 (no `--merge`), the merge commands are printed, not run. One invocation is complete.
+
+## 1. Report (step 11)
+
+**FEAT-001 · Add a subtract function to calc.py with a test** — `[/]` leaf root resumed (`next: build`), built, reviewed, verified, drained.
+
+**Commands and results**
+- Done when: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` → Ran 1 test, **OK** (run before the refresh and again after; green both times)
+- Regression (README `Tests:`): `python3 -m unittest discover -s tests` → 2 tests **OK** before refresh; 3 tests **OK** after (refresh brought main's FEAT-009 `twice`). Baseline was absent from `State:` (resume): suite fully green, no test deleted, skipped or weakened.
+- Refresh from base: `git merge main -m "Merge main into FEAT-001"` → clean merge, brought `extra.py`, `tests/test_extra.py`, CHANGELOG entry (FEAT-009); Done when + regression rerun per rule.
+
+**Files changed**
+- Code: `calc.py` (+`subtract`), `tests/test_calc.py` (+`test_subtract` with `# FEAT-001` marker)
+- Backlog: `CHANGELOG.md` (new FEAT-001 entry, first under `### Added`), `TODO.md` (subtree deleted → empty tree)
+
+**Branch and commits** — `todo/FEAT-001-add-subtract-function-calc` (checked out):
+- `f6b79df` `feat(calc): add subtract function to calc.py with a test` (Refs: FEAT-001, Reviewed: self, 1 findings fixed)
+- `9b517e1` Merge main into FEAT-001
+- `59cad7b` `chore(backlog): drain FEAT-001` (Refs: FEAT-001)
+
+**Children done/total:** n/a (leaf root). **Root review:** not offered (low, additive change). **Last gate:** skipped (no `.todo/check.sh`).
+
+**Merge commands** (not run — no `--merge`):
+```
+git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-function-calc && git branch -d todo/FEAT-001-add-subtract-function-calc
+```
+Push-and-PR alternative: `git push -u origin todo/FEAT-001-add-subtract-function-calc` and open a pull request (never run — the skills never push).
+
+**Adjacent problems:** none (doc-drift: no `subtract` hits in README.md; `docs/` doesn't exist).
+**Next workable node:** none — the tree is empty.
+**Suggestion:** clear context before the next todo command.
+
+## 2. Ambiguities / unclear instructions hit
+
+1. **"Without a baseline in `State:`, the regression must be fully green with no test deleted, skipped or weakened."** (step 2, `[/]` bullet) — step 9's gate "no fewer passing tests than the baseline" is undefined against a baseline that doesn't exist. Resolved: treated the pre-existing passing suite on the branch (`test_add`) as the floor and required the full suite green (2 tests before, 3 after the refresh), nothing deleted/skipped/weakened.
+2. **"…carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name (a test id, class or file)."** (step 8, spec bullet) — "fixes the name" and the parenthetical are cryptic. Resolved: the Done when names the exact test id (`tests.test_calc.CalcTest.test_subtract`), i.e. it freezes the name, so the ID can't be in the name → put `# FEAT-001` in a comment (treated the missing marker as my one review finding and fixed it).
+3. **"update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`)"** (step 9) — unclear whether a *first-ever* baseline should be written on a resume, or only "changes" to an existing item. Resolved: no failed cycle, and the node completed (State deleted at drain), so I left `State:` untouched.
+4. **"`Red: <first failing assertion or missing-symbol error>` (leaves that started red)"** (git-flow, "Commits") — unclear for a resumed leaf whose red phase, if any, happened before this session. Resolved: omitted the `Red:` line (resume skipped red per step 7; `attempts 0/3`, no red history).
+5. **"and the push-and-pull-request alternative"** (git-flow, "Root") — the alternative is never spelled out and this clone has no remote. Resolved: printed a generic `git push -u origin <branch>` + "open a pull request" line, running nothing.
+6. **Mild tension:** "implement only the task line. Adjacent findings go to the report, not into the code" (step 7 Green) vs. the review spec requiring the ID marker (finding 2 above) — the comment isn't asked for by the task line itself. Resolved in favor of the review rule ("Fix what is valid").
+7. **Initially confusing double standard, self-reconciled by the text:** root review counts only "changes an existing public interface (adding one does not count here, though it does for documentation drift below)" (step 10.4.1) while doc-drift counts "added" symbols — I applied doc-drift (grep) but not root review, exactly as the text says.

@@ -1,0 +1,35 @@
+Node blocked, committed, stopped — one invocation, no merge (the `--merge` flag applies only "when a root finishes"). Final state verified: clean tree, on `todo/FEAT-001-add-subtract-calc-py`.
+
+---
+
+## 1) Report (`/todo-continue --merge`, stopped early at step 9 → "Test failures" → blocked)
+
+**FEAT-001 · Add subtract to calc.py** — leaf root, P1, low.
+
+**Stopped at step 9 (Verify):** `Done when` passed, but the regression went red on a **pre-existing frozen-interface contract test**. Per `reference/failures.md`, a failure outside the node blocks it: FEAT-001 is now `[!]` with a `Blocked:` line; no code or test outside the task line was touched and the contract test was **not** weakened.
+
+**Commands and results** (regression = README `Tests:` line, run via Git Bash):
+
+| Command | Result |
+|---|---|
+| `python3 -m unittest discover -s tests` (baseline, on `main` before branching) | 2 tests, OK → **baseline 2 passing** |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (red) | ERROR: `AttributeError: module 'calc' has no attribute 'subtract'` (expected missing-symbol) |
+| `python3 -m unittest tests.test_calc.CalcTest.test_subtract` (Done when) | 1 test, OK, exit 0 ✅ |
+| `python3 -m unittest discover -s tests` (regression) | 3 ran, **FAIL** `test_contract.ContractTest.test_public_names`: `AssertionError: Lists differ: ['add', 'subtract'] != ['add']` — red vs baseline (2 passing, none deleted/skipped) ❌ |
+
+**Files changed:** `calc.py` (added `subtract`), `tests/test_calc.py` (added `test_subtract`, red-first, ID in comment), `TODO.md` (claim → start → block).
+**Branch/commits:** `todo/FEAT-001-add-subtract-calc-py` (currently checked out): `49ea605` claim (published to `main` via fast-forward), `c7023ff` start, `f295975` block. Work-in-progress code is committed on the branch; **nothing merged into `main` beyond the claim**; no drain, no CHANGELOG change.
+
+**Resolution needed (user's call):** unfreeze the interface at the 2.0 review (`tests/test_contract.py` allows only `["add"]`) or drop the task. Adjacent problem, to run on the base: `/todo-add "unfreeze calc's public interface at the 2.0 review: update tests/test_contract.py to allow subtract" --from FEAT-001` (or `/todo-update FEAT-001 --status drop`).
+**Next workable node:** none (the only root is `[!]`; its tree waits).
+No `Models:` line / routing configured, so no tier escalation applied; a stronger model is unlikely to help — this is a spec-level conflict, not a reasoning failure.
+**Suggestion:** clear context (`/clear` or a new session); rerun `/todo-continue` only after the interface conflict is resolved.
+
+## 2) Ambiguities / contradictions hit
+
+1. **Immediate block vs. the 3-attempt diagnose cycle.** failures.md: *"Diagnose first: reproduce, read the first failing assertion, write one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, rerun. At most **3** attempts…"* vs. *"A failure outside the node … block the node: `[!]`, `State:` replaced by a `Blocked:` line … stop."* No `hyp:`/rerun cycle can test any hypothesis here (the only "fixes" weaken the contract test or abandon the task line). **Resolution:** treated the failure as outside-the-node and blocked after attempt 1, without burning attempts 2–3.
+2. **Is a task-mandated change tripping a pre-existing test "a failure outside the node"?** failures.md: *"A failure outside the node (a flaky test, a regression beyond the task line)"* — neither example fits a change the task line itself requires. Combined with *"You may change code and the tests this node creates"* (`test_contract.py` is not this node's) and *"Forbidden: … deleting, skipping or weakening tests"*. **Resolution:** read "outside the node" as "not fixable within the task line and this node's own tests" → block, never edit the contract test.
+3. **Attempt counter lost on block.** todo-continue step 9: *"update `State:` whenever a cycle changes one of its items (`attempts`, …)"* vs. failures.md: *"`State:` replaced by a `Blocked:` line"*. **Resolution:** followed failures.md — the Blocked line (which embeds the failing run) replaces State entirely; the run counted internally as attempt 1/3.
+4. **Block commit body.** todo-continue step 10.2 requires body lines (`Refs:`, `Red:`, `Reviewed:`, `Checked:`) on node commits, but the block commit is a backlog commit and git-flow says backlog commits *"have no body except `Refs:` and `Includes:` on a drain"*. **Resolution:** made `chore(backlog): block FEAT-001` with no body, per the backlog rule (the drain-only exception doesn't apply).
+5. **Minor wording tension in the regression gate.** Step 9: *"Regression green, no fewer passing tests than the baseline"* — my run had 2 passing ≥ baseline 2 yet was red. **Resolution:** treated "green" as the binding requirement (both clauses must hold); no action hinged on it.
+6. **`--merge` on an unfinished root.** *"`--merge`: when a **root** finishes, also merge it into the base. Without it the commands are printed."* Silent on a blocked root (and git-flow's print-rule covers only the without-flag case). **Resolution:** the root did not finish → no drain, no merge, nothing printed; the claim commit already on `main` was left as is (release is `/todo-update … --status ready` / `drop`, a user action).

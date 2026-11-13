@@ -1,0 +1,38 @@
+All done — `main` holds both roots, tree clean, 3/3 tests passing. Here is the requested output.
+
+---
+
+## 1) Report (`/todo-continue --all-lanes --merge`)
+
+**No subagent tool is available to me** — per `reference/lanes.md` ("Without a subagent tool, say so in the first line of your output and do everything below yourself, running the lane work of item 3 one lane after another in each lane's worktree (all lanes first, then item 4)") I ran as coordinator **and** both lane workers, sequentially, in per-root worktrees under `../repo.todo/`.
+
+**Setup (coordinator, lanes.md items 0–2):** No claimed/unfinished roots. Invariants I1–I10 pass (no `.todo/todo-lint.sh`; checked by reading). Base = `main` (no user-named base, no README `Base:` line; `main` exists). Baseline on `main`: `python3 -m unittest discover -s tests` → **1 test OK** — one shared run (both lanes start from `main` with the same regression command). Both tree claims created, fast-forwarded to `main`, worktrees `../repo.todo/FEAT-001`, `../repo.todo/FEAT-002` created; main checkout stayed on `main` the whole run.
+
+**Lane `math` — FEAT-001 "Add subtract to calc.py" — finished**
+- Branch `todo/FEAT-001-add-subtract-calc-py` (leaf root); commits: claim `910c3ee`, start `56928b1`, node `d3304c9` `feat(calc): add subtract` (body `Refs: FEAT-001`, `Red: AttributeError: module 'calc' has no attribute 'subtract'`, `Reviewed: self, 0 findings fixed`), refresh `a7375ee`, drain `804ac97`.
+- Commands: red `python3 -m unittest tests.test_calc.CalcTest.test_subtract` → 1 error (missing symbol, quoted above); Done when → **1 test OK**; regression in worktree → **2 tests OK** (baseline 1); refresh merge brought FEAT-002's claim (auto-merged); base pass count 1; post-refresh Done when **1 OK**, regression **2 OK**.
+- Files: `calc.py`, `tests/test_calc.py`, `TODO.md`, `CHANGELOG.md`. Doc drift: grep for `subtract` in README/docs → no hits. Root review: not offered (root is `low`, adds an interface, changes none).
+- Drained to `### Added`, merged into `main` with `git merge --no-ff -m "Merge FEAT-001 into main"` → `48e8e4d`; worktree removed, branch deleted.
+
+**Lane `text` — FEAT-002 "Add shout to text.py" — finished**
+- Branch `todo/FEAT-002-add-shout-text-py` (leaf root); commits: claim `97f6c49`, start `80d3b9e`, node `13f8f4e` `feat(text): add shout` (body `Refs: FEAT-002`, `Red: ModuleNotFoundError: No module named 'text'`, `Reviewed: self, 0 findings fixed`), refresh `cc4687d`, drain `40eaa52`.
+- Commands: red → 1 error (module missing, quoted above); Done when → **1 test OK**; regression in worktree → **2 tests OK**; refresh merge hit the expected TODO.md conflict (drained FEAT-001 vs this root's block) — resolved per the conflict rules (kept FEAT-002's `[/]` block, dropped drained FEAT-001, no `--ours/----theirs`); base pass count 2; post-refresh Done when **1 OK**, regression **3 OK**.
+- Files: `text.py` (new), `tests/test_text.py` (new), `TODO.md`, `CHANGELOG.md`. Doc drift: grep for `shout`/`text` in README/docs → no hits. Root review: not offered (`low`, adds an interface).
+- Drained to `### Added` (newest first), merged into `main` with `git merge --no-ff -m "Merge FEAT-002 into main"` → `c397a44`; worktree removed, branch deleted.
+
+**Final state:** `main` @ `c397a44`, clean, checked out in the main checkout; TODO.md = empty tree; CHANGELOG `[Unreleased]` holds both entries; full regression on `main` → **3 tests OK**. No pushes, no tags, no `git add -A`/`.`, hooks untouched.
+- **Blocked:** none in either lane.
+- **Still open:** none; no remaining worktree or `todo/` branch.
+- **Merge commands without `--merge`:** none to print — `--merge` was given and both merges were executed.
+- **Next workable root:** none (math: none; text: none).
+- **Adjacent problems:** none found — no `/todo-add` suggestions.
+- Suggestion: clear context; if you keep working, run `/todo-continue` (or `/todo-status`) fresh.
+
+## 2) Ambiguities / contradictions / unclear instructions
+
+1. **"…with one blank line before it and one between it and its first entry"** (core SKILL.md, "CHANGELOG entry", on creating a missing `###` heading). It contradicts the common Keep-a-Changelog style (entry directly under the heading) and is not what "no blank line between entries" literally covers. **Resolution:** took the literal reading — one blank line before `### Added` and one between the heading and its first entry; subsequent entries added directly under it (no blank between entries). Flagging in case the tighter style was intended.
+2. **Re-run condition on refresh:** `git-flow.md` says after the pre-land refresh "**If it brought changes**, rerun `Done when` and the full regression", while `lanes.md` item 4 says "re-run `Done when` and the regression there against the base's current pass count (run the regression on the base first to get it)" — unconditional. **Resolution:** followed the unconditional lanes.md wording (the lane flag's page governs the run); moot in practice, since both refreshes brought changes anyway.
+3. **When to take "the base's current pass count":** ambiguous whether it is taken before or after this root's merge into the base (the count changes between roots). **Resolution:** took it after any earlier root landed but before this root's merge (FEAT-001: 1; FEAT-002: 2), which is the reading that makes "no fewer passing tests than the base" meaningful.
+4. Minor: `Red:` for FEAT-002 failed at `import text` (module-level missing symbol) rather than at `shout`. Not strictly ambiguous ("a missing-symbol error for the new thing under test" — the module is part of the new thing), so I used it; noted only because "quote the first failing assertion or missing-symbol error" doesn't say how much of the traceback to keep. **Resolution:** kept the one-line error class and message.
+
+No other contradictions or unclear instructions were hit; all other steps (claim order, shared baseline, worktree paths, conflict resolution, commit bodies, `Checked:` exemption for `python -m unittest`, no root review for `low` roots that only add interfaces) were followed as written.

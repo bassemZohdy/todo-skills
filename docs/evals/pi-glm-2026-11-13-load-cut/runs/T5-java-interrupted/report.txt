@@ -1,0 +1,33 @@
+Lint passes (I1–I10 all clean: unique IDs, valid Done when commands, `[x]` leaf FEAT-001.1 has no open children, no CHANGELOG conflicts, no forbidden commands). Stopping here per "report once (step 11) and stop".
+
+---
+
+## (1) Report — `/todo-continue`
+
+**Recovered an interrupted merge; no node built in this invocation.**
+
+- **Node:** FEAT-001.1 · low · Add subtract with a test class SubtractTest (was `[x]` on `todo/FEAT-001.1-add-subtract-test-class`, branch not yet merged into its parent — interrupted before the merge)
+- **What ran:** step 10 item 3 only — merge `--no-ff` into the parent branch + delete the child branch (nothing else of step 10). No tests run, per the skill ("No tests here; the parent's integration step runs them"); verify commands: **not run**
+- **Files changed by the merge:** `TODO.md` (FEAT-001.1 → `[x]`), `src/main/java/mini/Calc.java` (subtract), `src/test/java/mini/SubtractTest.java`
+- **Branch/commit:** merge commit `5a244ca` "Merge FEAT-001.1 into FEAT-001" on `todo/FEAT-001-add-subtract-multiply-calc`; child branch `todo/FEAT-001.1-add-subtract-test-class` deleted; tree clean
+- **Lint:** merged TODO.md passes I1–I10 (no `.todo/todo-lint.sh`; checked by reading)
+- **Parent root FEAT-001:** children done 1/2
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-calc`
+- **Merge commands for a root without `--merge`:** n/a (root not finished)
+- **Adjacent problems:** none
+- **Next workable node:** FEAT-001.2 · low · Add multiply with a test class MultiplyTest (`mvn -B test -Dtest=MultiplyTest -Dsurefire.failIfNoSpecifiedTests=true`)
+- **Suggestion:** clear context before the next `/todo-continue` (fresh session for FEAT-001.2)
+
+## (2) Ambiguities / unclear instructions encountered
+
+1. **"Interrupted merge (with any `todo/` branch of the tree checked out; core 'Interrupted work comes first')"** — unclear whether the parenthetical is a precondition of the interrupted-merge case or a trigger for scanning. Resolved via the core's "Interrupted work comes first (git mode)" ("On a tree branch … Skip this on the base branch"): since a `todo/` tree branch was checked out, I ran the interrupted-work scan of all tree branches, which found the unmerged `[x]` FEAT-001.1.
+
+2. **"do step 10 item 3 for that node"** — "that node" has no antecedent inside todo-continue step 2 itself. Resolved by the core section it cites: the `[x]` node on a branch not merged into its parent's branch (verified via `git merge-base --is-ancestor` exit 1).
+
+3. **Step 10.3: "switch to the parent's branch"** — I was already on the parent (root) branch when handling the interrupted merge; "switch" is a no-op there. Treated as satisfied by being on the parent branch (a literal `git switch` to the current branch would also be harmless; I skipped it and confirmed the branch first).
+
+4. **"lint the merged `TODO.md`"** — "lint" is defined only in the core ("if `.todo/todo-lint.sh` exists … otherwise check I1–I10 by reading"). No script exists, so I checked I1–I10 by reading the merged file. Clear enough via the core, but the todo-continue text never says what "lint" means.
+
+5. **Minor:** the description ("Completes at most one node per invocation") could be read as "after finishing the interrupted merge, continue with the next node" — the step-2 text is explicit ("then report once (step 11) and stop. No tests here"), so I stopped after the merge without starting FEAT-001.2.
+
+Also noted (not an instruction ambiguity, but a discrepancy in repo state): the earlier node commit `2634a20` carries `Refs:`/`Reviewed:` but no `Red:` line, which step 10.2 requires only "leaves that started red"; whether FEAT-001.1 started red is unknowable from history, and the interrupted-merge path says "nothing else of step 10", so I left history untouched.

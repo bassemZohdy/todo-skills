@@ -1,0 +1,25 @@
+## HEAD
+8ac9adde6bf8ddd47352894dd37d631c4c0efe95
+## current branch
+main
+## branches
+* main 8ac9add init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi10/update-drop/repo  8ac9add [main]
+## tags
+## refs
+refs/heads/main 8ac9adde6bf8ddd47352894dd37d631c4c0efe95
+## log --all --graph
+* 8ac9add  (HEAD -> main) init with two roots
+## status --porcelain
+ M TODO.md
+ M docs/plans/PROJECT.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

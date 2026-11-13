@@ -1,0 +1,31 @@
+`/todo-continue` (one invocation, no flags) — done. The skill mandated a stop at step 3 (red baseline), so no branch, no edits, no commits; still on `main` with a clean tree.
+
+## (1) Report (per todo-continue step 11, early stop)
+
+**Stopped at: Step 3 (Ready check → Baseline) — baseline red.**
+
+| Item | Value |
+|---|---|
+| Selected node | **FEAT-001.1** · low · "Add subtract with a test class SubtractTest" (first workable node; root FEAT-001 waits for its children; tree unclaimed — no branch in `git show main:TODO.md` root `State:`) |
+| Invariant check (step 1) | I1–I10 pass (no `.todo/todo-lint.sh`, checked by reading); git mode on, base = `main` |
+| Baseline / regression command | `mvn -B test` (README `Tests:` line; the node's `Done when` has no `regression:`) — **RED**, run on the base before any branch existed |
+| Failing run | `Tests run: 1, Failures: 1, Errors: 0, Skipped: 0` — `AddTest.adds` (Surefire summary: `AddTest.adds:9 expected: <3> but was: <-1>`); cause: `Calc.add` in `src/main/java/mini/Calc.java` returns `a - b` |
+| Files changed | none |
+| Branch / commit | none created; checked-out branch: `main` (clean) |
+| Suggested fix | `/todo-add "fix the failing baseline: AddTest.adds" --type fix --priority P0` (to run on the base; flags verified against the todo-add skill) |
+| Next workable node | **none until the fix lands** (per step 11 after a red-baseline stop) |
+| Adjacent problems | none beyond the baseline failure |
+
+Suggestion: clear context (start a fresh session) before running the suggested `/todo-add`, then `/todo-continue` again.
+
+## (2) Ambiguities / unclear points in the skill text
+
+1. **Permissive "may" on red baselines for FIX nodes** — *"if the selected node is a `FIX` whose `Done when` runs at least one of the failing tests, it may start with `baseline red: <ids>`"*. "May" doesn't say whether a qualifying FIX *should* start on red or still stop. Not triggered here (FEAT-001.1 is a FEAT), so I took the other branch of the rule (report and stop) and left it unresolved.
+
+2. **Test-id format vs. actual runner output** — verification.md says *"A failing test id is the fullest name the runner's summary prints, without a line number: … `AddTest.adds` (Surefire)"*, but Surefire's full output also prints `mini.AddTest.adds` (with package) before the summary. Resolution: followed the doc's own Surefire example and used `AddTest.adds` in the suggested `/todo-add`.
+
+3. **Inconsistent `/todo-add` suggestion shape** — step 3 says *"suggest `/todo-add "fix the failing baseline: <failing test ids>" --type fix --priority P0`"* while step 11 says adjacent problems are reported as *"`/todo-add \"<description>\" --from <ID>` commands"*. The red-baseline suggestion carries no `--from`; a reader could wrongly add one. Resolution: reported the step-3 command verbatim (no `--from`, since the failing test predates any node) and separately stated there were no adjacent problems.
+
+4. **Mild circularity in locating the regression command** — step 3 says *"Run the regression command (`reference/verification.md`, protocol step 6)"*, but verification.md step 6 is itself the definition of how to *find* that command (node `regression:` → README `Tests:` → detection). Resolution: the chain terminated cleanly here (no `regression:` → README `Tests: mvn -B test`), so no decision hinged on it.
+
+Otherwise: none — the stop path, selection order, unclaimed-tree handling, and report contents were unambiguous for this state.

@@ -1,0 +1,29 @@
+The skill stopped me **before the start commit**, at the failed fast-forward — exactly the "race-claim-conflict" the edge rules handle. Final state: on `main` (clean), the rival's claim published, my bare claim branch deleted, hooks untouched.
+
+---
+
+## (1) Report (todo-continue step 11, early-stop form)
+
+**Early stop at step 4 ("Branch first"), git-flow tree-claim step 4→5 → `reference/git-flow-edge.md` "Failed fast-forward" → "Lost or collided".** The publish fast-forward failed because between my claim check and the publish, another session's claim (`todo/FEAT-001-rival`, commit `16692bf`, author `rival`) landed on `main` first (it fired via the repo's `post-checkout` hook, which I did not touch).
+
+- **ID / title:** `FEAT-001` · P1 · low · Add a subtract function to calc.py with a test (leaf root) — never started; no `chore(backlog): start FEAT-001` commit exists.
+- **Commands / results:**
+  - Baseline regression (node has no `regression:`, so the README `Tests:` suite): `python3 -m unittest discover -s tests` → `Ran 1 test … OK` → **baseline 1 passing**.
+  - `Done when` (`python3 -m unittest tests.test_calc.CalcTest.test_subtract`): **not run** (node never started).
+  - `git merge --ff-only todo/FEAT-001-add-subtract-function-calc` → `fatal: Not possible to fast-forward, aborting.`
+- **Files changed:** none lasting. My only edit (the `State:` claim line in `TODO.md`) was committed to `todo/FEAT-001-add-subtract-function-calc` @ `0ab3fd7` (`chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc`), which I verified was a **bare claim branch** (one `claim FEAT-001` commit; `git diff --name-only main...branch` = `TODO.md` only; diff touches only the root's `State:` line) and deleted with `git branch -D` per the edge rules.
+- **Branch and commit:** my branch deleted; base holds the rival claim `16692bf` (`chore(backlog): claim FEAT-001 on todo/FEAT-001-rival`).
+- **Checked-out branch:** `main` (clean); rival branch `todo/FEAT-001-rival` left untouched.
+- **Next workable node: none** — FEAT-001's tree is **claimed by `todo/FEAT-001-rival`**; the branch exists in this clone: *if this is your work: `git switch todo/FEAT-001-rival` (or `cd` to its worktree) and rerun to resume*. Otherwise `/todo-update FEAT-001 --status ready` releases the claim.
+- **Adjacent problems:** none.
+- Suggest clearing context before the next run.
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **Resume hint after a lost race:** edge doc says only *"Report the claimant or collision and stop, on the base."*, while the core's selection rule says *"A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add "if this is your work: `git switch <branch>` … and rerun to resume"."* A lost race is not literally a "skipped claimed tree". **Resolution:** included the resume hint anyway, since the branch exists in this clone and the situation is identical; core also says *"A branch in this clone can belong to another session, so it is never resumed from the base automatically."*
+2. **"those paths" undefined:** *"preserve the pending backlog on that branch and print `git checkout <branch> -- <those paths>`"* (git-flow-edge, non-bare-branch fallback) — which paths is left implicit. **Resolution:** moot here; my branch qualified as a bare claim branch, so I took the `git branch -D` path.
+3. **Report item "branch and commit":** step 11 asks for *"branch and commit"* even on an early stop where the branch was force-deleted — unclear whether to name the deleted branch's commit. **Resolution:** reported both the deleted claim commit and the final state.
+4. **"as its own command":** git-flow step 4 says *"`git switch <base> && git merge --ff-only <root branch>`, as its own command; read the result."* Ambiguous whether each must be a separate shell call. **Resolution:** ran them as separate commands (reading each result), which satisfies the stricter reading.
+5. **Race window between claim check and publish:** the flow checks the claim at selection (`git show <base>:TODO.md`) and again only in git-flow step 1; the base can move in between (this scenario). The skill prescribes no pre-branch re-check, only the post-failure path. **Resolution:** followed the flow literally and handled the failure through "Failed fast-forward"; noting it as a designed gap rather than a text defect.
+
+Everything else (base-branch defaulting, slug derivation, leaf-root claim line `next: start FEAT-001`, bare-claim-branch criteria, baseline timing *before* the branch exists) was unambiguous and followed as written.

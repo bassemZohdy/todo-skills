@@ -1,0 +1,44 @@
+Done. Commit `3176612 chore(release): 0.2.0` contains only `CHANGELOG.md`; the tree is clean. Per the skill, the tag and push commands are **printed, not run**.
+
+## 1. Release report (/todo-release)
+
+**Preconditions (all passed)**
+- Git repo, git mode; base branch = `main` (user didn't name one, README has no `Base:` line, first of main/master/trunk/develop); `main` checked out, and this is the main checkout (`git worktree list`).
+- `git status --porcelain` → empty (nothing beyond backlog/untracked).
+- Invariant check (no `.todo/todo-lint.sh`, so a read of I1–I10): TODO.md is the empty tree — all pass.
+- `[Unreleased]` had `- ` entries: FEAT-002 (Added), FIX-001 (Fixed). No refusal.
+- Warning check: no `[/]` task and no claimed tree in TODO.md or `git show main:TODO.md` — no warning.
+- Tags: only `v0.1.0` exists → `v0.2.0` free.
+
+**Version**
+- Previous version: `0.1.0` (newest `## [X.Y.Z]` heading).
+- Reason: minor — an `### Added` entry (`FEAT-002`) is present (no BREAKING/`!`/Removed entries).
+- User-confirmed version: **0.2.0** (digits only, > 0.1.0, no local tag).
+
+**Edits to `CHANGELOG.md`** (nothing else touched; version files not edited)
+- `## [Unreleased]` renamed to `## [0.2.0] - 2026-11-13` (`date +%F` via bash); fresh empty `## [Unreleased]` (no subheadings) placed above it with a blank line between. Older sections untouched.
+- Link refs: base URL `https://github.com/example/minical` (part before `/compare/` on the old `[Unreleased]:` line); `[Unreleased]:` now points at `.../compare/v0.2.0...HEAD`; new line `[0.2.0]: https://github.com/example/minical/compare/v0.1.0...v0.2.0` added under it.
+- Version files mentioning `0.1.0` (grep over package.json/pyproject.toml/Cargo.toml/pom.xml): **none found** (exit 1).
+
+**New version section**
+- Heading: `## [0.2.0] - 2026-11-13`
+- `### Added` — FEAT-002 (feat): Add multiply to calc.py
+- `### Fixed` — FIX-001 (fix): Handle float inputs in add
+
+**Commit**: `chore(release): 0.2.0` (CHANGELOG.md only, no body) → `3176612`.
+
+**Run these yourself** (I did not run them):
+```
+git tag -a v0.2.0 -m "0.2.0"
+git push --follow-tags
+```
+
+## 2. Ambiguities / unclear instructions hit
+
+None that blocked execution; the following wording gaps had to be interpreted (none changed the outcome materially):
+
+1. *"a type followed by an exclamation mark (written by hand, for example feat followed by !)"* — the actual token (`feat!`? `(feat!):`?) and where it must appear in an entry are never shown. Resolved: I would have counted any `feat!`/`fix!`/etc. anywhere in an entry as major; no such entry existed, so it didn't apply.
+2. *"add `[X.Y.Z]: <base URL>/compare/v<previous>...vX.Y.Z` under it"* — "under it" could mean directly under the new `[Unreleased]:` line or appended under the whole link block. Resolved: placed it directly under the new `[Unreleased]:` line, above the untouched `[0.1.0]:` line (newest-first, matching Keep a Changelog convention).
+3. *"Give the reason in one line and ask the user to confirm or name another. Do nothing until they answer"* vs. the pre-supplied answer "0.2.0, confirmed". Resolved: treated the task's pre-supplied confirmation as the user's in-conversation answer; it also matched the version the rules propose (minor via the `### Added` entry), so no divergence existed.
+4. *"commit `CHANGELOG.md` only (`git commit -- CHANGELOG.md`)"* — ambiguous whether an explicit `git add CHANGELOG.md` was intended first, and `git commit -- <path>` only works when that path has working-tree changes. Resolved: edited the file first, then ran `git commit -m "chore(release): 0.2.0" -- CHANGELOG.md` directly; the commit contains exactly one file, as required.
+5. *"run the invariant check again (it reads CHANGELOG.md for I5 and I7)"* — core defines the invariant check as I1–I10 on TODO.md (or the lint script); the parenthetical makes it sound like the check itself reads CHANGELOG. Resolved: performed the I1–I10 check on TODO.md, consulting CHANGELOG.md only for the I5/I7 lookups (vacuous here — empty tree).

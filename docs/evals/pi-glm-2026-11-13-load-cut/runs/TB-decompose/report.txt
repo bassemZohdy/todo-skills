@@ -1,0 +1,34 @@
+Done. The invariant check passes again after the edit (I1–I10 by reading — no `.todo/todo-lint.sh` exists), and per todo-add step 10 the edit stays uncommitted on the base (the decompose commit applies only on a `todo/` branch). Stopping after one invocation as instructed.
+
+---
+
+## 1) Report (step 11, early stop at step 2)
+
+**Stopped at step 2 (`/todo-continue`, decompose path)** — the next node was a workable `[ ]` root carrying `State: next: decompose`, so it was broken down, not built.
+
+- **Node:** **FEAT-001** · Add subtract, multiply and divide to calc.py, each with its own test
+- **Check / commands run:**
+  - Git mode: repo, base `main`, clean tree, tree unclaimed (`git show main:TODO.md` State names no branch)
+  - Invariant check (I1–I10, by reading — `.todo/todo-lint.sh` does not exist): **pass** before and after the edit
+  - No verification run for the node (the decompose path builds nothing); I did confirm the `Done when` command style is runnable on this host: `python3 -m unittest tests.test_calc.CalcTest.test_add` → OK (1 test) via Git Bash
+- **Decomposition (user confirmed "yes"):**
+  - `FEAT-001.1` · low · Add subtract to calc.py — Done when: calc.subtract(2, 1) returns 1; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - `FEAT-001.2` · low · Add multiply to calc.py — Done when: calc.multiply(2, 3) returns 6; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`
+  - `FEAT-001.3` · low · Add divide to calc.py — Done when: calc.divide(6, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_divide`
+  - Root keeps its integration `Done when` (`python3 -m unittest discover -s tests`); its `State: next: decompose` was removed. No sizes (none carried anywhere), no `Depends:` (sibling order is obvious), no plan file needed (3 nodes, fits in 4 lines each)
+- **Files changed:** `TODO.md` only (+6/−1, now 12 lines; LF endings and final newline preserved) — **uncommitted backlog edit on the base**, to be carried by the next tree-claim commit
+- **Branch / commit:** checked-out branch `main` (the base); no commit made — `chore(backlog): decompose <ID>` is committed only on a `todo/` branch, and no root drained, so no merge commands
+- **Children done/total:** 0/3
+- **Adjacent problems:** none
+- **Next workable node:** **FEAT-001.1** (then .2, .3; FEAT-001's integration step after all are `[x]`)
+- **Suggestion:** clear context before running `/todo-continue` again so FEAT-001.1 starts fresh (claim → baseline → red/green/refactor)
+
+## 2) Ambiguities / contradictions / unclear instructions in the skill text
+
+1. **"A node with `next: decompose` is broken down, not built"** (todo-continue step 2) vs. the core scope rule "Every leaf is one change that fits one context window and touches at most 5 files. Bigger work is split into children" — FEAT-001 touches 2 files and would fit one leaf, yet the `next: decompose` instruction is unconditional. **Resolution:** followed the explicit unconditional todo-continue rule and decomposed; the flag records that the node was deemed too big to build as-is.
+2. **"A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down"** (core) says what the line is *before*, but nothing says what it becomes *after* the breakdown. **Resolution:** removed the `State:` line entirely (git-flow's tree-claim step writes a fresh `State: branch … from …; next: build children` at claim time), leaving the root marker `[ ]` with no state.
+3. **"Rate each node's complexity with the core table … a parent is rated by its integration step"** (todo-add step 7, incorporated by "with `../todo-add/SKILL.md` steps 7-8") — unclear whether an existing parent already rated `mid` gets re-rated; FEAT-001's integration step looks `low`. **Resolution:** kept the root at `mid` (minimal edit; steps 7–8 were applied to the new children, and re-rating an unchanged parent isn't explicitly required).
+4. **"show the children, write them after the user confirms"** (todo-continue step 2) — no wording for the confirmation question, and it overrides todo-add's own step 9 ("Confirm. For more than one node, show the proposed tree … and wait"); it also doesn't say whether later todo-add steps (10's insert/invariant re-check) still apply. **Resolution:** showed the children, treated the pre-supplied "yes" as the confirmation, wrote them, and re-ran the invariant check per the core's general rule ("A lint run after an edit that fails means the edit is wrong").
+5. **"(over 120 lines: write nothing, say so, stop)"** (todo-continue step 2) — terse cross-reference to todo-add step 8's 120-line budget (invariant I4); unclear on first read that "120 lines" means the whole TODO.md after the insertion. **Resolution:** read it against step 8 / I4; the result is 12 lines, so it did not apply.
+
+Otherwise: none.

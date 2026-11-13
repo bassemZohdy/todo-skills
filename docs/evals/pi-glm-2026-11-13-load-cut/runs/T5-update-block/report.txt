@@ -1,0 +1,31 @@
+The file is correct (the earlier mojibake was just PowerShell's console encoding). Post-edit lint by reading (I1–I10): all pass — FEAT-002 is now `[!]` with a `Blocked:` line and no `State:`, 4 lines total, still ≤120 file lines, no ID collisions, `From: FEAT-000` still satisfied. Git shows ` M TODO.md` on `main` — deliberately left uncommitted (base backlog edit).
+
+---
+
+## (1) Report (`/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"`)
+
+**FEAT-002 is now blocked.** Pre-checks: git repo, on base branch `main` (no `Base:` line, `main` is the default), tree clean; lint (I1–I10, by reading — no `.todo/todo-lint.sh`) passed before the edit; FEAT-002 is not in CHANGELOG.md, so no reopen-refusal; its tree is unclaimed (no `State:` branch claim, no `todo/` branches), so the node was changed on the base, where its state lives.
+
+Updated task lines (in `TODO.md`):
+
+```markdown
+- [!] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title
+  - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
+  - Links: From: FEAT-000
+  - Blocked: waiting for the product decision on rounding → n/a (manual) → resolve this, then run /todo-update FEAT-002 --status ready
+```
+
+- Marker `[ ]` → `[!]` (only the character between the brackets changed); `Blocked:` added as the last field line (the node had no `State:` to replace). No verification of FEAT-002 failed in this conversation, so the middle part is the manual `n/a (manual)`; the note gave only a reason, so the action was generated per the skill.
+- Left **uncommitted** on the base as a backlog edit (per the skill: on the base, no commit; commits happen only on a `todo/` branch). No other branch involved.
+- Post-edit lint passes. Title kept verbatim including the `<with> "quotes" & </script>` characters — not interpreted or escaped.
+- Per the skill, autonomous execution now **stops**; I will not pick up another node.
+
+## (2) Ambiguities / contradictions / unclear instructions encountered
+
+1. *"If the ID is in CHANGELOG.md, refuse to reopen it"* — "in CHANGELOG.md" is loose (FEAT-002's `From: FEAT-000` parent is in CHANGELOG, but that's not FEAT-002). Resolved using I5's precise definition: only counts as an entry ID or an `Includes:` ID.
+2. *"the action is `resolve this, then run /todo-update <ID> --status ready` (written without quotes)"* — "written without quotes" is ambiguous between "don't add quotation marks around the action" and merely delimiting the skill's own text. Resolved by writing the action with no quote characters: `resolve this, then run /todo-update FEAT-002 --status ready`.
+3. *"the middle part is `n/a (manual)`, written without backticks"* vs the core format `"<command in backticks> <error…>"` — minor tension: the core format says the command goes in backticks, while the manual case must not. Resolved by writing the literal string `n/a (manual)` with no backticks.
+4. The `--status blocked` bullet states no explicit refusal for `[x]` nodes (unlike the `drop`/`revert` bullets, which list their refusals); whether blocking a done node is allowed must be inferred from the lifecycle table ("`[x]` → `/todo-update` `revert` only"). Not applicable here (node was `[ ]`), so nothing to resolve in practice.
+5. *"Then **stop autonomous execution** and do not pick up another node"* — "stop" is behavioral rather than a file/report action; resolved as "make no further changes and take no new node," which is how I ended the run.
+
+Aside from these minor wording points, the skill text was internally consistent for this path.

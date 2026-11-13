@@ -1,0 +1,29 @@
+Done. Post-edit lint re-check (I1–I10, by reading — no `.todo/todo-lint.sh` exists) passes on the updated file.
+
+## (1) Report
+
+One-line confirmation (the skill's required reply format for a drop):
+
+> **Dropped FEAT-002** ("duplicate of FEAT-001"): root leaf deleted from TODO.md (no subtree, no `Depends:`/`From:` references to re-point); recorded in `docs/plans/PROJECT.md` → `- 2026-11-13 · duplicate of FEAT-001 · dropped FEAT-002`; changes left uncommitted on the base as backlog edits; lint passes.
+
+Supporting detail:
+- Pre-checks: git mode, base = `main` (README has no `Base:` line); tree clean; invariant check passed before and after; FEAT-002 not in CHANGELOG.md (no reopen-refusal); marker `[ ]` (not `[/]`/`[x]`); not a claimed root (no `State:` in `git show main:TODO.md`); no descendants; no `todo/FEAT-002*` branch (nothing to list, no `git branch -D` to print); reason present in `--note`; unclaimed tree → dropped on the base, where I already was.
+- Confirmation was requested with the full proposal (node + subtree + reference changes: none found) and answered "yes".
+- Files changed (uncommitted backlog edits, per "on the base leave it uncommitted"): `TODO.md` (−3 lines), `docs/plans/PROJECT.md` (+1 Revisions line).
+- No RTM exists (`docs/RTM.md` absent, no `## RTM` section in README) → RTM step skipped. Nothing written to CHANGELOG. No commit, tag, push, or branch deletion performed.
+
+## (2) Ambiguities / unclear points in the skill text
+
+1. **"a node of an unclaimed tree is dropped on the base, one inside a claimed tree on its parent's branch (its nearest ancestor branch that exists; from elsewhere, name that branch and stop)"** — for a *root* node, "its parent's branch" is undefined. Resolved logically: the same bullet refuses drops of claimed roots ("a claimed root (release the claim first)"), so a root's tree is always unclaimed at drop time and only the "on the base" clause can apply — which is what I did. Not hit in practice, but the text never states where a root is dropped.
+
+2. **"update any ancestor sizes given, and lint (a parent left without children becomes a leaf: check its complexity and any size still fit, and ask if not)"** — only reached the general clause here (FEAT-002 is a root leaf, no ancestors/sizes), but the parenthetical assumes a dropped node always has a parent; for a dropped root it silently doesn't apply. Resolved: no-op, since a root has no ancestor to resize.
+
+3. **"reply with the updated task lines (or a one-line confirmation for a drop)"** — this sentence sits in the "Field edits" section, and it's unclear whether it also governs `--status` changes. Resolved: treated it as applying to all of `/todo-update` (the drop option exists only there), and replied with the one-line confirmation.
+
+4. **"With an RTM (`../todo/reference/rtm.md`) remove each dropped ID from its Tasks cell in the same change"** — the drop bullet assumes you already know whether the project has an RTM; the reference file itself must be read just to learn where an RTM lives (`docs/RTM.md` or a README `## RTM` section). Resolved: read `reference/rtm.md`, resolved both locations as absent, skipped the step.
+
+5. **Latent tension between the no-reuse mechanism and uncommitted base edits** — "So the ID is never reused (core 'IDs'): when `docs/plans/PROJECT.md` exists, append …" combined with "on the base leave it uncommitted (a backlog edit)". The core's next-ID rule also scans commit subjects, but a base drop is never committed by the skill, so the entire no-reuse record is an *uncommitted* working-tree edit until some later `todo/` branch commit stages it. Not a blocker (nothing to decide), but the guarantee is weaker than the text implies. Resolved: followed the text literally (append + leave uncommitted) and flag it here.
+
+6. **"otherwise offer to create `docs/plans/PROJECT.md` … (a backlog file; ask first when `docs/` is missing), telling the user that without it the ID could be reused"** — would have required a second user answer after the drop's confirmation "yes" (does that "yes" also cover the offer?). Not hit: `docs/plans/PROJECT.md` already existed, so the unconditional append branch applied and no second question was needed.
+
+No contradictions that changed the outcome; items 1–4 were resolved without user input, 5–6 are latent and documented.

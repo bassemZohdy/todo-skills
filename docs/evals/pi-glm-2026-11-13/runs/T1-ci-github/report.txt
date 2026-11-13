@@ -1,0 +1,41 @@
+All steps complete. Here is the deliverable.
+
+## 1. `/todo-init --ci` report
+
+**Mode:** git. Base branch: **`main`** (user named none; no README `Base:` line; first existing of main/master/trunk/develop). Working tree clean apart from the new untracked files created below (backlog files unmodified, so nothing pending for the tree-claim commit).
+
+**Backlog files**
+- `TODO.md` — exists in the current tree format with an **empty tree**; nothing created, no migration needed.
+- `CHANGELOG.md` — exists and already has `## [Unreleased]`; nothing added.
+- `README.md` — found. `docs/` — **missing** (never created by the skill). No `CONTRIBUTING.md`.
+
+**Runtime / package manager / test command**
+- Runtime: Python 3 (stdlib `unittest`; no marker file — inferred from the README `Tests:` command and `tests/test_calc.py`).
+- Package manager: none (no lockfile/marker).
+- Test command: `python3 -m unittest discover -s tests` — source: **README `Tests:` line** (highest precedence). Safety check passed (plain test command). README already states it, so no `Tests:` line offer was needed.
+- CI-run test command: none (no `.github/workflows/`, `.gitlab-ci.yml` or `Jenkinsfile` existed), so no mismatch to flag.
+
+**Definition of Done:** none found (no `Definition of Done` heading in README.md; no CONTRIBUTING.md; no docs/). Not created.
+
+**Checks**
+- `.todo/todo-lint.sh`: **missing** → copy `tools/todo-lint.sh` from the todo-skills repository (https://github.com/bassemZohdy/todo-skills) into `.todo/` yourself; the skill never downloads it. Until it exists, `check.sh` omits the lint line and invariants were checked by reading instead.
+- `.todo/check.sh`: **created** (chmod +x) and run once — **green** (`Ran 1 test … OK`).
+- Invariants I1–I10: **pass** (empty tree; I6 structure exact).
+
+**Tree summary:** empty.
+
+**CI setup** (GitHub Actions — no CI file, origin `github.com/example/minical.git`):
+- Created `.github/workflows/todo-check.yml`: `on: push` (branches: [main]) + `pull_request`, `permissions: contents: read`, `actions/checkout@v4`, `actions/setup-python@v5` (`python-version: "3.x"`), no install step (no dependencies), then `bash .todo/check.sh`.
+- No pre-push hook (local fallback does not apply — GitHub row matched).
+
+**Your next step:** commit `.todo/` and `.github/workflows/todo-check.yml` yourself (they are project files, not backlog files — no claim commit carries them; commit on `main` or via a PR as you would any CI change). The skill commits nothing; the first CI run starts when you push (pushing is yours). A red first run usually means a missing install step — not expected here since the suite is stdlib-only.
+
+## 2. Ambiguities / contradictions / unclear instructions hit
+
+1. **Runtime detection has no row for this repo.** todo-init step 4: *"Detect runtime, package manager and test command by marker file"* — no marker file exists (no `pyproject.toml`, `requirements.txt`, `setup.cfg`, `pytest.ini`, …), so "runtime" is formally undetectable from the table. Resolved via the test command's precedence winner (README `Tests:` → `python3 …`) plus ci.md's runtime-table clause *"or a test command that starts with `python`/`pytest`/`uv`"* → `actions/setup-python@v5`; package manager reported as "none".
+
+2. **Optional vs mandatory one-shot run of `check.sh`.** todo-init step 4: *"Do not run the suite (the `--ci` step **may** run `.todo/check.sh` once to show it works)"* vs ci.md: *"Otherwise **run it once** after writing and report the result"*. Resolved by running it once (the more specific ci.md instruction) and reporting the green result.
+
+3. **Workflow details unspecified.** ci.md prescribes only *"GitHub workflow (`on: push` with `branches: [<base>]` and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, … then `bash .todo/check.sh`"* — no workflow/job name, no `runs-on`, and it is unclear whether `pull_request` also takes a branch filter. Resolved with conventional choices: name/job `todo-check`, `runs-on: ubuntu-latest`, branch filter on `push` only (reading `with branches: [<base>]` as attaching to `push`).
+
+No other ambiguities, contradictions or unclear instructions were encountered (the `Tests:`-line offer correctly did not trigger — the README states the command in a sentence; the `Base:`-line offer correctly did not trigger — the user named no base; pre-planning correctly skipped — no `--plan` and no project goal stated).

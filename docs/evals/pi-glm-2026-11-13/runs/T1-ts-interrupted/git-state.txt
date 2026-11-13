@@ -1,0 +1,31 @@
+## HEAD
+3174f74f5f964147335b59620ee8c7b5c04df819
+## current branch
+todo/FEAT-001-add-subtract-multiply-src
+## branches
+  main                                    3b0ea2e chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-src
+* todo/FEAT-001-add-subtract-multiply-src 3174f74 Merge FEAT-001.1 into FEAT-001
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/ts-interrupted/repo  3174f74 [todo/FEAT-001-add-subtract-multiply-src]
+## tags
+## refs
+refs/heads/main 3b0ea2e7fed59fe54809da5c73486d412c32bcb6
+refs/heads/todo/FEAT-001-add-subtract-multiply-src 3174f74f5f964147335b59620ee8c7b5c04df819
+## log --all --graph
+*   3174f74  (HEAD -> todo/FEAT-001-add-subtract-multiply-src) Merge FEAT-001.1 into FEAT-001
+|\  
+| * 111c8ee  feat(calc): add subtract
+|/  
+* 3b0ea2e  (main) chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-src
+* afd7a36  init typescript project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./package.json
+./src/calc.ts
+./tests/add.test.ts
+./tests/subtract.test.ts

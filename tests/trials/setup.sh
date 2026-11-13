@@ -34,7 +34,9 @@ head='# Active Backlog
 
 ## 🌳 Task Tree
 '
-[ "$scenario" = no-git ] || git init -q -b main
+# LF in the working copy on every host: with core.autocrlf=true (Git for Windows) the first branch switch rewrote TODO.md
+# with CRLF, an agent's exact-match edit then failed, and it rewrote the whole file (docs/evals/pi-glm-2026-11-12).
+[ "$scenario" = no-git ] || { git init -q -b main; git config core.autocrlf false; }
 
 # The red-baseline and interrupted variants start from the lifecycle project of their language (TASK-086).
 kind="$scenario"
@@ -44,14 +46,14 @@ case "$kind" in
 interrupted-merge)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
   - Done when: both functions work; `python3 -m unittest discover -s tests`
-  - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
+  - State: branch todo/FEAT-001-add-subtract-multiply-calc from main; next: build children
   - [ ] **FEAT-001.1** · low · Add subtract with a test
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with claimed tree"
-  g switch -q -c todo/FEAT-001-subtract-multiply
-  g switch -q -c todo/FEAT-001.1-subtract-test
+  g switch -q -c todo/FEAT-001-add-subtract-multiply-calc
+  g switch -q -c todo/FEAT-001.1-add-subtract-test
   printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
   python3 - <<'PY'
 p='tests/test_calc.py'
@@ -63,17 +65,17 @@ open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   g add calc.py tests/test_calc.py TODO.md && g commit -q -m "feat(calc): add subtract" -m "Refs: FEAT-001.1
 Reviewed: self, 0 findings fixed"
-  g switch -q todo/FEAT-001-subtract-multiply   # the session died here, before the merge
+  g switch -q todo/FEAT-001-add-subtract-multiply-calc   # the session died here, before the merge
   ;;
 refresh-from-base)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
-  - State: branch todo/FEAT-001-subtract from main; next: start FEAT-001' > TODO.md
+  - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001' > TODO.md
   g add -A && g commit -q -m "init with claimed root"
-  g switch -q -c todo/FEAT-001-subtract
+  g switch -q -c todo/FEAT-001-add-subtract-function-calc
   python3 - <<'PY'
 p='TODO.md'
-s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('branch todo/FEAT-001-subtract from main; next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-subtract from main; next: build')
+s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001**','- [/] **FEAT-001**').replace('branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001','attempts 0/3; branch todo/FEAT-001-add-subtract-function-calc from main; next: build')
 open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   g add TODO.md && g commit -q -m "chore(backlog): start FEAT-001"
@@ -91,7 +93,7 @@ PY
   printf 'import unittest, sys, os\nsys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))\nimport extra\nclass ExtraTest(unittest.TestCase):\n    def test_twice(self):\n        self.assertEqual(extra.twice(2), 4)\nif __name__ == "__main__":\n    unittest.main()\n' > tests/test_extra.py
   printf '\n### Added\n\n- **FEAT-009** (feat): Add twice() in extra.py. Validated: `python3 -m unittest tests.test_extra`.\n' >> CHANGELOG.md
   g add extra.py tests/test_extra.py CHANGELOG.md && g commit -q -m "feat(extra): add twice" -m "Refs: FEAT-009"
-  g switch -q todo/FEAT-001-subtract
+  g switch -q todo/FEAT-001-add-subtract-function-calc
   g stash pop -q
   ;;
 team-claim)
@@ -106,7 +108,7 @@ team-claim)
   git init -q --bare -b main .team/origin.git
   g remote add origin "$dir/.team/origin.git"
   g push -q -u origin main
-  git clone -q .team/origin.git .team/peer
+  git clone -q -c core.autocrlf=false .team/origin.git .team/peer
   ( cd .team/peer
     awk '{print} /Done when: subtract works/ {print "  - State: branch todo/FEAT-001-peer-work from main; next: build children"}' TODO.md > TODO.new && mv TODO.new TODO.md
     git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-peer-work"
@@ -120,11 +122,11 @@ team-claim)
 claimed-elsewhere)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
-  - State: branch todo/FEAT-001-subtract from main; next: start FEAT-001
+  - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001
 - [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with one claimed root"
-  g branch todo/FEAT-001-subtract
+  g branch todo/FEAT-001-add-subtract-function-calc
   ;;
 race-claim-conflict|race-claim-benign)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
@@ -279,14 +281,14 @@ update-block|update-drop|status-readonly|report)
 blocked-sibling)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
   - Done when: both functions work; `python3 -m unittest discover -s tests`
-  - State: branch todo/FEAT-001-subtract-multiply from main; next: build children
+  - State: branch todo/FEAT-001-add-subtract-multiply-calc from main; next: build children
   - [ ] **FEAT-001.1** · low · Add subtract with a test
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init with claimed tree"
-  g switch -q -c todo/FEAT-001-subtract-multiply
-  g switch -q -c todo/FEAT-001.1-subtract-test
+  g switch -q -c todo/FEAT-001-add-subtract-multiply-calc
+  g switch -q -c todo/FEAT-001.1-add-subtract-test
   python3 - <<'PY2'
 p='TODO.md'
 s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001.1** · low · Add subtract with a test\n    - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`',
@@ -294,7 +296,7 @@ s=open(p,encoding='utf-8').read().replace('- [ ] **FEAT-001.1** · low · Add su
 open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY2
   g add TODO.md && g commit -q -m "chore(backlog): block FEAT-001.1"
-  g switch -q todo/FEAT-001-subtract-multiply   # the parent's branch still shows FEAT-001.1 as [ ]
+  g switch -q todo/FEAT-001-add-subtract-multiply-calc   # the parent's branch still shows FEAT-001.1 as [ ]
   ;;
 ts-lifecycle)
   # TypeScript (Node 22, node:test with type stripping), no dependencies. One root with two children.

@@ -65,7 +65,7 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - `todo-report.sh` encodes hostile text and exits 1 without a `TODO.md`;
 - the packaging rules above;
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
-- that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules);
+- that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules, the narrowed review trigger, the leftover-work rule);
 - each command's loaded bytes and words against the [load budget](#load-budget);
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);

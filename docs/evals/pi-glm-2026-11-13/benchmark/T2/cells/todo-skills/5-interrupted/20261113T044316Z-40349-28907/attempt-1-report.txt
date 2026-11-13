@@ -1,0 +1,18 @@
+Done. The tree is drained and merged into `main`; no skill stop rule fired that needed your answer.
+
+## Summary
+
+**Workflow:** `/todo-init` → `/todo-add` → `/todo-continue --merge` (one invocation — the single-node tree drained in it).
+
+**todo-init:** created `TODO.md` (empty tree) + `CHANGELOG.md` (with `## [Unreleased]`); git mode, base `main`; test command from README `Tests:` line: `python3 -m unittest discover -s tests -t .`; no docs/, no Definition of Done, no `.todo/` scripts (mention: `--ci` can set up `check.sh` if you want it).
+
+**todo-add:** one leaf root **FEAT-001** · P1 · low — finish `slugify` (type FEAT: implements a new capability; no confirmation needed for a single leaf).
+
+**todo-continue --merge — FEAT-001 "Finish textutil.slug.slugify"**
+- **Interrupted work preserved:** the `wip: slugify lowercases` commit stayed in history (ancestor of the branch), and the uncommitted `textutil/slug.py` change was treated as leftover work per git-flow: baseline taken with it in place, carried to `todo/FEAT-001-finish-textutil-slug-slugify`, committed with the node (the interrupted session's `lower()` logic is still in the final code).
+- **Commands:** baseline 1 passing → red `AssertionError: '--hello,-world!-' != 'hello-world'` → Done when `python3 -m unittest tests.test_slug`: 4 tests OK → regression `python3 -m unittest discover -s tests -t .`: 4 OK (baseline 1, nothing deleted/skipped). Attempts 0/3.
+- **Files:** `textutil/slug.py` (+`re.sub("[^a-z0-9]+", "-", …)`, `.strip("-")`), `tests/test_slug.py` (+3 tests carrying FEAT-001 in docstrings).
+- **Git:** claim `fb3c523` (published to main via ff-only) → start `78b20fa` → `9019351` feat(slug) → drain `56cbe79` → `445707b` Merge FEAT-001 into main; branch deleted. Optional root review skipped (low complexity, completes rather than alters an established interface). Checked out: **main**, clean (only generated `__pycache__` untracked).
+- **Adjacent problems:** none. Next workable node: **none** (tree empty; FEAT-001 lives in CHANGELOG.md under `### Added`).
+
+One open offer from todo-init (non-blocking): want CI setup (`/todo-init --ci`)? Everything else is complete — good point to clear context.

@@ -1,0 +1,54 @@
+## HEAD
+0de2e70959a6fa78b7b791b5bc6380dbd7dee872
+## current branch
+main
+## branches
+* main 0de2e70 Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi8/java-lifecycle/repo  0de2e70 [main]
+## tags
+## refs
+refs/heads/main 0de2e70959a6fa78b7b791b5bc6380dbd7dee872
+## log --all --graph
+*   0de2e70  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * e463bc4  chore(backlog): drain FEAT-001
+| * 5d787ff  chore(backlog): start FEAT-001
+| *   d660a7f  Merge FEAT-001.2 into FEAT-001
+| |\  
+| | * a7ff848  feat(mini): add multiply with a test class MultiplyTest
+| | * 0623172  chore(backlog): start FEAT-001.2
+| |/  
+| * 8ec3e23  Merge FEAT-001.1 into FEAT-001
+|/| 
+| * b337986  feat(mini): add subtract with a test class SubtractTest
+| * b7caaf7  chore(backlog): start FEAT-001.1
+|/  
+* 073d3a1  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* deb38b8  init java project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./pom.xml
+./src/main/java/mini/Calc.java
+./src/test/java/mini/AddTest.java
+./src/test/java/mini/MultiplyTest.java
+./src/test/java/mini/SubtractTest.java
+./target/classes/mini/Calc.class
+./target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./target/surefire-reports/TEST-mini.AddTest.xml
+./target/surefire-reports/TEST-mini.MultiplyTest.xml
+./target/surefire-reports/TEST-mini.SubtractTest.xml
+./target/surefire-reports/mini.AddTest.txt
+./target/surefire-reports/mini.MultiplyTest.txt
+./target/surefire-reports/mini.SubtractTest.txt
+./target/test-classes/mini/AddTest.class
+./target/test-classes/mini/MultiplyTest.class
+./target/test-classes/mini/SubtractTest.class

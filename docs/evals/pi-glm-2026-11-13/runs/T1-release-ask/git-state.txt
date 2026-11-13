@@ -1,0 +1,24 @@
+## HEAD
+d22b1483dca80061203d7e485f46c2430335d675
+## current branch
+main
+## branches
+* main d22b148 init with a released 0.1.0 and unreleased work
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/release-ask/repo  d22b148 [main]
+## tags
+v0.1.0
+## refs
+refs/heads/main d22b1483dca80061203d7e485f46c2430335d675
+refs/tags/v0.1.0 d22b1483dca80061203d7e485f46c2430335d675
+## log --all --graph
+* d22b148  (HEAD -> main, tag: v0.1.0) init with a released 0.1.0 and unreleased work
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

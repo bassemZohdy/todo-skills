@@ -1,0 +1,16 @@
+Done — the tree is drained and merged. Final report:
+
+**Worked entirely through the todo skills** (`todo-init` → `todo-add` → `todo-continue --merge`), no skill stop rule was triggered; nothing required asking.
+
+**/todo-init** — Created `TODO.md` (empty tree) and `CHANGELOG.md` (`[Unreleased]`), left uncommitted for the first claim. Test command `python3 -m unittest discover -s tests -t .` from the README `Tests:` line; base branch `main`; no `Definition of Done`, no `.todo/todo-lint.sh` (manual I1–I10 lint used), no `.todo/check.sh` (if you want lint+tests wired into CI or a pre-push fallback, run `/todo-init --ci`). Pre-planning questions weren't needed — your message already states the goal and done-state.
+
+**/todo-add** — Inserted `FEAT-001` · P1 · low (leaf root, `--type feat`: completing slugify delivers the new capability). Baseline before branching: **1 test passing** with the interrupted uncommitted change in place.
+
+**/todo-continue --merge — FEAT-001 "Finish textutil.slug.slugify"**
+- Interrupted work preserved: the wip commit `13ed5f7` stays in `main`'s history, and the uncommitted change was carried onto `todo/FEAT-001-finish-textutil-slug-slugify` as leftover work and is contained in the node commit (its `import re` + lowercase step kept).
+- Red: 2 new tests failed as expected (`AssertionError: '--hello,-world!-' != 'hello-world'`).
+- Green: `slugify` = lowercase → `re.sub(r"[^a-z0-9]+", "-", …)` → `strip("-")`.
+- Verified: Done when `python3 -m unittest tests.test_slug` → **3 tests OK**; regression `python3 -m unittest discover -s tests -t .` → **3 tests OK** (baseline 1, none deleted/skipped).
+- Files: `textutil/slug.py`, `tests/test_slug.py`. Commits: claim `2fc0f9c` (ff-published to main), start `e0c9409`, node `415179c` (`feat(slug): finish slugify`, self-reviewed, 0 findings), drain `910bdea` (`chore(backlog): drain FEAT-001`), then `Merge FEAT-001 into main` (`ff5eb40`) and the branch deleted.
+
+**End state:** `main` has the CHANGELOG entry under `### Added`, TODO.md's tree is empty (no workable nodes left), working tree clean (only generated `__pycache__`). No adjacent problems found. Since the root drained within one invocation, a second `todo-continue` was not needed; it would report "nothing workable".

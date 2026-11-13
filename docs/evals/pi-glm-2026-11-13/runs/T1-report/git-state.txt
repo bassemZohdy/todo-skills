@@ -1,0 +1,25 @@
+## HEAD
+3c8b4bd2097a3a803cd8ffea4caadf130b69d53f
+## current branch
+main
+## branches
+* main 3c8b4bd init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/report/repo  3c8b4bd [main]
+## tags
+## refs
+refs/heads/main 3c8b4bd2097a3a803cd8ffea4caadf130b69d53f
+## log --all --graph
+* 3c8b4bd  (HEAD -> main) init with two roots
+## status --porcelain
+?? docs/status.html
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./docs/status.html
+./tests/test_calc.py

@@ -1,0 +1,25 @@
+## HEAD
+c229750bfbede6d84270cbdba8a4a8cc538a49ad
+## current branch
+main
+## branches
+* main c229750 init with a plan
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/replan/repo  c229750 [main]
+## tags
+## refs
+refs/heads/main c229750bfbede6d84270cbdba8a4a8cc538a49ad
+## log --all --graph
+* c229750  (HEAD -> main) init with a plan
+## status --porcelain
+ M TODO.md
+ M docs/plans/PROJECT.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

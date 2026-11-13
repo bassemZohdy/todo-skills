@@ -13,7 +13,7 @@ What has been checked on each agent, and what has not. Nothing here claims suppo
 
 ## pi (2026-11-12)
 
-pi 1.5.2 with `glm-5.3` (z.ai) ran 28 of the 29 trial scenarios once each plus `blocked-sibling` four times and the agent benchmark, from the same prompts as the other agents (`tests/trials/run-pi.sh`, `docs/evals/benchmark/agents/pi.sh`). Slash commands are not available in print mode: the agent reads `.claude/skills/<name>/SKILL.md` as the prompt tells it. On native Windows pi has only a `powershell` shell tool, so the agent starts Git Bash from it. The assertions ran unisolated on that host and the lifecycle results are one run each; see [docs/evals/pi-glm-2026-11-12/summary.md](evals/pi-glm-2026-11-12/summary.md) for what was and was not verified.
+pi 1.5.2 with `glm-5.3` (z.ai) ran 28 of the 29 trial scenarios once each plus `blocked-sibling` four times and the agent benchmark, from the same prompts as the other agents (`tests/trials/run-pi.sh`, `docs/evals/benchmark/agents/pi.sh`). Slash commands are not available in print mode: the agent reads `.claude/skills/<name>/SKILL.md` as the prompt tells it. On native Windows pi has only a `powershell` shell tool, so the agent starts Git Bash from it. The assertions ran unisolated on that host and the lifecycle results are one run each; see [docs/evals/pi-glm-2026-11-12/summary.md](evals/pi-glm-2026-11-12/summary.md) for what was and was not verified. On 2026-11-13 the same setup reran all 31 scenarios on the revised skill text (pull requests 35 to 38), with reruns of the scenarios each later wording round touched; all passed ([docs/evals/pi-glm-2026-11-13/summary.md](evals/pi-glm-2026-11-13/summary.md)).
 
 ## Unsupported or unverified
 

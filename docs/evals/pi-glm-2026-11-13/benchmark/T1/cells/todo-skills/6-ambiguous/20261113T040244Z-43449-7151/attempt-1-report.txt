@@ -1,0 +1,31 @@
+The tree is empty and clean; invariants pass by inspection (no `.todo/todo-lint.sh` exists). Init is done. Now **/todo-add "Give loyal customers a discount in `billing.discount.price`"** reaches step 5 (Clarify), loads `reference/clarify.md`, and its stop triggers fire — I must stop before writing anything to TODO.md.
+
+---
+
+## /todo-init — report
+
+- **Created** (uncommitted backlog files, committed later by the first tree claim): `TODO.md` (empty tree), `CHANGELOG.md` (`## [Unreleased]`).
+- **Git mode:** repository, base branch `main` (default; clean tree). 
+- **Test command:** `python3 -m unittest discover -s tests -t .` — source: the README `Tests:` line (highest precedence; no CI config present to compare).
+- **Docs:** README.md only; no `docs/`. **Definition of Done:** none found.
+- **Checks:** `.todo/todo-lint.sh` absent (invariants checked by reading: pass), `.todo/check.sh` absent — run `/todo-init --ci` if you want lint+tests wired into CI.
+- **Tree:** empty (0 roots).
+
+## /todo-add — stopped at the clarify step
+
+The request relies on terms and rules nothing in this repo defines (`billing/discount.py` returns `amount` unchanged; the only test is full price; no docs). Two of the clarify stop triggers hold: a **business rule the work depends on is missing**, and **several incompatible implementations fit**. Per the skill I stop here and ask — no task was written to TODO.md, and /todo-continue was not run.
+
+**Questions (answer and I'll add the tree and continue to the drain):**
+
+1. **What makes a customer "loyal"?**
+   - a) `orders >= N` (e.g. 10) — objective, trivial to verify; ignores long-tenured low-volume customers; needs N.
+   - b) Tenure: `since` at least X ago (e.g. 2 years) — rewards the long relationship; new frequent buyers miss out; needs X and the reference date.
+   - c) Either of the above — most generous; two rules to document and test.
+2. **What discount applies, and in what form?**
+   - a) Percentage off `amount` (e.g. 10%) — scales with order value; needs the rate and rounding.
+   - b) Fixed amount off (e.g. 5, floored at 0) — predictable cost; no benefit growth for big orders; needs the value and floor rule.
+3. **How is the discounted price computed?**
+   - a) Plain float math (`0.9 * amount`) — simplest; can produce binary-float artifacts in expected values.
+   - b) Rounded to 2 decimals as money (half-up or banker's — pick one) — stable test values; slightly more code. Also: does a customer exactly at the threshold (N orders, exactly 2 years) count?
+
+If you'd rather record the questions than answer now, say so and I'll write the task as a `[!]` node with a `Blocked: open questions: …` line, ready for `/todo-update <ID> --status ready` once answered.

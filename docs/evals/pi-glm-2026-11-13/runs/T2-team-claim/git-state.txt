@@ -1,0 +1,205 @@
+## HEAD
+049782d95a7ef27d4fb7cb16899cf27c21d8d3cc
+## current branch
+todo/FEAT-002-add-multiply-function-calc
+## branches
+  main                                     cf7dad4 [origin/main: ahead 3] chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc
+* todo/FEAT-002-add-multiply-function-calc 049782d chore(backlog): start FEAT-002
+  remotes/origin/HEAD                      -> origin/main
+  remotes/origin/main                      2a16dbf chore(backlog): add FEAT-003
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi6/team-claim/repo  049782d [todo/FEAT-002-add-multiply-function-calc]
+## tags
+## refs
+refs/heads/main cf7dad404ff00b7ee48f822f8cf429c7ef090c77
+refs/heads/todo/FEAT-002-add-multiply-function-calc 049782d95a7ef27d4fb7cb16899cf27c21d8d3cc
+refs/remotes/origin/HEAD 2a16dbfc2e83357b823ba0feaf301e9fbbea4f42
+refs/remotes/origin/main 2a16dbfc2e83357b823ba0feaf301e9fbbea4f42
+## log --all --graph
+* 049782d  (HEAD -> todo/FEAT-002-add-multiply-function-calc) chore(backlog): start FEAT-002
+* cf7dad4  (main) chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc
+*   9b35e14  Merge branch 'main' of C:/Users/<user>/Code/todo-skills-workspace/runs-pi6/team-claim/repo/.team/origin
+|\  
+| * 2a16dbf  (origin/main, origin/HEAD) chore(backlog): add FEAT-003
+| * c0b8e56  chore(backlog): claim FEAT-001 on todo/FEAT-001-peer-work
+* | 203c109  chore(backlog): add FEAT-003
+|/  
+* d658fba  init with two free roots
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./.team/origin.git/HEAD
+./.team/origin.git/config
+./.team/origin.git/description
+./.team/origin.git/hooks/applypatch-msg.sample
+./.team/origin.git/hooks/commit-msg.sample
+./.team/origin.git/hooks/fsmonitor-watchman.sample
+./.team/origin.git/hooks/post-update.sample
+./.team/origin.git/hooks/pre-applypatch.sample
+./.team/origin.git/hooks/pre-commit.sample
+./.team/origin.git/hooks/pre-merge-commit.sample
+./.team/origin.git/hooks/pre-push.sample
+./.team/origin.git/hooks/pre-rebase.sample
+./.team/origin.git/hooks/pre-receive.sample
+./.team/origin.git/hooks/prepare-commit-msg.sample
+./.team/origin.git/hooks/push-to-checkout.sample
+./.team/origin.git/hooks/sendemail-validate.sample
+./.team/origin.git/hooks/update.sample
+./.team/origin.git/info/exclude
+./.team/origin.git/objects/05/4c1d6e8669f6032dd23b6845028dd4f8df793f
+./.team/origin.git/objects/09/26e5eb0f2247db719cb317359e3eac7ee73985
+./.team/origin.git/objects/0a/4e19fc22b3c354679e234d5f789fc4c39fcceb
+./.team/origin.git/objects/0c/13a581126367d791bff420a1e1e8ac6124b450
+./.team/origin.git/objects/0f/076b46cac21bdb5bdf4b004865d545065151d1
+./.team/origin.git/objects/15/8d908a0e1bc42bf0c278cb98adb5c95c724a4e
+./.team/origin.git/objects/26/f7caf7a51ee6ac9bf4ec7104a9f2fb12e07e8e
+./.team/origin.git/objects/2a/16dbfc2e83357b823ba0feaf301e9fbbea4f42
+./.team/origin.git/objects/2a/3e4c64c275e35cc5bce2d354fe600a0ee0d820
+./.team/origin.git/objects/32/98a3c033c92179fb8093a867620f6fe5363888
+./.team/origin.git/objects/44/e12eac0b58bc0a351b1cffb1733219744ba1cd
+./.team/origin.git/objects/46/93ad3cf8b0903b98497fb89b8b524fbf1b93f4
+./.team/origin.git/objects/50/ae1fcc4f45b20624f1cfc66593ba3b6bc5c387
+./.team/origin.git/objects/5e/523634702b4f0532066b90286f0979d11fb79c
+./.team/origin.git/objects/5f/31f7a1a4e2a237617856b38073bd6057d07ad2
+./.team/origin.git/objects/5f/f9d8bbc8a0af6ed2e6b00ae80852cd0acf4565
+./.team/origin.git/objects/6b/733b4db68221f4368f6ca2cc0c18f6167dcb4e
+./.team/origin.git/objects/6d/303b20dbc1684e408db392352e1e7ff6822c25
+./.team/origin.git/objects/6d/c153bca171195904ca6cc640984f8f29438594
+./.team/origin.git/objects/70/594c3e0444d2643cd041e10252b1a86c8b0b32
+./.team/origin.git/objects/75/8aa7c09e2a733f7f74c79a74c13e02467186aa
+./.team/origin.git/objects/85/1bfe4daba14d2e662e16a698d7ca44913977d6
+./.team/origin.git/objects/85/cb3aee6bca596fcd980766731fb189bbb28f98
+./.team/origin.git/objects/8d/8b1711e28650a4406005639369994bd9136364
+./.team/origin.git/objects/97/eb608e10fbab28603864c82e8c98323ccf35e4
+./.team/origin.git/objects/98/a148d32544c205723167064e659fa782dd4748
+./.team/origin.git/objects/99/d20fd785ead4ca5545446c192094c1ab964b86
+./.team/origin.git/objects/9b/ad200becd8d1e5caf81f484cd8eb1bf2b894a4
+./.team/origin.git/objects/9c/b0676bea719d3f9f2fe1486de3a072f32ecbd9
+./.team/origin.git/objects/a3/72643641a8a189525f1259185f4db0f92afab3
+./.team/origin.git/objects/b3/f91176181c609889601684f6764dfd7cc62833
+./.team/origin.git/objects/b8/ed4a3816af8fc4658e35f069eb1f0e33192da3
+./.team/origin.git/objects/bf/1f9504a6c8f547baad0d8242f6314ef4d8230d
+./.team/origin.git/objects/c0/b8e56c2a73add7ee9db8666e6e0cbc249d077c
+./.team/origin.git/objects/c1/8dd8d83ceed1806b50b0aaa46beb7e335fff13
+./.team/origin.git/objects/c8/51591ab735b60968f4ed2f9120b9082d1f93a6
+./.team/origin.git/objects/d1/ab8d21194f0210fa5b7ef84a8a45cae97c2706
+./.team/origin.git/objects/d2/797b4266cc21344c84a6cffc757dd1c6370440
+./.team/origin.git/objects/d6/58fba09ce6afd8115c20e236c39849db47397d
+./.team/origin.git/objects/df/445b82817f75cb9b61a9cb9d5d70a9a62601ca
+./.team/origin.git/objects/e4/fd25081fc80581f85e16df17e5a4cd944bff68
+./.team/origin.git/objects/ea/a31ae2b80b468989be8d0accd3fb7d4b02a774
+./.team/origin.git/objects/ed/057ba3103de432e95e90523713d86ac5f2275e
+./.team/origin.git/objects/f1/2b4297769239f904af3f4cb4fe10a1b2c53842
+./.team/origin.git/objects/f7/ba6ed94061056d750fcb275edf433979ea928b
+./.team/origin.git/objects/fe/1e15db6b4cbd88da0c56648812e3cfbf537240
+./.team/origin.git/objects/ff/985823f57c8370545b6d45ae9a9549db3f3347
+./.team/origin.git/refs/heads/main
+./.team/peer/.claude/skills/todo-add/SKILL.md
+./.team/peer/.claude/skills/todo-continue/SKILL.md
+./.team/peer/.claude/skills/todo-init/SKILL.md
+./.team/peer/.claude/skills/todo-plan/SKILL.md
+./.team/peer/.claude/skills/todo-release/SKILL.md
+./.team/peer/.claude/skills/todo-report/SKILL.md
+./.team/peer/.claude/skills/todo-report/template.md
+./.team/peer/.claude/skills/todo-status/SKILL.md
+./.team/peer/.claude/skills/todo-update/SKILL.md
+./.team/peer/.claude/skills/todo/SKILL.md
+./.team/peer/.claude/skills/todo/reference/ci.md
+./.team/peer/.claude/skills/todo/reference/clarify.md
+./.team/peer/.claude/skills/todo/reference/deliverables.md
+./.team/peer/.claude/skills/todo/reference/doc-drift.md
+./.team/peer/.claude/skills/todo/reference/git-flow-edge.md
+./.team/peer/.claude/skills/todo/reference/git-flow.md
+./.team/peer/.claude/skills/todo/reference/lanes.md
+./.team/peer/.claude/skills/todo/reference/review.md
+./.team/peer/.claude/skills/todo/reference/rtm.md
+./.team/peer/.claude/skills/todo/reference/verification.md
+./.team/peer/.git/COMMIT_EDITMSG
+./.team/peer/.git/HEAD
+./.team/peer/.git/config
+./.team/peer/.git/description
+./.team/peer/.git/hooks/applypatch-msg.sample
+./.team/peer/.git/hooks/commit-msg.sample
+./.team/peer/.git/hooks/fsmonitor-watchman.sample
+./.team/peer/.git/hooks/post-update.sample
+./.team/peer/.git/hooks/pre-applypatch.sample
+./.team/peer/.git/hooks/pre-commit.sample
+./.team/peer/.git/hooks/pre-merge-commit.sample
+./.team/peer/.git/hooks/pre-push.sample
+./.team/peer/.git/hooks/pre-rebase.sample
+./.team/peer/.git/hooks/pre-receive.sample
+./.team/peer/.git/hooks/prepare-commit-msg.sample
+./.team/peer/.git/hooks/push-to-checkout.sample
+./.team/peer/.git/hooks/sendemail-validate.sample
+./.team/peer/.git/hooks/update.sample
+./.team/peer/.git/index
+./.team/peer/.git/info/exclude
+./.team/peer/.git/logs/HEAD
+./.team/peer/.git/logs/refs/heads/main
+./.team/peer/.git/logs/refs/remotes/origin/HEAD
+./.team/peer/.git/logs/refs/remotes/origin/main
+./.team/peer/.git/objects/05/4c1d6e8669f6032dd23b6845028dd4f8df793f
+./.team/peer/.git/objects/09/26e5eb0f2247db719cb317359e3eac7ee73985
+./.team/peer/.git/objects/0a/4e19fc22b3c354679e234d5f789fc4c39fcceb
+./.team/peer/.git/objects/0c/13a581126367d791bff420a1e1e8ac6124b450
+./.team/peer/.git/objects/0f/076b46cac21bdb5bdf4b004865d545065151d1
+./.team/peer/.git/objects/15/8d908a0e1bc42bf0c278cb98adb5c95c724a4e
+./.team/peer/.git/objects/26/f7caf7a51ee6ac9bf4ec7104a9f2fb12e07e8e
+./.team/peer/.git/objects/2a/16dbfc2e83357b823ba0feaf301e9fbbea4f42
+./.team/peer/.git/objects/2a/3e4c64c275e35cc5bce2d354fe600a0ee0d820
+./.team/peer/.git/objects/32/98a3c033c92179fb8093a867620f6fe5363888
+./.team/peer/.git/objects/44/e12eac0b58bc0a351b1cffb1733219744ba1cd
+./.team/peer/.git/objects/46/93ad3cf8b0903b98497fb89b8b524fbf1b93f4
+./.team/peer/.git/objects/50/ae1fcc4f45b20624f1cfc66593ba3b6bc5c387
+./.team/peer/.git/objects/5e/523634702b4f0532066b90286f0979d11fb79c
+./.team/peer/.git/objects/5f/31f7a1a4e2a237617856b38073bd6057d07ad2
+./.team/peer/.git/objects/5f/f9d8bbc8a0af6ed2e6b00ae80852cd0acf4565
+./.team/peer/.git/objects/6b/733b4db68221f4368f6ca2cc0c18f6167dcb4e
+./.team/peer/.git/objects/6d/303b20dbc1684e408db392352e1e7ff6822c25
+./.team/peer/.git/objects/6d/c153bca171195904ca6cc640984f8f29438594
+./.team/peer/.git/objects/70/594c3e0444d2643cd041e10252b1a86c8b0b32
+./.team/peer/.git/objects/75/8aa7c09e2a733f7f74c79a74c13e02467186aa
+./.team/peer/.git/objects/85/1bfe4daba14d2e662e16a698d7ca44913977d6
+./.team/peer/.git/objects/85/cb3aee6bca596fcd980766731fb189bbb28f98
+./.team/peer/.git/objects/8d/8b1711e28650a4406005639369994bd9136364
+./.team/peer/.git/objects/97/eb608e10fbab28603864c82e8c98323ccf35e4
+./.team/peer/.git/objects/98/a148d32544c205723167064e659fa782dd4748
+./.team/peer/.git/objects/99/d20fd785ead4ca5545446c192094c1ab964b86
+./.team/peer/.git/objects/9b/ad200becd8d1e5caf81f484cd8eb1bf2b894a4
+./.team/peer/.git/objects/9c/b0676bea719d3f9f2fe1486de3a072f32ecbd9
+./.team/peer/.git/objects/a3/72643641a8a189525f1259185f4db0f92afab3
+./.team/peer/.git/objects/b3/f91176181c609889601684f6764dfd7cc62833
+./.team/peer/.git/objects/b8/ed4a3816af8fc4658e35f069eb1f0e33192da3
+./.team/peer/.git/objects/bf/1f9504a6c8f547baad0d8242f6314ef4d8230d
+./.team/peer/.git/objects/c0/b8e56c2a73add7ee9db8666e6e0cbc249d077c
+./.team/peer/.git/objects/c1/8dd8d83ceed1806b50b0aaa46beb7e335fff13
+./.team/peer/.git/objects/c8/51591ab735b60968f4ed2f9120b9082d1f93a6
+./.team/peer/.git/objects/d1/ab8d21194f0210fa5b7ef84a8a45cae97c2706
+./.team/peer/.git/objects/d2/797b4266cc21344c84a6cffc757dd1c6370440
+./.team/peer/.git/objects/d6/58fba09ce6afd8115c20e236c39849db47397d
+./.team/peer/.git/objects/df/445b82817f75cb9b61a9cb9d5d70a9a62601ca
+./.team/peer/.git/objects/e4/fd25081fc80581f85e16df17e5a4cd944bff68
+./.team/peer/.git/objects/ea/a31ae2b80b468989be8d0accd3fb7d4b02a774
+./.team/peer/.git/objects/ed/057ba3103de432e95e90523713d86ac5f2275e
+./.team/peer/.git/objects/f1/2b4297769239f904af3f4cb4fe10a1b2c53842
+./.team/peer/.git/objects/f7/ba6ed94061056d750fcb275edf433979ea928b
+./.team/peer/.git/objects/fe/1e15db6b4cbd88da0c56648812e3cfbf537240
+./.team/peer/.git/objects/ff/985823f57c8370545b6d45ae9a9549db3f3347
+./.team/peer/.git/packed-refs
+./.team/peer/.git/refs/heads/main
+./.team/peer/.git/refs/remotes/origin/HEAD
+./.team/peer/.git/refs/remotes/origin/main
+./.team/peer/.gitignore
+./.team/peer/CHANGELOG.md
+./.team/peer/README.md
+./.team/peer/TODO.md
+./.team/peer/calc.py
+./.team/peer/tests/test_calc.py
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

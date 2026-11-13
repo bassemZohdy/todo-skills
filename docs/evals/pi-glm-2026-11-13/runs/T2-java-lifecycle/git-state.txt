@@ -1,0 +1,54 @@
+## HEAD
+01de3e78564a17bec8f0141fa0a0ae0c1241204e
+## current branch
+main
+## branches
+* main 01de3e7 Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi6/java-lifecycle/repo  01de3e7 [main]
+## tags
+## refs
+refs/heads/main 01de3e78564a17bec8f0141fa0a0ae0c1241204e
+## log --all --graph
+*   01de3e7  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * ceee4da  chore(backlog): drain FEAT-001
+| * 705b1e9  chore(backlog): start FEAT-001
+| *   5363648  Merge FEAT-001.2 into FEAT-001
+| |\  
+| | * 43d5faa  feat(mini): add multiply
+| | * 05a9efc  chore(backlog): start FEAT-001.2
+| |/  
+| * df7cb56  Merge FEAT-001.1 into FEAT-001
+|/| 
+| * 93546e8  feat(mini): add subtract
+| * a95440c  chore(backlog): start FEAT-001.1
+|/  
+* 2c7c61d  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* b3608f5  init java project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./pom.xml
+./src/main/java/mini/Calc.java
+./src/test/java/mini/AddTest.java
+./src/test/java/mini/MultiplyTest.java
+./src/test/java/mini/SubtractTest.java
+./target/classes/mini/Calc.class
+./target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./target/surefire-reports/TEST-mini.AddTest.xml
+./target/surefire-reports/TEST-mini.MultiplyTest.xml
+./target/surefire-reports/TEST-mini.SubtractTest.xml
+./target/surefire-reports/mini.AddTest.txt
+./target/surefire-reports/mini.MultiplyTest.txt
+./target/surefire-reports/mini.SubtractTest.txt
+./target/test-classes/mini/AddTest.class
+./target/test-classes/mini/MultiplyTest.class
+./target/test-classes/mini/SubtractTest.class

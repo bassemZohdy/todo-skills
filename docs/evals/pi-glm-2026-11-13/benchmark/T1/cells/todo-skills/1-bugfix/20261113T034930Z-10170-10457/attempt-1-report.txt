@@ -1,0 +1,21 @@
+All done. Final report per the skills:
+
+## /todo-init
+- Created **TODO.md** (empty task tree) and **CHANGELOG.md** (with `## [Unreleased]`), left uncommitted for the first claim.
+- Test command: `python3 -m unittest discover -s tests -t .` — source: README `Tests:` line. No CI config, no `Definition of Done`, no `.todo/todo-lint.sh` / `.todo/check.sh` (consider `/todo-init --ci` if you want one). Base branch: `main`, clean. No pre-planning questions (no goal stated, no `--plan`).
+
+## /todo-add
+- Type detection hit rule 2 ("fix"/"bug"/"regression") → prefix **FIX**. Single leaf (one change, 2 files), complexity `low` (cause and fix stated in the request) → no confirmation needed for a single leaf.
+- Inserted `FIX-001 · P1 · low` as the sole root.
+
+## /todo-continue --merge (FIX-001 — leaf root)
+- **Baseline** (on `main`, pre-branch): 2 passing.
+- **Branch/claim**: `todo/FIX-001-fix-double-10-discount` ← claim commit → fast-forward published to `main` → start commit.
+- **Red**: added `test_order_of_200_or_more_gets_ten_percent_off_once` (FIX-001 in comment) — first failing assertion: `202.5 != 225.0`.
+- **Green**: removed the second `if subtotal >= 200` discount in `pricing/total.py` (10% now applies exactly once at ≥ 100).
+- **Review**: self, spec ok · quality ok, 0 findings.
+- **Verify**: `python3 -m unittest discover -s tests -t .` → **3 tests OK** (baseline 2 → 3, none deleted/skipped); same command is the full-suite regression (README `Tests:`). No doc drift (no interface change).
+- **Drain**: CHANGELOG entry under new `### Fixed`, subtree deleted from TODO.md, lint clean.
+- **Merge** (`--merge`): `main` merged `--no-ff` as `b618b62 Merge FIX-001 into main`; node branch deleted. Checked-out branch: **main**, clean (only untracked `__pycache__/`).
+- Files changed: `pricing/total.py`, `tests/test_total.py` (+ backlog files by the skills).
+- Adjacent problems: none. **Next workable node: none — the tree is drained.** Suggest clearing context if you start new work.

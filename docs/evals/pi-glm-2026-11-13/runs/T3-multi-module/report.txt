@@ -1,0 +1,39 @@
+All done — both lanes drained and merged, `main` clean with the empty tree and both CHANGELOG entries, final suite 4 passing. Worktrees removed, branches deleted.
+
+---
+
+## 1) Report (`--all-lanes --merge`)
+
+**No subagent tool is available, so I ran the coordinator and both lanes' work myself, one lane after another, in each lane's worktree.**
+
+Shared baseline on `main` (both lanes share start branch + regression): `mvn -B test` → **2 passing** (AddTest, UpperTest), BUILD SUCCESS.
+
+**Lane `core` — FEAT-001 · Add subtract to the core module (Calc.java) — finished**
+- Done when: `mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 run, 0 failures (after red: `cannot find symbol: method subtract(int,int)`, SubtractTest.java:[9,29])
+- Regression: `mvn -B test` → 3 passing vs baseline 2; after refresh from base (base at 2) → 3 passing, green
+- Files: `core/src/main/java/mini/core/Calc.java`, `core/src/test/java/mini/core/SubtractTest.java` (+ TODO.md, CHANGELOG.md)
+- Branch `todo/FEAT-001-add-subtract-core-module` (worktree `../repo.todo/FEAT-001`, removed after merge)
+- Commits: `chore(backlog): claim FEAT-001 on …` (4ab5c62, FF'd to main) · `chore(backlog): start FEAT-001` (503c591) · `feat(core): add subtract to calc` (712a054, Refs/Red/Reviewed: self, 0 findings) · `Merge main into FEAT-001` (c775938, clean) · `chore(backlog): drain FEAT-001` (3020418) · `Merge FEAT-001 into main` (baf0ddf)
+- Merged into base with `--merge`; worktree removed, branch deleted. No root review (low, add-only). No `.todo/check.sh`.
+
+**Lane `text` — FEAT-002 · Add shout to the text module (Text.java) — finished**
+- Done when: `mvn -B test -pl text -Dtest=ShoutTest -Dsurefire.failIfNoSpecifiedTests=true` → 1 run, 0 failures (after red: `cannot find symbol: method shout(java.lang.String)`, ShoutTest.java:[9,33])
+- Regression: `mvn -B test` → 3 passing vs baseline 2; after refresh from base (base at 3) → 4 passing, green
+- Files: `text/src/main/java/mini/text/Text.java`, `text/src/test/java/mini/text/ShoutTest.java` (+ TODO.md, CHANGELOG.md)
+- Branch `todo/FEAT-002-add-shout-text-module` (worktree `../repo.todo/FEAT-002`, removed after merge)
+- Commits: `chore(backlog): claim FEAT-002 on …` (6c52d26, FF'd to main) · `chore(backlog): start FEAT-002` (93f3e9a) · `feat(text): add shout to text` (baeaf0d, Refs/Red/Reviewed: self, 0 findings) · `Merge main into FEAT-002` (c3bdd46; TODO.md conflict resolved per the rules: dropped the drained FEAT-001 block, kept FEAT-002's) · `chore(backlog): drain FEAT-002` (a628878) · `Merge FEAT-002 into main` (7efaf8e)
+- Merged into base with `--merge`; worktree removed, branch deleted.
+
+**Blocked:** none. **Still open:** none. **Merge commands:** all executed (`--merge` given); nothing to print. **Next workable root:** none in either lane (tree is empty: `# Active Backlog` / `## 🌳 Task Tree` only). Final state of `main`: clean, both CHANGELOG entries under `### Added`, full suite **4 passing**. No adjacent problems found (no `/todo-add` suggestions). Nothing pushed, no tags. Suggestion: start a fresh context for the next task.
+
+## 2) Ambiguities / unclear points in the skill text
+
+1. **"`--all-lanes`: … do everything below yourself, running step 3's lane work one lane after another in each lane's worktree"** (lanes.md) — step 3 itself is "Start one subagent per lane", so "step 3's lane work" must mean the *body* of step 3 (its numbered rules: "runs steps 1, 2, 4-9 and step 10 items 1-3 … stops before the root's drain"). Resolved by executing that body myself, sequentially, per lane in its worktree, with the coordinator's steps 0–2 and 4 around it.
+2. **"Lanes with the same start branch and regression command share one baseline run."** (lanes.md step 1) — it's unclear whose `State:` records the shared count; both roots start on `main` with `mvn -B test`. Resolved by one baseline run (2 passing) recorded in **both** nodes' `State:`.
+3. **Start State says `next: read docs`, lane stop requires `next: drain` "committed … in its node commit"** vs **"a run with no failed cycle need not advance `next:`"** (SKILL.md steps 5, 9; lanes.md step 3) — unclear whether intermediate `next:` values (`build`) need their own commits. Resolved: `next: read docs` in the start commit, `next: drain` in the node commit, no intermediate commits (no failed cycles).
+4. **"`(a leaf root has only item 2)`"** (lanes.md step 3) vs step 10 item 2's wording "Non-root node:" as its heading — read together, item 2 (the commit) still applies to a leaf root even though the heading says non-root. Resolved by making the node commit for each leaf root (files + TODO.md) and skipping items 1/3.
+5. **`Checked:` line rule: "…not a test, lint, typecheck or build runner (a test runner or a build tool's test target, such as `python -m unittest`, `node --test` or `make test`, needs none; the lint's W3 warning)"** (SKILL.md step 10.2) — whether `mvn -B test` counts as a "build tool's test target" is implicit, and "the lint's W3 warning" is unexplained (no lint script exists here to check W3). Resolved by treating `mvn test` as a build tool's test target → no `Checked:` lines.
+6. **Root review trigger: "For a root that is `high`, touches security, data migration or concurrency, or changes an existing public interface (adding one does not count here…)"** (SKILL.md step 10.4.1) — both roots only *add* methods (low complexity), so it's a judgement call. Resolved: no root review offered, since adding an interface explicitly does not count.
+7. **Refresh conflict expectation: "TODO.md and CHANGELOG.md conflicts from earlier roots are resolved by the coordinator…expect them for every root after the first"** (lanes.md step 4) — FEAT-001's refresh merged *cleanly*, contradicting the expectation only softly. Resolved by following the actual git results: FEAT-001 clean, FEAT-002 conflicted on TODO.md and resolved by the given rule (keep this root's block, drop the drained ID).
+8. **Drain location vs merge location:** the drain happens "there" (in the worktree) while the base merge must be "from the main checkout and only when it is clean, backlog files included" (git-flow.md "Root"); since the drain commit lives on the root branch, this works, but the sequencing isn't spelled out. Resolved by: refresh/verify/drain in the worktree → then in the main checkout (on `main`, clean) `git merge --no-ff` → `git worktree remove` → `git branch -d`, per root, before starting the next root's coordinator step 4.
+9. **POSIX-on-Windows rule: "Commands in the skills are POSIX: on Windows run them, `Done when` included, through Git Bash (`bash -c`)"** (core SKILL.md) — not contradictory, but operationally important: my first `Done when` run directly in PowerShell mangled `-Dsurefire.failIfNoSpecifiedTests=true` (PowerShell tokenization), producing a spurious failure. Resolved by running all Maven commands through `bash -c` as the rule says; that first mangled run executed no test and was not counted as an attempt.

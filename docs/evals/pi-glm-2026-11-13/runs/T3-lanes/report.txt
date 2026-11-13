@@ -1,0 +1,31 @@
+All done. Final report:
+
+---
+
+**(1) Report** — `/todo-continue --all-lanes --merge`
+
+**No subagent tool is available, so this lane run was executed entirely in this thread: the main thread acted as coordinator and ran each lane's work itself, one lane after another, in each lane's worktree.**
+
+Shared baseline (step 3, one run for both lanes — same start branch `main`, same regression): `python3 -m unittest discover -s tests` → **1 passing** (green). No unfinished lane work (no claimed roots in `git show main:TODO.md`). Both trees claimed and fast-forwarded to `main`; worktrees `../repo.todo/FEAT-001`, `../repo.todo/FEAT-002` (now removed).
+
+**Lane `math` — FEAT-001 · P1 · low · Add subtract to calc.py — FINISHED and merged**
+- Files: `calc.py` (+ `subtract`), `tests/test_calc.py` (+ `test_subtract`, ID in docstring), `TODO.md`, `CHANGELOG.md`
+- Commands: Done when `python3 -m unittest tests.test_calc.CalcTest.test_subtract` — red first (`AttributeError: module 'calc' has no attribute 'subtract'`), then OK (1 test); regression `python3 -m unittest discover -s tests` — 2 passing ≥ baseline 1; re-verified after refresh-from-base against base count 1 → 2 passing. Doc drift: new exported symbol `subtract`, grep of README/docs → no hits.
+- Review: self (no subagent tool), spec ok / quality ok, 0 findings.
+- Commits: `e5153b8` claim, `1a9cbae` start, `9b2e24b` `feat(calc): add subtract to calc.py`, `742ef87` refresh, `b627fb1` drain, `0d7a829` `Merge FEAT-001 into main` (worktree removed, branch deleted).
+
+**Lane `text` — FEAT-002 · P1 · low · Add shout to text.py — FINISHED and merged**
+- Files: `text.py` (new, `shout`), `tests/test_text.py` (new, `test_shout`, ID in docstring), `TODO.md`, `CHANGELOG.md`
+- Commands: Done when `python3 -m unittest tests.test_text.TextTest.test_shout` — red first (`ModuleNotFoundError: No module named 'text'`), then OK (1 test); regression — 2 passing in worktree ≥ baseline 1; after refresh (TODO.md conflict with drained FEAT-001 resolved: kept FEAT-002's block, dropped FEAT-001) re-verified against base count 2 → 3 passing. Doc drift: `shout` grep → no hits.
+- Review: self, spec ok / quality ok, 0 findings.
+- Commits: `d7c9ba1` claim, `5bd2ee0` start, `ac495da` `feat(text): add shout to text.py`, `794a36c` refresh (conflict resolved), `fcd9b1c` drain, `36b750f` `Merge FEAT-002 into main` (worktree removed, branch deleted).
+
+**Blocked:** none. **Still open:** none — TODO.md is an empty tree. **Merge commands without `--merge`:** n/a, `--merge` was given and both merges ran. **Next workable root:** none (lane `math`: none; lane `text`: none). **Adjacent problems:** none (no `/todo-add` suggestions). Final base regression on `main`: 3 passing. Checked-out branch: `main` (clean). Nothing was pushed; no tags; hooks untouched. Suggestion: clear context — this run is complete.
+
+**(2) Ambiguities / unclear instructions encountered**
+
+1. *"Without a subagent tool, say so in the first line of your output and do everything below yourself"* — unclear whether "first line of your output" means the first reply of the whole session or the final report (in a single-reply flow they coincide). Resolved by stating it in the first line of this report.
+2. *"running step 3's lane work one lane after another"* (lanes.md) — "step 3" is ambiguous: lanes.md's own numbered item 3 (the lane-agent step) or todo-continue's step 3, which the lane agent is told to skip. Resolved as lanes.md item 3 (the node work, steps 1-2, 4-9, 10.1-3), which is consistent with the sentence "skips step 3 (the coordinator's baseline holds)".
+3. *"The main checkout stays on the base for the whole run (this replaces git-flow's 'switch back to the root branch' after each claim)"* vs git-flow's claim step 4 *"On success, `git switch <root branch>` and go on"* — a mild contradiction; resolved per the explicit lanes.md parenthetical (switch back to `main` after each fast-forward; work happens in worktrees).
+4. Lanes.md item 3: *"leaving the root `[/]` with `next: drain` in its `State:` (committed: a leaf root sets it in its node commit, step 10 item 2…)"* vs todo-continue step 5's State template (*`next: read docs`*) and step 9's *"a run with no failed cycle need not advance `next:`"* — the normal flow never says when `next:` becomes `drain`. Resolved by following lanes.md: start commit holds `next: read docs`, the node commit updates it to `next: drain` (no separate commit).
+5. *"expect them for every root after the first"* (TODO.md/CHANGELOG.md conflicts on refresh) — for FEAT-002 only TODO.md conflicted; CHANGELOG.md merged cleanly since the lane never touches it before the drain. Noted as an imprecise expectation rather than a contradiction; resolved with the given rule ("keep this root's block, drop IDs already drained to `CHANGELOG.md`").

@@ -44,7 +44,7 @@ chk "lint passes on the checked-out branch" 'bash "$lint" TODO.md CHANGELOG.md'
 
 case "$scenario" in
 interrupted-merge)
-  r=todo/FEAT-001-subtract-multiply
+  r=todo/FEAT-001-add-subtract-multiply-calc
   chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l)" = 0 ]'
   chk "merged child branch deleted" '! git branch --list "todo/FEAT-001.1-*" | grep -q .'
   chk "root branch has subtract" 'at $r calc.py | grep -q "def subtract"'
@@ -56,7 +56,7 @@ interrupted-merge)
   chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l)" = 1 ]'
   ;;
 refresh-from-base)
-  r=todo/FEAT-001-subtract
+  r=todo/FEAT-001-add-subtract-function-calc
   chk "base branch merged into the root branch" 'git merge-base --is-ancestor main $r'
   chk "CHANGELOG has FEAT-001 entry" 'at $r CHANGELOG.md | grep -q "FEAT-001"'
   chk "CHANGELOG keeps FEAT-009 from main" 'at $r CHANGELOG.md | grep -q "FEAT-009"'
@@ -70,10 +70,10 @@ refresh-from-base)
   chk "full suite ran on merged tree: extra tests present and passing" 'git checkout -q $r && python3 -m unittest tests.test_extra tests.test_calc'
   ;;
 claimed-elsewhere)
-  chk "FEAT-001's branch untouched" '[ "$(git rev-parse todo/FEAT-001-subtract)" = "$start" ]'
+  chk "FEAT-001's branch untouched" '[ "$(git rev-parse todo/FEAT-001-add-subtract-function-calc)" = "$start" ]'
   chk "a branch for FEAT-002 exists" 'git branch --list "todo/FEAT-002-*" | grep -q .'
   chk "main shows FEAT-002 claimed with its branch" 'at main TODO.md | grep -A3 "FEAT-002\*\*" | grep -q "State: branch todo/FEAT-002-"'
-  chk "main still shows FEAT-001 claimed" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-subtract"'
+  chk "main still shows FEAT-001 claimed" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-add-subtract-function-calc"'
   chk "no [/] on main" '! at main TODO.md | grep -q "^ *- \[/\]"'
   chk "main gained exactly the claim commit, TODO.md only" '[ "$(git log --format=%s $start..main)" = "chore(backlog): claim FEAT-002 on $(git branch --list "todo/FEAT-002-*" | tr -d "* ")" ] && [ "$(git diff --name-only $start main)" = TODO.md ]'
   chk "FEAT-002 is [/] on its branch with attempts and baseline" 'at "$(git branch --list "todo/FEAT-002-*" | tr -d "* ")" TODO.md | grep -A3 "\[/\] \*\*FEAT-002" | grep -q "State: attempts 0/3; baseline 1 passing; branch todo/FEAT-002-"'
@@ -220,7 +220,7 @@ report)
   chk "only docs/status.html changed" 'unchanged && [ "$(git status --porcelain)" = "?? docs/status.html" ]'
   ;;
 blocked-sibling)
-  chk "the blocked node's branch is untouched" '[ "$(git rev-parse todo/FEAT-001.1-subtract-test)" = "$(grep FEAT-001.1 "$gd/trial-refs" | cut -d" " -f2)" ]'
+  chk "the blocked node's branch is untouched" '[ "$(git rev-parse todo/FEAT-001.1-add-subtract-test)" = "$(grep FEAT-001.1 "$gd/trial-refs" | cut -d" " -f2)" ]'
   chk "FEAT-001.1 was not restarted anywhere" '! git grep -q "\[/\] \*\*FEAT-001.1" $(git for-each-ref --format="%(refname)" refs/heads)'
   chk "FEAT-001.2 started on its own branch" 'b=$(git branch --list "todo/FEAT-001.2-*" | tr -d "* "); [ -n "$b" ] && at $b TODO.md | grep -q "\[/\] \*\*FEAT-001.2"'
   chk "main untouched" '[ "$(git rev-parse main)" = "$(grep "refs/heads/main " "$gd/trial-refs" | cut -d" " -f2)" ]'

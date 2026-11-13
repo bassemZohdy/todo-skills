@@ -1,0 +1,39 @@
+The edit is verified: only the marker character changed, `Blocked:` added as the last field line, LF endings preserved, 10 lines total. Re-running the invariant check by reading (no lint script exists): all of I1–I10 still pass — FEAT-002 is now a 4-line task (header, Done when, Links, Blocked: exactly the four fields, `[!]` carries its `Blocked:` line, no State+Blocked together). Per the skill I leave this uncommitted on the base and stop.
+
+---
+
+## (1) Report — `/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"`
+
+**Pre-checks (all passed):**
+- Git mode: in a work tree; base branch resolved to `main` (none named; no README `Base:` line; `main` exists); we are on `main` in the main checkout.
+- Invariant check (I1–I10, by reading — no `.todo/todo-lint.sh`): clean before and after the edit.
+- `FEAT-002` is **not** in CHANGELOG.md → no reopen refusal. `FEAT-002` **is** in TODO.md → proceed.
+- Marker in checked-out TODO.md: `[ ]`; FEAT-002's tree is **unclaimed** (no `State:` naming a branch in the base's TODO.md) → "A node of an unclaimed tree is changed only on the base" — edited on `main`.
+- No verification ran for this node in this conversation → middle part of `Blocked:` is `n/a (manual)` (no backticks). The note gives only a reason → the action is the prescribed text.
+
+**Updated task lines (FEAT-002 in `TODO.md`):**
+
+```markdown
+- [!] **FEAT-002** · P2 · low · Add round_to to calc.py <with> "quotes" & </script> in the title
+  - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
+  - Links: From: FEAT-000
+  - Blocked: waiting for the product decision on rounding → n/a (manual) → resolve this, then run /todo-update FEAT-002 --status ready
+```
+
+**What changed:** only the marker character `[ ]` → `[!]` (the `- `, ID, indentation and title untouched) and one new `Blocked:` line as the last field line. Nothing else in the repo changed; FEAT-001 untouched.
+
+**Git:** on the base branch the edit is left **uncommitted** as a backlog edit (the skill commits `chore(backlog): block <ID>` only on a `todo/` branch). `git status` shows only ` M TODO.md`.
+
+**Stopping autonomous execution** — no other node picked up. FEAT-002 now blocks its ancestors (none — it is a root); when the decision lands, run `/todo-update FEAT-002 --status ready`.
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **Description vs. body on editable fields** — frontmatter: "edits Title, Done when, Ref, Depends, From, State, Complexity, Priority or Lane in place using only text the user supplied", but the Field edits section also governs `Size:` ("`Size:` (optional, `-` removes it) must match the tree"). Resolved: not needed for this run (status change only); had it mattered I'd follow the body over the description.
+
+2. **Unreachable cross-reference for `blocked`** — the blocked bullet says "on a `[/]` node, together with its changed files by explicit path, as `/todo-continue` "Test failures" does", but the loading instruction only tells you to read `../todo-continue/SKILL.md` for `--status in-progress`. Resolved: not applicable here (node was `[ ]` on the base, nothing to commit), so no extra load needed; noted that a `[/]`-on-branch case would leave you without the referenced instructions unless you load todo-continue on your own.
+
+3. **Scope of "written without backticks"** — "otherwise the middle part is `n/a (manual)`, written without backticks" could attach to just `n/a (manual)` or to the whole middle part. Resolved: read it as the manual middle part being plain (the core format otherwise puts a command in backticks there); both readings give the same output here.
+
+4. **Vague prescribed action "resolve this"** — "the action is `resolve this, then run /todo-update <ID> --status ready` (written without quotes)". "this" presumably means the blocker/reason, but it isn't stated. Resolved: used the phrase verbatim as the action part, substituting only `<ID>` → `FEAT-002`.
+
+5. **Interplay of the "state lives where" rule** — "`ready`, `blocked` and `revert` act where the node's state lives: `[/]`, `[!]` and `[x]` live on the tree's branches, while the base shows the node as `[ ]`" vs. "A node of an unclaimed tree is changed only on the base" required careful reconciliation (does a `[ ]` node of an unclaimed tree still have "state living" somewhere?). Resolved via "Judge the marker in the checked-out `TODO.md`": an unclaimed `[ ]` node is edited on the base, which is where I was.

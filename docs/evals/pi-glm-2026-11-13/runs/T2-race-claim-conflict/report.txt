@@ -1,0 +1,26 @@
+All done — the run stopped **before** the start commit, exactly where the skill orders a stop. Final state verified: on `main` at `e8799b5` (the rival's claim commit), my bare claim branch deleted, tree clean, hooks untouched.
+
+## 1) Report (`/todo-continue`, early stop)
+
+**Stopped at:** step 4 "Branch first" — tree claim **step 5 (failed fast-forward → git-flow-edge "Failed fast-forward" → Lost/collided)**. **Why:** while I was claiming FEAT-001, another session published a claim for the same root onto the base (`e8799b5 chore(backlog): claim FEAT-001 on todo/FEAT-001-rival`), so my `git merge --ff-only` publish aborted. No start commit `chore(backlog): start <ID>` was made — the skill stops here first.
+
+- **Node:** FEAT-001 · Add a subtract function to calc.py with a test (leaf root, unclaimed at selection: no `State:` in `git show main:TODO.md`)
+- **Commands & results:**
+  - Baseline (regression = README `Tests:`, on the base before any branch, via Git Bash): `python3 -m unittest discover -s tests` → **Ran 1 test, OK → baseline 1 passing**
+  - `git switch main && git merge --ff-only todo/FEAT-001-add-subtract-function-calc` → **failed**: `fatal: Not possible to fast-forward, aborting` (base had moved to the rival claim)
+  - `Done when` / build / regression-after-work: **not run** (stopped before the node started)
+  - Invariant check (I1–I10 by reading; no `.todo/todo-lint.sh`): pass before and after my claim edit
+- **Files changed:** none surviving. My only edit (the root's `State:` claim line) lived on claim commit `d53f867` of `todo/FEAT-001-add-subtract-function-calc`; that branch met all three bare-claim-branch tests (one `claim FEAT-001` commit; three-dot diff = `TODO.md` only; only the root's `State:` line) and was deleted with `git branch -D` as git-flow-edge orders. The repo now carries the rival's claim in TODO.md instead.
+- **Branch/commit:** no node branch or node commit; claim branch deleted (was `d53f867`)
+- **Claimant (the collision):** FEAT-001 is claimed by **`todo/FEAT-001-rival`** (commit `e8799b5` on the base). That branch exists in this clone — if this is your work: `git switch todo/FEAT-001-rival` (or `cd` to its worktree) and rerun to resume.
+- **Next workable node:** **none** — the only root is claimed by another branch (its tree is workable only from a branch of that family). `/todo-update FEAT-001 --status ready` on the base would release a stale claim.
+- **Adjacent problems:** none → no `/todo-add` suggestions. **Children done/total:** n/a (leaf). **Merge commands:** n/a (no root finished).
+- Suggest clearing context before resuming (the tree state changed out from under this run).
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **Overlapping cases in "Failed fast-forward"** — `"Lost or collided: the root's State: there names another branch"` vs. `"The base only moved: git rebase <base> <root branch>"`. In this run **both** held: the base moved *and* the State names a rival branch (git-flow step 5 itself names both causes: `"another session claimed the root, or the base only moved"`). Nothing says which bullet wins when both apply. **Resolution:** treated Lost/collided as controlling (it is listed first and describes the more specific condition — a competing claim on the same root), so I deleted my bare claim branch and stopped instead of rebasing onto the rival's claim.
+2. **Resume hint scope mismatch** — git-flow-edge says only `"Report the claimant or collision and stop, on the base"`, while the core's selection rules say a claimed tree is `"skipped with the resume hint"` / `"when that branch exists in this clone, add 'if this is your work: git switch <branch> … and rerun to resume'"` (which applies to *skipped* trees at step 2, not this stop point). **Resolution:** included the resume hint in the report anyway, since the claimant branch exists in this clone and the core's rationale (never auto-resume another session's branch) applies identically here.
+3. **Bare-claim test against a moved base** — `"git diff --name-only <base>...<branch> (three dots: the branch's own changes)"`. After the race, `<base>` names the rival's commit, so a two-dot reading would diff my claim against the rival's claim; the parenthetical defines intent as "the branch's own changes". **Resolution:** ran the literal three-dot command (diff from merge-base), under which my branch was bare; the two-dot reading would also have shown only `TODO.md`, so the outcome is the same either way.
+
+Also noted (no action needed): the pre-branch base read (`git show <base>:TODO.md`) showed no claim because the rival's claim landed only at my `todo/FEAT-001*` checkout; the skill's design catches this at the ff-only publish, which is where I caught it. And the "The base only moved" re-baseline rule ("if the base changed any file other than backlog files, take the baseline again") would not have applied — the rival changed only `TODO.md`, a backlog file — but the stop takes precedence regardless.

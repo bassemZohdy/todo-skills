@@ -1,0 +1,38 @@
+Done — stopped immediately after the start commit, per your instruction. Here is everything:
+
+## 1. Report (per `/todo-continue` step 11, adapted to the early stop)
+
+**Git mode / invariants (step 1):** `git rev-parse --is-inside-work-tree` → `true`. Base branch = `main` (none named; no README `Base:` line; first of main/master/trunk/develop). Invariant check (no `.todo/todo-lint.sh` exists → I1–I10 by reading): **pass**, and re-checked after each TODO.md edit.
+
+**Selection (step 2):**
+- No interrupted merge, interrupted drain, or `[/]` node found from the base.
+- **FEAT-001 — skipped, claimed by `todo/FEAT-001-subtract`** (its `State:` in `git show main:TODO.md` names that branch; the branch exists in this clone and equals `main`'s commit, i.e. claim published, node never started). If this is your work: `git switch todo/FEAT-001-subtract` (or `cd` to its worktree) and rerun to resume.
+- **Selected: FEAT-002 · P1 · low · Add a multiply function to calc.py with a test** — first workable `[ ]` node (leaf root, no `Depends:`, unclaimed tree).
+
+**Ready check / baseline (step 3):** lint clean; no `Ref:`; tree clean per git-flow (only backlog/generated count, nothing present); unclaimed tree → starts from the base (already on `main`, no pending backlog edits); no base dependency. Baseline on the base, before any branch: `python3 -m unittest discover -s tests` (README `Tests:` line, run via `bash -c`) → `Ran 1 test ... OK` → **baseline 1 passing**.
+
+**Branch + claim + start (steps 4–5):**
+- `git switch -c todo/FEAT-002-add-multiply-function-calc` (from `main`)
+- Claim edit on TODO.md (FEAT-002 `State: branch … from main; next: start FEAT-002`, marker stays `[ ]`) → `f31f5ab chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc`
+- Published: `git switch main && git merge --ff-only todo/FEAT-002-add-multiply-function-calc` → `Updating 6b5a645..f31f5ab Fast-forward` ✓, then switched back to the root branch (leaf root: root branch = node's branch)
+- Start: FEAT-002 set `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-002-add-multiply-function-calc from main; next: read docs` → **`63596e7 chore(backlog): start FEAT-002`**
+
+**Early stop:** stopped at **step 5, right after the start commit, per your instruction — no build (steps 6–10 not run)**; the `Done when`/regression gate therefore not reached (regression "against the baseline": not run; the baseline run itself was green, 1 passing).
+
+**Files changed:** `TODO.md` only (claim commit + start commit; working tree clean).
+**Branch and commit:** `todo/FEAT-002-add-multiply-function-calc`, start commit `63596e7`.
+**Checked-out branch:** `todo/FEAT-002-add-multiply-function-calc`.
+**Children done/total:** n/a (leaf root). **Merge commands for a root:** n/a (root not drained/finished).
+**Adjacent problems:** none (no `/todo-add` suggestions).
+**Next workable node:** FEAT-002 itself — it is now in progress and resumes at `next: read docs`; FEAT-001 stays claimed by `todo/FEAT-001-subtract`.
+**Suggestion:** clear context; a fresh session rerunning `/todo-continue` will resume FEAT-002 from its `State:` line.
+
+## 2. Ambiguities / contradictions hit
+
+1. **Where the "interrupted work" scan runs.** todo-continue step 2 says the interrupted merge is "**found from any `todo/` branch of the tree; core 'Interrupted work comes first'**", which reads as branch-agnostic; but the core section it cites opens "**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch), list the tree's branches …" and ends "**Skip this on the base branch.**" I was on `main`. This is consequential here: `todo/FEAT-001-subtract` *is* merged into `main` (its claim was ff-published), so the scan's cleanup rule "a branch already merged into its parent's branch is deleted with `git branch -d`" would have deleted another session's claim branch if run from the base. **Resolution:** followed the core's explicit "Skip this on the base branch" — no scan, no deletion from `main`; FEAT-001 was handled through the claimed-tree skip path instead.
+
+2. **"Resume" wording for a never-started claimed root.** The core: "A skipped claimed tree is reported as `claimed by <branch>`; when that branch exists in this clone, add 'if this is your work: `git switch <branch>` (or `cd` to its worktree) and rerun to resume'" — but FEAT-001 is `[ ]` with `next: start FEAT-001` (never started, not `[/]`), so "rerun to resume" loosely conflates the claimed-tree skip and the `[/]` resume paths. **Resolution:** reported the hint verbatim and did not switch to or otherwise touch the claimed tree, per "A branch in this clone can belong to another session, so it is never resumed from the base automatically."
+
+3. **Fixture observation (not skill text):** the pre-existing branch `todo/FEAT-001-subtract` does not match the slug rule in `reference/git-flow.md` ("keep the first 4 words that remain" → would be `todo/FEAT-001-add-subtract-function-calc`). A reader could take it as evidence of a different naming convention. **Resolution:** applied the written rule for the new branch (`todo/FEAT-002-add-multiply-function-calc`) and never reused or renamed the existing one ("Never reuse a `todo/<ID>-…` branch that is not yours").
+
+Everything else (base-branch default, `Tests:` regression detection, baseline placement "where the node starts, before its branch exists", leaf-root branch identity, claim-commit/staging by explicit path, ff-publish, `State:` schema and marker-only edit) was unambiguous and followed literally.

@@ -10,11 +10,11 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Execution and merges | `happy-path`, `ts-lifecycle`, `java-lifecycle` | Python; Node 22; Java 17 + Maven |
 | Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling` | Python |
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
-| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones are set up and checked by the selftest only, no agent run yet) |
+| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
-| Team use (two clones, one bare remote) | `team-claim` | Python; set up and checked by the selftest only, no agent run yet |
+| Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
 | Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |
@@ -76,6 +76,19 @@ Fresh `pi -p` processes via `tests/trials/run-pi.sh` (pi 1.5.2, `glm-5.3` on z.a
 | `blocked-sibling` | Failed once (the agent dropped the `- ` of a task line when changing its marker; the lint rejects it), then passed 3 of 3 after one sentence was added to the core |
 
 The same batch ran the agent benchmark for the first time (3 arms, 6 scenarios, 3 runs each): `no-methodology` 16/18, `lean-baseline` 15/18, `todo-skills` 15/18, at roughly 25 times the input tokens for `todo-skills`; the skills asked about the ambiguous requirement 3 of 3 times and stopped on uncommitted work in `5-interrupted` 3 of 3 times (design, not a defect).
+
+### pi reruns on the revised text (2026-11-13)
+
+Every ambiguity section of the 2026-11-12 reports was read again, the skill text was changed in four pull requests (FIX-098, FIX-099, FEAT-100, FIX-102), and fresh pi agents reran the scenarios on each version of the new text, same agent, model and host. Details, the text versions and what the reports say now: [docs/evals/pi-glm-2026-11-13/summary.md](evals/pi-glm-2026-11-13/summary.md).
+
+| Text | Scenarios | Result |
+|---|---|---|
+| T1 (first wording) | all 31, including the new `leftover-work` and `dirty-tree` | Pass, one fresh run each |
+| T2 (after reading the T1 reports; fixture branches renamed) | 17 | Pass, one fresh run each |
+| T3 (after reading the T2 reports; the text of pull requests 35 to 37) | 9 | Pass, one fresh run each |
+| T4 (with FIX-102) | `ts-lifecycle`, `java-lifecycle`, two runs each | Pass, 4 of 4; each made the root's start commit |
+
+The benchmark's `todo-skills` arm was rerun too: `5-interrupted` passed 6 of 6 (it had failed 3 of 3, stopping on the uncommitted work), the other five scenarios 1 of 1 each. Scratch repositories now keep LF line endings on Windows; the CRLF rewrite behind the one failure of 2026-11-12 did not come up again.
 
 ### Limits of the earlier by-hand runs
 

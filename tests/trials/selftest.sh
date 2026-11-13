@@ -13,6 +13,7 @@ for s in $scenarios; do
   mkdir -p "$tmp/$s"
   if ! bash "$here/setup.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1; then fail=$((fail+1)); echo "FAIL  $s: setup failed"; continue; fi
   bash "$here/prompt.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1 || { fail=$((fail+1)); echo "FAIL  $s: no prompt"; continue; }
+  if [ -d "$tmp/$s/repo/.git" ] && [ "$(git -C "$tmp/$s/repo" config --local core.autocrlf)" != false ]; then fail=$((fail+1)); echo "FAIL  $s: setup left core.autocrlf on (CRLF working copies on Windows)"; continue; fi
   if bash "$here/assert.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1; then got=pass; else got=fail; fi
   case "$readonly_ok" in *" $s "*) want=pass ;; *) want=fail ;; esac
   if [ "$got" = "$want" ]; then pass=$((pass+1)); echo "PASS  $s: untouched setup gives $want, as expected"

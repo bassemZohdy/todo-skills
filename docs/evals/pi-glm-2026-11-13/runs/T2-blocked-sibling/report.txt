@@ -1,0 +1,25 @@
+Done. I stopped immediately after the start commit (step 5), before step 6 ("Read before write"), per your instruction — no build, no tests written.
+
+## (1) Report (todo-continue step 11)
+
+- **Node:** `FEAT-001.2` · low · "Add multiply with a test" (leaf; tree FEAT-001, claimed by `todo/FEAT-001-add-subtract-multiply-calc`)
+- **Early stop:** stopped after **step 5** (`chore(backlog): start FEAT-001.2`), per the harness instruction; the skill itself would have continued at step 6.
+- **Commands and results:**
+  - Baseline/regression (run on the parent/root branch before branching): `python3 -m unittest discover -s tests` → **Ran 1 test, OK (green)** → `baseline 1 passing` (baseline = regression count 1).
+  - `Done when` (`python3 -m unittest tests.test_calc.CalcTest.test_multiply`): **not run** (stopped before build; also `test_multiply` does not exist yet).
+- **Files changed:** `TODO.md` only (FEAT-001.2 `[/]` + `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001.2-add-multiply-test from todo/FEAT-001-add-subtract-multiply-calc; next: read docs`).
+- **Branch/commit:** `todo/FEAT-001.2-add-multiply-test`, commit `3d6d734` `chore(backlog): start FEAT-001.2` (backlog commit, no body).
+- **Checked-out branch:** `todo/FEAT-001.2-add-multiply-test` (tree clean).
+- **Parent root children done/total:** FEAT-001: 0/2 (no root drain, so no merge commands to print).
+- **Tree state:** sibling `FEAT-001.1` is `[!]` on `todo/FEAT-001.1-add-subtract-test` — "the product owner must decide how subtract rounds → n/a (manual) → resolve this, then run /todo-update FEAT-001.1 --status ready". It is skipped everywhere; its ancestors (FEAT-001's integration step) wait, but siblings stay workable, hence FEAT-001.2 was selected.
+- **Adjacent problems:** none found (no code read/written).
+- **Next workable node:** **none** — FEAT-001.2 is `[/]` (resume it), FEAT-001.1 is `[!]`, and root FEAT-001 waits for both children.
+- **Suggestion:** clear context and rerun `/todo-continue` in a fresh session to resume FEAT-001.2 at `next: read docs`.
+
+## (2) Ambiguities / unclear points in the skill text
+
+1. **"claimed trees are skipped with the resume hint"** (todo-continue step 2) vs core: *"A root is **claimed** when its `State:` in the base branch's `TODO.md` … names a branch; its tree is workable only from a branch of that family (`todo/<ROOT-ID>-…` or `todo/<ROOT-ID>.…`)"*. FEAT-001's tree **is** claimed, yet I worked in it. **Resolution:** the core qualifies "claimed" as a skip only from outside the family; I was on the claiming root branch, so I worked inside the family rather than skipping.
+2. **Blocked sibling vs first-workable selection:** step 2 says *"`[!]` nodes are skipped, also one that is `[!]` only in its own branch's `TODO.md` (its siblings stay workable)"*, while the core says a blocked node means *"its ancestors wait"*. Taken alone, "the first **workable** `[ ]` node" plus a blocked earlier sibling could be read either way (does the blocked sibling poison the parent and thus the tree?). **Resolution:** followed the explicit parenthetical — FEAT-001.1 `[!]` (on its own branch only) is skipped, sibling FEAT-001.2 stays workable; only ancestors (FEAT-001's integration) wait.
+3. **"Every other node stays on its tree's branch"** (step 3, "Where to start") — singular "its tree's branch" is odd for a child, which needs its *own* new branch. **Resolution:** per git-flow *"Branch chain. A root branches from the base, a child from its parent's branch"*, I stayed on the root branch, ran the baseline there, then created `todo/FEAT-001.2-add-multiply-test` from it.
+4. **Scope of I1, "At most one `[/]` task"**: unlike `[!]` (explicitly *"counts as `[!]` everywhere"* across branches), nothing says whether `[/]` uniqueness spans branches or is per-file. **Resolution:** treated it as per-file (the schema and lint are per file); no other branch had a `[/]` anyway.
+5. **Step 11 report at an early stop:** it asks for *"commands and results (regression against the baseline; say 'not run' when the path ran no tests)"*, which presumes a full run to verification. **Resolution:** reported the baseline run itself (which is the regression command) and "not run" for the `Done when` command.

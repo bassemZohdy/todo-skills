@@ -1,0 +1,31 @@
+## 1. Report (`/todo-release`, stopped at the confirmation step)
+
+**Preconditions (step 1)** — all pass:
+
+| Check | Result |
+|---|---|
+| Git mode | Yes, repo detected; single worktree `C:/.../release-ask/repo` on `main` |
+| Base branch (core "Git mode": user-named → README `Base:` → `main`/`master`/`trunk`/`develop`) | `main` (no `Base:` line in README), and it is checked out ✓ |
+| `git status --porcelain` | Empty — nothing but backlog/untracked files allowed; tree is fully clean ✓ |
+| Invariant check | No `.todo/todo-lint.sh`; I1–I10 checked by reading: TODO.md is an empty tree (`# Active Backlog` + `## 🌳 Task Tree` only) — no violations ✓ |
+| `[Unreleased]` has `- ` entries | Yes, 2 entries (FEAT-002, FIX-001) ✓ |
+| `[/]` task or claimed tree in TODO.md or `git show main:TODO.md` | None in either (both files are the empty tree) — no warning needed ✓ |
+
+**Version proposal (step 2):**
+
+- Previous version: `## [0.1.0] - 2026-10-01` (digits only ✓; local tag `v0.1.0` exists).
+- `[Unreleased]` entries read: `**FEAT-002** (feat)` under `### Added`; `**FIX-001** (fix)` under `### Fixed`. No `BREAKING CHANGE`, no `feat!`-style type, no `### Removed` → not major.
+- **Proposed version: `0.2.0`** — reason: a new feature (FEAT-002, `### Added` / `(feat)`) with no breaking changes → minor bump from 0.1.0; `0.2.0` is digits-only, greater than 0.1.0, and no local `v0.2.0` tag exists (`git tag --list` → only `v0.1.0`).
+
+Per the skill ("Do nothing until they answer"), steps 3–6 (rewriting the CHANGELOG section, version-file scan, commit, final report) are **not** run yet.
+
+**Question for you:** Release version **0.2.0** (minor: new `Added`/`feat` entry FEAT-002, no breaking changes)? Confirm, or name another version.
+
+## 2. Ambiguities / contradictions / unclear instructions
+
+Mostly clear; two minor notes, neither decision-changing:
+
+1. *"In git mode the base branch (core "Git mode") must be checked out, and `git status --porcelain` may list nothing but backlog files (core) and untracked files"* — the compressed "(core)" pointers required loading the core skill to resolve "backlog files" and the base-branch fallback chain; also unusual that untracked files are permitted at release time. Resolved literally via the core's "Backlog files" paragraph and Git-mode base-branch rule (→ `main`, clean tree here, so moot).
+2. *"a type followed by an exclamation mark (written by hand, for example feat followed by !)"* vs. entries that render the type as `(feat)` — I read this as the Conventional Commits breaking marker (`feat!`/`(feat!)`). No such entry existed, so it didn't affect the outcome.
+
+Otherwise: none.

@@ -7,6 +7,8 @@
 | skills CLI | Available (discovery of all nine skills verified from the repository root and from `plugin/`, 2026-11-07) | `npx skills add bassemZohdy/todo-skills` |
 | skills.sh | Listed 2026-11-13, all nine skills (the site lists a repository from `npx skills add` installs; there is no submit form) | `npx skills add bassemZohdy/todo-skills` |
 | ClawHub (OpenClaw) | Published 2026-11-13, nine skills under `@bassemzohdy`, MIT-0; the core skill's slug is `todo-core`. See below | `openclaw skills install @bassemzohdy/todo-core` |
+| agent-skills.md | Submitted 2026-11-13 with the `plugin/skills` folder URL; the site parsed and added all nine skills | https://agent-skills.md |
+| Skills Directory (skillsdirectory.com) | Submitted 2026-11-13, one skill per submission (repository URL plus each `SKILL.md` path), signed in with the maintainer's account; all nine graded A by its security scan (core `todo` 92/100, medium note: "installs packages at runtime" in `reference/ci.md`, the CI guidance) | `npx -y skills add bassemZohdy/todo-skills --skill <name> --agent claude-code`, pages `https://www.skillsdirectory.com/skills/bassemzohdy-<name>` |
 | OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0, upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 

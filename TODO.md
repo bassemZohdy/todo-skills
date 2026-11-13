@@ -5,6 +5,7 @@
 - [ ] **FIX-108** · P1 · low · Close four cross-reference gaps: the blocked path of todo-update cites todo-continue Test failures without loading it, step 10 item 2 applies to a root too, the commit scope for nested source folders, and where the task ID goes when Done when names a test class or file
   - Done when: each rule is stated where it is used, inside the load budget, with a pin in tests/run.sh; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed
+  - State: branch todo/FIX-108-close-four-cross-reference from main; next: start FIX-108
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets
   - Done when: tracked files under docs/evals fall below the agreed count, every README and docs link still resolves, and a dangling evidence link fails the check; `bash tests/run.sh`
   - State: next: decompose

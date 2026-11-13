@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [/] **FIX-105** · P1 · low · Define which form of a failing test id is written after a red baseline when the runner prints two (unittest, Surefire, node --test): five pi reports chose differently
-  - Done when: todo-continue step 3 and verification.md name the form to use with one example per runner, pinned in tests/run.sh; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed
-  - State: attempts 0/3; baseline 245 passing; branch todo/FIX-105-define-which-form-failing from main; next: read docs
 - [ ] **FIX-106** · P1 · low · Close three todo-init gaps: what to report as runtime and package manager when no marker file exists, that step 4 and ci.md agree on running check.sh once with --ci, and whether the Tests: line is offered when the README names the command without a Tests: marker
   - Done when: todo-init and ci.md state each rule once and tests/run.sh pins the three; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed

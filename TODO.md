@@ -2,6 +2,13 @@
 
 ## 🌳 Task Tree
 
+- [ ] **FIX-114** · P1 · low · Close four gaps on the plan stop, the breakdown and a blocked node, found by the first agent runs of those paths: what makes a plan proposed and whether the first --plan run asks, what becomes of next: decompose, where the new children are committed, and when a failure is outside the node
+  - Done when: plan-step.md and failures.md state each of the four, docs/VERIFICATION.md agrees, and the new wording is pinned; `bash tests/run.sh`
+  - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#what-the-reports-say-on-t5 · From: TASK-113
+  - State: branch todo/FIX-114-close-four-gaps-on from main; next: start FIX-114
+- [ ] **FIX-115** · P1 · low · Reword six sentences that two or more reports on the cut text called unclear: the test ID when Done when names the test, the parent's branch already checked out, the State items updated during a run, a Tests: inside a sentence, the planning questions on an empty tree, and the breaking-change marker
+  - Done when: each sentence is reworded in its skill, every load budget still holds, and the new wording is pinned; `bash tests/run.sh`
+  - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#what-the-reports-say-on-t5 · From: TASK-110
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets
   - Done when: tracked files under docs/evals fall below the agreed count, every README and docs link still resolves, and a dangling evidence link fails the check; `bash tests/run.sh`
   - State: next: decompose

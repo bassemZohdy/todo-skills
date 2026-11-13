@@ -412,6 +412,10 @@ if [ -z "$lw_bad" ]; then ok "leftover work is adopted only when the request or 
 ct11="$root/plugin/skills/todo-continue/SKILL.md"
 if grep -qF 'after a red-baseline stop the failing run itself' "$ct11" && grep -qF 'after a red-baseline stop, none until the fix lands' "$ct11"; then ok "the report of a red-baseline stop names the failing run and no next node (FIX-104)"; else bad "todo-continue step 11 does not say what a red-baseline stop reports (FIX-104)"; fi
 
+# Failing test ids (FIX-105): one form when a runner prints two, with an example per runner; todo-continue points to it.
+vr105="$root/plugin/skills/todo/reference/verification.md"
+if grep -qF 'fullest name the runner' "$vr105" && grep -qF 'test_calc.CalcTest.test_add' "$vr105" && grep -qF 'AddTest.adds' "$vr105" && grep -qF 'add (tests/add.test.ts)' "$vr105"    && grep -qF 'ids as `reference/verification.md` step 1 writes them' "$root/plugin/skills/todo-continue/SKILL.md"; then ok "a failing test id has one defined form, with an example per runner (FIX-105)"; else bad "the form of a failing test id is not defined with an example per runner (FIX-105)"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

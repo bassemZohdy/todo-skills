@@ -1,0 +1,32 @@
+Lint passes (I1–I10 all hold: no `[/]`, unique IDs, valid fields, 13 ≤ 120 lines, no CHANGELOG overlap, correct headings, tree integrity — `[x]` FEAT-001.1 is a childless non-root, safe commands). Per the skill: **report once and stop. No tests; the parent's integration step runs them.**
+
+---
+
+## (1) Report — `/todo-continue` (one invocation, interrupted-merge path)
+
+**Step 2, "Interrupted merge"** — detected and completed (stopped after it, as the skill requires):
+
+- **Node: FEAT-001.1 · Add subtract with a test** — was `[x]` on `todo/FEAT-001.1-add-subtract-test` (completion commit `fb60f16` "feat(calc): add subtract") but not yet merged into its parent's branch (`git merge-base --is-ancestor` failed).
+- **Commands and results:**
+  - `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-add-subtract-test` → clean merge (ort), exit 0
+  - `git branch -d todo/FEAT-001.1-add-subtract-test` → deleted (was `fb60f16`)
+  - Tests: **not run** (per the skill: the parent's integration step runs them)
+- **Files changed by the merge:** `src/calc.ts` (+4, adds `subtract`), `tests/subtract.test.ts` (new), `TODO.md` (FEAT-001.1 `[ ]` → `[x]`)
+- **Branch / commit:** merge commit `9f209b3` `Merge FEAT-001.1 into FEAT-001` on the parent's branch
+- **Lint of merged TODO.md:** pass (I1–I10; no `.todo/todo-lint.sh` present)
+- **Children done/total (parent root FEAT-001):** 1/2
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-src` (clean tree)
+- **Adjacent problems:** none
+- **Next workable node:** FEAT-001.2 · Add multiply with a test (leaf, all deps satisfied)
+- Suggest clearing context before the next run.
+
+No root drain occurred, so no root merge commands apply.
+
+## (2) Ambiguities / contradictions / unclear instructions
+
+1. **"do step 10 item 3 for the `[x]` node the core check found"** vs. **"the core check"** — Step 1 defines "the invariant check (core)" as the I1–I10 lint, which finds no `[x]`-on-unmerged-branch node. What actually finds the node is the core's *"Interrupted work comes first (git mode)"* paragraph (branch scan + `git merge-base --is-ancestor`), which is not an "invariant check". Resolution: treated "the core check" as referring to that interrupted-work scan, which is clearly the intent given the step-2 heading.
+2. **"A node that is `[x]` on a branch not yet merged into its parent's branch … stopped before its merge: finish that merge and do nothing else (`/todo-continue` step 2)"** — "do nothing else" conflicts mildly with the step-2 bullet's own additions ("lint the merged `TODO.md`", "report once (step 11)"). Resolution: read "nothing else" as scoping to step 10 (matching "nothing else of step 10" in the same bullet), so the lint and the report are still required.
+3. **"on the parent's branch (switch to it unless it is checked out)"** (step 10.3) — here the parent's *branch* is `todo/FEAT-001-add-subtract-multiply-src` but the parent *node* FEAT-001 is not itself started (`[/]`); "the parent's branch" is only defined via git-flow's branch-chain rule ("a child from its parent's branch"), and this child was in fact created from the root branch (= the parent's branch). Resolution: merged into `todo/FEAT-001-add-subtract-multiply-src`, which is both the tree's root branch and the branch the child forked from.
+4. **"`git merge --no-ff` with `Merge <ID> into <PARENT-ID>`"** — the message template is given but not the exact flag form (`-m`); trivial, resolved as `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" <branch>`.
+5. **Step 11 report scope on an early stop** — "and only the items that apply" leaves it to judgment which items apply (e.g., "the merge commands for a root without `--merge`" — the root did not drain here). Resolution: omitted root-merge commands with a one-line justification, included ID/title, commands/results ("not run" for tests), files, branch/commit, children done/total, checked-out branch, adjacent problems, next node.
+6. **"No tests here; the parent's integration step runs them"** vs. the general guardrail "No node is closed without running its `Done when`" — the node was already closed (`[x]`) by the earlier session; this invocation only finishes the merge. Not blocking, but worth noting the tension. Resolution: ran no tests, exactly as instructed.

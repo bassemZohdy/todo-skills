@@ -1,0 +1,31 @@
+Done — one invocation of `/todo-continue` complete. 
+
+## 1) Report (step 11)
+
+**⚠️ No-git mode** (warned once): "This is not a git repository. The todo skills still work, but without branches, worktrees, commits or merges, so there is no isolation and no history. Run `git init` to enable them." Invariant check (I1–I10, read): passed before start and after the drain.
+
+**FEAT-001 · Add subtract to calc.py** — leaf root, started, built, verified, and drained (a root is never `[x]`).
+
+| Command (all via `bash -c`) | Result |
+|---|---|
+| Baseline regression: `python3 -m unittest discover -s tests` (README `Tests:`) | 1 test, OK → `baseline 1 passing` |
+| Red: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` | FAILED — `AttributeError: module 'calc' has no attribute 'subtract'` |
+| Done when: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` | 1 test, OK, exit 0 (tests ran) |
+| Regression after: `python3 -m unittest discover -s tests` | **2 tests, OK** (baseline 1 → no test deleted/skipped/weakened) |
+
+- **Files changed**: `calc.py` (added `subtract(a, b)`), `tests/test_calc.py` (added `test_subtract` with FEAT-001 docstring), `TODO.md` (start `[/]` → subtree deleted on drain), `CHANGELOG.md` (drain entry under new `### Added`).
+- **Branch / commit**: none — no-git mode. **Checked-out branch**: n/a. **Merge commands**: n/a (no git; no `--merge`).
+- **children done/total**: n/a (leaf root). **Last gate**: skipped (no `.todo/check.sh`). **Doc drift**: searched `README.md` for `subtract` — no hits; README `Tests:` line agrees with the command that passed.
+- **Review**: `Reviewed: self, 0 findings fixed` (spec ok, quality ok).
+- **Adjacent problems**: none. **Next workable node**: none (tree is empty). **Suggestion**: context is still light; if you continue with new tasks, a fresh context is fine.
+
+## 2) Ambiguities / unclear instructions encountered
+
+1. **`docs:` when empty** — step 5: `docs: <rolled-up docs, if any>` — unclear whether to write an empty `docs:` item or omit it. Resolved: omitted it (nothing to roll up), matching the core's "if any"; `files:` used `-` at start, then the touched files per step 7 ("No git: list touched files in `State: files:`").
+2. **Advancing `next:`** — step 9: "a run with no failed cycle need not advance `next:`" vs. step 5 writing `next: read docs` — unclear whether mid-run state must track the real step. Resolved: updated `files:` (required by step 7) and set `next: build`; moot since the node drained in the same invocation.
+3. **"Tree clean" without git** — step 3: "tree clean by the git-flow definition (otherwise stop and ask, unless it is leftover work as defined there)" — the definition is git-only (untracked/modified files), so its no-git meaning is undefined; likewise "Baseline … where the node starts, **before its branch exists**: on the base for an unclaimed tree, else…" gives only git-mode locations. Resolved: treated both as N/A without git; baseline run in the working folder.
+4. **Merge commands without git** — step 10.4.4: "otherwise print those commands" and step 11: "the merge commands for a root without `--merge`" — impossible in no-git mode (no base/branches). Resolved: skipped printing them and reported n/a.
+5. **What is an "exported symbol"** — Documentation drift: "Only when the node changed a public interface (… or **exported symbol**, added, …)" — unclear whether a plain module-level function counts. Resolved: treated `subtract` as an added exported symbol (it is the library's public surface) and ran the doc-drift search (no hits).
+6. **ID placement in tests** — step 8: "carry the ID in the test name, or in a docstring or comment when `Done when` already names the test (a test id, class or file) **and so fixes that name**" — the clause is convoluted. Resolved: `Done when` names `CalcTest.test_subtract`, which fixes the test name, so the ID went in the test's docstring.
+7. **"Interrupted drain" in no-git mode** — step 2: "**Interrupted drain** (a root branch whose uncommitted `CHANGELOG.md` holds its entry)" — without git every CHANGELOG is "uncommitted", so the test is undefined. Resolved: checked whether CHANGELOG held an entry for an in-tree root (it didn't) and moved on.
+8. **POSIX commands on Windows** — core: "Commands in the skills are POSIX: on Windows run them, `Done when` included, through Git Bash (`bash -c`)" — unclear exactly which commands count as "in the skills"; also PowerShell interpolates `$?` inside double quotes (saw `EXIT=True`). Resolved: ran every skill/test command through `bash -c` with single-quoted arguments.

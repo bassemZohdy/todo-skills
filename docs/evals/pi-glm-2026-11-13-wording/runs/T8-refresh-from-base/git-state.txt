@@ -1,0 +1,37 @@
+## HEAD
+0b05884069bbcb3e19618ab8399abbec504f6fbd
+## current branch
+todo/FEAT-001-add-subtract-function-calc
+## branches
+  main                                     a1b6a06 feat(extra): add twice
+* todo/FEAT-001-add-subtract-function-calc 0b05884 chore(backlog): drain FEAT-001
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi15/refresh-from-base/repo  0b05884 [todo/FEAT-001-add-subtract-function-calc]
+## tags
+## refs
+refs/heads/main a1b6a060713fadff97555c7acbb64929dc03bf1f
+refs/heads/todo/FEAT-001-add-subtract-function-calc 0b05884069bbcb3e19618ab8399abbec504f6fbd
+## log --all --graph
+* 0b05884  (HEAD -> todo/FEAT-001-add-subtract-function-calc) chore(backlog): drain FEAT-001
+*   cce9fa5  Merge main into FEAT-001
+|\  
+| * a1b6a06  (main) feat(extra): add twice
+* | 2a50b8f  feat(calc): add a subtract function to calc.py with a test
+* | 1c725bb  chore(backlog): start FEAT-001
+|/  
+* 108069e  init with claimed root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./__pycache__/extra.cpython-313.pyc
+./calc.py
+./extra.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/__pycache__/test_extra.cpython-313.pyc
+./tests/test_calc.py
+./tests/test_extra.py

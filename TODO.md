@@ -2,10 +2,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FIX-115** · P1 · low · Reword six sentences that two or more reports on the cut text called unclear: the test ID when Done when names the test, the parent's branch already checked out, the State items updated during a run, a Tests: inside a sentence, the planning questions on an empty tree, and the breaking-change marker
-  - Done when: each sentence is reworded in its skill, every load budget still holds, and the new wording is pinned; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#what-the-reports-say-on-t5 · From: TASK-110
-  - State: branch todo/FIX-115-reword-six-sentences-two from main; next: start FIX-115
 - [ ] **TASK-085** · P2 · mid · Slim what an install clones, after the owner picks the target: docs/evals holds 1,643 of the 1,839 tracked files (12 MB, 1,366 of them raw run logs and diagnostics) and every marketplace install or npx skills add clones them; keep summaries and results on main and move raw runs to a separate branch or release assets
   - Done when: tracked files under docs/evals fall below the agreed count, every README and docs link still resolves, and a dangling evidence link fails the check; `bash tests/run.sh`
   - State: next: decompose

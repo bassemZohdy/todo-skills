@@ -463,6 +463,12 @@ for s in 'the red run of step 7' 'a test the node does not own'; do grep -qF -- 
 # The always-loaded text must not promise what the reference files take back (seen in the first runs on the FIX-114 text).
 for s in 'the next run asks for the approval (step 6)' 'at once when the failure is outside the node'; do grep -qF -- "$s" "$lc_ct" || f14_bad="$f14_bad todo-continue('$s')"; done
 if [ -z "$f14_bad" ]; then ok "the plan stop, the breakdown and the block answer what the first agent runs asked (FIX-114)"; else bad "plan stop, breakdown, block (FIX-114):$f14_bad"; fi
+# FIX-115: six sentences that two or more reports on the cut text called unclear (same summary, "What the reports say on T5").
+f15_bad=""; f15_sk="$root/plugin/skills"
+for s in 'already names the test' 'the `[x]` node the core check found' 'switch to it unless it is checked out' 'without git also `files:`'; do grep -qF -- "$s" "$f15_sk/todo-continue/SKILL.md" || f15_bad="$f15_bad todo-continue('$s')"; done
+for s in 'a `Tests:` inside a sentence counts as that line' 'or when both hold:'; do grep -qF -- "$s" "$f15_sk/todo-init/SKILL.md" || f15_bad="$f15_bad todo-init('$s')"; done
+grep -qF -- 'as in (feat!) at the start of an entry' "$f15_sk/todo-release/SKILL.md" || f15_bad="$f15_bad todo-release(breaking-change marker)"
+if [ -z "$f15_bad" ]; then ok "six sentences that reports called unclear say what is meant (FIX-115)"; else bad "unclear sentences (FIX-115):$f15_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi

@@ -1,0 +1,45 @@
+All steps complete. `/todo-continue` invocation finished — one node (FEAT-001, a leaf root) completed and drained; no `--merge`, so the base merge commands are printed, not run.
+
+---
+
+## (1) Report (step 11)
+
+**FEAT-001 · Add a subtract function to calc.py with a test** — resumed `[/]` node (`next: build`); uncommitted diff (subtract + test) matched the task line → treated as earlier work, committed at completion.
+
+**Commands and results** (all via Git Bash, per core skill):
+- Done when: `` python3 -m unittest tests.test_calc.CalcTest.test_subtract `` → **OK, 1 test**, exit 0 (run before and re-run after the base refresh).
+- Regression (README `Tests:` line): `` python3 -m unittest discover -s tests `` → **2/2 OK** on the branch; **3/3 OK** after the refresh merge brought in FEAT-009's `test_twice`. No baseline was recorded in `State:`; per the resume rule the suite is fully green with no test deleted, skipped or weakened (`test_add` intact; suite grew 1→2→3).
+- Doc drift: `grep -nF 'subtract' README.md` → no hits (`docs/` does not exist) → nothing to update or queue.
+
+**Files changed:** `calc.py`, `tests/test_calc.py`; backlog at drain: `TODO.md`, `CHANGELOG.md`.
+
+**Branch and commits:** `todo/FEAT-001-add-subtract-function-calc`
+- `2a50b8f` `feat(calc): add a subtract function to calc.py with a test` (body: `Refs: FEAT-001`, `Reviewed: self, 0 findings fixed`)
+- `cce9fa5` `Merge main into FEAT-001` (refresh from base; brought FEAT-009)
+- `0b05884` `chore(backlog): drain FEAT-001` (body: `Refs: FEAT-001`)
+
+**children done/total:** n/a (leaf root). **Checked-out branch:** `todo/FEAT-001-add-subtract-function-calc` (tree clean).
+
+**Merge commands for the root (not run, no `--merge`):**
+```
+git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-function-calc && git branch -d todo/FEAT-001-add-subtract-function-calc
+```
+Alternative: push the branch and open a pull request (never done by the skill).
+
+**Adjacent problems:** none to queue as `/todo-add`.
+**Next workable node:** none — the tree is empty (FEAT-001 drained; FEAT-009 already in CHANGELOG).
+**Suggestion:** clear this context and start fresh for the next `/todo-*` command.
+
+---
+
+## (2) Ambiguities / unclear instructions hit
+
+1. **Baseline on resume with none recorded** — Step 2: *"Without a baseline in `State:`, the regression must be fully green with no test deleted, skipped or weakened"* vs step 9: *"Regression green, no fewer passing tests than the baseline"*. With no count in `State:`, "no fewer than the baseline" is undefined, and it's unclear whether the green check must run before building (step 3's baseline is explicitly skipped on resume) or only at verify. **Resolution:** enforced it at the step-9 regression gate using the suite at the start commit (1 test) as the implicit reference; did not write a `baseline` into `State:` (step 9 requires updates only when a cycle changes an item, and the drain deletes `State:` anyway); reported the raw counts.
+
+2. **"Resume" vs "Red" when `next:` says `build` but earlier work exists** — Step 2 routes `build` → 7, and step 7's first bullet is *"**Resume:** code and tests already exist: skip red and go to review"*; it doesn't say whether the "earlier work" case from step 2 (uncommitted changes fitting the task line) counts as resume when `next:` isn't a resume marker. **Resolution:** treated the existing uncommitted code+test as the Resume case → skipped the red phase (never saw the test fail) and went straight to review/verify.
+
+3. **`Reviewed: self, <n> findings fixed` with zero findings** — unclear whether *"Reviewed: self, 0 findings fixed"* is the intended rendering or the line should be omitted when the self-review produced no findings. **Resolution:** kept the line with `0`.
+
+4. **Empty tree shape after drain** — *"An empty tree is the two headings and no tasks."* doesn't say whether the blank line between the headings stays. **Resolution:** kept `# Active Backlog` + blank line + `## 🌳 Task Tree`, matching the schema's code block in the core skill.
+
+(Side note, not a skill-text issue: `doc-drift.md`'s command `grep -rnF -- '<name>' README.md docs` errors when `docs/` doesn't exist, but its parenthetical *"(name only the paths that exist…)"* already resolves it — I grepped README.md only.)

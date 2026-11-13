@@ -1,0 +1,27 @@
+`/todo-continue --merge` completed — one node (FEAT-001) built, verified, drained, and merged. Final state: `main` clean at `b03c5ab`, branch deleted.
+
+## (1) Report (step 11)
+
+**FEAT-001 · Add subtract to calc.py** — leaf root, done, drained, merged into base.
+
+- **Baseline** (on `main`, before branching): `python3 -m unittest discover -s tests` → OK, **1 passing**.
+- **Red** (test written first): `AttributeError: module 'calc' has no attribute 'subtract'`.
+- **Done when**: `python3 -m unittest tests.test_calc.CalcTest.test_subtract` → OK, 1 test, exit 0.
+- **Regression**: `python3 -m unittest discover -s tests` → OK, **2 passing** (baseline 1; +1, none deleted or skipped).
+- **Review**: self (no subagent tool available), spec ok / quality ok, 0 findings fixed.
+- **Documentation drift**: added exported symbol `subtract` → grep of README.md (no `docs/`) found no hits → no action.
+- **Files changed**: `calc.py`, `tests/test_calc.py`, `TODO.md`, `CHANGELOG.md`.
+- **Branch**: `todo/FEAT-001-add-subtract-calc-py` from `main` — claim `02dea05`, start `04c9533`, node `cc4e8c4` (`feat(calc): add subtract`), drain `2059cbd`; branch deleted after merge.
+- **Merge** (`--merge`): `Merge FEAT-001 into main` = `b03c5ab`, merged from the main checkout; refresh from base brought nothing, so no rerun. Nothing pushed.
+- **Children**: n/a (leaf root). **Next workable node**: none — the tree is empty.
+- **Adjacent problems**: none (no `/todo-add` commands suggested).
+- Suggest clearing context before the next `/todo-*` command.
+
+## (2) Ambiguities / contradictions hit
+
+1. **CHANGELOG heading spacing** — core skill, "CHANGELOG entry": *"Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before it and one between it and its first entry."* This literally requires a blank line both before `### Added` (separating it from `## [Unreleased]`) and between the heading and its first entry, which **contradicts the Keep a Changelog canonical layout it cites** (heading immediately under `[Unreleased]`, entry immediately under the heading). Resolution: followed the literal text — blank line before `### Added` and before the entry.
+2. **Advancing `next:` after a clean verify** — todo-continue step 9: *"update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`; …); a run with no failed cycle need not advance `next:`"*. "Need not" leaves it unclear whether a successful run should still advance `next:` (e.g. to `drain` for a root) before the 10.2 commit. Resolution: treated it as optional and left `next: read docs` as written; the drain deleted the `State:` line anyway, so nothing observable changed.
+3. **Root's marker at the node commit** — step 10.1: *"A root is never `[x]`; item 4 drains it"*, while 10.2 says to commit *"its files and any changed `TODO.md`"*. It's unspecified whether the root's `TODO.md` (still `[/]` + `State:`) should be modified in the 10.2 commit or left until the drain. Resolution: committed `TODO.md` unchanged and let the drain (10.4.3) delete the subtree in one step.
+4. **"as its own command"** — git-flow.md tree claim step 4: *"Publish it: `git switch <base> && git merge --ff-only <root branch>`, as its own command; read the result."* Ambiguous whether "as its own command" means one combined invocation separate from surrounding commands, or each of `switch`/`merge` separately. Resolution: ran them as sequential commands in a single shell call and read both results; behavior is identical either way.
+
+Otherwise: none. (The `Red:`/`Checked:`/slug/test-ID-carry rules all resolved unambiguously as quoted above; no subagent tool exists, so per the skill text I reviewed in-thread.)

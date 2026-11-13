@@ -1,0 +1,37 @@
+Release complete. Commit `bdfbaf6` on `main` contains only `CHANGELOG.md`; no tag created, nothing pushed.
+
+## (1) Release report
+
+**Preconditions** — git mode, base branch `main` (default: README has no `Base:` line; first existing of main/master/trunk/develop) checked out in the main checkout; `git status --porcelain` clean; `[Unreleased]` had `- ` entries; TODO.md and `main:TODO.md` are empty trees (no `[/]` task, no claimed tree → no warning). Invariant check I1–I10 (no `.todo/todo-lint.sh`, checked by reading): pass, before and after the edit.
+
+**Version** — previous `0.1.0` (newest `## [X.Y.Z]` heading). `[Unreleased]` contained an `### Added` entry (`FEAT-002 (feat)`) with no breaking markers → **minor** → `0.2.0`, matching the user-confirmed `0.2.0` (digits only, > 0.1.0, no local `v0.2.0` tag).
+
+**New section** — `## [Unreleased]` renamed to:
+
+- `## [0.2.0] - 2026-11-13`, with subheadings `### Added` (FEAT-002) and `### Fixed` (FIX-001); a fresh empty `## [Unreleased]` (no subheadings) sits above it. Older sections untouched.
+
+**Links** — base URL `https://github.com/example/minical` (from the old `[Unreleased]:` line, part before `/compare/`):
+- `[Unreleased]: https://github.com/example/minical/compare/v0.2.0...HEAD`
+- `[0.2.0]: https://github.com/example/minical/compare/v0.1.0...v0.2.0`
+
+**Version files** (step 4) — grep for `0.1.0` in package.json/pyproject.toml/Cargo.toml/pom.xml: **none found**; not edited.
+
+**Commit** — `bdfbaf6` `chore(release): 0.2.0` (`git commit -- CHANGELOG.md` only, no body).
+
+**Run these yourself (not executed by the skill):**
+```
+git tag -a v0.2.0 -m "0.2.0"
+git push --follow-tags
+```
+
+## (2) Ambiguities / unclear instructions
+
+1. **"`git status --porcelain` may list nothing but backlog files (core) and untracked files; otherwise refuse"** — garbled grammar ("may list nothing but X and Y"); read as "may only list backlog files and untracked files". Moot here (porcelain was empty).
+2. **"a type followed by an exclamation mark inside its parentheses (written by hand, as in (feat!): at the start of an entry)"** — the stray `:` after `(feat!)` makes the pattern ambiguous; resolved as: the colon is prose punctuation, the pattern is an entry starting with `(feat!)`-style types. Not triggered by these entries.
+3. **"`--version` replaces the proposal … but still needs the confirmation"** vs. a user answering a version question in conversation — the user's "0.2.0, confirmed" isn't literally `--version`, and it happens to equal the computed proposal, so I treated it as both the version choice and its confirmation.
+4. **"put a new, empty `## [Unreleased]` (no subheadings) above it, with a blank line between"** — "between" what wasn't stated; resolved as a blank line between the new `## [Unreleased]` and the version heading.
+5. **"add `[X.Y.Z]: <base URL>/compare/v<previous>...vX.Y.Z` under it"** — "under it" read as immediately below the `[Unreleased]:` link line and above the older `[0.1.0]:` line (Keep a Changelog ordering).
+6. **Step 4's grep is POSIX-only** — the core skill requires POSIX commands to go through Git Bash on Windows; PowerShell has no `grep`. Also, its "exit 1 means none" couldn't be read directly (PowerShell interpolated my `$?` echo as `True`); relied on empty output → "none found".
+7. **Step 6: "Report the new version heading and its `###` headings"** — "its" resolved as the new version section's subheadings (`### Added`, `### Fixed`), not `[Unreleased]`'s.
+
+No contradictions with the core skill were hit; the release-commit-to-base and confirm-before-release rules aligned cleanly.

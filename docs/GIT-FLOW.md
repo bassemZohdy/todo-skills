@@ -47,6 +47,7 @@ Lane runs (`--all-lanes`) use the same layout, one worktree per lane root, kept 
 ## Clean tree and staging
 
 - **Clean tree:** untracked files, backlog files and generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`) do not count. Any other change stops the command, which offers commit, stash or `--worktree`.
+- **Leftover work:** the one exception. When your request (or the task line) says the uncommitted changes are the unfinished work of the node being started, for example what an interrupted session left behind, `/todo-continue` does not stop: it names them in its report, takes the baseline with them in place and carries them onto the node's branch, where they are committed with the node. It never decides this by itself: an edit nobody explained still stops the command, also when it is in a file the task names. Tests the leftover work lacks are still written first. Not available with `--worktree`.
 - **Staging:** explicit paths only, `git add <path>…` then `git commit -- <path>…`, so nothing staged earlier rides along. Never `git add -A`, `.` or `-p`. Backlog edits earlier todo-* commands left uncommitted go into the next claim or start commit; the agent asks only about edits no skill made ([FILES.md](FILES.md#backlog-files-and-when-they-are-committed)).
 
 ## Commit messages

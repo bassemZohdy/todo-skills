@@ -4,7 +4,7 @@
 # Scenarios: interrupted-merge | refresh-from-base | claimed-elsewhere | race-claim-conflict | race-claim-benign | release-ask | release |
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
-#   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted
+#   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -241,6 +241,14 @@ happy-path)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   g add -A && g commit -q -m "init with one free root"
+  ;;
+leftover-work|dirty-tree)
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  g add -A && g commit -q -m "init with one free root"
+  # An uncommitted change on the base: unfinished work on FEAT-001 (leftover-work), or an edit nobody explained (dirty-tree).
+  if [ "$scenario" = leftover-work ]; then printf '\ndef subtract(a, b):\n    raise NotImplementedError\n' >> calc.py
+  else printf '\n# scratch: maybe cache results here\n' >> calc.py; fi
   ;;
 baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

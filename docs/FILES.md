@@ -58,7 +58,7 @@ No skill tags, fetches, pulls or pushes. Sharing commits with other clones is gi
 **Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, the `docs/plans/<ROOT-ID>-*.md` a `Ref:` names, and the README `Tests:` and `Base:` lines a skill wrote.
 
 - `/todo-init`, `/todo-plan` and `/todo-add` leave their edits **uncommitted**. The next commit a skill makes on a `todo/` branch, usually the tree claim, stages them by explicit path. So a root you have just added is claimable without a separate commit.
-- The clean-tree check ignores backlog files, untracked files and generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`). Any other change stops a command until you commit, stash or use `--worktree`.
+- The clean-tree check ignores backlog files, untracked files and generated files (`__pycache__`, `*.pyc`, `dist/`, `build/`, `target/`, `node_modules/`, `*.log`). Any other change stops a command until you commit, stash or use `--worktree`, unless you say it is the unfinished work of the node being started ([GIT-FLOW.md](GIT-FLOW.md#clean-tree-and-staging)).
 - README is staged by a backlog commit only while `git diff README.md` adds exactly the `Tests:`/`Base:` lines. README edits made under "Documentation drift" belong to the task and are committed with it. Any other README change is yours and is never staged by a skill.
 - New roots, and any change to a tree nobody has claimed, are made on the base branch. On a `todo/` branch the skills refuse them and name the base.
 - An RTM edit made while completing a task is a task file, committed with the node, not a backlog file.

@@ -19,6 +19,9 @@ case "$scenario" in
   leftover-work)      task='A previous session was interrupted: the uncommitted change in calc.py is unfinished work on FEAT-001. Keep it and finish it. Run `/todo-continue --merge`. Stop after one invocation.' ;;
   dirty-tree)         task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   baseline-red)       task='Run `/todo-continue`. Stop after one invocation.' ;;
+  plan-stop)          task='Run `/todo-continue --plan`. Stop after one invocation.' ;;
+  decompose)          task='Run `/todo-continue`. The user confirms the children you propose: "yes". Stop after one invocation.' ;;
+  regress-block)      task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   no-git)             task='Run `/todo-continue`. Stop after one invocation.' ;;
   add-fix)            task='Run `/todo-add "add() crashes with a TypeError traceback when given None; it should raise ValueError(\"add needs numbers\")" --priority P0`. Do not ask questions; the description is complete.' ;;
   update-block)       task='Run `/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"`.' ;;

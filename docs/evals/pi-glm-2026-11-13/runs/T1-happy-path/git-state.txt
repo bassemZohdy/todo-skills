@@ -1,0 +1,31 @@
+## HEAD
+9ce847c7a110ba03c1e4a251f4f5b199c22a44bf
+## current branch
+main
+## branches
+* main 9ce847c Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/happy-path/repo  9ce847c [main]
+## tags
+## refs
+refs/heads/main 9ce847c7a110ba03c1e4a251f4f5b199c22a44bf
+## log --all --graph
+*   9ce847c  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * 9c38598  chore(backlog): drain FEAT-001
+| * 9325a97  feat(calc): add subtract to calc.py
+| * 30aec2c  chore(backlog): start FEAT-001
+|/  
+* 29fa5c1  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+* fac4cd1  init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

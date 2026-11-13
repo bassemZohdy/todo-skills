@@ -1,0 +1,51 @@
+All done — the root is drained and merged into `main`, the tree is empty, and a fourth invocation would report "the tree is empty" (nothing left to continue). Final state verified: `npm test` on `main` → 3 passing, exit 0; working tree clean; only branch left is `main`.
+
+---
+
+## (1) Report
+
+**`/todo-continue --merge` — ran 3 invocations (one node each), plus a final check that found the tree empty.**
+
+**Invocation 1 — FEAT-001.1 · low · Add subtract with a test** (`feat`, leaf, child of FEAT-001)
+- Invariants (I1–I10, no lint script): pass. Tree unclaimed → baseline on `main` before branching.
+- Baseline: `npm test` → 1 passing.
+- Flow: root branch `todo/FEAT-001-add-subtract-multiply-src` → tree claim commit `1d7274a` → published to `main` via `--ff-only` → node branch `todo/FEAT-001.1-add-subtract-test` → start `[/]` `1a55742`.
+- Red: `SyntaxError: The requested module '../src/calc.ts' does not provide an export named 'subtract'` (expected missing-symbol). Green: `subtract` added to `src/calc.ts`.
+- Done when `node --experimental-strip-types --test tests/subtract.test.ts` → 1 pass, exit 0. Regression `npm test` → **3? no — 2 passing** vs baseline 1, none deleted/skipped. Self-review: 0 findings. Doc drift (`subtract` added): no README/docs hits.
+- Commit `92ac454` `feat(calc): add subtract` (Refs/Red/Reviewed body), merged `--no-ff` into `todo/FEAT-001-…` (`Merge FEAT-001.1 into FEAT-001`), child branch deleted.
+
+**Invocation 2 — FEAT-001.2 · low · Add multiply with a test** (`feat`, leaf)
+- Baseline on parent's (root) branch: `npm test` → 2 passing. Branch `todo/FEAT-001.2-add-multiply-test`, start `d79f7a3`.
+- Red: `does not provide an export named 'multiply'`. Green: `multiply` added to `src/calc.ts`.
+- Done when `node --experimental-strip-types --test tests/multiply.test.ts` → 1 pass, exit 0. Regression `npm test` → **3 passing** vs baseline 2. Self-review: 0 findings. Doc drift (`multiply`): no hits.
+- Commit `6ea1d13` `feat(calc): add multiply`, merged into `todo/FEAT-001-…` (`Merge FEAT-001.2 into FEAT-001`), child branch deleted.
+
+**Invocation 3 — FEAT-001 · P1 · mid · Add subtract and multiply to src/calc.ts** (root, integration step + drain + merge)
+- Both children `[x]` → integration step: baseline on own branch 3 passing; start `[/]` `49f0bb1`. No feature code; children's tests already cover the combined behavior.
+- Done when = regression (`npm test`): **3 passing**, exit 0 (one run counts for both). No Definition of Done, no RTM, no doc drift.
+- Refresh from `main`: already up to date. No root review (mid; only interface additions, which don't trigger it). No `.todo/check.sh` last gate.
+- Drain: CHANGELOG entry under new `### Added`; subtree deleted from TODO.md (tree now empty); commit `3e54ac3` `chore(backlog): drain FEAT-001` (Refs/Includes).
+- **Merged into base** (`--merge`): `Merge FEAT-001 into main` → `815e0c1`, root branch deleted.
+- **Children done/total: 2/2.** Checked-out branch: `main` (clean).
+
+**Files changed (tree total):** `src/calc.ts`, `tests/subtract.test.ts` (new), `tests/multiply.test.ts` (new), `TODO.md`, `CHANGELOG.md`.
+
+**Adjacent problems:** none (no `/todo-add` commands needed).
+**Next workable node:** none — the tree is empty.
+**Suggestion:** clear context before the next `/todo-*` command; all state was in git/TODO.md, nothing pending.
+
+## (2) Ambiguities / contradictions in the skill text
+
+1. **`next: read docs` on a parent's integration step** — todo-continue step 5: *"**Start** (a parent's integration step too). On the node's branch set `[/]` and write `State:` … as `attempts 0/3; baseline <n> passing; branch <name> from <branch it was created from>; next: read docs`"*. The integration step has no docs-read/build phase (step 7 sends it straight to verification protocol step 8), so the literal template value is odd. **Resolution:** wrote the template literally (`next: read docs`), since step 5 gives no integration-specific variant and the line is deleted by the drain in the same invocation.
+
+2. **One node per invocation vs. integration+drain together** — todo-continue front matter: *"Completes at most one node per invocation"* vs. verification.md step 8: *"A root's integration step and drain happen in one invocation, with the full suite last"*. Strictly, the integration step and drain are both "the root node", so they fit in one invocation, but the two phrasings pull in different directions for a root that also needs a refresh/rerun. **Resolution:** treated the root's integration step, drain and base merge as one node's completion in invocation 3 (following the more specific verification.md rule).
+
+3. **Added interface: root review vs. doc drift** — todo-continue 10.4.1: *"or changes an existing public interface (adding one does not count here, though it does for documentation drift below)"* vs. "Documentation drift": *"(a command, flag, endpoint, config key or exported symbol, added, renamed, removed or with a changed meaning)"*. The same fact (an added export) triggers one check and exempts the other. **Resolution:** followed both literally — no root review for FEAT-001 (only additions), but did run the doc-drift grep for each added symbol.
+
+4. **Root-refresh merge message casing** — git-flow.md: *"with the message `Merge <base> into <ROOT-ID>`"*; elsewhere merge messages use branch names (`Merge <ID> into <PARENT-ID>`, `Merge <ROOT-ID> into <base>`). It's unclear whether `<ROOT-ID>` means the ID or the branch name. **Resolution:** used `Merge main into FEAT-001` (ID form, matching the template literally); the merge was a no-op ("Already up to date") anyway.
+
+5. **`Checked:` line wording** — todo-continue 10.2: *"one `Checked: <command>` line for each `Done when` or regression command that you judged safe but that is not a test, lint, typecheck or build runner (a test runner or a build tool's test target, such as `python -m unittest`, `node --test` or `make test`, needs none; the lint's W3 warning)"*. The double-negative ("safe but not a runner") takes re-reading, and `npm test` is a `run <script>` whose safety must be read first (verification.md "Command safety") even though it needs no `Checked:` line. **Resolution:** read `package.json`'s `test` script before running it; treated `node --test` and `npm test` as test runners → no `Checked:` lines.
+
+6. **Slug derivation for paths in titles** — git-flow.md: *"turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`), drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain"*. Applying it to *"Add subtract and multiply to src/calc.ts"* requires deciding that `/` and `.` both count as punctuation (giving words `src`, `calc`, `ts`) and that only then are stopwords dropped before taking the first 4. **Resolution:** words `add subtract multiply src calc ts`, drop `and`/`to` → `add-subtract-multiply-src`.
+
+No other contradictions were hit; the remaining edge cases in the skill (interrupted merge/drain, claimed-by-another-branch, red baseline, delegate/worktree/lane flags) never applied to this state.

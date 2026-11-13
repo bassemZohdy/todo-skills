@@ -1,0 +1,33 @@
+Done — one invocation, stopped at the interrupted-merge exit point as the skill directs.
+
+## 1) Report (`/todo-continue`, per step 11)
+
+**Stopped at step 2 (Interrupted merge) — completed by design, not an error.**
+
+| Item | Detail |
+|---|---|
+| **Node** | **FEAT-001.1** · low · Add subtract with a test class SubtractTest — already `[x]` on its branch; this invocation only finished its interrupted merge into the parent |
+| **Why interrupted** | `todo/FEAT-001.1-add-subtract-test-class` (0fa6592 `feat(calc): add subtract`) held an `[x]` FEAT-001.1 and was not an ancestor of its parent branch `todo/FEAT-001-add-subtract-multiply-calc` |
+| **Commands run** | `git switch todo/FEAT-001-add-subtract-multiply-calc` (already on it) → `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-add-subtract-test-class` → clean merge (ort) → `git branch -d todo/FEAT-001.1-add-subtract-test-class` → deleted (was 0fa6592) |
+| **Tests / regression** | **Not run** — step 2 says "No tests here; the parent's integration step runs them" |
+| **Lint of merged TODO.md** | Pass (I1–I10 checked by reading; no `.todo/todo-lint.sh` exists) |
+| **Files changed by merge** | `TODO.md` (FEAT-001.1 → `[x]`), `src/main/java/mini/Calc.java` (+ `subtract`), `src/test/java/mini/SubtractTest.java` (new) |
+| **Branch / commit** | merge commit **fe866d2** on `todo/FEAT-001-add-subtract-multiply-calc`; child branch deleted |
+| **Root FEAT-001 children** | done/total: **1/2** |
+| **Checked-out branch** | `todo/FEAT-001-add-subtract-multiply-calc` (clean tree) |
+| **Root merge commands** | n/a — the root is not draining |
+| **Adjacent problems** | None (`/todo-add` suggestions: none). Note: FEAT-001.1's history shows no `chore(backlog): start` commit and no recorded baseline — historical only; the interrupted-merge path says to do nothing else of step 10 |
+| **Next workable node** | **FEAT-001.2** · low · Add multiply with a test class MultiplyTest (`[ ]`, leaf, no `Depends:`, same claimed tree, on the family branch) |
+| **Context** | Suggest clearing context (new session) before the next `/todo-continue`, which will build FEAT-001.2 |
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"Complete at most one node per invocation (lane runs excepted)"** vs. the step-2 interrupted-merge path. Finishing a merge looks like "touching" a node, and FEAT-001.1 was never `[/]` in this invocation. Resolved: the node was already `[x]` (verified+committed), so nothing was "completed" here — I read the interrupted-merge bullet as an explicit, self-contained exception to the main loop, ending in "report and stop".
+
+2. **"**Interrupted merge** (found from any `todo/` branch of the tree; core 'Interrupted work comes first')"** — "any `todo/` branch" is vague about whether the tree's root branch counts and how to enumerate them. The core clarifies it ("list the tree's branches ... and read each one's node in `git show <branch>:TODO.md`"), so I resolved it via the core: listed `todo/FEAT-001-*` / `todo/FEAT-001.*`, read each branch's TODO.md, and found the `[x]` node only on the child branch (the parent branch still shows `[ ]`).
+
+3. **"do step 10 item 3 for that node (switch, merge, delete its branch; nothing else of step 10), then lint the merged `TODO.md`, report and stop"** vs. step 10 item 3's own trailing "**Report and stop; the node stays `[x]` until its root drains**" — two "report and stop" instructions plus the top-level step 11 report. Ambiguous whether two reports are wanted. Resolved: one report at the end (step 11), which also satisfies "which step and why" for the early stop.
+
+4. **"A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor <branch> <parent branch>` fails)"** — the core doesn't spell out the parent branch for a *level-1* child; it says "a child from its parent's branch". Resolved as: parent = root FEAT-001, so parent branch = `todo/FEAT-001-add-subtract-multiply-calc` (confirmed by the claim line in the root's `State:`); the check failed (exit 1), proving the interruption.
+
+Otherwise the path was unambiguous; no contradictions blocked execution.

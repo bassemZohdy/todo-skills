@@ -1,0 +1,32 @@
+## HEAD
+aaf94781c8fc0ff22309dc40c1a4f92b8af21112
+## current branch
+main
+## branches
+* main aaf9478 init with a red baseline
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/java-baseline-red/repo  aaf9478 [main]
+## tags
+## refs
+refs/heads/main aaf94781c8fc0ff22309dc40c1a4f92b8af21112
+## log --all --graph
+* aaf9478  (HEAD -> main) init with a red baseline
+* a0314f0  init java project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./pom.xml
+./src/main/java/mini/Calc.java
+./src/test/java/mini/AddTest.java
+./target/classes/mini/Calc.class
+./target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
+./target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+./target/surefire-reports/TEST-mini.AddTest.xml
+./target/surefire-reports/mini.AddTest.txt
+./target/test-classes/mini/AddTest.class

@@ -77,6 +77,19 @@ Fresh `pi -p` processes via `tests/trials/run-pi.sh` (pi 1.5.2, `glm-5.3` on z.a
 
 The same batch ran the agent benchmark for the first time (3 arms, 6 scenarios, 3 runs each): `no-methodology` 16/18, `lean-baseline` 15/18, `todo-skills` 15/18, at roughly 25 times the input tokens for `todo-skills`; the skills asked about the ambiguous requirement 3 of 3 times and stopped on uncommitted work in `5-interrupted` 3 of 3 times (design, not a defect).
 
+### pi reruns on the revised text (2026-11-13)
+
+Every ambiguity section of the 2026-11-12 reports was read again, the skill text was changed in four pull requests (FIX-098, FIX-099, FEAT-100, FIX-102), and fresh pi agents reran the scenarios on each version of the new text, same agent, model and host. Details, the text versions and what the reports say now: [docs/evals/pi-glm-2026-11-13/summary.md](evals/pi-glm-2026-11-13/summary.md).
+
+| Text | Scenarios | Result |
+|---|---|---|
+| T1 (first wording) | all 31, including the new `leftover-work` and `dirty-tree` | Pass, one fresh run each |
+| T2 (after reading the T1 reports; fixture branches renamed) | 17 | Pass, one fresh run each |
+| T3 (after reading the T2 reports; the text of pull requests 35 to 37) | 9 | Pass, one fresh run each |
+| T4 (with FIX-102) | `ts-lifecycle`, `java-lifecycle`, two runs each | Pass, 4 of 4; each made the root's start commit |
+
+The benchmark's `todo-skills` arm was rerun too: `5-interrupted` passed 6 of 6 (it had failed 3 of 3, stopping on the uncommitted work), the other five scenarios 1 of 1 each. Scratch repositories now keep LF line endings on Windows; the CRLF rewrite behind the one failure of 2026-11-12 did not come up again.
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

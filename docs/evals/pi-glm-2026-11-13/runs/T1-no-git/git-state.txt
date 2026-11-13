@@ -1,0 +1,27 @@
+## HEAD
+fatal: not a git repository (or any of the parent directories): .git
+## current branch
+fatal: not a git repository (or any of the parent directories): .git
+## branches
+fatal: not a git repository (or any of the parent directories): .git
+## worktrees
+fatal: not a git repository (or any of the parent directories): .git
+## tags
+fatal: not a git repository (or any of the parent directories): .git
+## refs
+fatal: not a git repository (or any of the parent directories): .git
+## log --all --graph
+fatal: not a git repository (or any of the parent directories): .git
+## status --porcelain
+fatal: not a git repository (or any of the parent directories): .git
+## stash
+fatal: not a git repository (or any of the parent directories): .git
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

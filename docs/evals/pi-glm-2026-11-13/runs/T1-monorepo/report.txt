@@ -1,0 +1,61 @@
+All three commands ran to completion. Here is everything.
+
+## 1. Reports
+
+### `/todo-init` report (step 7)
+
+| Item | Result |
+|---|---|
+| Created | `TODO.md` — empty task tree (the two headings); left uncommitted (backlog file, committed by the first tree claim) |
+| CHANGELOG.md | Already existed with `## [Unreleased]` → unchanged |
+| Mode | git; base branch **`main`** (user named none, no README `Base:` line; first of main/master/trunk/develop → no `Base:` offer) |
+| Tree | Clean (only uncommitted backlog bootstrap, which the clean-tree check ignores) |
+| Runtime / package manager / test command | Python 3 (unittest; no per-package marker files — inferred from Makefile/sources), no lockfile/package manager, **`make test`** — source: README sentence *"Run `make test` to run every package test suite"* (matches the Makefile `test` target row); no `Tests:` line existed → **added `Tests: \`make test\``** (proposal accepted), at the end of the first section |
+| CI | No `.github/workflows`, `.gitlab-ci.yml` or `Jenkinsfile` → no CI command, no mismatch; `.todo/check.sh` doesn't exist → `/todo-init --ci` available if wanted |
+| Doc files found | `README.md`, `CHANGELOG.md`; `docs/` missing (never created — reported as missing) |
+| Definition of Done | None in README.md/CONTRIBUTING.md/docs/ (none created) |
+| `.todo/todo-lint.sh` / `.todo/check.sh` | Absent / absent (invariants checked by reading) |
+| Tree summary | **empty** (no roots, no active node, no blocked IDs) |
+| Invariant violations | none |
+
+### `/todo-add` reply (step 11)
+
+Inserted (position: only/first root of the tree), chosen prefix **FEAT** (first word "add"); single leaf, so no confirmation round was required; not started, left uncommitted; invariants pass:
+
+```markdown
+- [ ] **FEAT-001** · P1 · low · Add a power function to the api package
+  - Done when: calc.power(2, 3) returns 8; `cd packages/api && python3 -m unittest tests.test_calc.CalcTest.test_power`
+```
+
+### `/todo-continue --merge` report (step 11)
+
+- **Node:** FEAT-001 · Add a power function to the api package (leaf root; children n/a — none)
+- **Baseline:** `make test` → green, **2 passing** (api 1, web 1), run on the base before branching
+- **Red:** `cd packages/api && python3 -m unittest tests.test_calc.CalcTest.test_power` → `AttributeError: module 'calc' has no attribute 'power'` (expected missing-symbol failure)
+- **Done when:** same command → **OK, Ran 1 test** (exited 0, ran tests, not masked)
+- **Regression:** `make test` → **green, 3 passing vs baseline 2** (+1; none deleted or skipped)
+- **Review:** self (no subagent tool) — spec ok, quality ok, 0 findings fixed
+- **Doc drift:** added exported symbol `power` → `grep -rnF -- power README.md` → no hits (`docs/` doesn't exist); nothing to update
+- **Files changed:** `packages/api/calc.py`, `packages/api/tests/test_calc.py`; backlog: `TODO.md`, `README.md` (Tests: line), `CHANGELOG.md`
+- **Branch `todo/FEAT-001-add-power-function-api`** (deleted after merge): claim `3e6a4a0` (fast-forwarded to main), start `dadce8e`, node commit `c6ea93a` `feat(api): add power function to the api package` (Refs/Red/Reviewed body), drain `af6f387` `chore(backlog): drain FEAT-001`
+- **Drain:** CHANGELOG `[Unreleased]` → `### Added` first item: `- **FEAT-001** (feat): Add a power function to the api package. Validated: …`; TODO.md back to the empty tree
+- **Merge (`--merge`):** `Merge FEAT-001 into main` → `174af8a`; branch deleted; **checked out: `main`, clean**
+- **Adjacent problems:** none (no `/todo-add … --from` commands to suggest)
+- **Next workable node:** none (tree empty)
+- **Suggestion:** clear context before the next run.
+
+## 2. Ambiguities / contradictions / unclear instructions
+
+1. **`Tests:` offer condition (todo-init, step 4):** *"If README does not state the command after `Tests:` (on its own line or in a sentence), offer to add a `Tests:` line"*. The README stated `make test` in a sentence ("Run `make test` to run every package test suite") but had no `Tests:` marker — unclear whether "in a sentence" means any sentence naming the command (→ don't offer) or a sentence containing the literal `Tests:` marker (→ offer). **Resolution:** offered (and added), reading it as requiring the `Tests:` marker, because verification.md step 6 speaks of "the command after `Tests:` in the README (on its own line or in a sentence)" and todo-init's precedence list distinguishes "the README `Tests:` line" from "a command stated in README.md".
+
+2. **Placement of the `Tests:` line (todo-init, step 4):** *"Place it under an existing `Tests` heading, or at the end of the first section if no such heading exists"*. "First section" is undefined for a README whose opening block has no heading (the intro under the title vs the `## Development` section). **Resolution:** literal reading — the document's first section, i.e. the intro under `# minical monorepo`; placed the line at the end of that intro (with a blank line before it, which the core's "optionally after a blank line" permits for backlog staging).
+
+3. **Blank line under the tree heading (core, "TODO.md schema"):** the empty-tree template (`# Active Backlog` / `## 🌳 Task Tree`) and the task example are shown as separate blocks, leaving unspecified whether a blank line separates the heading from the first task. **Resolution:** no blank line — task directly under `## 🌳 Task Tree`.
+
+4. **Step 10.2's applicability to a root (todo-continue, step 10):** items 1 and 3 are labeled "**Non-root node:**" but item 2 ("Commit the node's files and any changed `TODO.md` by path…") is unlabeled, so it's unclear whether a root's code commit happens before item 4's drain. **Resolution:** applied item 2 to the root (otherwise the root's code would land in the drain commit or stay uncommitted), then item 4.
+
+5. **"Adding" an interface — doc-drift vs root review (todo-continue):** "Documentation drift" says to run doc-drift when *"an exported symbol, added, renamed, removed or with a changed meaning"* changes, while step 10.4.1 says the root review is offered only when the root *"changes an existing public interface (adding one does not count)"*. Read together, "added" triggers drift-checking but exempts root review — potentially contradictory at a glance. **Resolution:** treated them as distinct rules: ran doc-drift (added exported symbol `power`; no hits), and did not offer the root review (adding doesn't count; node is `low` complexity).
+
+6. **`Checked:` line for `make test` (todo-continue, step 10.2):** *"one `Checked: <command>` line for each `Done when` or regression command that you judged safe but that is not a test, lint, typecheck or build runner (`pytest`, `npm test`, `mvn test` and the like need none)"*. `make test` is run by a build tool but runs tests — unclear which side it falls on. **Resolution:** treated it like `mvn test` (test command needing no `Checked:` line), while still reading the Makefile under "Command safety" as required.
+
+Aside: one environment quirk (not a skill issue) — inner double quotes in `bash -c '… "…" …'` calls were mangled by PowerShell, so git commands with message strings were run directly from PowerShell instead of through Git Bash.

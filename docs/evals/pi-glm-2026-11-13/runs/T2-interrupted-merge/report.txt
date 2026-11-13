@@ -1,0 +1,27 @@
+Both invariants re-checked on the merged file: all pass (single tree section, unique IDs, `[x]` leaf with no open children, no CHANGELOG ID conflicts, safe commands, 12 lines ≤ 120). The interrupted-merge path is complete — per the skill, report and stop, no tests run.
+
+---
+
+## 1) Report (`/todo-continue`, one invocation)
+
+**Interrupted merge completed — FEAT-001.1 · Add subtract with a test**
+
+- **Detected:** FEAT-001.1 was `[x]` on branch `todo/FEAT-001.1-add-subtract-test` (commit `0d990b7 feat(calc): add subtract`) but that branch was not an ancestor of its parent's branch — the root branch `todo/FEAT-001-add-subtract-multiply-calc` (at `63fc287`). Core "Interrupted work comes first" + step 2 "Interrupted merge" applied.
+- **Actions:** already on the parent's (root) branch → `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-add-subtract-test` → clean merge, commit `1944034`; `git branch -d todo/FEAT-001.1-add-subtract-test` (was `0d990b7`). Nothing else of step 10.
+- **Lint of merged TODO.md:** clean — FEAT-001.1 now `[x]` on the root branch, FEAT-001.2 `[ ]`, invariants I1–I10 pass (no `.todo/todo-lint.sh`, checked by reading).
+- **Commands/results:** no tests run, deliberately — the skill says "No tests here; the parent's integration step runs them." Regression: **not run**.
+- **Files changed (by the merge):** `calc.py` (+3), `tests/test_calc.py` (+2), `TODO.md` (marker `[ ]`→`[x]` on FEAT-001.1).
+- **Branch/commit:** merge commit `1944034` on `todo/FEAT-001-add-subtract-multiply-calc`; child branch deleted. Working tree clean.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-calc` (main checkout).
+- **Root FEAT-001 children done/total:** 1/2 (not draining; root stays `[ ]`).
+- **Adjacent problems:** none.
+- **Next workable node:** **FEAT-001.2 · Add multiply with a test** (`[ ]`, low).
+- **Suggestion:** clear context and rerun `/todo-continue` to start FEAT-001.2 on its own branch (`todo/FEAT-001.2-multiply-test`, created from the root branch); after it merges, FEAT-001's integration step runs the root's `Done when` and drains it.
+
+## 2) Ambiguities / unclear instructions hit
+
+1. *"do step 10 item 3 for that node (switch, merge, delete its branch; nothing else of step 10)"* + step 10 item 3 *"switch to the parent's branch…"* — no word on what to do when already on the parent's branch (I was). **Resolution:** treated the switch as a no-op and proceeded to the merge; nothing suggested a needless `git switch` to the current branch.
+2. *"Interrupted merge (only on a `todo/` branch, any branch of the tree…)"* — "any branch of the tree" is ambiguous between "whichever tree branch you're currently on" and "located on any branch of the tree". **Resolution:** read it as both: the check triggers because the checkout is on a tree branch, and the interrupted node is found by scanning all of the tree's branches per the core ("list the tree's branches … read each one's node in `git show <branch>:TODO.md`"). Both readings converge here.
+3. *"then lint the merged `TODO.md`"* — "lint" is only defined in the core (run `.todo/todo-lint.sh` if present, otherwise check I1–I10 by reading); the skill doesn't repeat this. **Resolution:** followed the core definition; no script exists, so I read-checked I1–I10 against the merged file. Minor cross-reference gap, not a contradiction.
+
+No contradictions; everything else (merge message format `Merge <ID> into <PARENT-ID>`, "No tests here", "report and stop", `git branch -d`) was unambiguous and followed literally.

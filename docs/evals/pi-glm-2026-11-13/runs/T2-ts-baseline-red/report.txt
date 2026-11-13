@@ -1,0 +1,25 @@
+The run stopped exactly where the skill requires. Working tree untouched, still on `main`, no branches created.
+
+## 1. Report (per todo-continue step 11, early stop)
+
+- **Stopped at:** Step 3 (Ready check → **Baseline**). Reason: **baseline red** — the project's regression suite fails before any work can start.
+- **Selected node:** **FEAT-001.1** · low · "Add subtract with a test" (FEAT-001 itself is not workable: it has two open children; no `[/]`, `[!]`, interrupted merge or drain; tree unclaimed, so the node starts from the base `main`).
+- **Command & result:** regression = README `Tests:` → `npm test` (= `node --experimental-strip-types --test "tests/*.test.ts"`), run on `main` before any branch exists:
+  - exit 1 — **1 test, 0 pass, 1 fail**: `add` (tests/add.test.ts) — `AssertionError: -1 !== 3` (src/calc.ts `add()` returns `a - b` instead of `a + b`).
+  - Baseline could not be recorded; no Done-when/regression gates ran (step 9 "not run" — the stop happened at step 3).
+- **Files changed:** none. **Branch/commit:** none (baseline precedes "Branch first", step 4). **Checked-out branch:** `main`.
+- **Next workable node:** none until the baseline is green — only a `FIX` node may start on a red baseline, and FEAT-001.1 is a FEAT.
+- **Fix path (suggested, to run on the base):**
+  ```
+  /todo-add "fix the failing baseline: add" --type fix --priority P0
+  ```
+- **Adjacent problems:** none beyond the red baseline itself (`src/calc.ts` `add` is the sole failure).
+- **Suggestion:** clear context and rerun `/todo-continue` after the FIX node lands, so the baseline check starts fresh.
+
+## 2. Ambiguities / unclear instructions encountered
+
+1. **"suggest `/todo-add "fix the failing baseline: <failing test ids>" --type fix --priority P0` (ids as the runner prints them)"** — node's runner prints the failure both as a bare test name (`✖ add`) and a location (`test at tests\add.test.ts:5:1`); it isn't specified which counts as the "id". Resolved: used the test name `add`, since that is what the runner prints on the failing-test line itself.
+2. **"Otherwise (do not select another node) change nothing more, report 'baseline red' … and stop."** — ambiguous whether "do not select another node" forbids merely *picking a different node to run* or also *scanning the tree for a FIX that covers the failure* (e.g. hypothetically re-selecting a FIX node that would qualify for `baseline red:`). Resolved: treated as "stop entirely; no rescanning or workaround selection", consistent with verification.md step 1 ("A red baseline stops the node before any branch or file change").
+3. **Step 2: "Interrupted merge (only on a `todo/` branch, any branch of the tree; …)"** — the parenthetical is convoluted: it mixes where the check applies (a `todo/` branch) with which node it can concern ("any branch of the tree"). Resolved via the core's matching text ("Skip this on the base branch"): the check is skipped on `main`, which is where this run started.
+
+No contradictions found between the skill, the core rules, git-flow.md and verification.md for this code path.

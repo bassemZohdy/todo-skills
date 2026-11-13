@@ -1,0 +1,27 @@
+Done — start commit `049782d` made; stopping here per instruction. Working tree clean, one `[/]` node (I1 holds).
+
+## (1) Report
+
+**Merge (user-directed `git pull --no-rebase`)**
+- Incoming: `c0b8e56` (peer claim: FEAT-001 on `todo/FEAT-001-peer-work`) + `2a16dbf` (incoming **FEAT-003 = divide**, P1). Conflict in TODO.md against our local **FEAT-003 = power** (P2, `Depends: FEAT-002`).
+- Resolved per `git-flow-edge.md` "Git conflicts": kept the union; ID collision → kept the **published/incoming** FEAT-003 (divide); renumbered our power root to **FEAT-004** (next free root number after counting TODO.md + CHANGELOG (empty) + docs/plans (none) + `git log --all --format=%s` → highest FEAT-003 → 004). Root order per core (P1 001/002/003, then P2 004). No `Depends:`/`From:` elsewhere named the old ID (our root's own `Depends: FEAT-002` was unchanged); renumbered root was unclaimed → no stop-and-ask. Concluded with `git commit --no-edit` → `9b35e14`.
+- **Lint after merge: passes** (no `.todo/todo-lint.sh`; I1–I10 checked by reading).
+
+**/todo-continue (stopped right after the start commit, as instructed)**
+- **FEAT-002 · P1 · low · Add a multiply function to calc.py with a test** (FEAT-001's tree skipped: claimed by `todo/FEAT-001-peer-work` in the base's TODO.md; that branch doesn't exist in this clone, so no resume hint).
+- Baseline (regression, README `Tests:`): `python3 -m unittest discover -s tests` → **1 test, OK** (baseline: 1 passing).
+- Tree claim: branch `todo/FEAT-002-add-multiply-function-calc` from `main`, commit `cf7dad4` `chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc`; published to base via `merge --ff-only` (9b35e14..cf7dad4).
+- Start: marker `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-002-add-multiply-function-calc from main; next: read docs`, commit `049782d` `chore(backlog): start FEAT-002`.
+- Files changed: `TODO.md` only. Checked-out branch: `todo/FEAT-002-add-multiply-function-calc`. Working tree clean. Nothing pushed.
+- Next workable node: **FEAT-003** (divide, P1, unclaimed). FEAT-004 waits on FEAT-002 (`Depends:` unsatisfied while `[/]`).
+- Stopped at step 5 per your instruction; a rerun of `/todo-continue` resumes FEAT-002 at `next: read docs` (step 6). Suggest clearing context before resuming.
+
+## (2) Ambiguities / contradictions in the skill text
+
+1. **Pull vs. no-network guardrail.** Core: *"The skills' own git commands never touch the network: no fetch, pull or push. Sharing commits is git's job and yours."* vs. your explicit `git pull --no-rebase`. Resolved: the ban targets the skills' *own* commands; sharing is delegated to the user's flow, so I ran the pull as a user action (also satisfying guardrail 7 without a stop-and-ask).
+2. **"keep the core's root order"** (git-flow-edge.md, TODO.md conflicts). Ambiguous whether "the core" means the core skill's ordering rule (*"roots P0 → P1 → P2, then by ID number"*) or the pre-merge order in the file. Resolved: applied the core skill's rule; here both readings give the same order (001, 002, 003/P1, 004/P2).
+3. **"the next free root number (core "IDs", counted after the merge)"** — "after the merge" is vague: count before or after the renumbered block is rewritten, and do both sides' commit subjects count? Resolved: counted all core "IDs" sources on the post-merge state, including `git log --all --format=%s` (both "add FEAT-003" subjects) → highest 3 → FEAT-004. Any reading yields 4 here.
+4. **Priority of the renumbered root.** The rules say to renumber and reorder but never whether priority changes; our P2 power root kept P2 while the published FEAT-003 is P1. Resolved: kept the original priority (nothing authorizes changing it).
+5. **Stopping mid-node.** Your "stop right after the start commit" cuts across the skill's *"Complete at most one node per invocation"* (which implies running a node to completion); the skill doesn't spell out a mid-flow stop. Resolved: stopped as instructed — coherent because step 2's resume logic (`[/]` → resume at `next:`) makes the state recoverable.
+
+Everything else (conflict union rule, claim/publish sequence, slug derivation, staging by explicit path, `commit --no-edit` for merge conclusion) was unambiguous.

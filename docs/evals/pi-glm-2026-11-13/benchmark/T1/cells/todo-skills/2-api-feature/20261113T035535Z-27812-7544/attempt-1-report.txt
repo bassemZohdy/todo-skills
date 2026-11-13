@@ -1,0 +1,9 @@
+**todo-continue report — FEAT-001 · Add GET /items/<id> to shop.api.handle**
+
+- **Verification:** baseline `python3 -m unittest discover -s tests -t .` → 1 passing. Red: 3 new tests failed with `AssertionError: 404 != 200` / `404 != 400` (expected reason). Green: `Done when` `python3 -m unittest tests.test_api` → **5 tests OK**; regression `python3 -m unittest discover -s tests -t .` → **5 tests OK** (baseline 1, none deleted/skipped/weakened). No Definition of Done, no RTM, no doc drift (README describes `handle` generically).
+- **Files changed:** `shop/api.py` (route `/items/<id>`: parse int → 400 `invalid id` on failure, 404 `not found` when absent, 200 + item otherwise), `tests/test_api.py` (+4 tests: known id, unknown id, `abc`, `1.5`; `GET /items` test untouched).
+- **Git:** branch `todo/FEAT-001-add-get-items-id` → claim (16ac032, fast-forwarded to main) → start (e2c2a66) → `feat(shop): add GET /items/<id> to handle` (da5bbd7, self-reviewed spec ok/quality ok) → drain (35dfeea) → **merged into `main` with `--merge`** (c11f3c8), branch deleted. Checked out: **main**, clean (only `__pycache__`, generated).
+- **Drained:** CHANGELOG.md `[Unreleased] → ### Added` holds the FEAT-001 entry; TODO.md tree is empty. Root was a leaf (`children done/total` n/a).
+- **Adjacent problems:** none. **Next workable node:** none — the tree is fully drained and merged, so no further `todo-continue` runs are needed.
+
+The whole flow ran through the todo skills without hitting a stop rule: todo-init bootstrapped TODO.md/CHANGELOG.md, todo-add inserted FEAT-001 (single leaf, no confirmation needed), and todo-continue --merge took it red → green → reviewed → drained → merged to main. No open questions remain.

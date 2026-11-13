@@ -1,0 +1,13 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  tests pass on the checked-out branch
+PASS  lint passes on the checked-out branch
+PASS  nothing committed: no branch, no commit
+PASS  the unexplained change is still there, not stashed, and the backlog is untouched
+PASS  an agent report was provided and is not empty
+PASS  report says the tree is not clean and offers commit, stash or --worktree
+
+11 passed, 0 failed

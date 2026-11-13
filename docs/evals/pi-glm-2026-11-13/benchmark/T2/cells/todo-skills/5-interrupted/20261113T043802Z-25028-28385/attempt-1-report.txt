@@ -1,0 +1,16 @@
+Done — the tree is drained and merged; no further `/todo-continue` runs are needed (empty tree). No skill stop rule fired; there are no open questions.
+
+## Report
+
+**/todo-init** — created `TODO.md` (empty tree) and `CHANGELOG.md` (uncommitted backlog files, later carried by the tree claim); git mode, base `main`; test command `python3 -m unittest discover -s tests -t .` (source: README `Tests:` line); no CI config, no Definition of Done, no lint script (invariants checked by reading).
+
+**/todo-add** — inserted **FEAT-001** (P1 · low · leaf): finish `textutil.slug.slugify` (lowercase; every run of non-ASCII-alnum → one dash; strip edge dashes) with tests in `tests/test_slug.py`.
+
+**/todo-continue --merge** — completed FEAT-001 end to end:
+- **Interrupted work preserved:** the `wip: slugify lowercases` commit stayed in history; the uncommitted `textutil/slug.py` change was treated as leftover work — baseline taken with it in place, carried onto the node branch, and committed with the node.
+- **Flow:** baseline 1 passing → branch `todo/FEAT-001-finish-textutil-slug-slugify` → tree claim published to `main` (ff) → start `[/]` → **red**: `AssertionError: '--hello,-world!-' != 'hello-world'` (and `'a--b' != 'a-b'`) → **green**: `re.sub(r"[^a-z0-9]+", "-", ...)` + `strip("-")` → self-review (spec ok, quality ok, 0 findings) → verify.
+- **Verified:** `python3 -m unittest tests.test_slug` → 3 tests OK; regression `python3 -m unittest discover -s tests -t .` → 3 OK vs baseline 1, none deleted/skipped. Doc-drift: no hits for `slugify` in README/docs.
+- **Files changed:** `textutil/slug.py`, `tests/test_slug.py`, `TODO.md`, `CHANGELOG.md`.
+- **Drained + merged:** CHANGELOG entry under `## [Unreleased]` → `### Added`; subtree deleted; `Merge FEAT-001 into main` (`9110802`); branch deleted; final suite on `main`: 3 OK.
+
+**Current state:** `TODO.md` empty; checked out on `main`, clean (only generated `__pycache__`); next workable node: **none**. Adjacent problems: none found — no `/todo-add --from` suggestions.

@@ -1,0 +1,32 @@
+Done — the start commit is in place and I stopped there as instructed (no build, steps 6+ not started).
+
+## 1) Report (todo-continue step 11, early stop)
+
+**Early stop:** stopped after **step 5 (Start)** because the trial instruction said to stop right after the start commit; the node is `[/]`, nothing built yet.
+
+- **Node:** `FEAT-001` · P1 · low · Add a subtract function to calc.py with a test (leaf root)
+- **Commands and results:**
+  - Baseline / regression `python3 -m unittest discover -s tests` (README `Tests:` line): **green, 1 test, 0 failures** — run once on `main` before branching, and **again on the root branch** after the base moved (see race below): green, 1 passing, no change.
+  - Invariant check (no `.todo/todo-lint.sh`, checked I1–I10 by reading): pass, before and after each edit.
+- **Files changed:** `TODO.md` only (claim line, then `[/]` + start `State:`).
+- **Branch/commits:** branch `todo/FEAT-001-add-subtract-function-calc`
+  - `d76cc4a` `chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc` — published to `main` via fast-forward
+  - `c6c2924` `chore(backlog): start FEAT-001` (State: `attempts 0/3; baseline 1 passing; branch … from main; next: read docs`)
+- **Race during the claim (handled):** while claiming, an external commit `8399ebd docs: touch readme (race)` landed on `main`, so the claim's `git merge --ff-only` failed. Per `git-flow-edge.md` "Failed fast-forward": re-read `git show main:TODO.md` (FEAT-001 still unclaimed → not lost/collided → "base only moved"), rebased the claim branch onto `main`, linted, re-published the fast-forward (succeeded), switched back, and re-took the baseline on the root branch since the base changed a non-backlog file (`README.md` "Race note." line): still green.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-function-calc` (worktree clean)
+- **Merge commands for the root:** none yet — the root is not finished (no drain, no `--merge` in play).
+- **Adjacent problems:** none.
+- **Next workable node:** `FEAT-001` itself (now `[/]`; a rerun resumes at `next: read docs`, i.e. step 6).
+- Suggest clearing context before the next `/todo-continue` run.
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"If the base changed any file other than backlog files, take the baseline again on the root branch"** (`reference/git-flow-edge.md`, Failed fast-forward) vs. the core's definition of backlog files, which includes README.md ("**Backlog files** are `TODO.md`, `CHANGELOG.md`, … and the README `Tests:` and `Base:` lines written by a todo-* skill"). The racing commit changed `README.md`, so README is arguably "a backlog file" (→ no re-baseline needed) or "a non-backlog change" (→ re-baseline needed). **Resolution:** I used the narrower reading — only the `Tests:`/`Base:` lines make README a backlog file; the added "Race note." line is a user README change — so I re-ran the baseline on the root branch (the safer option; it was green either way).
+
+2. **"Commit `chore(backlog): start <ID>` with any pending backlog edits."** (todo-continue step 5) — it doesn't say where pending backlog edits on the base are *carried from* at this exact point; step 3 "Where to start" covers carrying them into the *claim* commit, and here there were none, so the question never bit. **Resolution:** none needed (no pending backlog edits existed); I would have staged only `TODO.md`/backlog paths by explicit path per git-flow "Staging".
+
+3. **Minor wording tension:** step 5's template says `next: read docs` unconditionally for a fresh start, while the "Links:" schema (`State:` items) lists `next:` values like `read docs`, `build`, etc. without saying which applies at a start — the only start-time value named anywhere is `read docs`, so this was resolvable. **Resolution:** used `next: read docs` as the template dictates.
+
+4. The user instruction "stop right after the start commit … Do not build" cuts the skill's flow between step 5 and step 6 ("Read before write" — which is reading, not building); the skill itself mandates no stop there. **Resolution:** stopped immediately after the start commit per the explicit instruction, and gave this step-11 early-stop report as both the skill and the instruction request. (No core-guardrail-7 conflict: the instruction defines the boundary rather than contradicting a rule.)
+
+No other contradictions or unclear instructions were encountered; the failed-fast-forward path (the intended race) was fully and unambiguously specified by `git-flow-edge.md`.

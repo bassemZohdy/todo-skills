@@ -1,0 +1,21 @@
+Lint of the merged `TODO.md` (I1–I10, by reading — no `.todo/todo-lint.sh` exists): all pass (`[x]` leaf FEAT-001.1, no `[/]`, unique IDs, ≤120 lines, no CHANGELOG ID overlap, valid tree/commands). Stopping here per step 2.
+
+## 1. Report (`/todo-continue`, one invocation)
+
+**Interrupted merge completed — FEAT-001.1 · Add subtract with a test class SubtractTest**
+
+- **What ran:** detected FEAT-001.1 as `[x]` on `todo/FEAT-001.1-add-subtract-test-class` but not merged into its parent branch; on the parent branch `todo/FEAT-001-add-subtract-multiply-calc`: `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001"` → clean merge (commit `485655f`), then `git branch -d todo/FEAT-001.1-add-subtract-test-class` → deleted.
+- **Commands/results:** `mvn -B test` / Done when — **not run** (interrupted-merge path: "No tests here; the parent's integration step runs them").
+- **Files changed (by the merge):** `src/main/java/mini/Calc.java`, `src/test/java/mini/SubtractTest.java`, `TODO.md` (FEAT-001.1 → `[x]`). Working tree clean.
+- **Branch/commit:** merge commit `485655f` on `todo/FEAT-001-add-subtract-multiply-calc`; child branch deleted.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-calc` (main checkout).
+- **FEAT-001 (parent root): children done/total 1/2** — stays `[ ]` until FEAT-001.2 and the integration step.
+- **Adjacent problems:** none.
+- **Next workable node:** **FEAT-001.2** · Add multiply with a test class MultiplyTest (`[ ]`, no blockers).
+- **Suggestion:** clear context before the next `/todo-continue`.
+
+## 2. Ambiguities / unclear instructions
+
+- **Minor (resolved without impact):** step 2's interrupted-merge bullet says "do step 10 item 3 for that node (switch, merge, delete its branch…)", and item 3 begins "**Non-root node:** switch to the parent's branch" — I was already on the parent branch. Resolved by running `git switch` anyway (idempotent, printed "Already on…").
+- **Minor cross-file assembly:** "Interrupted merge" itself gives no detection rule; the actual trigger ("A node that is `[x]` on a branch not yet merged into its parent's branch (`git merge-base --is-ancestor` … fails)") is only in the core skill's "Interrupted work comes first". I followed the core's procedure (listed the tree's `todo/FEAT-001*` branches, read each `git show <branch>:TODO.md`, ran the merge-base check).
+- Otherwise: none — the interrupted-merge path, merge message format (`Merge FEAT-001.1 into FEAT-001`), "lint the merged `TODO.md`" (defined in the core as I1–I10 by reading when no lint script exists), and "No tests here" were unambiguous and mutually consistent.

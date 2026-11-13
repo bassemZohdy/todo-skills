@@ -112,6 +112,6 @@ whole harness repository.
 
 The harness is tested with a stub agent: `bash tests/trials/test-benchmark-harness.sh` (CI runs it). The first real run
 was made on 2026-11-12 with pi and GLM 5.3 (`agents/pi.sh`, 3 runs per cell, isolation `provisional`; every cell is in
-`docs/evals/pi-glm-2026-11-12/benchmark/results.csv`). No Claude Code or Codex run has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
+`docs/evals/pi-glm-2026-11-12/benchmark/results.csv`). On 2026-11-13 only the `todo-skills` arm was rerun, on the text with the leftover-work rule (FEAT-100): `5-interrupted`, which it had failed 3 of 3, passed 6 of 6; the decision record asked for above is in `docs/evals/pi-glm-2026-11-13/summary.md`. No Claude Code or Codex run has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
 todo-skills arm needs (TASK-045: 6 of 8 lifecycle runs INFRA_ERROR), and a full protocol is 54 or more agent runs, which is
 the maintainer's cost to choose. See [the update review](../update-review.md), Ruling 3.

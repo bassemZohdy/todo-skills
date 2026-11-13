@@ -1,0 +1,40 @@
+Both files updated. Lint re-check on the new TODO.md passes (I1–I10: single root `FEAT-001`, 7 lines, valid `Done when` with a backticked command, no dangling `Depends:`/`From:`, no cycles, no forbidden commands).
+
+---
+
+## (1) Report
+
+**Dropped `FEAT-002` ("duplicate of FEAT-001") — root with no descendants, no tasks referenced it in `Depends:`/`From:`, no `todo/` branch existed; deleted from TODO.md and recorded in `docs/plans/PROJECT.md` `## Revisions`; changes left uncommitted on `main` (backlog edits); lint passes.**
+
+Details of what was done per the skill:
+
+| Step | Result |
+|---|---|
+| Git mode | Repo, on `main` (base; README has no `Base:` line, `main` exists), clean tree |
+| Invariant check | I1–I10 pass (no `.todo/todo-lint.sh`, checked by reading) |
+| ID in CHANGELOG? | No — `FEAT-002` not in CHANGELOG.md |
+| Drop preconditions | `[ ]` (not `[/]`/`[x]`), unclaimed root (no `State:`), no descendants — all OK |
+| Reason in `--note` | "duplicate of FEAT-001" ✓ |
+| Subtree | none |
+| Referencing tasks | none named `FEAT-002` in `Depends:`/`From:` → no re-pointing |
+| Own `todo/` branch | none (only `main`) → no commits to list, nothing to print for `git branch -D` |
+| Ancestor sizes | root with no size → nothing to update; no parent left childless |
+| PROJECT.md | exists → appended `- 2026-11-13 · duplicate of FEAT-001 · dropped FEAT-002` under `## Revisions` |
+| RTM | none (`docs/RTM.md` absent, README has no `## RTM`) → skipped |
+| Git | on the base → left uncommitted (backlog edit); CHANGELOG untouched (never write dropped tasks there) |
+
+User confirmation "yes" was treated as given for the proposal above.
+
+## (2) Ambiguities / unclear instructions
+
+1. **Pre-supplied confirmation vs. "ask for confirmation":** the skill says *"List the node, its whole subtree, and every task that names any dropped ID in `Depends:` or `From:` with your proposal to remove or re-point each reference, and ask for confirmation. Then delete the node..."* — the task statement supplies the confirmation ("yes") up front. **Resolution:** treated the stated "yes" as the answer to the proposal and proceeded in one run, still listing the proposal in the report.
+
+2. **Revisions line with no descendants:** *"append `- <date +%F> · <reason> · dropped <the ID and its descendants' IDs>`"* — neither the separator for multiple IDs nor the shape with zero descendants is specified. **Resolution:** with no descendants, wrote just the node's ID: `- 2026-11-13 · duplicate of FEAT-001 · dropped FEAT-002`.
+
+3. **Scope of "every task that names any dropped ID":** *"and every task that names any dropped ID in `Depends:` or `From:` with your proposal to remove or re-point each reference"* — unclear whether this covers only TODO.md tasks or also CHANGELOG.md/PROJECT.md mentions. **Resolution:** TODO.md tasks only (CHANGELOG is append-only, and core I5 says `Depends:`/`From:` references there don't count). Moot here — no referencing tasks existed.
+
+4. **RTM parenthetical reads like a load instruction:** *"With an RTM (`../todo/reference/rtm.md`) remove each dropped ID from its Tasks cell in the same change."* — could be misread as "always load `reference/rtm.md`". **Resolution:** read it as defining when the RTM step applies; verified no RTM exists (`docs/RTM.md` absent, no `## RTM` in README) per the core's definition, so skipped.
+
+5. **Size guidance for a dropped root:** *"update any ancestor sizes given, and lint (a parent left without children becomes a leaf: check its complexity and any size still fit, and ask if not)"* — "ancestor sizes" is vacuous for a root, and the childless-parent clause doesn't say it applies only when a parent remains. **Resolution:** no ancestors → no size updates; no parent was left childless → no complexity/size re-check triggered.
+
+Otherwise none — the branch-selection rules ("*a node of an unclaimed tree is dropped on the base*"), refusal conditions, commit-vs-uncommitted rule ("*on the base leave it uncommitted (a backlog edit)*"), and the one-line-confirmation reply format were all unambiguous.

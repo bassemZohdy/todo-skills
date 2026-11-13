@@ -1,0 +1,35 @@
+Stopped at step 3 (Baseline) exactly as the skill directs. Nothing was written, committed, or branched.
+
+## 1) Report (per step 11 — early stop)
+
+**Stopped at:** Step 3 (Ready check → Baseline): **red baseline**, before any branch or file change.
+
+**Selected node:** `FEAT-001.1` · low · "Add subtract with a test" (first workable node; `FEAT-001` waits for its children, tree unclaimed on `main`)
+
+**Baseline / regression:** `npm test` (README `Tests:` line) on `main`, before branching → **exit 1 — RED**
+- `tests 1 · pass 0 · fail 1`
+- Failing test as printed by the runner: **`add`** (test at `tests/add.test.ts:5:1`) — `AssertionError [ERR_ASSERTION]: -1 !== 3` (`src/calc.ts` `add` returns `a - b`)
+
+FEAT-001.1 is a `FEAT`, not a `FIX`, so it may not start on a red baseline. Per step 3: changed nothing more, did not select another node, stopped.
+
+**Files changed:** none. **Branch/commit:** none created (stopped pre-branch); HEAD `98c8578`. **Checked-out branch:** `main`. **Merge commands:** n/a (no root finished).
+
+**Suggested fix (run on the base, per step 3):**
+```
+/todo-add "fix the failing baseline: add (tests/add.test.ts)" --type fix --priority P0
+```
+
+**Adjacent problems:** none beyond the baseline failure itself.
+
+**Next workable node:** none — the red baseline blocks FEAT-001.1, FEAT-001.2 and therefore FEAT-001.
+
+**Suggestion:** clear context before the next invocation.
+
+## 2) Ambiguities / unclear instructions in the skill text
+
+1. **"suggest `/todo-add \"fix the failing baseline: <failing test ids>\" --type fix --priority P0` (ids as the runner prints them)"** — Node's `--test` runner prints a test *name* and a *file:line location*, not an id, so "ids as the runner prints them" doesn't map cleanly. Resolved by quoting both name and file: `add (tests/add.test.ts)`.
+2. **"Otherwise (do not select another node) change nothing more, report 'baseline red'…"** — the parenthetical is placed inside the "Otherwise" branch, which is where I was; it was readable but terse. Resolved as: never fall back to FEAT-001.2 or any other node; stop.
+3. **"for a leaf that already has its own branch, the branch after its `from`"** (step 3, Baseline) — the phrase "the branch after its `from`" is opaque (presumably: run on the branch named after `from` in the node's `State:`). Not decisive here (no branches existed; unclaimed tree → baseline on the base), so I moved on without needing a resolution.
+4. **Step 11: "commands and results (regression against the baseline)"** — presumes a recorded baseline to compare against, but on a step-3 red-baseline stop no green baseline exists. Resolved by reporting the baseline run itself and its failure instead of a comparison.
+
+No contradictions between the skill texts were encountered; verification.md step 1 and todo-continue step 3 agreed on stopping before any branch or file change.

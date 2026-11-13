@@ -1,0 +1,39 @@
+Done. Both files edited, left uncommitted as the skill requires ("Do not commit, as in Plan step 5"; backlog files are staged only by the next tree-claim commit).
+
+## 1) Report (per `/todo-plan --revise` step 4: apply, Revisions bullet, lint, report the new tree)
+
+**Revision applied** — reason (verbatim): `FEAT-003 (web dashboard) is out of scope, drop it`
+
+- Dropped root **FEAT-003** (P2 · low · Add a web dashboard) from TODO.md. It was `[ ]`, a leaf, in an unclaimed tree, written on the base (`main`) — allowed. Its ID is never reused; it stays named in `docs/plans/PROJECT.md` (Out of scope + Revisions), which the ID-counting rule counts, so the next root is **FEAT-004**.
+- No `Depends:`/`From:` referenced FEAT-003, so nothing was re-pointed (I7). No RTM exists (`docs/RTM.md` / README `## RTM` both absent), so no Tasks cell changed.
+- Plan doc: created `## Out of scope` (missing, needed for dropped work) at its place in the Plan step 3 order, and appended the Revisions bullet:
+  `- 2026-11-13 · FEAT-003 (web dashboard) is out of scope, drop it · Dropped root FEAT-003 from the tree; added Out of scope to the plan doc naming it.`
+- Lint: no `.todo/todo-lint.sh`, so I1–I10 checked by reading — all pass (2 roots, `[ ]` only, unique IDs, valid `Done when` commands, 10/120 lines, tree shape intact). The plan doc and TODO.md agree afterwards.
+
+**New tree:**
+
+```markdown
+- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - Links: Ref: docs/plans/PROJECT.md
+- [ ] **FEAT-002** · P1 · low · Add a command line interface to the calculator
+  - Done when: cli prints the sum; `python3 -m unittest tests/test_cli`-style suite (`python3 -m unittest tests.test_cli`)
+  - Links: Ref: docs/plans/PROJECT.md
+```
+(quoted exactly as it is in the file — FEAT-002's line reads `- Done when: cli prints the sum; \`python3 -m unittest tests.test_cli\``)
+
+Not committed: `git status` shows `M TODO.md` and `M docs/plans/PROJECT.md` — the next tree claim commits them by explicit path. `/todo-plan` never starts work.
+
+## 2) Ambiguities / contradictions / unclear instructions
+
+1. **Quote:** "First load the `todo` core skill …, and read `../todo-add/SKILL.md` and `../todo/reference/verification.md` for how nodes are split, rated and written." — Unclear scope for a `--revise` that only *drops* a node: splitting/rating/"Writing a Done when" rules apply only when nodes are added or re-rated. **Resolution:** I read both as instructed, but applied their rules vacuously (no nodes added, re-rated or re-ordered), using only the drop/plan-doc rules from the Revise section.
+
+2. **Quote (Revise step 3):** "A plan-doc section the change needs (for example **Out of scope** for dropped work) is created if missing" — "the change needs" is a judgment call (an example, not a definition). **Resolution:** I treated dropping work *for scope reasons* as needing `## Out of scope`, also because "The plan doc and `TODO.md` must agree afterwards" would otherwise be hard to satisfy; other missing sections (`Scope`, `Decisions`, `Open questions`) were left alone per the same sentence.
+
+3. **Quote (Revise step 4):** "- <date +%F> · <the user's reason, verbatim> · <what changed, naming every added, dropped or moved ID>" — It doesn't say what "verbatim" covers when the reason embeds an instruction ("drop it") rather than pure rationale, nor the format of Out-of-scope entries (bullet vs. sentence). **Resolution:** I used the full argument string verbatim as the reason, and a single bullet line for Out of scope.
+
+4. **Quote (core):** "Commands in the skills are POSIX: on Windows run them, `Done when` included, through Git Bash (`bash -c`)." — Slight friction: my harness runs PowerShell, and `date +%F` is a POSIX command. **Resolution:** I ran it and it returned `2026-11-13` (the correct `%F` output); had it errored I would have re-run it via `bash -c`. No behavioral difference.
+
+5. **Minor redundancy, not a contradiction:** the todo-plan frontmatter ("Only open [ ] nodes are changed") and Revise step 2 ("`[/]`, `[x]` and `[!]` nodes … are never edited") say the same thing consistently; nothing in this run depended on resolving it.
+
+No other contradictions were hit: base-branch resolution (README has no `Base:` → `main` exists → base = `main`), claim check (`git show main:TODO.md` shows no `State: branch`), the "never reuse a dropped ID" mechanism, and "Do not commit" were all unambiguous.

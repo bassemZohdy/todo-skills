@@ -1,0 +1,30 @@
+## HEAD
+63596e75b88cdd411442629a71f3728caad86c9d
+## current branch
+todo/FEAT-002-add-multiply-function-calc
+## branches
+  main                                     f31f5ab chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc
+  todo/FEAT-001-subtract                   6b5a645 init with one claimed root
+* todo/FEAT-002-add-multiply-function-calc 63596e7 chore(backlog): start FEAT-002
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi5/claimed-elsewhere/repo  63596e7 [todo/FEAT-002-add-multiply-function-calc]
+## tags
+## refs
+refs/heads/main f31f5ab520f3431de9b39bc6d2f2a80b98fe9156
+refs/heads/todo/FEAT-001-subtract 6b5a645d70069b10c7c6f87d99391077526f5311
+refs/heads/todo/FEAT-002-add-multiply-function-calc 63596e75b88cdd411442629a71f3728caad86c9d
+## log --all --graph
+* 63596e7  (HEAD -> todo/FEAT-002-add-multiply-function-calc) chore(backlog): start FEAT-002
+* f31f5ab  (main) chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc
+* 6b5a645  (todo/FEAT-001-subtract) init with one claimed root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

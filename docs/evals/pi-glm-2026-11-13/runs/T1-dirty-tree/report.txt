@@ -1,0 +1,33 @@
+All inputs for the early steps are now gathered. Per the skill, I stop here — here's why, and the report.
+
+## Execution trace
+
+**Step 1 — Git mode & invariants:** git repo ✓. Base branch = `main` (none named, no README `Base:` line, `main` exists first). No `.todo/todo-lint.sh` → invariants I1–I10 checked by reading: **pass** (TODO.md is 5 lines, one `[ ]` root `FEAT-001`, valid header/Done when, no forbidden command in `Done when`, no CHANGELOG overlap).
+
+**Step 2 — Select by status:** No `todo/*` branches exist (`git branch --list 'todo/*'` empty) → no interrupted merge, no interrupted drain, no `[/]` node to resume, no `[!]`. First workable `[ ]` node: **FEAT-001** (leaf root, no `Depends:`, no `next: decompose`). Tree is unclaimed (`git show main:TODO.md` has FEAT-001 with no `State:` branch).
+
+**Step 3 — Ready check:** Lint clean ✓ · no `Ref:` ✓ · **tree clean ✗** — `git status` shows ` M calc.py` (tracked file, not a backlog file, not untracked, not generated): an appended scratch comment `# scratch: maybe cache results here`. The leftover-work exception doesn't apply: neither the user request nor the task line ("Add subtract to calc.py") says these changes are the node's unfinished subtract work (the comment is about caching, unrelated to `subtract`). → **Stop and ask.** No baseline, no branch, no edits were made.
+
+---
+
+## (1) Report (early stop)
+
+- **Stopped at:** Step 3 (ready check), tree-clean gate — per "tree clean by the git-flow definition (otherwise stop and ask, unless it is leftover work as defined there)" and git-flow's "Any other change: stop and offer commit, stash or `--worktree`".
+- **Node:** **FEAT-001** · Add subtract to calc.py (first workable node; leaf root, unclaimed tree).
+- **Reason:** Uncommitted tracked change in `calc.py` (adds `# scratch: maybe cache results here`), which is not backlog, untracked or generated, and not leftover work of this node.
+- **Commands and results:** none run — baseline/regression **not run** (stop precedes the baseline in step 3).
+- **Files changed:** none. **Branch/commit:** none created. **Checked-out branch:** `main`.
+- **Merge commands:** n/a — invocation never reached the drain (ran with `--merge`).
+- **Next workable node:** FEAT-001 (only blocked by the dirty tree).
+- **Ask (please choose):**
+  1. commit `calc.py` yourself first, then rerun `/todo-continue --merge`; or
+  2. `git stash push -- calc.py`, rerun `/todo-continue --merge`, then `git stash pop` on `main`; or
+  3. rerun `/todo-continue --merge --worktree` (isolates from the dirty checkout).
+- Suggestion: clear context before the rerun.
+
+## (2) Ambiguities / unclear points hit
+
+1. **Is a dirty change in the *file named by* the task line "leftover work"?** — todo-continue step 3: "tree clean by the git-flow definition (otherwise stop and ask, unless it is leftover work as defined there)"; git-flow.md: "**Leftover work** is the one exception (not with `--worktree`): when the user's request or the task line says the uncommitted changes are the selected node's unfinished work, do not stop." The task line is "Add subtract to calc.py" and the dirty change is in `calc.py`, so "the task line says" could be read as satisfied by file overlap. **Resolution:** I read it as requiring the *changes* to actually be unfinished subtract work; the change is an unrelated caching scratch comment → not leftover work → stopped and asked. This is the pivotal judgment of this run.
+2. **Does the baseline still run when the tree-clean gate fails?** — Step 3 lists "Lint clean; the `Ref:` path, if any, exists; tree clean … (otherwise stop and ask…)" before the "Baseline" bullet. **Resolution:** the failed gate stops the whole step; I ran no baseline or test command.
+3. **Interrupted-work scan on the base branch.** — todo-continue step 2: "**Interrupted merge** (found from any `todo/` branch of the tree; core "Interrupted work comes first")…" vs core: "**Interrupted work comes first (git mode).** On a tree branch (any `todo/` branch) … **Skip this on the base branch.**" We're on `main`, so the core says skip the scan while step 2 makes it the first selection category. **Resolution:** moot in practice — no `todo/*` branches exist in the clone; I verified and moved on.
+4. **Report shape on an early stop.** — Step 11: "**Report**, short (also on an early stop: which step and why): ID and title, commands and results … the merge commands for a root without `--merge`…". Only "which step and why" is specified for early stops; the remaining items presume a node ran (and the merge-commands item presumes *without* `--merge`, while we ran *with* it). **Resolution:** included the stop reason plus every applicable item, marking the rest n/a.

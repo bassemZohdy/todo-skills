@@ -1,0 +1,27 @@
+Merge complete and child branch deleted. Lint of the merged `TODO.md` (invariant check I1–I10 by reading, no `.todo/todo-lint.sh`): clean — one tree section, unique IDs, `[x]` leaf FEAT-001.1 has no children, all `Done when` commands present and safe.
+
+---
+
+## (1) Report — `/todo-continue` (one invocation, interrupted-merge path)
+
+**Selected by status (step 2, "Interrupted merge")**: `FEAT-001`'s tree branch `todo/FEAT-001-add-subtract-multiply-calc` was checked out; scanning the tree's branches, `FEAT-001.1` was `[x]` on `todo/FEAT-001.1-add-subtract-test` and `git merge-base --is-ancestor` into its parent's branch failed → finish that merge, nothing else.
+
+- **ID and title**: FEAT-001.1 · Add subtract with a test (interrupted merge completed)
+- **Actions**: switched to parent branch `todo/FEAT-001-add-subtract-multiply-calc` (already there), `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001"` (succeeded, ort strategy), `git branch -d todo/FEAT-001.1-add-subtract-test` (deleted, was bb02491)
+- **Commands and results**: Done when (`python3 -m unittest tests.test_calc.CalcTest.test_subtract`) — **not run**; regression (`python3 -m unittest discover -s tests`) — **not run**. Per the skill: "No tests here; the parent's integration step runs them."
+- **Files changed (by the merge)**: `TODO.md` (FEAT-001.1 → `[x]`), `calc.py` (+subtract), `tests/test_calc.py` (+test)
+- **Branch and commit**: merge commit `961a688` "Merge FEAT-001.1 into FEAT-001" on `todo/FEAT-001-add-subtract-multiply-calc`; FEAT-001.1's branch deleted
+- **Children done/total** (parent root FEAT-001): 1/2
+- **Checked-out branch**: `todo/FEAT-001-add-subtract-multiply-calc` (working tree clean)
+- **Root merge commands**: n/a — no root drained this invocation
+- **Adjacent problems**: none
+- **Next workable node**: FEAT-001.2 · Add multiply with a test
+- Suggest clearing context before continuing.
+
+## (2) Ambiguities / contradictions in the skill text
+
+Mostly none of consequence; three minor tensions, each resolved:
+
+1. **"`Interrupted merge` (with any `todo/` branch of the tree checked out …)`"** — the checkout was the *root* branch of the tree, not a child's. Resolved by the core's matching phrase "On a tree branch (any `todo/` branch)" plus its branch-list patterns `todo/<ROOT-ID>-*` / `todo/<ROOT-ID>.*`, which include the root branch: treated as qualifying.
+2. **"No tests here; the parent's integration step runs them."** vs step 11's "**commands and results** (regression against the baseline; say 'not run' when the path ran no tests)" and step 9's "**Verify** in full and unnarrowed". Resolved: the step-2 bullet is an explicit special-case override — no tests run, reported as "not run" rather than as a failure to verify.
+3. **"do step 10 item 3 for that node (switch, merge, delete its branch; nothing else of step 10)"** — step 10.3 itself ends with "Report and stop; the node stays `[x]` until its root drains," which is arguably "of step 10". Resolved: read "nothing else" as covering only the other numbered items/sub-items (10.1, 10.2, 10.4), while 10.3's closing "report and stop" instruction stands — report once via step 11 and stop, which also matches the step-2 bullet.

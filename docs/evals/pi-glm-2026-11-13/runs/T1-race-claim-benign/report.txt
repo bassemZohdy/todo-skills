@@ -1,0 +1,33 @@
+The start commit is done — stopping here per the trial instruction (the skill itself would have continued to step 6, "Read before write", then the build; the user instruction explicitly scoped the run to end after the start commit).
+
+---
+
+## 1) Report (per `/todo-continue` step 11, early stop)
+
+**Stopped at:** end of **step 5 (Start)** — start commit created — per the user's explicit instruction to stop right after `chore(backlog): start <ID>` and not build.
+
+- **Node:** `FEAT-001` · P1 · low · Add a subtract function to calc.py with a test (leaf root, was unclaimed)
+- **Base branch:** `main` (no user-named base, no README `Base:` line)
+- **Invariant check:** pass (no `.todo/todo-lint.sh`, I1–I10 checked by reading; re-checked after every TODO.md edit)
+- **Commands and results (regression `python3 -m unittest discover -s tests`, from README `Tests:` — node has no `regression:`):
+  - Baseline on `main` before branching: **1 passing, OK**
+  - Baseline retaken on the root branch after the race recovery: **1 passing, OK** (unchanged vs. baseline)
+  - `Done when` command: **not run** (stopped before build)
+- **Files changed:** `TODO.md` only (claim `State:` line → start `[/]` + `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001-add-subtract-function-calc from main; next: read docs`)
+- **Branch/commits:** `todo/FEAT-001-add-subtract-function-calc` — claim `469332c` (fast-forward-published to `main`), start `993d870`
+- **children done/total:** n/a (leaf root)
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-function-calc`
+- **Merge commands:** none (root not finished; no drain this run)
+- **Race event (mid-claim):** immediately after `git switch -c` (git-flow step 2), the repo's pre-existing `post-checkout` hook committed `fb673d3 docs: touch readme (race)` (README-only, benign) and moved `main`, so the publish fast-forward failed. Followed `reference/git-flow-edge.md` "Failed fast-forward" → "The base only moved": re-read `git show main:TODO.md` (no rival claim on FEAT-001 → not lost/collided), rebased the root branch onto `main` (claim became `469332c`), re-linted, republished (`fb673d3..469332c` fast-forward ✓), switched back, and — since README.md is not a backlog file — retook the baseline on the root branch (green). Hooks untouched.
+- **Adjacent problems:** none → no `/todo-add` suggestions
+- **Next workable node:** none — `FEAT-001` is now `[/]` (the only node); it resumes via `/todo-continue` (State says `next: read docs`)
+- Suggest clearing context before resuming this node.
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **"If the base changed any file other than backlog files, take the baseline again on the root branch"** (git-flow-edge.md) vs. core: "**Backlog files** are `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md` named by a `Ref:`, and the README `Tests:` and `Base:` lines written by a todo-* skill." README is only *partially* a backlog file (two lines), and the rival's README change touched neither. **Resolution:** treated the change as "a file other than backlog files" (it is not backlog *content*), so I retook the baseline on the root branch.
+2. **Baseline location:** step 3 says the baseline runs "before its branch exists: on the base for an unclaimed tree", while git-flow-edge.md has the retake happen **on the root branch** after it exists. **Resolution:** ran the initial baseline on the base per step 3, then the edge doc as the situation-specific override (retake on the root branch) after the failed fast-forward. Both were 1 passing, so `State:` records `baseline 1 passing` either way.
+3. **Explicit user stop vs. skill flow (guardrail conflict, stated rather than asked):** the skill continues past step 5 (step 6 "Read before write", step 7 build), and the core says "When a rule here conflicts with an explicit user instruction, state the conflict and ask." The trial instruction was explicit and unambiguous ("stop right after the start commit… Do not build"). **Resolution:** stopped at the start commit and state the conflict here instead of asking.
+4. **Rebase rewrites the claim commit:** "the one forced branch delete is of a branch holding only the skill's own unpublished claim commit" and "The base only moved: `git rebase <base> <root branch>`…" — the skills never address that rebase changes the claim commit's hash (`1905872` → `469332c`), e.g. for the "bare claim branch" definition in git-flow.md ("`git log <base>..<branch>` shows exactly one `claim <ROOT-ID>` commit"). **Resolution:** harmless here (hash-based references are internal); treated the rebased `469332c` as the claim commit.
+
+Otherwise the skill text was clear for this path.

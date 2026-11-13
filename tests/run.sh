@@ -429,6 +429,15 @@ if [ -z "$ti_bad" ]; then ok "todo-init says what to report without a marker fil
 ln107="$root/plugin/skills/todo/reference/lanes.md"
 if grep -qF 'the lane work of item 3' "$ln107" && grep -qF 'all lanes first, then item 4' "$ln107" && grep -qF 'possible for every root after the first' "$ln107" && ! grep -qF 'expect them for every root' "$ln107"; then ok "lanes.md says how a run without a subagent tool orders the lane work and the drains (FIX-107)"; else bad "lanes.md gaps for a run without a subagent tool (FIX-107)"; fi
 
+# Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
+# commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
+x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"
+grep -qF 'staged by explicit path' "$root/plugin/skills/todo-update/SKILL.md" && ! grep -qF '"Test failures" does' "$root/plugin/skills/todo-update/SKILL.md" || x108="$x108 todo-update(blocked path)"
+grep -qF 'Every node, a root too' "$tc108" || x108="$x108 todo-continue(root commit)"
+grep -qF 'a test id, class or file' "$tc108" || x108="$x108 todo-continue(ID placement)"
+grep -qF 'not `src`' "$root/plugin/skills/todo/reference/git-flow.md" || x108="$x108 git-flow(scope)"
+if [ -z "$x108" ]; then ok "four cross-reference gaps are closed where each rule is used (FIX-108)"; else bad "cross-reference gaps (FIX-108):$x108"; fi
+
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi
 out="$(bash "$lint" "$fx/no-such-TODO.md" 2>&1)"

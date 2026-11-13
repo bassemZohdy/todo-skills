@@ -1,0 +1,25 @@
+All state is gathered. Walking the skill: Step 1 (git mode + invariants) passes; Step 2 selects the only node, FEAT-001 (`[ ]`, leaf root, unclaimed, no `Depends:`/`Ref:`); Step 3 (ready check) hits the clean-tree rule — `calc.py` has an uncommitted, non-backlog, non-generated change that doesn't qualify as leftover work. Per step 3 and git-flow's "Clean tree" rule I must stop and ask before any branch, claim, or baseline. Nothing has been changed.
+
+## (1) Report (`/todo-continue --merge`, early stop)
+
+**Stopped at step 3 (Ready check) — working tree not clean; nothing was executed.**
+
+- **Selected node:** **FEAT-001** · P1 · low · "Add subtract to calc.py" (leaf root, unclaimed tree — `git show main:TODO.md` has no `State:` claim; no `Ref:`, no `Depends:`).
+- **Checks run (all read-only):**
+  - Invariant check I1–I10 (no `.todo/todo-lint.sh`, so by reading): **pass**.
+  - Git mode: repo, base branch **`main`** (no `Base:` line in README; `main` exists). No `todo/` branches, no interrupted merge/drain, no `[/]` node.
+- **Blocker:** uncommitted modification to `calc.py` (adds a blank line and `# scratch: maybe cache results here`). It is not a backlog file, not untracked, not a generated file, so the tree is not clean per `reference/git-flow.md` "Clean tree". The leftover-work exception does not apply: the task line names `calc.py`, but "touching a file the task names is not enough", and a caching scratch note is not unfinished subtract work.
+- **Commands and results:** invariant check pass; `git status`/`git diff` show the one dirty file. No baseline was run (it is a later item of step 3 than the clean-tree stop). No branch, no commit, no files changed.
+- **Your options (per the rule "stop and offer commit, stash or `--worktree`"):**
+  1. `git stash push -- calc.py` (rerun `/todo-continue --merge` afterwards; `git stash pop` later), or
+  2. commit the scratch change yourself first, or
+  3. rerun `/todo-continue --merge --worktree`.
+- **Next workable node:** FEAT-001 (still next once the tree is clean). No adjacent findings.
+
+## (2) Ambiguities / contradictions in the skill text
+
+1. **Leftover-work exception vs. a task that names the dirty file.** git-flow: *"**Leftover work** is the one exception … when the user's request or the task line states that the uncommitted changes are the selected node's unfinished work (touching a file the task names is not enough), do not stop."* Here the task line is "Add subtract to **calc.py**" and the dirty file is exactly `calc.py`, so a literal reading ("the task line states … the … work" on that file) could be argued to allow continuing. Resolved via the parenthetical (naming the file is not enough) plus content mismatch (a caching scratch comment ≠ subtract work) → treated as not leftover work, stopped.
+2. **Different dirt tolerance by status for the same file.** Step 2, `[/]` resume: *"Uncommitted changes that fit its task line are its earlier work, committed at step 10; anything else: stop and ask"* — a looser test than the new-node leftover-work rule in (1). Had FEAT-001 been `[/]`, the same scratch comment might have been absorbed as "earlier work". Not hit (node is `[ ]`); resolved by status: the strict new-node rule applied.
+3. **Early-stop report contents.** Step 11: *"Report, short (on an early stop: which step and why, and only the items that apply)"* — "the items that apply" is undefined. Resolved by including ID/title, the checks actually run, the blocker, the options, and the next workable node; omitting files-changed/branch/commit/merge-commands (none exist).
+
+Otherwise none.

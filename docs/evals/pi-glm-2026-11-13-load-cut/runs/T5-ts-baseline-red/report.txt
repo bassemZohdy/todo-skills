@@ -1,0 +1,29 @@
+## 1) Report (`/todo-continue`, one invocation)
+
+**Early stop at step 3 (Ready check → Baseline): baseline red — nothing was changed, no branch created.**
+
+- **Selected node:** `FEAT-001.1` · low · "Add subtract with a test" (first workable node, depth-first; parent `FEAT-001` is not workable until both children are `[x]`; tree `FEAT-001` is unclaimed, so the node starts from the base).
+- **Pre-checks:** invariant check I1–I10 passed (no `.todo/todo-lint.sh`; checked by reading); no `Ref:`; tree clean; root unclaimed in `git show main:TODO.md`.
+- **Baseline (regression = README `Tests:` → `npm test`, run on `main` before any branch): RED**
+  - Command: `npm test` → `node --experimental-strip-types --test "tests/*.test.ts"`
+  - Result: `tests 1 · pass 0 · fail 1`
+  - Failing test: **`add (tests/add.test.ts)`** — `AssertionError: -1 !== 3` (src/calc.ts `add` returns `a - b`)
+- **Why it stopped:** the selected node is a `FEAT`, not a `FIX` whose `Done when` runs the failing test, so a red baseline blocks it (and every other node; no other node was selected).
+- **Files changed:** none. **Branch/commit:** none (still `main`, working tree clean). **Checked-out branch:** `main`.
+- **Next workable node:** none until the fix lands.
+- **Run this to fix the baseline first:**
+
+  ```
+  /todo-add "fix the failing baseline: add (tests/add.test.ts)" --type fix --priority P0
+  ```
+
+  (then rerun `/todo-continue`; the new FIX node will start with `baseline red: add (tests/add.test.ts)`).
+- Suggest clearing context (new session) before continuing.
+
+## 2) Ambiguities / contradictions in the skill text
+
+1. **Baseline location for a child in an unclaimed tree** — todo-continue step 3: *"on the base for an unclaimed tree, else on the nearest ancestor's branch (a new child: its parent's, else the root's)"*. The node here is simultaneously "in an unclaimed tree" (→ base) and "a new child" (→ parent's branch), but no parent branch exists yet. Resolved as: unclaimed tree takes precedence, ran `npm test` on `main` (also implied by verification.md step 1: *"A red baseline stops the node before any branch or file change"*).
+2. **Test-id format on Windows** — verification.md step 1: *"the fullest name the runner's summary prints, without a line number: … `add (tests/add.test.ts)` (`node --test`)"*. The runner's summary printed the path with a backslash (`test at tests\add.test.ts:5:1`) and the test name bare (`add`). Resolved by following the doc's own example literally: `add (tests/add.test.ts)`.
+3. Minor: step 11 asks for *"regression against the baseline"* in the report, but after a red-baseline stop there is no green baseline to compare against; the parenthetical *"after a red-baseline stop the failing run itself"* resolves it, and I reported only the failing run.
+
+No other contradictions encountered; the rest of the skill text was unambiguous for this run.

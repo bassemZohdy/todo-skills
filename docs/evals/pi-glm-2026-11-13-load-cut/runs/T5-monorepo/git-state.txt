@@ -1,0 +1,36 @@
+## HEAD
+f0af8d69a4fd8276eebc0e5d154b6e55bfbbca93
+## current branch
+main
+## branches
+* main f0af8d6 Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi10/monorepo/repo  f0af8d6 [main]
+## tags
+## refs
+refs/heads/main f0af8d69a4fd8276eebc0e5d154b6e55bfbbca93
+## log --all --graph
+*   f0af8d6  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * 855d438  chore(backlog): drain FEAT-001
+| * d8dc2a3  feat(api): add power function to the api package
+| * a878bda  chore(backlog): start FEAT-001
+|/  
+* 0e68762  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-power-function-api
+* 3e3c8e2  initial monorepo
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./Makefile
+./README.md
+./TODO.md
+./packages/api/__pycache__/calc.cpython-313.pyc
+./packages/api/calc.py
+./packages/api/tests/__pycache__/test_calc.cpython-313.pyc
+./packages/api/tests/test_calc.py
+./packages/web/__pycache__/greet.cpython-313.pyc
+./packages/web/greet.py
+./packages/web/tests/__pycache__/test_greet.cpython-313.pyc
+./packages/web/tests/test_greet.py

@@ -1,0 +1,24 @@
+## HEAD
+297931bf31e809066dd1fc8f29a691773eab6ad6
+## current branch
+main
+## branches
+* main 297931b init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi10/update-block/repo  297931b [main]
+## tags
+## refs
+refs/heads/main 297931bf31e809066dd1fc8f29a691773eab6ad6
+## log --all --graph
+* 297931b  (HEAD -> main) init with two roots
+## status --porcelain
+ M TODO.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

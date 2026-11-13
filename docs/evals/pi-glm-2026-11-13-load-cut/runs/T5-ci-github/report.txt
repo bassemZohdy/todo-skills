@@ -1,0 +1,41 @@
+Everything is written and verified. Here is the single report `todo-init` step 7 + `reference/ci.md` ask for.
+
+---
+
+## /todo-init --ci report
+
+**Bootstrap (step 3)** — nothing to create: `README.md`, `TODO.md`, `CHANGELOG.md` all exist and are valid. `TODO.md` is already the new tree format (empty tree, no old-format sections), `CHANGELOG.md` already has `## [Unreleased]`. **Missing (never auto-created): `docs/`** (no `CONTRIBUTING.md` either). No migration offered — nothing to migrate.
+
+**Git** — git mode (repo detected). Base branch: **`main`** (default: first existing of main/master/trunk/develop; user named none, so no `Base:` README line offered). Working tree was **clean** before this run; backlog files were untouched.
+
+**Runtime / package manager / test command** —
+- Runtime: **Python** (implied by the test command; no marker file: no `pyproject.toml`, `pytest.ini`, `setup.cfg`, etc.)
+- Package manager: **none** (no lockfile/marker)
+- Test command: **`python3 -m unittest discover -s tests`** — source: the README `Tests:` sentence (`A tiny calculator library. Tests: …`). It already states the command after `Tests:`, so no offer to add a `Tests:` line.
+- CI's test command: **no CI existed** (no `.github/workflows`, `.gitlab-ci.yml`, `Jenkinsfile`), so no mismatch; the workflow below now runs the same command via `check.sh`.
+
+**Definition of Done** — none exists in `README.md`, `CONTRIBUTING.md` or `docs/` (none created, per the rules).
+
+**Checks** — `.todo/todo-lint.sh`: **does not exist** → per `ci.md`, copy `tools/todo-lint.sh` from the todo-skills repository (https://github.com/bassemZohdy/todo-skills) into `.todo/` yourself (the skill never writes or downloads it); the lint line is skipped in `check.sh` until then, and rerun `/todo-init --ci` afterwards to add it. `.todo/check.sh`: **created now** (executable).
+
+**Files written by `--ci`** (on your yes):
+- `.todo/check.sh` — `chmod +x`, test line only (lint line skipped, lint missing)
+- `.github/workflows/todo-check.yml` — chosen CI row: *no CI file + `origin` on github.com*; `push` to `main` + `pull_request`, `contents: read`, `checkout@v4` → `setup-python@v5` (`"3.x"`) → `bash .todo/check.sh`; no install step (README declares no dependencies)
+
+**`check.sh` result (run once):** ✅ green — `Ran 1 test … OK` (`test_calc.CalcTest.test_add`).
+
+**Tree summary:** empty (`# Active Backlog` / `## 🌳 Task Tree`, no roots, no active node, no blocked IDs).
+**Invariant check (I1–I10, by reading — no lint script):** no violations.
+**Pre-planning:** skipped (no `--plan`, and your message states no project goal).
+
+**Next step for you:** `.todo/` and the workflow are **project files, not backlog files** — no claim commit carries them. Commit them yourself (on `main` or via a PR, like any CI change); the first CI run starts when you push (the skills never push). Until you copy `todo-lint.sh` into `.todo/`, CI runs only the tests. The new untracked files don't block `/todo-continue`.
+
+---
+
+## Ambiguities / unclear instructions encountered
+
+1. **Step 8's trigger conjunction:** "*only with `--plan`, or when the tree is empty and the user's `/todo-init` message states a project goal*" — the tree here is empty, so "or when the tree is empty" alone could be read as sufficient. **Resolution:** read "and" as requiring both an empty tree *and* a stated goal; your message (`/todo-init --ci`) states no goal → skipped pre-planning.
+2. **"Tests: line" vs sentence (step 4):** "Precedence: the README `Tests:` line" vs "If README does not state the command after `Tests:` (on its own line or in a sentence…)". The README gives the command in a *sentence* (`A tiny calculator library. Tests: \`python3 -m unittest discover -s tests\`.`), not on its own line — is that "the `Tests:` line"? **Resolution:** the parenthetical explicitly admits in-sentence occurrences, so I treated the sentence as the `Tests:` line (used it as the detected command, made no offer to add a line).
+3. **Report ordering of `.todo/*` existence (step 7):** the report must state "whether `.todo/todo-lint.sh` exists and whether `.todo/check.sh` exists", but the same step says "Do steps 8-9 first … then print the report once, with what they wrote" — ambiguous whether existence is reported pre- or post-`--ci`. **Resolution:** reported post-write state (`check.sh` exists/created now, lint does not), per the "with what they wrote" clause.
+4. **`ci.md` item 2 failure branch with missing lint:** "if it fails, write only the lint line (when `.todo/todo-lint.sh` exists), show the test line for the user to add" — when the lint is absent this branch would write an empty `check.sh`, which reads like an oversight. **Resolution:** not triggered (the command passed the Command-safety check), so `check.sh` was written normally; flagging the text as unclear.
+5. *(minor, resolved by the table)* **ci.md CI-row interplay with a missing lint:** row 1 prescribes "a single lint job (`bash .todo/todo-lint.sh …`)"; with the lint absent a first-row workflow would be red on arrival. **Resolution:** this repo matched row 2 (no CI file + github.com origin), whose workflow runs `check.sh` — which cleanly omits the lint line — so the workflow written here cannot fail for the missing lint; noted for you that a row-1 repo with no lint would hit that gap.

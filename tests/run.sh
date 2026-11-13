@@ -377,7 +377,7 @@ if [ -z "$rr_bad" ]; then ok "optional design and root reviews share reference/r
 # Negative-case warning (FEAT-060): documented where the warnings and the Done when guidance live.
 w5_bad=""
 grep -qE '^\| W5 \|' "$root/docs/REFERENCE.md" || w5_bad="$w5_bad REFERENCE(row)"
-for f in plugin/skills/todo/reference/verification.md docs/VERIFICATION.md docs/TOOLS.md; do grep -qF 'W5' "$root/$f" || w5_bad="$w5_bad $f"; done
+for f in plugin/skills/todo/reference/done-when.md docs/VERIFICATION.md docs/TOOLS.md; do grep -qF 'W5' "$root/$f" || w5_bad="$w5_bad $f"; done
 if [ -z "$w5_bad" ]; then ok "W5 (no negative case on a high or security node) is documented"; else bad "W5 docs:$w5_bad"; fi
 # W6 (FEAT-066): a command that may download and run remote code is documented where the warnings and the replay live.
 w6_bad=""
@@ -387,7 +387,7 @@ grep -qE '^\| W7 \|' "$root/docs/REFERENCE.md" || w6_bad="$w6_bad REFERENCE(W7 r
 if [ -z "$w6_bad" ]; then ok "W6 (a command that may download and run remote code) is documented"; else bad "W6 docs:$w6_bad"; fi
 if grep -q -- '--strict' "$root/plugin/skills/todo/reference/verification.md"; then ok "verification reference documents --strict"; else bad "verification reference lacks --strict"; fi
 # A Done when that cannot run for an environmental reason (TASK-027).
-vr="$root/plugin/skills/todo/reference/verification.md"
+vr="$root/plugin/skills/todo/reference/failures.md"   # moved there from verification.md by TASK-110
 if grep -q '^## A Done when that cannot run' "$vr" && grep -q 'before any test executes' "$vr" && grep -qi 'never edit `Done when`' "$vr" && grep -q 'empty `__init__.py`' "$vr" && grep -q 'Adjacent problems' "$vr" && grep -q 'Done when cannot run' "$vr"; then ok "verification reference says what to do when a Done when cannot run"; else bad "verification reference lacks the cannot-run rule"; fi
 # Two-verdict review (FEAT-056): one reviewer call returns spec compliance, then quality; every place that documents the
 # Reviewed trailer uses the same form, keeps the self-review fallback, and none keeps the old one-verdict form.
@@ -437,6 +437,22 @@ grep -qF 'Every node, a root too' "$tc108" || x108="$x108 todo-continue(root com
 grep -qF 'a test id, class or file' "$tc108" || x108="$x108 todo-continue(ID placement)"
 grep -qF 'not `src`' "$root/plugin/skills/todo/reference/git-flow.md" || x108="$x108 git-flow(scope)"
 if [ -z "$x108" ]; then ok "four cross-reference gaps are closed where each rule is used (FIX-108)"; else bad "cross-reference gaps (FIX-108):$x108"; fi
+
+# Load cut (TASK-110): the /todo-continue row stays at least 10 percent under the 52900 bytes and 8600 words it had on
+# 2026-11-13, and every rare branch moved out of that load keeps a pointer where it applies and its rules in a reference.
+lc_row="$(tr -d '\r' < "$root/docs/DEVELOPMENT.md" | awk -F'|' '/^## Load budget/ { on = 1; next } /^## / { on = 0 } on && $2 ~ /^ `\/todo-continue` $/ { gsub(/ /, "", $4); gsub(/ /, "", $5); print $4, $5 }')"
+lc_b="${lc_row%% *}"; lc_w="${lc_row##* }"
+if [ -n "$lc_row" ] && [ "$lc_b" -le 47610 ] 2>/dev/null && [ "$lc_w" -le 7740 ] 2>/dev/null; then ok "the /todo-continue load budget is at least 10 percent under 52900 bytes and 8600 words (TASK-110)"; else bad "the /todo-continue load budget is not 10 percent under 52900 bytes and 8600 words: '${lc_row:-no row}' (TASK-110)"; fi
+lc_bad=""; lc_ref="$root/plugin/skills/todo/reference"; lc_ct="$root/plugin/skills/todo-continue/SKILL.md"
+grep -qF 'read `reference/failures.md` before the next change' "$lc_ct" && grep -qF 'at most **3** attempts' "$lc_ct" && grep -qF 'never edit `Done when`' "$lc_ct" || lc_bad="$lc_bad todo-continue(failures pointer and limits)"
+grep -qF 'At most **3** attempts' "$lc_ref/failures.md" 2>/dev/null && grep -qF 'Forbidden: editing `Done when`' "$lc_ref/failures.md" && grep -qF 'chore(backlog): block <ID>' "$lc_ref/failures.md" || lc_bad="$lc_bad failures.md"
+grep -qF 'read `reference/plan-step.md`, "Plan"' "$lc_ct" && grep -qF 'read `reference/plan-step.md`, "Decompose"' "$lc_ct" || lc_bad="$lc_bad todo-continue(plan-step pointers)"
+grep -qF 'approve the plan?' "$lc_ref/plan-step.md" 2>/dev/null && grep -qF 'chore(backlog): plan <ID>' "$lc_ref/plan-step.md" && grep -qF 'chore(backlog): decompose <ID>' "$lc_ref/plan-step.md" || lc_bad="$lc_bad plan-step.md"
+grep -qF 'read `reference/routing.md`' "$root/plugin/skills/todo/SKILL.md" && grep -qF 'one tier higher' "$lc_ref/routing.md" 2>/dev/null || lc_bad="$lc_bad routing"
+for f in todo-add todo-plan; do grep -qF 'reference/done-when.md' "$root/plugin/skills/$f/SKILL.md" || lc_bad="$lc_bad $f(done-when pointer)"; done
+for s in 'lint W1' 'lint W2' 'lint W5' 'runnable shell command'; do grep -qF -- "$s" "$lc_ref/done-when.md" 2>/dev/null || lc_bad="$lc_bad done-when.md('$s')"; done
+grep -qF '"Existing root branch"' "$lc_ref/git-flow.md" && grep -q '^## Existing root branch' "$lc_ref/git-flow-edge.md" && grep -qF '**Bare claim branch:**' "$lc_ref/git-flow-edge.md" || lc_bad="$lc_bad existing-root-branch"
+if [ -z "$lc_bad" ]; then ok "the rare branches moved out of the /todo-continue load keep their pointers and rules (TASK-110)"; else bad "moved rare branches (TASK-110):$lc_bad"; fi
 
 # Resume, blocked verification and missing optional CI files, all without services (TASK-010).
 if out="$(bash "$lint" "$fx/ok-resume.md" "$fx/changelog/no-such-CHANGELOG.md" 2>&1)"; then ok "lint works without a CHANGELOG.md"; else bad "lint failed without CHANGELOG.md: $out"; fi

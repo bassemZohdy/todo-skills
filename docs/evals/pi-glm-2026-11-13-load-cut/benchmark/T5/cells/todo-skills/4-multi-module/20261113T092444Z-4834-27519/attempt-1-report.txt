@@ -1,0 +1,16 @@
+The tree is drained and merged. Final report:
+
+### /todo-continue --merge report — FEAT-001 · Placing an order reserves its stock through inventory
+
+- **Node:** leaf root `FEAT-001` (P1 · mid) — completed, drained, merged.
+- **Commands and results:**
+  - Baseline (before branch): `python3 -m unittest discover -s tests -t .` → 2 passing.
+  - Red: new tests failed with `ImportError: cannot import name 'OutOfStock' from 'inventory.stock'`.
+  - Done when: `python3 -m unittest tests.test_inventory.StockReserveTest tests.test_orders.PlaceOrderReserveTest` → 7 tests OK.
+  - Regression (full suite): 9 passing, baseline 2 → +7, none deleted or skipped. Doc-drift grep over README/docs: no hits.
+- **Files changed:** `inventory/stock.py` (added `OutOfStock` + `Stock.reserve`, validate-then-apply so a short line changes nothing; unknown SKU = 0; duplicate lines aggregated), `orders/service.py` (`place_order` reserves through `Stock.reserve`, returns `{"lines": [...], "status": "placed"}`, propagates `OutOfStock`), `tests/test_inventory.py` (`StockReserveTest`, 4 tests), `tests/test_orders.py` (`PlaceOrderReserveTest`, 3 tests).
+- **Branch/commits:** `todo/FEAT-001-placing-order-reserves-stock` — claim → start → `feat(orders): place_order reserves stock through inventory` → drain; merged `--no-ff` into `main` as `8b87388`, branch deleted, never pushed.
+- **Drain:** CHANGELOG.md `## [Unreleased]` → `### Added` gained the `FEAT-001` entry; TODO.md is back to the empty tree. Root review not applicable (mid, additions only); no `.todo/check.sh` gate; no RTM/DoD.
+- **Adjacent problems:** none. **Next workable node:** none — the tree is empty (this run drained it, so no further `/todo-continue` needed). Suggestion: clear context; the backlog is clean for the next `/todo-add`.
+
+No stop rule required asking you anything — behavior, modules, and verification were fully derivable, and the single-leaf tree needed no confirmation. One optional follow-up, run it only if you want it: `/todo-add "add a Test: badge/CI workflow running the suite" --type task --from FEAT-001` (there is no CI config; `/todo-init --ci` can set up `.todo/check.sh` or a CI job).

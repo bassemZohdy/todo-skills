@@ -1,0 +1,56 @@
+All three skills ran to completion. Here are the reports and the issues found.
+
+---
+
+# (1) Reports
+
+## `/todo-init` report
+
+- **Created:** `TODO.md` (empty task tree). `CHANGELOG.md` already had `## [Unreleased]` — untouched. `README.md` gained a **`Tests: \`make test\``** line (accepted offer). All left uncommitted as backlog files (the first tree claim commits them).
+- **Git mode:** git repo, base branch **`main`** (default chain; no user-named base, no `Base:` line), tree clean apart from backlog files.
+- **Runtime / package manager / test command:** Python 3 / no package manager / **`make test`** — source: README sentence "Run `make test`…" plus the table row "`Makefile` with a `test` target". Per package: `cd packages/api && python3 -m unittest discover -s tests` and `cd packages/web && …`.
+- **CI command:** none (no workflow files) — nothing to flag. **Docs:** `docs/` missing (not created). **Definition of Done:** none. **`.todo/todo-lint.sh` / `.todo/check.sh`:** absent (mention: `/todo-init --ci` can create the latter). **Tree:** empty. **Invariant violations:** none. Suite not run (per the skill).
+
+## `/todo-add` report
+
+Inserted **FEAT-001** (prefix **FEAT**, "add" as first word) as the only root, P1, complexity `low`, single leaf (no confirmation needed for one node):
+
+```
+- [ ] **FEAT-001** · P1 · low · Add a power function to the api package
+  - Done when: calc.power(2, 3) returns 8 and calc.power(5, 0) returns 1; `cd packages/api && python3 -m unittest tests.test_calc.CalcTest.test_power`
+```
+
+No `Ref` (no `docs/`), no RTM, no regression clause (the full suite is the right guard for a root). Lint re-run: pass. Nothing committed; work not started.
+
+## `/todo-continue --merge` report
+
+- **Node:** FEAT-001 — Add a power function to the api package (leaf root, completed end-to-end).
+- **Commands and results:**
+  - Baseline (on `main`, before branching): `make test` → **2 passing** (1 api + 1 web), green.
+  - Done when: `cd packages/api && python3 -m unittest tests.test_calc.CalcTest.test_power` → **red first** with `AttributeError: module 'calc' has no attribute 'power'` (quoted in the commit body), then **OK, 1 test**, exit 0.
+  - Regression: `make test` → **3 passing vs baseline 2** (+1), no test deleted, skipped or weakened.
+  - Review: self (no subagent tool) — spec ok, quality ok, 0 findings fixed.
+  - Doc drift: grep for `power` in README.md (no `docs/`) → no hits; nothing to update.
+- **Files changed:** `packages/api/calc.py`, `packages/api/tests/test_calc.py` (code); `README.md`, `TODO.md`, `CHANGELOG.md` (backlog).
+- **Branch/commits:** branch `todo/FEAT-001-add-power-function-api`: `0e68762` claim (published to `main` via ff-only), `a878bda` start, `d8dc2a3` `feat(api): add power function to the api package`, `855d438` drain (`chore(backlog): drain FEAT-001`, CHANGELOG entry added under `### Added`, subtree removed from TODO.md). Base refresh: already up to date. No root review offered (low, no security/migration/concurrency, only adds an interface). No `.todo/check.sh` → last gate skipped.
+- **Merge (`--merge`, executed):** from the clean main checkout: `git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-power-function-api` → merge commit `f0af8d6`; `git branch -d todo/FEAT-001-add-power-function-api` → deleted. Nothing pushed, no tags.
+- **Children done/total:** n/a (leaf root). **Checked-out branch:** `main`, working tree clean.
+- **Adjacent problems:** none (`/todo-add` follow-ups: none).
+- **Next workable node:** none — the tree is empty.
+- Suggestion: clear context before the next command; nothing was left mid-flight.
+
+---
+
+# (2) Ambiguities / contradictions / unclear instructions
+
+1. **Where the `Tests:` line goes — "Place it under an existing `Tests` heading, or at the end of the first section if no such heading exists; preserve unrelated text."** (todo-init, step 4) — "first section" is ambiguous for a README whose `#` title is followed by intro text and then `## Development`: the intro under the title, or the first `##` section (Development)? Placing it at the end of `## Development` would duplicate the identical sentence already there. **Resolution:** treated the intro under the document's first heading (`# minical monorepo`) as the "first section" and put `Tests: \`make test\`` at its end, before `## Development`.
+
+2. **The offer trigger for the `Tests:` line — "If README does not state the command after `Tests:` (on its own line or in a sentence; a sentence that names the command without `Tests:` does not count), offer to add a `Tests:` line"** (todo-init, step 4) — near self-contradictory on first read: "(…in a sentence…)" seems to allow sentences, then "a sentence … does not count" denies them. **Resolution:** read it as one construct — the command stated *after the label `Tests:`*, either as a standalone line or within a `Tests:`-anchored sentence; a plain sentence naming the command (this README's "Run `make test`…") does not satisfy it, so the offer applied and I made it (accepted per trial instructions).
+
+3. **Complexity of a small new function — "`low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function **whose fix the task line states**"** vs "`mid` | Ordinary work that needs some investigation or design **(the default)**" (core complexity table; todo-add step 7 says "`mid` when unsure") — the `low` example is phrased for *fixes*, leaving unclear whether a small *new* function stated verbatim in the task line is `low` or the `mid` default. **Resolution:** rated `low`, because the task line fully states the change (a power function in the api package, matching the existing `add(a, b)` pattern) and no investigation or design is needed — the stated *meaning* of `low`.
+
+4. **Where the ID lives in a test — "the tests … carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name (a test id, class or file)"** (todo-continue, step 8, Spec) — it takes a careful re-read to see that the docstring/comment alternative applies exactly when `Done when` names a test id/class/file (as ours did). **Resolution:** since the `Done when` fixes `tests.test_calc.CalcTest.test_power`, I put `# FEAT-001` as a comment on the test method rather than mangling the test name.
+
+5. **Monorepo detection without per-package markers — "Detect runtime, package manager and test command by marker file (in a monorepo list one per package)"** (todo-init, step 4) — this monorepo's packages have no marker files at all; only the root `Makefile` (with `cd packages/*` recipes) exists, so "one per package" has nothing to key on per package. **Resolution:** reported the umbrella command `make test` (README sentence + Makefile table row) as *the* test command and listed the two per-package commands the Makefile actually runs, naming the Makefile as their source.
+
+None of these blocked execution; all were resolved as described and the run completed cleanly (tree empty, CHANGELOG drained, `main` merged, clean tree).

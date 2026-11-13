@@ -1,6 +1,6 @@
 # Verification
 
-How a node is proven done, what blocks it, and which commands an agent may run. The rules the model follows are in [`plugin/skills/todo/reference/verification.md`](../plugin/skills/todo/reference/verification.md) and in `/todo-continue` ("Review", "Verify", "Test failures", "Documentation drift").
+How a node is proven done, what blocks it, and which commands an agent may run. The rules the model follows are in [`plugin/skills/todo/reference/verification.md`](../plugin/skills/todo/reference/verification.md), in [`done-when.md`](../plugin/skills/todo/reference/done-when.md) (writing a `Done when`) and [`failures.md`](../plugin/skills/todo/reference/failures.md) (read only when a run fails) beside it, and in `/todo-continue` ("Review", "Verify", "Documentation drift").
 
 ## The protocol
 

@@ -1,0 +1,38 @@
+All preconditions pass and I've reached the version proposal, which per the skill ("Do nothing until they answer") is where I stop and ask. Here is the report and my notes on the skill text.
+
+## (1) `/todo-release` report — preconditions & version proposal
+
+**Preconditions** (step 1):
+
+- **Git:** repo detected; this is the main checkout (`git worktree list` → `C:/.../repo [main]`). Base branch: none user-named, no README `Base:` line → first of `main`/`master`/`trunk`/`develop` = **`main`**, and it **is checked out**. ✔
+- **Invariant check:** no `.todo/todo-lint.sh` exists → checked I1–I10 by reading `TODO.md`. It is an empty tree (two headings, no tasks) — all invariants pass. ✔
+- **Tree:** `git status --porcelain` is empty (no backlog or untracked paths at all). ✔
+- **`[Unreleased]` entries:** present (`FEAT-002`, `FIX-001`). ✔ (No refusal.)
+- **Warning check:** neither `TODO.md` nor `git show main:TODO.md` has a `[/]` task or a claimed tree — no warning. ✔
+- **Tags:** local tags = `v0.1.0` only.
+
+**Proposed version:** **0.2.0**
+
+- Previous version: **0.1.0** (the only `## [0.1.0] - 2026-10-01` heading; digits only ✔).
+- Entries read under `[Unreleased]`: `### Added` → `**FEAT-002** (feat): Add multiply to calc.py`; `### Fixed` → `**FIX-001** (fix): Handle float inputs in add`. No `BREAKING CHANGE` text, no type followed by `!`, no `### Removed` entry → not major.
+- Validation: `0.2.0` is digits-only ✔, greater than 0.1.0 ✔, no local `v0.2.0` tag ✔.
+
+**Reason (one line):** [Unreleased] contains an `### Added` entry (FEAT-002, `(feat)`) and nothing breaking (`BREAKING CHANGE`, `!` type, or `### Removed` all absent), so the bump over 0.1.0 is minor.
+
+---
+
+## (2) Ambiguities / unclear instructions in the skill text
+
+None that blocked me; these are the spots that required interpretation:
+
+1. **"If you cannot load a skill by name, read `../todo/SKILL.md`."** — `../todo/SKILL.md` is a relative path with no stated base, and this harness has no "load by name" mechanism. Resolved: relative to the command skill's folder, i.e. `.claude/skills/todo/SKILL.md`, which I read in full.
+2. **"`git status --porcelain` may list nothing but backlog files (core) and untracked files"** and **"a claimed tree"** — both terms are defined only in the core skill, so the step forces a cross-reference. Resolved: "backlog files" = TODO.md, CHANGELOG.md, `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-*.md`, README `Tests:`/`Base:` lines; "claimed tree" = a root whose `State:` names a branch. Moot here — status was empty and the tree has no roots.
+3. **"a type followed by an exclamation mark (written by hand, for example feat followed by !)"** — doesn't pin down the textual form (e.g. `(feat!)` vs `feat!:` vs bare `feat!`). Resolved: any entry where a type token is immediately followed by `!` in any position. Not present under any reading.
+4. **"major (minor while the previous version is `0.x`)"** — terse parenthetical. Resolved as: breaking changes bump major, except while the previous version is 0.x they bump only minor. Not triggered here (no breaking entries), so the reading didn't affect the outcome.
+5. **"the newest `## [X.Y.Z]` heading"** — "newest" could mean by document order or by heading date. Resolved as the topmost/most recent released section (they coincide here: 0.1.0, and the file is in standard Keep-a-Changelog order).
+
+Everything else (refusal rules, `--version` handling, digits-only/greater-than/tag checks, "Do nothing until they answer") was clear and followed literally.
+
+---
+
+**Confirm releasing as `0.2.0`**, or name another version?

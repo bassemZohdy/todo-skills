@@ -1,0 +1,39 @@
+All done — both roots drained and merged, tree empty, base green (4 passing). Final report and findings below.
+
+---
+
+## 1) Report (`/todo-continue --all-lanes --merge`)
+
+**No subagent tool is available in this harness, so I ran as coordinator and executed each lane's work myself, sequentially, in its worktree (per `reference/lanes.md`).**
+
+Lanes found: `core` (FEAT-001), `text` (FEAT-002). No unfinished lane work (no claims in `git show main:TODO.md` at start). Shared baseline on `main` (same start branch + same regression command): `mvn -B test` → **green, 2 passing** (core 1, text 1). Invariants I1–I10 passed (no lint script exists). Both roots claimed on `main` (fast-forward), worktrees at `../repo.todo/FEAT-001`, `../repo.todo/FEAT-002`; main checkout stayed on `main`.
+
+### Lane `core` — FEAT-001 · Add subtract to the core module (Calc.java) — **finished**
+- Red: `mvn -B test -pl core -Dtest=SubtractTest …` failed as expected — `cannot find symbol: method subtract(int,int), location: class mini.core.Calc`
+- Done when: same command → **exit 0, Tests run: 1** (SubtractTest)
+- Regression `mvn -B test` → **green, 3 passing** (baseline 2, none deleted/skipped); re-verified after base refresh vs base count 2 → 3 passing
+- Files: `core/src/main/java/mini/core/Calc.java`, `core/src/test/java/mini/core/SubtractTest.java` (ID carried in a comment; `Done when` fixes the class name)
+- Branch `todo/FEAT-001-add-subtract-core-module`; commits: `193c819` claim, `c763896` start, `8c031f3` feat(core) (Red/Refs/Reviewed: self, 1 findings fixed), `d29e1e2` refresh, `744a6e8` drain, merged to main `5f5108f`; worktree removed, branch deleted
+- Doc drift: no hits for `subtract` in README/docs; no RTM; no `Definition of Done`; no `.todo/check.sh`; root review not offered (low, interface only added)
+
+### Lane `text` — FEAT-002 · Add shout to the text module (Text.java) — **finished**
+- Red: `mvn -B test -pl text -Dtest=ShoutTest …` failed as expected — `cannot find symbol: method shout(java.lang.String), location: class mini.text.Text`
+- Done when: same command → **exit 0, Tests run: 1** (ShoutTest)
+- Regression `mvn -B test` → **green, 3 passing** (baseline 2); after refresh from moved base (TODO.md conflict resolved per conflict rules: kept FEAT-002's block, dropped drained FEAT-001): Done when OK, regression **4 passing** vs base count 3
+- Files: `text/src/main/java/mini/text/Text.java`, `text/src/test/java/mini/text/ShoutTest.java`
+- Branch `todo/FEAT-002-add-shout-text-module`; commits: `b1b4720` claim, `b7efa4e` start, `6e6521b` feat(text) (Reviewed: self, 0 findings fixed), `dabe1a5` refresh, `3568d9f` drain, merged to main `76d04ce`; worktree removed, branch deleted
+
+### Wrap-up
+- **Blocked:** none. **Still open:** none — TODO.md is the empty tree. **Merge commands:** n/a (`--merge` given; both roots merged into `main`).
+- **Next workable root per lane:** none (core: none, text: none; tree empty).
+- Final state: `main` clean at `76d04ce`, checked-out branch `main`; final `mvn -B test` on base: **green, 4 passing**; CHANGELOG `[Unreleased] › Added` holds both entries. Adjacent problems: none found (no `/todo-add` suggestions). Suggest clearing context before the next run.
+
+## 2) Ambiguities / unclear instructions encountered
+
+1. **Test-ID rule** — todo-continue step 8: *"the tests … carry the ID in the test name, or in a docstring or comment when `Done when` fixes the name (a test id, class or file)."* It's unclear what "fixes the name" covers. Resolution: since `Done when` fixes the test class (`-Dtest=SubtractTest`), which can't contain the ID, I put `// FEAT-001` comments in the test classes (my first commit's review finding).
+2. **`next:` advancement vs lane stop-state** — step 9: *"a run with no failed cycle need not advance `next:`, which only tells a later session where to resume"* vs lanes.md item 3: *"leaving the root `[/]` with `next: drain` in its `State:` (committed: a leaf root sets it in its node commit…)"*. Resolution: lanes.md is more specific for lane runs, so I set `next: drain` in each node commit despite the clean run.
+3. **`Checked:` commit-body rule** — step 10.2: *"one `Checked: <command>` line for each `Done when` or regression command that you judged safe but that is not a test, lint, typecheck or build runner (`python -m unittest`, `node --test`, `make test` and other test targets need none; the lint's W3 warning)"*. Whether `mvn -B test` counts as a "test target" is implicit. Resolution: treated `mvn -B test` as a test target → no `Checked:` lines.
+4. **Base pass count timing** — lanes.md item 4: *"re-run `Done when` and the regression there against the base's current pass count (run the regression on the base first to get it)"*. "Current" is ambiguous (before/after earlier roots land). Resolution: ran the base regression at each root's verification time (FEAT-001: base=2; FEAT-002: base=3, after FEAT-001 landed).
+5. **Sequential lane order** — lanes.md: *"one lane after another in each lane's worktree (all lanes first, then item 4)"*. Resolution: finished item 3 for both lanes (core first, then text) before starting item 4 — the parenthetical was taken as the tiebreaker.
+
+No contradictions blocked execution; nothing else unclear.

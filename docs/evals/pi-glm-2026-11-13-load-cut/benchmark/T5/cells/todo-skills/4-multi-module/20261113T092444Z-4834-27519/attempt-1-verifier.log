@@ -1,0 +1,8 @@
+    .....
+    ----------------------------------------------------------------------
+    Ran 5 tests in 0.000s
+    
+    OK
+PASS  the hidden acceptance tests pass
+    agent tests: exit 0, 9 ran
+PASS  the agent's tests pass

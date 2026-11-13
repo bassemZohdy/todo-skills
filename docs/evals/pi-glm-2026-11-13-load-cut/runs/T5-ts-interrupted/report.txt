@@ -1,0 +1,25 @@
+## Report
+
+**`/todo-continue` — one invocation, interrupted-merge path (step 2 → step 10.3), node stays `[x]`:**
+
+- **ID/title:** **FEAT-001.1 · Add subtract with a test** — interrupted merge resumed. FEAT-001.1 was `[x]` on `todo/FEAT-001.1-add-subtract-test`, not yet merged into its parent's branch.
+- **Commands and results:**
+  - `git merge --no-ff -m "Merge FEAT-001.1 into FEAT-001" todo/FEAT-001.1-add-subtract-test` → clean merge, no conflicts (already on the parent branch, so no switch needed)
+  - `git branch -d todo/FEAT-001.1-add-subtract-test` → deleted (was 69bc15f)
+  - Invariant check before (step 1): I1–I10 pass; **lint of merged TODO.md**: I1–I10 pass (no `.todo/todo-lint.sh`, checked by reading)
+  - **Tests: not run** — this path runs none; the parent's integration step runs them.
+- **Files changed** (brought in by the merge from commit 69bc15f): `src/calc.ts` (+`subtract`), `tests/subtract.test.ts` (new), `TODO.md` (FEAT-001.1 → `[x]`).
+- **Branch/commit:** `todo/FEAT-001-add-subtract-multiply-src`, merge commit `2b6cae9` "Merge FEAT-001.1 into FEAT-001"; working tree clean.
+- **Parent root FEAT-001 children:** 1/2 done. **Checked-out branch:** `todo/FEAT-001-add-subtract-multiply-src`.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001.2 · Add multiply with a test.
+- Suggest clearing context and rerunning `/todo-continue` in a fresh session for FEAT-001.2.
+
+## Ambiguities / unclear points
+
+1. **"do step 10 item 3 for that node (switch, merge, delete its branch…"** vs. step 10.3's "**switch** to the parent's branch" — I was already on the parent's (root) branch, so the "switch" was a no-op; I skipped issuing a switch command rather than switching away and back. Unambiguous in effect, but the literal wording assumes a different starting branch.
+2. **"lint the merged `TODO.md`"** — the core defines lint as `bash .todo/todo-lint.sh` "if it exists, otherwise check I1–I10 by reading". No script exists here, so I checked by reading. Resolved via the core rule; not a real conflict, just an indirection.
+3. **Step 11's "the merge commands for a root without `--merge`"** — the interrupted path completes a *non-root* node, so no root merge commands apply; I omitted them. The skill doesn't explicitly exempt this path from that report item, only from the rest of step 10 ("nothing else of step 10").
+4. **Detection scope:** the core's "Interrupted work comes first" tells me to list the tree's branches with `git branch --list 'todo/<ROOT-ID>-*' 'todo/<ROOT-ID>.*'` — I had already enumerated with `git branch -a` and read each branch's `TODO.md` via `git show`, which covers the same set here (2 branches). No behavioral difference in this repo.
+
+Otherwise the skill text was consistent: git-flow's merge message format (`Merge <ID> into <PARENT-ID>` → `Merge FEAT-001.1 into FEAT-001`), `--no-ff`, `git branch -d`, and "No tests here; the parent's integration step runs them" all applied literally.

@@ -1,0 +1,31 @@
+## HEAD
+8921b3faaf41ec387aee43588ac6e1411ec9c206
+## current branch
+main
+## branches
+* main 8921b3f Merge FEAT-001 into main
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi10/leftover-work/repo  8921b3f [main]
+## tags
+## refs
+refs/heads/main 8921b3faaf41ec387aee43588ac6e1411ec9c206
+## log --all --graph
+*   8921b3f  (HEAD -> main) Merge FEAT-001 into main
+|\  
+| * ed3f656  chore(backlog): drain FEAT-001
+| * 27985bf  feat(calc): add subtract to calc.py
+| * b6f0f64  chore(backlog): start FEAT-001
+|/  
+* b3bf650  chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-calc-py
+* 16787db  init with one free root
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

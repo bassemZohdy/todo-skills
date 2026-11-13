@@ -1,0 +1,28 @@
+## HEAD
+40fb7fc86eca3a080ad5add40f968d55e712b91e
+## current branch
+main
+## branches
+* main 40fb7fc init
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-pi10/ci-github/repo  40fb7fc [main]
+## tags
+## refs
+refs/heads/main 40fb7fc86eca3a080ad5add40f968d55e712b91e
+## log --all --graph
+* 40fb7fc  (HEAD -> main) init
+## status --porcelain
+?? .github/
+?? .todo/
+## stash
+## files (excluding .git and .claude)
+./.github/workflows/todo-check.yml
+./.gitignore
+./.todo/check.sh
+./CHANGELOG.md
+./README.md
+./TODO.md
+./__pycache__/calc.cpython-313.pyc
+./calc.py
+./tests/__pycache__/test_calc.cpython-313.pyc
+./tests/test_calc.py

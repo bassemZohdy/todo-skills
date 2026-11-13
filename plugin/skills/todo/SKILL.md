@@ -88,16 +88,7 @@ A node at level L (a root is level 0) has its header indented `2L` spaces and it
 
 **Scope rule.** Every leaf is one change that fits one context window and touches at most 5 files; bigger work is split into children (`/todo-add`). A node too big to split yet keeps `State: next: decompose` until `/todo-continue` breaks it down.
 
-**Size** (optional, after the complexity) records scope when it helps a reader; when present, it must match the tree, and adding or dropping a node updates every ancestor's size:
-
-| Size | Meaning | Where |
-|---|---|---|
-| `S` | One change, at most 2 files | Leaf |
-| `M` | One context window, at most 5 files | Leaf |
-| `L` | Has children, all leaves | Parent |
-| `XL` | Has grandchildren | Parent |
-
-A leaf with `State: next: decompose` may carry `L`/`XL`.
+**Size** (optional, after the complexity) records scope when it helps a reader: `S` a leaf of one change in at most 2 files, `M` a leaf of one context window and at most 5 files, `L` a parent whose children are all leaves, `XL` a parent with grandchildren (a leaf with `State: next: decompose` may carry `L`/`XL`). When present it must match the tree, and adding or dropping a node updates every ancestor's size.
 
 **Complexity** says how hard the reasoning is, not how big the change is, so an agent can pick a fitting model:
 
@@ -111,11 +102,7 @@ A parent is rated by its integration step alone (usually `low` or `mid`); its ch
 
 ### Model routing (optional)
 
-A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both:
-
-- `/todo-continue --delegate` and lane runs give each node (or lane root, at its highest complexity) a subagent on the mapped model.
-- The reviewer runs at the node's tier or higher.
-- **Escalation:** after a failed verification attempt the next attempt runs one tier higher (`low` → `mid` → `high`), recorded in `State:` as `tier:`. A wrong `low` label costs one cheap attempt, not a blocked node.
+A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both, read `reference/routing.md` (`--delegate`, lane runs, the reviewer's tier, escalation after a failed attempt).
 
 ## IDs
 
@@ -171,20 +158,10 @@ One entry per root. Parts in this order, each only when it applies: `Ref:` (the 
 
 ## Reference files
 
-Loaded only when a command needs them, from `reference/` (`../todo/reference/` from a command skill):
+Read only where a skill or another reference names them, from `reference/` (`../todo/reference/` from a command skill).
 
-| File | Contents | Loaded by |
-|---|---|---|
-| `reference/git-flow.md` | Branches, tree claim, staging, merging, refresh from base, conflicts | `/todo-continue`, `/todo-update --status in-progress` or `ready` |
-| `reference/verification.md` | Verification protocol, writing a Done when, Definition of Done, command safety | `/todo-continue`, `/todo-add`, `/todo-plan`, `/todo-update --status in-progress`, `/todo-init --ci` |
-| `reference/rtm.md` | Optional RTM: `docs/RTM.md` first, else README `## RTM`, else none; format and rules | `/todo-plan`, `/todo-add`, `/todo-continue`, only when an RTM exists |
-| `reference/lanes.md` | Lane runs: coordinator, lane agents, merging lanes | `/todo-continue --lane` or `--all-lanes` |
-| `reference/ci.md` | `.todo/check.sh` (lint + tests), CI job per provider, local pre-push fallback | `/todo-init --ci` |
-| `reference/clarify.md` | Ambiguity checklist, stop triggers, where open questions go | `/todo-plan`, `/todo-add`, only for an unclear request |
-| `reference/review.md` | Optional independent reviews: design review before the build, root review before the drain | `/todo-plan`, `/todo-continue`, only for a `high` or risky root |
-| `reference/git-flow-edge.md` | A failed tree-claim fast-forward, `--worktree`, merge and rebase conflicts | `reference/git-flow.md`, only at those points |
-| `reference/deliverables.md` | Red checks for scripts, CI YAML, docs and configuration; services and environment assignments in `Tests:` | `reference/verification.md`, only for those deliverables |
-| `reference/doc-drift.md` | Searching README and docs for a changed interface name and reporting `file:line` hits | `/todo-continue`, only when a node changed an interface |
+- Loaded with their command: `reference/git-flow.md` and `reference/verification.md` (`/todo-continue`, `/todo-update --status in-progress`), `reference/done-when.md` (`/todo-add`, `/todo-plan`), `reference/lanes.md` (a lane flag), `reference/ci.md` (`/todo-init --ci`).
+- Read only when the pointer to them applies: `reference/git-flow-edge.md`, `reference/failures.md`, `reference/deliverables.md`, `reference/doc-drift.md`, `reference/plan-step.md`, `reference/routing.md`, and the optional `reference/rtm.md`, `reference/review.md` and `reference/clarify.md`.
 
 ## Invariants (every todo-* skill checks these first)
 

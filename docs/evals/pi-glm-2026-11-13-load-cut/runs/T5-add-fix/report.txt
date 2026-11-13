@@ -1,0 +1,26 @@
+Post-edit invariant re-check (no lint script → by reading): I1–I10 all pass (unique IDs, 2-line tasks with backticked non-vacuous test-id commands, priority on roots only, 6 lines ≤ 120, exact heading structure, no CHANGELOG/ID conflicts, valid tree, no forbidden commands). Edit left uncommitted, as required.
+
+## (1) Report
+
+**Added 1 task (root), prefix chosen: `FIX`** (rule 2: "crashes" in the description) — inserted into `TODO.md` at the **top of the tree, above FEAT-001**, because a P0 root goes above every P1 root:
+
+```markdown
+- [ ] **FIX-002** · P0 · low · Guard calc.add to raise ValueError("add needs numbers") on None instead of the TypeError crash
+  - Done when: calc.add(None, 1) raises ValueError("add needs numbers"); `python3 -m unittest tests.test_calc.CalcTest.test_add_rejects_none`
+```
+
+- **ID:** FIX-002 (highest existing number anywhere = FEAT-001 → next = 2; single new leaf, so no confirmation round was needed).
+- **Complexity:** `low` — the fix is fully stated in the task line (a guard whose exact exception and message are given).
+- **Size:** none (no existing node carries a size; the user didn't ask).
+- **Done when:** names the test id the node will create (`tests.test_calc.CalcTest.test_add_rejects_none` — it does not exist yet, as done-when.md requires for new work); no `regression:` because the project's full suite (`python3 -m unittest discover -s tests`, README `Tests:` line) is the right guard. Pre-check found no existing `ValueError` guard or None-handling test, so this is new work.
+- **Ref / RTM / From / parent / lane:** none applicable (no `docs/`, no RTM file or README `## RTM` section, no flags given). New root added on the base branch `main` — allowed. Working tree: `M TODO.md`, deliberately uncommitted (the next claim commit carries it).
+
+Not starting work — this command only adds to the backlog.
+
+## (2) Ambiguities / unclear instructions
+
+1. **Type-rule overlap on the leading "add()"**: *"its first word, or the word after a leading 'add', starts with test, doc, refactor, rename or chore → TASK"* vs. rule 3's *"add, implement or support as the first word"*. The description's first token is `add()`, not the bare word `add`, so it is unclear whether it counts as a "leading add". **Resolution:** moot — rule 2 fires first ("crash, crashes … **anywhere** → FIX"; "crashes" is present), so the type is FIX regardless of how `add()` is parsed.
+2. **"run the targeted test if one exists"** (step 6) vs. done-when/step-7 rules about tests that don't exist yet — it doesn't say whether "the targeted test" means an existing test of the *same behavior* or any test touching the target function. **Resolution:** read it as a test covering the described behavior; none exists (`CalcTest.test_add` only asserts `add(1, 2) == 3`, grep shows no `ValueError`/`None` handling), so nothing was run and the new test id was named per done-when.md.
+3. Minor wording gap in step 9: *"For more than one node, show the proposed tree … and wait for confirmation"* — it never explicitly says a single node needs **no** confirmation, only that "a single new **leaf** needs no confirmation"; a single-node *parent* (e.g. one root with `State: next: decompose`) is left unaddressed. **Resolution:** not hit here (single leaf), so no effect on this run; treated the leaf sentence as covering this case.
+
+Otherwise the skill text was unambiguous and consistent with the core skill.

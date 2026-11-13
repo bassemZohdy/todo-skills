@@ -1,0 +1,43 @@
+Done — the plan is committed and, per step 6's "**stop**", I stop here (one invocation).
+
+---
+
+## (1) Report (step 11 — early stop)
+
+**Stopped at step 6 (Plan):** `--plan` was given and no plan was previously proposed, so per the "Otherwise" branch I printed a plan, set `next: plan proposed`, committed it, and stopped **before writing any code**. No approval question yet — that comes on the next invocation.
+
+**Plan for FEAT-001 — Add subtract to calc.py** (commit body of `0fcad54`):
+```
+Plan for FEAT-001 (Add subtract to calc.py)
+Files: calc.py (subtract), tests/test_calc.py (CalcTest.test_subtract)
+Approach: mirror add() - def subtract(a, b): return a - b
+Tests: red first - test_subtract asserts subtract(5, 3) == 2, plus one negative-result case
+Verify: python3 -m unittest tests.test_calc.CalcTest.test_subtract, then full suite (discover -s tests)
+Risks: none - pure function, no public interface renamed/removed, no doc drift
+```
+
+| Item | Result |
+|---|---|
+| **Node** | `FEAT-001` · P1 · low · Add subtract to calc.py (leaf root, unclaimed tree) |
+| **Commands / results** | Invariants I1–I10 pass (no `.todo/todo-lint.sh`, read check) · Baseline regression `python3 -m unittest discover -s tests` (README `Tests:` line, run on `main` before branching): **1 test, OK → baseline 1 passing** · `Done when` command: **not run** (stopped at step 6, before build) |
+| **Files changed** | `TODO.md` only (claim `State:`, `[/]` + start `State:`, `next: plan proposed`) |
+| **Branch / commits** | `todo/FEAT-001-add-subtract-calc-py` (leaf root = node branch) · `a6261c9` claim (published to `main` via `--ff-only`, then switched back) · `8644ded` start · `0fcad54` plan |
+| **children done/total** | n/a (leaf) · **merge commands**: n/a (root not finished) |
+| **Checked-out branch** | `todo/FEAT-001-add-subtract-calc-py`, tree clean |
+| **Adjacent problems** | none |
+| **Next workable node** | `FEAT-001` itself — rerun `/todo-continue --plan` to show this plan and approve ("yes" sets `next: build` and builds in that invocation; "change: …" revises the plan) |
+| **Context** | suggest clearing context before the build run |
+
+## (2) Ambiguities / contradictions in the skill text
+
+1. **Front-matter description vs step 6 behavior**: "`--plan`: stop for approval after reading, before writing code (step 6)." Yet step 6's approval path says "yes sets `next: build` and goes on" — i.e. it may build in the same invocation — and the no-plan path writes and commits TODO.md before stopping. **Resolution:** treated the description as approximate; followed the step-6 text literally (backlog-file writes are not "code"; stop = before step 7).
+
+2. **Overlapping plan branches**: "**If a plan was proposed, show it** (the body of the newest commit whose subject is exactly `chore(backlog): plan <ID>`; **none or no git: print a new one) and ask "approve the plan?…"** … **Otherwise print a plan** … set `next: plan proposed`, commit it … and **stop**." If "a plan was proposed" means a plan commit exists, the "none" case is covered by both branches with different outcomes (ask-approval vs commit-and-stop). **Resolution:** read "a plan was proposed" as the state condition (`next: plan proposed` in `State:`, sourced from that commit); here `next: read docs` and no plan commit existed, so both readings point to the "Otherwise" branch — commit and stop, no question asked yet.
+
+3. **"print a plan"** — unclear whether "print" means to the chat immediately or into the report; and the commit body vs the printed plan could diverge. **Resolution:** printed the identical text in this report and committed the same text as the commit body.
+
+4. **Slug/stopword order**: "turn punctuation into spaces … drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain". With "Add subtract to calc.py" the order of dropping vs truncating changes nothing (4 words either way: `add-subtract-calc-py`), but the rule is ambiguous in general. **Resolution:** applied drop-then-truncate as written.
+
+5. **Step 5 "Commit `chore(backlog): start <ID>` with any pending backlog edits"** — "pending backlog edits" (core: edits by earlier todo-* commands) vs the start's own TODO.md edit being committed. **Resolution:** committed only the start's own TODO.md change, staged by explicit path; there were no other pending backlog edits.
+
+6. **Not hit, but unclear on other paths:** "`a change is committed the same way (`--allow-empty` if `TODO.md` is unchanged) and stops`" — "the same way" doesn't say the subject/body of the revised-plan commit (presumably `chore(backlog): plan <ID>` with the new plan as body). No resolution needed; noted only.

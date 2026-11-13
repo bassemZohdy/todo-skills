@@ -9,7 +9,7 @@ argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--d
 First load the `todo` core skill and read `reference/git-flow.md` and `reference/verification.md` from its folder (`reference/lanes.md` too with a lane flag). If you cannot load a skill by name, read `../todo/SKILL.md` and those files from `../todo/reference/`.
 
 Complete at most one node per invocation (lane runs excepted). Flags, all optional; an invalid combination is reported and nothing runs:
-- `--plan`: stop for approval after reading, before writing code (step 6). Not with a lane flag.
+- `--plan`: after reading, propose a plan and stop before any code is written; the next run asks for the approval (step 6). Not with a lane flag.
 - `--lane <name>`: only roots of that lane, in order. `--all-lanes [--seq]`: one subagent per lane, in parallel (`--seq`: one after another); see `reference/lanes.md`. Not together, and not with `--worktree`.
 - `--worktree`: work in a separate worktree; the main checkout is never switched (`reference/git-flow.md`, "--worktree").
 - `--delegate`: steps 6-9 run in a subagent on the model the node's tier maps to (`reference/routing.md`); you keep the other steps and rerun the verify commands yourself. Without a subagent tool or a `Models:` line, say so and work in this thread.
@@ -64,7 +64,7 @@ The order of every node is the core's "Lifecycle by status".
 
 ## Test failures
 
-When a verification run (step 9) fails or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`); never edit `Done when`, delete, skip or weaken a test, add `|| true`, loosen an assertion or narrow a command.
+When a verification run (step 9) fails or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when`, delete, skip or weaken a test, add `|| true`, loosen an assertion or narrow a command.
 
 ## Documentation drift
 

@@ -60,10 +60,10 @@ With a subagent tool, a fresh-context reviewer does both in one call, given only
 ## Test failures and blocking
 
 - Diagnose first: reproduce, read the first failing assertion, write one hypothesis into `State:` (`hyp:`), make the smallest change that tests it, rerun.
-- At most **3 attempts** across sessions, counted in `State:` (`attempts n/3`). An attempt is a failed verification run after implementing started; the first red run is not one.
+- At most **3 attempts** across sessions, counted in `State:` (`attempts n/3`). An attempt is a failed verification run after implementing started; the red run of step 7 of `/todo-continue` (the new test failing before the implementation) is not one.
 - **Escalation:** with a `Models:` line and work in a subagent (`--delegate`, lanes), each failed attempt raises the next one a tier (`low` → `mid` → `high`), recorded as `tier:`. Without routing, the report says a stronger model might help.
 - Allowed: changing code and the tests this node creates, within the task line. Forbidden: editing `Done when`; deleting, skipping or weakening tests; `|| true`; loosened assertions; a narrower command.
-- A failure outside the node (a flaky test, a regression beyond the task line), a Definition of Done item that is missing, review findings still valid after 2 rounds, or the third failed attempt **blocks the node**: `[!]`, with `State:` replaced by `Blocked: <reason> → <command> <error> → <action required>` (secrets redacted), committed as `chore(backlog): block <ID>` with the node's changed files. The agent stops. `/todo-update <ID> --status ready` unblocks it with a fresh attempt counter.
+- A failure outside the node (one that no change within the task line and the node's own tests can turn green: a flaky test, a regression beyond the task line, or a test the node does not own that the change the task asks for breaks; it blocks at once), a Definition of Done item that is missing, review findings still valid after 2 rounds, or the third failed attempt **blocks the node**: `[!]`, with `State:` replaced by `Blocked: <reason> → <command> <error> → <action required>` (secrets redacted), committed as `chore(backlog): block <ID>` with the node's changed files. The agent stops. `/todo-update <ID> --status ready` unblocks it with a fresh attempt counter.
 
 ## Documentation drift
 

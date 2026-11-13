@@ -161,7 +161,7 @@ Order for every node: **ready check → branch (in an unclaimed tree: tree claim
 
 ## CHANGELOG entry (written only by a root drain)
 
-Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before and after it (also between it and its first entry):
+Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, no blank line between entries. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before it and one between it and its first entry:
 
 ```markdown
 - **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.

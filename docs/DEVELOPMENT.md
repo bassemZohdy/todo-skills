@@ -12,7 +12,7 @@ plugin/                          The installable plugin: Markdown, JSON and the 
   README.md                      The plugin's own short README
   skills/
     todo/SKILL.md                Core rules: layers, task format, IDs, git mode, invariants, guardrails
-    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md, review.md, clarify.md, git-flow-edge.md, deliverables.md, doc-drift.md
+    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md, review.md, clarify.md, git-flow-edge.md, deliverables.md, doc-drift.md, failures.md, done-when.md, plan-step.md, routing.md
     todo-init/ todo-plan/ todo-add/ todo-continue/ todo-update/ todo-status/ todo-release/
     todo-report/SKILL.md         …and template.md, the status page inside a fenced block
 .claude-plugin/marketplace.json  Claude Code marketplace, source ./plugin
@@ -65,8 +65,8 @@ for t in tests/trials/test-*.sh; do bash "$t"; done        # harness checks (thr
 - `todo-report.sh` encodes hostile text and exits 1 without a `TODO.md`;
 - the packaging rules above;
 - README drift (TASK-054): every version README states equals both manifests and the newest CHANGELOG heading, the `cp -r todo-skills/<path>` install source holds the nine skills, every relative link resolves, and the "Agents with recorded trials" line names Claude Code and Codex with their evidence;
-- that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules, the narrowed review trigger, the leftover-work rule);
-- each command's loaded bytes and words against the [load budget](#load-budget);
+- that the skill text keeps rules other tests rely on (the RTM pointers, the optional design and root reviews, `--strict`, the "Done when cannot run" rule, the documentation-drift rules, the narrowed review trigger, the leftover-work rule, and the pointers and rules of the rare branches that TASK-110 moved into reference files);
+- each command's loaded bytes and words against the [load budget](#load-budget), and the `/todo-continue` row against its ceiling of 10% under the 2026-11-11 budget;
 - that the agent-compatibility review line names the released version, the trial-report template names none and the release steps name the pages that state one (TASK-074);
 - that SECURITY.md and the layout above name every script in `tools/` and every file in `plugin/skills/todo/reference/` (TASK-071);
 - that every tag and commit a CHANGELOG link names exists in git (a clone without tags prints a `SKIP`; the links of 0.1.0 to 0.4.0 name release commits because those versions were never tagged, and the owner can add the tags later) (FIX-082);
@@ -84,23 +84,23 @@ The trial harness, its scenarios and its own checks are described in [tests/tria
 
 ## Load budget
 
-Every command loads the core skill, its own `SKILL.md`, and the reference files its steps always read. `tests/run.sh` adds up the bytes (counted with LF line endings) and words of the files in each row below, prints them, and fails when a command is over either budget, a listed file is missing, or a `SKILL.md` is in no row. Files read only on a condition (`review.md`, `clarify.md`, `rtm.md`) are not counted; `lanes.md` has its own row. Words are a rough stand-in for tokens, which were not measured.
+Every command loads the core skill, its own `SKILL.md`, and the reference files its steps always read. `tests/run.sh` adds up the bytes (counted with LF line endings) and words of the files in each row below, prints them, and fails when a command is over either budget, a listed file is missing, or a `SKILL.md` is in no row. Files read only on a condition (`review.md`, `clarify.md`, `rtm.md`, `failures.md`, `plan-step.md`, `routing.md`, `git-flow-edge.md`, `deliverables.md`, `doc-drift.md`) are not counted; `lanes.md` has its own row. Words are a rough stand-in for tokens, which were not measured.
 
-The budgets are the 2026-11-08 measurement plus about 5%, rounded up; the `/todo-continue` rows were lowered on 2026-11-11 to the measurement after TASK-090 plus about 5%. Raise one only with a measured reason in the commit, and prefer moving a rare branch into a `reference/` file.
+The budgets are the 2026-11-08 measurement plus about 5%, rounded up; the `/todo-continue` rows were lowered on 2026-11-11 to the measurement after TASK-090 plus about 5%. On 2026-11-13 TASK-110 moved the rare branches of `/todo-continue` (a failed verification run, the `--plan` stop, breaking a node down, model routing, an existing root branch) and the rules for writing a `Done when` into reference files, and every row was set to the new measurement plus about 5%; the `/todo-continue` row is 10% under its earlier 52900 bytes and 8600 words, which `tests/run.sh` pins (about 2% above the measurement). Raise one only with a measured reason in the commit, and prefer moving a rare branch into a `reference/` file.
 
 | Command | Files (under `plugin/skills/`) | Byte budget | Word budget |
 |---|---|---|---|
-| `/todo` | `todo/SKILL.md` | 24000 | 3900 |
-| `/todo-init` | `todo/SKILL.md` `todo-init/SKILL.md` | 31500 | 5100 |
-| `/todo-init --ci` | `todo/SKILL.md` `todo-init/SKILL.md` `todo/reference/ci.md` `todo/reference/verification.md` | 44700 | 7300 |
-| `/todo-plan` | `todo/SKILL.md` `todo-plan/SKILL.md` `todo-add/SKILL.md` `todo/reference/verification.md` | 44200 | 7300 |
-| `/todo-add` | `todo/SKILL.md` `todo-add/SKILL.md` `todo/reference/verification.md` | 38500 | 6400 |
-| `/todo-continue` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` | 52900 | 8600 |
-| `/todo-continue --lane` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` `todo/reference/lanes.md` | 57900 | 9400 |
-| `/todo-update` | `todo/SKILL.md` `todo-update/SKILL.md` | 33000 | 5400 |
-| `/todo-status` | `todo/SKILL.md` `todo-status/SKILL.md` | 28000 | 4500 |
-| `/todo-report` | `todo/SKILL.md` `todo-report/SKILL.md` `todo-report/template.md` | 41000 | 5000 |
-| `/todo-release` | `todo/SKILL.md` `todo-release/SKILL.md` | 28000 | 4500 |
+| `/todo` | `todo/SKILL.md` | 23100 | 3750 |
+| `/todo-init` | `todo/SKILL.md` `todo-init/SKILL.md` | 30900 | 5000 |
+| `/todo-init --ci` | `todo/SKILL.md` `todo-init/SKILL.md` `todo/reference/ci.md` `todo/reference/verification.md` | 42400 | 6800 |
+| `/todo-plan` | `todo/SKILL.md` `todo-plan/SKILL.md` `todo-add/SKILL.md` `todo/reference/done-when.md` | 37700 | 6200 |
+| `/todo-add` | `todo/SKILL.md` `todo-add/SKILL.md` `todo/reference/done-when.md` | 31900 | 5200 |
+| `/todo-continue` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` | 47600 | 7700 |
+| `/todo-continue --lane` | `todo/SKILL.md` `todo-continue/SKILL.md` `todo/reference/git-flow.md` `todo/reference/verification.md` `todo/reference/lanes.md` | 52600 | 8530 |
+| `/todo-update` | `todo/SKILL.md` `todo-update/SKILL.md` | 32000 | 5200 |
+| `/todo-status` | `todo/SKILL.md` `todo-status/SKILL.md` | 27000 | 4400 |
+| `/todo-report` | `todo/SKILL.md` `todo-report/SKILL.md` `todo-report/template.md` | 39900 | 4800 |
+| `/todo-release` | `todo/SKILL.md` `todo-release/SKILL.md` | 26800 | 4300 |
 
 ## CI
 

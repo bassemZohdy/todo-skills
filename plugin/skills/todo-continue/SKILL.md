@@ -12,7 +12,7 @@ Complete at most one node per invocation (lane runs excepted). Flags, all option
 - `--plan`: stop for approval after reading, before writing code (step 6). Not with a lane flag.
 - `--lane <name>`: only roots of that lane, in order. `--all-lanes [--seq]`: one subagent per lane, in parallel (`--seq`: one after another); see `reference/lanes.md`. Not together, and not with `--worktree`.
 - `--worktree`: work in a separate worktree; the main checkout is never switched (`reference/git-flow.md`, "--worktree").
-- `--delegate`: steps 6-9 run in a subagent on the model the node's tier maps to (core "Model routing"); you keep the other steps and rerun the verify commands yourself. Without a subagent tool or a `Models:` line, say so and work in this thread.
+- `--delegate`: steps 6-9 run in a subagent on the model the node's tier maps to (`reference/routing.md`); you keep the other steps and rerun the verify commands yourself. Without a subagent tool or a `Models:` line, say so and work in this thread.
 - `--merge`: when a **root** finishes, also merge it into the base. Without it the commands are printed.
 
 ## Steps
@@ -24,7 +24,7 @@ The order of every node is the core's "Lifecycle by status".
    - **Interrupted merge** (with any `todo/` branch of the tree checked out; core "Interrupted work comes first"): do step 10 item 3 for that node (switch, merge, delete its branch; nothing else of step 10), lint the merged `TODO.md`, then report once (step 11) and stop. No tests here; the parent's integration step runs them.
    - **Interrupted drain** (a root branch whose uncommitted `CHANGELOG.md` holds its entry): make the drain commit (10.4.3 d), go on at 10.4.4, report and stop. A drained root branch not yet merged into the base is reported with its merge commands (with `--merge`: go to 10.4.4).
    - **A `[/]` node:** resume it on its branch (or worktree); check `git status` and `git diff --stat`. Uncommitted changes that fit its task line are its earlier work, committed at step 10; anything else: stop and ask, never revert or commit it. Skip steps 3-5 and go on where `next:` says: `read docs` or `plan proposed` → 6, `build` → 7, `drain` → 10.4, other or missing → 6. Without a baseline in `State:`, the regression must be fully green with no test deleted, skipped or weakened.
-   - **Otherwise** the first **workable** `[ ]` node (core "Which node is next"); claimed trees are skipped with the resume hint, `[!]` nodes are skipped, also one that is `[!]` only in its own branch's `TODO.md` (its siblings stay workable), `[x]` nodes are never touched. A node with `next: decompose` is broken down, not built: on the base for an unclaimed tree (as step 3 "Where to start"), with `../todo-add/SKILL.md` steps 7-8 (over 120 lines: write nothing, say so, stop); show the children, write them after the user confirms (on a `todo/` branch commit `chore(backlog): decompose <ID>`), and stop. Nothing workable: list what blocks progress (or say the tree is empty) and stop.
+   - **Otherwise** the first **workable** `[ ]` node (core "Which node is next"); claimed trees are skipped with the resume hint, `[!]` nodes are skipped, also one that is `[!]` only in its own branch's `TODO.md` (its siblings stay workable), `[x]` nodes are never touched. A node with `next: decompose` is broken down, not built: read `reference/plan-step.md`, "Decompose", and follow it. Nothing workable: list what blocks progress (or say the tree is empty) and stop.
 3. **Ready check** (new nodes only), in this order:
    - Lint clean; the `Ref:` path, if any, exists; tree clean by the git-flow definition (otherwise stop and ask, unless it is leftover work as defined there).
    - **Where to start** (git mode). A node in an unclaimed tree (no branch in its root's `State:` in `git show <base>:TODO.md`) starts from the base: on a `todo/` branch first commit pending backlog edits there (`chore(backlog): pending edits <IDs>`, by path), then `git switch <base>`. A root missing from the committed base is workable when it is an uncommitted root on the base in the main checkout's `TODO.md`; carry those backlog edits into the claim. Otherwise skip it and say it must be added on the base. Every other node stays on its tree's branch.
@@ -35,7 +35,7 @@ The order of every node is the core's "Lifecycle by status".
 4. **Branch first** (git mode). Follow `reference/git-flow.md`: in an unclaimed tree, root branch → tree claim commit → fast-forward of the base (**do not go on until it succeeded**) → missing ancestor branches → the node's branch; otherwise only the missing branches. No git: skip.
 5. **Start** (a parent's integration step too). On the node's branch set `[/]` and write `State:` (replacing one that exists) as `attempts 0/3; baseline <n> passing; branch <name> from <branch it was created from>; next: read docs` (or `baseline none` / `red: …`). No git: `attempts 0/3; baseline …; no git; files: <a root's rolled-up files, or `-`>; docs: <rolled-up docs, if any>; next: read docs`. Commit `chore(backlog): start <ID>` with any pending backlog edits. Nothing but backlog files changes before this.
 6. **Read before write.** Read the `Ref:` doc and the README/doc sections that govern the area, then only the code the node needs. A `Ref:` path that is missing or a doc that contradicts the task line: stop and ask.
-   - **Plan** (`--plan`, or `next: plan proposed`). If a plan was proposed, show it (the body of the newest commit whose subject is exactly `chore(backlog): plan <ID>`; none or no git: print a new one) and ask "approve the plan? (yes / change: …)": yes sets `next: build` and goes on; a change is committed the same way (`--allow-empty` if `TODO.md` is unchanged) and stops. Otherwise print a plan of at most 10 lines (files, approach, risks), set `next: plan proposed`, commit it as `chore(backlog): plan <ID>` with the plan as the body, and **stop**.
+   - **Plan** (`--plan`, or `next: plan proposed`): read `reference/plan-step.md`, "Plan", and follow it before any code is written; it ends in a stop, or in `next: build` once the user approved.
 7. **Build.**
    - **Resume:** code and tests already exist: skip red and go to review (its findings are fixed like any others).
    - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`). `TASK` refactors get characterization tests.
@@ -64,17 +64,10 @@ The order of every node is the core's "Lifecycle by status".
 
 ## Test failures
 
-- Diagnose first: reproduce, read the first failing assertion, write one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, rerun.
-- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started; the first red run is not one.
-- **Escalation** (core "Model routing"): with a `Models:` line and work in a subagent (`--delegate`, lanes), each failed attempt raises the next one a tier (`low` → `mid` → `high`), recorded as `tier:`. Without routing, say in the report that a stronger model might help.
-- You may change code and the tests this node creates, within the task line.
-- Forbidden: editing `Done when`, deleting, skipping or weakening tests, `|| true`, loosened assertions, a narrower command.
-- A failure outside the node (a flaky test, a regression beyond the task line), and the third failed attempt (list each hypothesis), block the node: `[!]`, `State:` replaced by a `Blocked:` line in the core format (secrets redacted; no git: a root's `files:`/`docs:` go into the action part as `(files: …; docs: …)`), committed with the node's changed files as `chore(backlog): block <ID>`; stop. Roots block the same way.
-- Run commands only under the safety rules in `reference/verification.md`.
+When a verification run (step 9) fails or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`); never edit `Done when`, delete, skip or weaken a test, add `|| true`, loosen an assertion or narrow a command.
 
 ## Documentation drift
 
 - If the implementation must deviate from the `Ref` doc, stop and let the user choose: change the code, or update the doc in this node.
 - Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, added, renamed, removed or with a changed meaning), read `reference/doc-drift.md` and follow it. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
 - Report README setup or test instructions that disagree with the commands that passed.
-- TODO.md never duplicates docs; spec-like text goes to `docs/` with a `Ref:`.

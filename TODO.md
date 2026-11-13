@@ -7,7 +7,3 @@
 - [ ] **TASK-116** · P2 · mid · Rerun the trial scenarios on the revised skill text with Codex: on this Windows host Codex cannot run python3 in its sandbox (probe of 2026-11-13 stopped at the baseline), and a Linux run needs a container with Codex set up in it
   - Done when: a dated docs/evals folder holds a checksummed Codex batch on the revised text that docs/trials.md and docs/agent-compatibility.md cite; `bash tests/run.sh`
   - Links: From: TASK-112
-- [ ] **TASK-112** · P2 · mid · Rerun the trial scenarios on the revised skill text with Claude Code and Codex: only pi with GLM 5.3 has run FIX-098 to FIX-103
-  - Done when: a dated docs/evals folder holds each batch with checksums that verify and docs/trials.md and docs/agent-compatibility.md cite it; `bash tests/run.sh`
-  - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#not-done
-  - State: branch todo/TASK-112-rerun-trial-scenarios-revised from main; next: start TASK-112

@@ -1,0 +1,47 @@
+**(1) Report**
+
+- **Node:** FEAT-001, "Add subtract to calc.py" (leaf root, P1, low). I stopped at the plan step, as `--plan` asks. No code or tests were written.
+- **Baseline:** `python3 -m unittest discover -s tests` is green with 1 test passing. I checked by reading that the invariants hold, since there is no `.todo/todo-lint.sh`.
+- **Branch and commits:** branch `todo/FEAT-001-add-subtract-calc-py`.
+  - `1fda8df` is the claim commit. It was fast-forwarded into `main`.
+  - `945d86d` is `chore(backlog): start FEAT-001`.
+  - `383293b` is `chore(backlog): plan FEAT-001`, with the plan as its body.
+  - `TODO.md` now shows `[/]` with `attempts 0/3; baseline 1 passing; … next: plan proposed`.
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-calc-py`. The tree is clean.
+- **Plan:**
+  - Files: add `CalcTest.test_subtract` (`subtract(5, 3) == 2`) to `tests/test_calc.py`, and `subtract(a, b)` to `calc.py`.
+  - Approach: write the test first and see it fail on the missing symbol, then add the minimal function. Then run Done when and the regression (1 passing before, 2 expected after).
+  - Risks: none.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001 itself. Rerun `/todo-continue` to be asked "approve the plan? (yes / change: …)". It is best to clear context first.
+
+I made one mistake. A `sed` failed on the slash in the branch name, so I created an empty plan commit before the start commit. I undid it with `git reset --soft HEAD~1` (my own unpublished commit, not a hard reset) and redid both commits in the right order.
+
+**(2) Ambiguities and contradictions**
+
+1. **Plan commit and the start commit.**
+   - Quote: step 6 "put a plan … set `next: plan proposed`, commit it as `chore(backlog): plan <ID>`", and plan-step.md says "(`--allow-empty` if `TODO.md` is unchanged)".
+   - The start commit, step 5, writes `next: read docs`. Setting `next: plan proposed` changes `TODO.md`, so the plan commit is not empty.
+   - I resolved it by committing the `TODO.md` change with the plan as the body.
+2. **When `--plan` is evaluated.**
+   - Quote: "`--plan`: after reading, propose a plan and stop before any code is written".
+   - Steps 3-5 (claim, branch, start `[/]`) still happen before the plan. The flag text suggests stopping earlier, but step 6 says otherwise.
+   - I resolved it by following the step order.
+3. **Slug of "Add subtract to calc.py".**
+   - Quote: "drop the words a, an, the, to, of, and, for, with".
+   - The rule drops only those words, so "add" stays and "to" goes. I got `add-subtract-calc-py`.
+4. **Plan size and format.**
+   - Quote: "a plan of at most 10 lines (files, approach, risks)".
+   - The text doesn't say whether the commit body has the same limit or the same format. I used the same short text for both.
+5. **`State:` order.**
+   - Quote: "`attempts n/3`, `baseline …`, … `branch …`, … `next:`".
+   - The claim commit's `State:` is `branch … from main; next: start FEAT-001`. The start step says it replaces the line, so I rewrote it in full.
+6. **Reading the whole core skill.**
+   - Quote: "First load the `todo` core skill".
+   - No Skill-tool loading was needed, so I read the files directly. I read the full core and the three reference files that were named. `routing.md` and the others were not needed.
+7. **Soft reset.**
+   - Quote: "Never tag, force-push, reset hard or clean."
+   - It doesn't say whether a soft reset to undo my own mistaken commit is allowed. I used it on the unpublished commit only.
+8. **Windows and Git Bash.**
+   - Quote: "on Windows run them … through Git Bash".
+   - The harness defaults to PowerShell. I used the Bash tool.

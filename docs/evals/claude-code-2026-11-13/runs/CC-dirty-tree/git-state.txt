@@ -1,0 +1,23 @@
+## HEAD
+2fc0f416cf5e417578fe7e7f547e5956bc686154
+## current branch
+main
+## branches
+* main 2fc0f41 init with one free root
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/dirty-tree/repo  2fc0f41 [main]
+## tags
+## refs
+refs/heads/main 2fc0f416cf5e417578fe7e7f547e5956bc686154
+## log --all --graph
+* 2fc0f41  (HEAD -> main) init with one free root
+## status --porcelain
+ M calc.py
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./tests/test_calc.py

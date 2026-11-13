@@ -1,0 +1,25 @@
+## HEAD
+0243d34fc14de7895e54349358d5498bff204453
+## current branch
+main
+## branches
+* main 0243d34 init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/report/repo  0243d34 [main]
+## tags
+## refs
+refs/heads/main 0243d34fc14de7895e54349358d5498bff204453
+## log --all --graph
+* 0243d34  (HEAD -> main) init with two roots
+## status --porcelain
+?? docs/status.html
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./docs/status.html
+./tests/test_calc.py

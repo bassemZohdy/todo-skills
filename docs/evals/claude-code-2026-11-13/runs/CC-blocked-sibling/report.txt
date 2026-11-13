@@ -1,0 +1,30 @@
+I ran `/todo-continue` and stopped after the start commit. I wrote no code and ran no build.
+
+## (1) Report
+
+- **Selected node:** FEAT-001.2, "Add multiply with a test" (low).
+- **Why not FEAT-001.1:** it is `[!]` in the `todo/FEAT-001.1-add-subtract-test` branch's `TODO.md` ("the product owner must decide how subtract rounds"). The skill says a node blocked only in its own branch leaves its siblings workable, so I skipped it.
+- **Baseline:** `python3 -m unittest discover -s tests` ran 1 test and passed, so the state line records `baseline 1 passing`. I ran it on the root branch, FEAT-001's, before creating the node's branch.
+- **Checks before starting:** git mode, I1–I10 checked by reading (no `.todo/todo-lint.sh`), no `Ref:`, clean tree. The tree was already claimed on `main`, so I did not switch to the base.
+- **Branch and commit:** created `todo/FEAT-001.2-add-multiply-test` from `todo/FEAT-001-add-subtract-multiply-calc`. Commit `6be2717` is `chore(backlog): start FEAT-001.2`. It changes `TODO.md` only.
+- **Node state:** marked `[/]` with `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001.2-add-multiply-test from todo/FEAT-001-add-subtract-multiply-calc; next: read docs`.
+- **Checked-out branch:** `todo/FEAT-001.2-add-multiply-test`.
+- **Not run:** `Done when` (nothing is built yet) and anything in steps 6–11.
+- **Parent:** FEAT-001 has 0/2 children done. FEAT-001.1 stays blocked on its own branch.
+- **Adjacent problems:** none.
+- **Next workable node after this one:** none. FEAT-001.1 is blocked, so the FEAT-001 integration step cannot run until it is unblocked.
+- **Suggestion:** clear context and rerun `/todo-continue` to resume at step 6.
+
+## (2) Ambiguities
+
+1. **Branch-local `[!]` versus the root's view.**
+   - Quoted text: "also one that is `[!]` only in its own branch's `TODO.md` (its siblings stay workable)". The core says "A node that is `[!]` on any of the tree's branches counts as `[!]` everywhere (not workable; its ancestors wait)".
+   - Why it is unclear: the two lines read as contradictory. The step 2 line governs siblings and the core line governs ancestors.
+   - What I did: I treated FEAT-001.2 as workable and FEAT-001 as waiting.
+   - Gap: the skill never says whether to carry the `[!]` marker into the current branch's `TODO.md`. I left it alone.
+2. **Interrupted-work scan.** The core says "A node that is `[x]` on a branch not yet merged… A node that is `[/]` is resumed". It is silent on a `[!]` branch that was never merged into its parent, as FEAT-001.1's branch is. I treated it as not interrupted.
+3. **Branch slug.** The git-flow rule says "drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain". "Add multiply with a test" has only 3 words left (add, multiply, test), so I used `add-multiply-test`. The sibling branch `add-subtract-test` follows the same pattern, so I'm fairly confident.
+4. **"Ready check… Where to start" versus "stay on tree's branch".** The rule says "Every other node stays on its tree's branch". I was already on the root branch, so I stayed. It doesn't say what to do if I had been on a different tree's branch.
+5. **Lint with no script.** "otherwise check I1-I10 by reading". The skill does not say whether to read the other branch's blocked state for I1–I10. I only checked the current branch's file.
+6. **Commit trailer.** The skill specifies no body for `chore(backlog)` commits ("no body except `Refs:`…"). The harness requires a `Co-Authored-By` line. I added it and treated that as the harness's instruction taking precedence.
+7. **Windows tooling.** Python heredocs failed on the non-ASCII `·` under Windows encoding, so I used the Edit tool instead. This is a tooling issue, not a skill problem.

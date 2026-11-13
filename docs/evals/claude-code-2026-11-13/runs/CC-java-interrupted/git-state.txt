@@ -1,0 +1,31 @@
+## HEAD
+febea9fe6df46bd1a7ed35559d30235830dbe87f
+## current branch
+todo/FEAT-001-add-subtract-multiply-calc
+## branches
+  main                                     41d33ca chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* todo/FEAT-001-add-subtract-multiply-calc febea9f Merge FEAT-001.1 into FEAT-001
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/java-interrupted/repo  febea9f [todo/FEAT-001-add-subtract-multiply-calc]
+## tags
+## refs
+refs/heads/main 41d33ca4e794f0bf614fbd72780c20bd96a6afe1
+refs/heads/todo/FEAT-001-add-subtract-multiply-calc febea9fe6df46bd1a7ed35559d30235830dbe87f
+## log --all --graph
+*   febea9f  (HEAD -> todo/FEAT-001-add-subtract-multiply-calc) Merge FEAT-001.1 into FEAT-001
+|\  
+| * 44f2b48  feat(calc): add subtract
+|/  
+* 41d33ca  (main) chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-multiply-calc
+* 2fee0f2  init java project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./pom.xml
+./src/main/java/mini/Calc.java
+./src/test/java/mini/AddTest.java
+./src/test/java/mini/SubtractTest.java

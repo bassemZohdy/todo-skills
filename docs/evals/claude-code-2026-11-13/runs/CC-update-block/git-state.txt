@@ -1,0 +1,24 @@
+## HEAD
+8f29288d6b5a0216c0f95bcae6902805931d3af9
+## current branch
+main
+## branches
+* main 8f29288 init with two roots
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/update-block/repo  8f29288 [main]
+## tags
+## refs
+refs/heads/main 8f29288d6b5a0216c0f95bcae6902805931d3af9
+## log --all --graph
+* 8f29288  (HEAD -> main) init with two roots
+## status --porcelain
+ M TODO.md
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./calc.py
+./docs/plans/PROJECT.md
+./tests/test_calc.py

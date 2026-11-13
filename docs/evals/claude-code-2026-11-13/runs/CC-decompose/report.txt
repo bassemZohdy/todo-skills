@@ -1,0 +1,58 @@
+## Report
+
+**Command:** `/todo-continue`, which ran the **Decompose** path (`next: decompose`) on **FEAT-001**. Nothing was built.
+
+- **Git:** the repo is on `main`, which is the base. The tree was unclaimed, so I worked on the base. No branch, claim or commit was made.
+- **Invariants:** I checked I1–I10 by reading, because there is no `.todo/todo-lint.sh`. They passed before and after the edit. `TODO.md` is 13 lines.
+- **Edit:** the user confirmed "yes". I added three `[ ]` leaves, all `low`, to FEAT-001 and removed its `State: next: decompose` line (it held nothing else):
+  - **FEAT-001.1:** Add `calc.subtract(a, b)`. Done when: `calc.subtract(5, 3)` returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract_feat_001_1`.
+  - **FEAT-001.2:** Add `calc.multiply(a, b)`. Done when: `calc.multiply(4, 3)` returns 12; `python3 -m unittest tests.test_calc.CalcTest.test_multiply_feat_001_2`.
+  - **FEAT-001.3:** Add `calc.divide(a, b)`. Done when: `calc.divide(6, 3)` returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_divide_feat_001_3`.
+- **Commits:** the edit to `TODO.md` is left uncommitted, as the Decompose rule says for the base. The next claim commit will carry it.
+- **Tests:** none run. The baseline step is for new nodes only, and the decompose path never reaches it. The test ids above don't exist yet; each leaf will create its own and start red.
+- **Checked-out branch:** `main`.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001.1. A later run will claim the tree, create the `todo/` branches and build it.
+- **Suggestion:** clear context before the next run.
+
+## Ambiguities and contradictions
+
+1. **Step 1 and the invariant check when there is no lint script.**
+   - Text: "otherwise check I1-I10 by reading".
+   - Unclear: whether a check done by reading is enough for `[ ]` roots.
+   - Resolved: I read the file against each invariant.
+
+2. **Step 2 against step 3.**
+   - Text: "A node with `next: decompose` is broken down, not built: read `reference/plan-step.md`, "Decompose", and follow it".
+   - Step 3 is headed "(new nodes only)" and holds the lint, clean-tree and baseline checks.
+   - Unclear: whether those checks apply before a decompose. Decompose step 1 says "as `/todo-continue` step 3, 'Where to start'", which pulls in only the start-branch part.
+   - Resolved: I skipped the baseline and ran no tests. I did confirm the tree was clean (backlog files don't count) and that I was on the base.
+
+3. **Decompose step 2.**
+   - Text: "Split it with steps 7-8 of the `todo-add` skill".
+   - Step 7 says "Definition of Ready... the command's test target is named" and "If the test does not exist yet, name the file or id the node will create". Step 8 says "Fit".
+   - Unclear: whether todo-add's check-already-done (step 6) and clarify (step 5) apply.
+   - Resolved: no, only steps 7–8. I did a quick check that the behaviour didn't already exist in `calc.py`.
+
+4. **Test-id naming.**
+   - Text: "carry the ID in the test name" (step 8), against `Done when` "name the file or id the node will create".
+   - Unclear: nothing says what form an ID embedded in a Python test name takes, since dots are invalid in identifiers.
+   - Resolved: I used `test_subtract_feat_001_1`.
+
+5. **Parent size and complexity.**
+   - Text: "A parent is rated by its integration step alone (usually `low` or `mid`)" and "No size by default".
+   - The root was already `mid` with no size.
+   - Resolved: I left both unchanged.
+
+6. **Confirmation timing.**
+   - Text: Decompose step 3: "Show the children and write them after the user confirms". The task says the user's "yes" is already given.
+   - Resolved: I treated the pre-given "yes" as the confirmation and wrote the children directly, without showing them first. I did not show the proposal in a separate turn.
+
+7. **Windows encoding (tooling, not skill text).**
+   - The core says "keep the file's line endings", but says nothing about encoding.
+   - My first Python edit corrupted the `·` separators under the default cp1252 codec. I reverted with `git checkout -- TODO.md` and redid it as UTF-8.
+   - That `git checkout` was a revert of my own edit, and the core's "Never ... reset hard or clean" doesn't cover it. A note about UTF-8 would help.
+
+8. **Report section.**
+   - Step 11 lists "files changed, branch and commit" but doesn't say what to write when the edit is deliberately uncommitted.
+   - Resolved: I stated that explicitly.

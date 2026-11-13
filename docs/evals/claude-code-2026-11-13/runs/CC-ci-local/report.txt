@@ -1,0 +1,64 @@
+## 1. Report
+
+**Created**
+- `TODO.md` and `CHANGELOG.md` already existed, so I created nothing for them.
+- I wrote `.todo/check.sh` with `chmod +x`. It is untracked.
+- I did not write `.git/hooks/pre-push`. The write was refused as a sensitive file, so you need to add it yourself (see next step).
+
+**Git and base branch**
+- Git mode, on branch `main`, which is the base.
+- There is no README `Base:` line and no remote.
+- The only backlog change is the untracked `.todo/`, which does not block the clean-tree check.
+
+**Runtime and test command**
+- No marker file, so the package manager is none. The runtime is Python 3.
+- Test command: `python3 -m unittest discover -s tests`.
+- Source: the README `Tests:` line, so no new `Tests:` line is needed.
+- I found no CI config, so there is no CI command to compare against.
+
+**Docs**
+- `README.md` exists. `docs/` and `CONTRIBUTING.md` are missing, and I didn't create them.
+- There is no `Definition of Done` heading anywhere.
+
+**Tree**
+- Empty. There is no active node, no blocked IDs and no invariant violations. I checked I1–I10 by reading, since `.todo/todo-lint.sh` doesn't exist.
+- `CHANGELOG.md` has `## [Unreleased]`. Its intro lacks the Semantic Versioning sentence, and I left it alone as instructed.
+
+**CI (`--ci`)**
+- I chose the local fallback: there is no CI file and no `origin` on github.com.
+- `.todo/todo-lint.sh` is missing. Save `tools/todo-lint.sh` from https://github.com/bassemZohdy/todo-skills there, then add `bash .todo/todo-lint.sh TODO.md CHANGELOG.md` before the test line in `check.sh`.
+- `check.sh` currently runs only the test line, because the lint script is missing. The test command passed the "Command safety" rules.
+- Result of running `bash .todo/check.sh` once: 1 test ran, OK, exit 0.
+- `.todo/todo-replay.sh` doesn't exist, so I didn't offer the optional replay line.
+
+**Next step for you**
+- Create `.git/hooks/pre-push` with these two lines:
+  ```
+  #!/usr/bin/env bash
+  bash .todo/check.sh || exit 1
+  ```
+- Then run `chmod +x .git/hooks/pre-push`.
+- Commit `.todo/` yourself. The skill doesn't commit it, and no claim commit will carry it.
+
+## 2. Ambiguities and contradictions
+
+1. **Pre-push hook and the user's yes.**
+   - Text: "written only on a yes, in its own tool call" and "If the hook cannot be written (… your environment refuses writes under `.git/`), print its two lines".
+   - The user said yes to everything, but the harness refused the write. I took the fallback and did not retry through Bash, since the refusal looked deliberate. The text doesn't say whether to retry through another route such as a shell redirect.
+2. **Is `--ci` a request for CI or the hook?**
+   - Text: "Local fallback (only in the last row of the table above, or when the user names the hook)" versus "Offer a git `pre-push` hook".
+   - I treated the last table row as sufficient for offering the hook.
+3. **Order of lint and tests in `check.sh`.**
+   - Text: "`bash .todo/todo-lint.sh TODO.md CHANGELOG.md` # only when .todo/todo-lint.sh exists".
+   - I omitted the line. Nothing says whether to leave a commented placeholder or tell the user to regenerate with `--ci`. The text only says a later `--ci` re-diffs the file.
+4. **"run it once after writing and report the result" versus "Do not run the suite".**
+   - Step 4 says "Do not run the suite (the `--ci` step runs `.todo/check.sh` once…)". This is consistent but easy to misread. I ran it only once, via `check.sh`.
+5. **Report timing.**
+   - Text: "Do steps 8-9 first… then print the report once".
+   - Step 7's list of report contents and the ci.md "Report" section overlap. I merged them into one report.
+6. **Missing Semantic Versioning line.**
+   - Text: "change nothing else, including its intro".
+   - This only covers the missing-Unreleased case. I left the shorter intro alone and mention it only as a note. Nothing says whether to report it.
+7. **Windows and `chmod`.**
+   - `chmod +x` has no real effect on Windows with a Git Bash filesystem.
+   - I ran it and relied on `bash .todo/check.sh`, which doesn't need the executable bit.

@@ -1,0 +1,32 @@
+**Report (`/todo-continue --merge`): stopped at step 3, ready check. Nothing was changed.**
+
+- **Node:** FEAT-001, "Add subtract to calc.py". It is the first workable `[ ]` node, P1, low.
+- **Why it stopped:** the tree is not clean by the git-flow definition. `calc.py` has an uncommitted change that adds a blank line and `# scratch: maybe cache results here`.
+  - It doesn't count as untracked, backlog or generated.
+  - It isn't leftover work either. Neither your request nor the task line says these changes are FEAT-001's unfinished work. The task line only names `calc.py`, and the rule says "touching a file the task names is not enough".
+- **Not done:** no baseline run, no branch, no `[/]` marker, no commit, no merge, no CHANGELOG change.
+- **Checked-out branch:** `main`.
+- **How to proceed:** choose one of these.
+  1. Commit the scratch comment.
+  2. Stash it with `git stash`.
+  3. Run with `--worktree`.
+  4. Tell me the change is FEAT-001's unfinished work.
+- **Adjacent problems:** none.
+- **Next workable node:** FEAT-001, once the tree is clean. Clearing context isn't needed.
+
+**Ambiguities and unclear instructions**
+
+1. Step 1 asks for "the invariant check (core)", but I never needed to run it.
+   - The check is also not scripted here: `.todo/` doesn't exist, so there is no lint script.
+   - I treated the one-node TODO.md as valid by inspection and moved on to step 3.
+2. Step 3 says "tree clean by the git-flow definition (otherwise stop and ask, unless it is leftover work as defined there)".
+   - "Stop and ask" and git-flow's "stop and offer commit, stash or `--worktree`" are slightly different.
+   - I stopped, offered the options and asked you to choose.
+3. The same step says to stop and ask only once the tree is dirty, but the order in step 2 is unclear when `--merge` is combined with a dirty tree.
+   - The dirty-tree stop comes first and `--merge` is irrelevant at that point.
+   - Step 2's "Otherwise the first workable `[ ]` node" also doesn't say whether the dirty tree should affect selection. I selected first and then stopped.
+4. The leftover-work wording "when the user's request or the task line states..." is strict.
+   - My invocation said nothing about the dirty change, so I treated it as not leftover.
+   - Nothing says whether a comment like "scratch" in the diff should count as a hint. I ignored the diff's content.
+5. Step 11 says "on an early stop: ... only the items that apply".
+   - It doesn't say whether to include the "next workable node" line for a dirty-tree stop. I included it.

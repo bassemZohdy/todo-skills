@@ -1,0 +1,24 @@
+## HEAD
+800b106949da13205ee345aec7940fb6ff528516
+## current branch
+main
+## branches
+* main 800b106 init with a red baseline
+## worktrees
+C:/Users/<user>/Code/todo-skills-workspace/runs-cc1/ts-baseline-red/repo  800b106 [main]
+## tags
+## refs
+refs/heads/main 800b106949da13205ee345aec7940fb6ff528516
+## log --all --graph
+* 800b106  (HEAD -> main) init with a red baseline
+* e4da317  init typescript project
+## status --porcelain
+## stash
+## files (excluding .git and .claude)
+./.gitignore
+./CHANGELOG.md
+./README.md
+./TODO.md
+./package.json
+./src/calc.ts
+./tests/add.test.ts

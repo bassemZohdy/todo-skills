@@ -1,0 +1,53 @@
+## (1) Report
+
+**Conflict resolution.** `git pull --no-rebase` conflicted in TODO.md. Both sides had added a root called `FEAT-003`:
+- **Incoming (published):** `FEAT-003`, P1, "divide".
+- **Mine (local):** `FEAT-003`, P2, "power", with `Depends: FEAT-002`.
+
+I kept the incoming one as `FEAT-003` and renumbered mine, with nothing else in its block changed, to `FEAT-004`. `FEAT-004` was the next free number across TODO.md, CHANGELOG.md and `git log --all`. No other `Depends:` or `From:` named the old ID, and the claimed root wasn't renumbered. The incoming `FEAT-001` claim (`State: branch todo/FEAT-001-peer-work from main`) was preserved. I did not use `--ours` or `--theirs`. I finished with `git commit --no-edit` (6537c21). There is no `.todo/todo-lint.sh`, so I checked I1–I10 by reading and found no violations.
+
+**`/todo-continue`**
+- **Selected node:** `FEAT-002` — Add a multiply function to calc.py with a test. `FEAT-001` was skipped because it is claimed by `todo/FEAT-001-peer-work`. That branch doesn't exist in this clone, so it is a teammate's claim.
+- **Baseline:** `python3 -m unittest discover -s tests` passes, with 1 test.
+- **Branch:** `todo/FEAT-002-add-multiply-function-calc`.
+- **Tree claim:** `4ba6673` `chore(backlog): claim FEAT-002 on todo/FEAT-002-add-multiply-function-calc`, fast-forwarded into `main`.
+- **Start commit:** `b328298` `chore(backlog): start FEAT-002`. FEAT-002 is now `[/]`, with `State: attempts 0/3; baseline 1 passing; branch … from main; next: read docs`.
+- **Checked-out branch:** `todo/FEAT-002-add-multiply-function-calc`.
+- **Not done:** no code was written and nothing was pushed.
+- **Next workable node:** `FEAT-003` (divide) after this one. `FEAT-004` waits on `FEAT-002`.
+- **Suggestion:** clear context before the build.
+
+## (2) Ambiguities
+
+1. **Which side counts as "already published."**
+   - Quote: "If two roots share an ID, keep the one already published (in a pull: the incoming side)".
+   - It is clear for a pull, which is what this was.
+   - Resolution: I kept the incoming side as `FEAT-003`.
+2. **The renumbered root's position in the file.**
+   - Quote: "keep the core's root order".
+   - The core orders by priority, then by ID number. It doesn't say whether file order must follow that, or whether P1 `FEAT-003` has to come before P2 `FEAT-004`.
+   - Resolution: I put `FEAT-003` (P1) before `FEAT-004` (P2), which also matches ID order.
+3. **No lint script, and "lint" after the merge.**
+   - Quote: "otherwise check I1-I10 by reading".
+   - The task says "lint", but `.todo/todo-lint.sh` doesn't exist.
+   - Resolution: I checked by reading.
+4. **Tree-claim `State:` for a leaf root.**
+   - Quote: "leaf root: `next: start <ROOT-ID>`".
+   - Step 5 then says to replace the line wholesale. The claim line has no `attempts` or `baseline` yet.
+   - Resolution: I wrote the claim as specified, then replaced it at the start commit.
+5. **Claim commit and the pull merge.** Local `main` was ahead of origin and had a merge commit. The claim fast-forward still worked, but nothing says whether claims should wait until a pull is pushed.
+   - Resolution: none needed; I proceeded.
+6. **Slug rule with "calc.py".**
+   - Quote: "turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`)... keep the first 4 words".
+   - The result is `add-multiply-function-calc`.
+   - Resolution: I applied it literally; it is clear.
+7. **Skipping a claimed tree when the claiming branch isn't local.**
+   - Quote: "A skipped claimed tree is reported as `claimed by <branch>`".
+   - The branch doesn't exist here and nothing says to treat the claim as stale.
+   - Resolution: I treated the claim as a teammate's, because "Stale claim" only covers a claim that was in the base's TODO.md for a branch that "no longer exists in this clone". This claim arrived through the pull, so it may be live on the remote.
+   - This case is borderline: the stale-claim rule and the "claimed by another branch" rule both seem to apply.
+8. **Commit trailer versus the attribution reminder.** The skill's commit format has no co-author line, while the system prompt asks for one.
+   - Quote: "backlog commits (`chore(backlog): …`) have no body except `Refs:`…".
+   - Resolution: I followed the skill and left the trailer off the backlog commits, since the skill's rule is explicit.
+9. **Tool-use instruction versus Bash for edits.** The core says "Prefer native file tools", but `sed -i` was the quickest way to change the marker and the State line.
+   - Resolution: I used `sed` for the start edit and re-read the result with `grep`.

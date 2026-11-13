@@ -1,0 +1,13 @@
+PASS  no .pyc tracked
+PASS  no tag created
+PASS  new commit subjects are conventional or merges
+PASS  node commits carry Refs: and Reviewed: trailers
+PASS  merge commits use the skill message
+PASS  lint passes on the checked-out branch
+PASS  the node's branch is checked out and FEAT-001 is [!] with a Blocked line
+PASS  the block is committed as chore(backlog): block FEAT-001 and the tree is clean
+PASS  the frozen-interface test is untouched and no test is skipped
+PASS  Done when is unchanged
+PASS  main holds only the claim: no subtract, no drain, no merge
+
+11 passed, 0 failed

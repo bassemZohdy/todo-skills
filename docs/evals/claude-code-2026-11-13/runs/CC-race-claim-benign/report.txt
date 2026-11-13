@@ -1,0 +1,43 @@
+## 1. Report
+
+**FEAT-001: Add a subtract function to calc.py with a test.** I stopped after the start commit, as instructed. No code or tests were written.
+
+- **Baseline:** `python3 -m unittest discover -s tests` ran 1 test and it passed. I ran it twice, on `main` and again on the root branch after the rebase. Both runs passed.
+- **Branch and commits:** `todo/FEAT-001-add-subtract-function-calc`, a leaf root, so this branch is also the node's branch. HEAD is `84bf6d4 chore(backlog): start FEAT-001`.
+  - `dffa98d` is the claim commit, `chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc`.
+  - `main` was fast-forwarded to `dffa98d`.
+- **Race:** the `post-checkout` hook advanced `main` with `0b9ad9c docs: touch readme (race)` as soon as I created the branch. The first fast-forward therefore failed.
+  - `main`'s `TODO.md` had no `State:` line, so the root was not claimed by anyone else and the base had only moved.
+  - I ran `git rebase main <root branch>`, then `git merge --ff-only` on `main`, which succeeded.
+  - The base change touched only `README.md`, so I retook the baseline.
+- **Files changed:** `TODO.md` only (state `[/]`, `State: attempts 0/3; baseline 1 passing; branch todo/FEAT-001-add-subtract-function-calc from main; next: read docs`).
+- **Checked-out branch:** `todo/FEAT-001-add-subtract-function-calc`. The tree is clean.
+- **Not applicable or not run:** `Done when` was not run (the stop point is before the build). The root merge and the CHANGELOG drain did not happen.
+- **Adjacent problems:** the "Race note." line the hook added to `README.md` is not part of this task and I left it alone. I have no `/todo-add` suggestion for it.
+- **Next workable node:** FEAT-001 itself, resumed at `next: read docs`. Clear context before continuing.
+
+## 2. Ambiguities and contradictions
+
+1. **Worktree-based `git-flow-edge` pointer vs. `Done when` test id.**
+   - Text: "`python3 -m unittest tests.test_calc.CalcTest.test_subtract`" (the `Done when`) against the README's `python3 -m unittest discover -s tests`.
+   - `tests/` has no `__init__.py`, so `tests.test_calc` only resolves as a namespace package from the repo root.
+   - I did not run the `Done when` because I stopped early, so I could not confirm it works.
+   - The skill has no rule for checking that a `Done when` is runnable before the start.
+2. **Lint when no `.todo/todo-lint.sh` exists.**
+   - Text: "otherwise check I1-I10 by reading".
+   - This is clear, but I had to check I1-I10 by hand after each edit. I did that mentally and did not report a result for each check.
+3. **"Failed fast-forward" classification.**
+   - Text: "**Lost or collided:** the root's `State:` there names another branch…" and "**The base only moved:** `git rebase <base> <root branch>`…".
+   - It does not say how to treat a base that moved only in non-backlog files. I treated it as "only moved" and retook the baseline, which the text covers ("If the base changed any file other than backlog files, take the baseline again").
+4. **Which baseline run counts.**
+   - Text: "Run the regression command … before its branch exists" (step 3), against "take the baseline again on the root branch" (the edge file).
+   - The pre-branch baseline became stale because of the race. I used the second run (on the root branch) as the recorded one. It had the same count of 1, so nothing changed.
+5. **Tree claim `State:` on a leaf root.**
+   - Text: "`next: start <ROOT-ID>`" in the claim, then step 5's "(replacing one that exists)".
+   - This is consistent. Step 5's `attempts 0/3; …` list does not mention the claim's `next:` value, but replacing the line resolves it.
+6. **Slug rule.**
+   - Text: "turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`)… keep the first 4 words that remain".
+   - The remaining words are add, subtract, function, calc, py, test, so the slug is `add-subtract-function-calc`. This is unambiguous, but the example makes the 4-word cutoff land right after `calc`.
+7. **Windows line endings.**
+   - Text: "keep the file's line endings and final newline".
+   - `TODO.md` used LF, so no conversion was needed. I did not check for a final newline in the original. My script preserved it by stripping trailing newlines and re-adding one.

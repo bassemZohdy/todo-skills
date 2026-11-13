@@ -36,6 +36,20 @@ install command, for example `openclaw skills install @bassemzohdy/todo-core`.
 - **Not done:** an install from ClawHub on a clean OpenClaw was not run, and no OpenClaw trial exists, so the README does not
   claim OpenClaw support beyond the listing.
 
+## Other directories checked (2026-11-13)
+
+Registered: skills.sh, ClawHub, agent-skills.md and Skills Directory (table above), plus the GitHub topics that the
+crawler-fed sites read. Not registered, and why:
+
+| Directory | Result |
+|---|---|
+| claudeskills.info | The submit page says "Skill submission coming soon" and has no form, even when signed in. Retry later. Whether its crawler picked the repository up was not checked. |
+| Smithery | Shut down for accounts, API keys and the CLI on 2026-10-31; only a public MCP directory remains. |
+| LobeHub | The only route is a "Request a Skill" form behind a Cloudflare Turnstile bot check, which an agent must not complete. Owner action if wanted. |
+| skillhub.club, mcpmarket.com, skillsplayground.com | Not opened: upload of a `SKILL.md`, MCP-server focus, and a README badge requirement. |
+| aiagentsdirectory.com, clawtools.com | Paid listings, skipped. |
+| SkillsMP, claudemarketplaces.com, claude-plugins.dev, claudepluginhub.com | Crawl GitHub with no submit step; whether they list the repository was not verified. |
+
 ## Anthropic directory submission
 
 First submission, refused by directory policy (source was the repository root): 2026-11-07 · https://claude.ai/directory/manage/plugins/1aa64a1d-da6d-4226-bcaa-a5d444c86cd9

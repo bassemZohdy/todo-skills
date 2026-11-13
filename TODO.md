@@ -4,7 +4,7 @@
 
 - [/] **TASK-075** · P1 · mid · Record real runs of the agent benchmark: docs/evals/benchmark has six scenarios and three arms but results.csv holds only its header, so COMPARISON.md still rests on reviewer estimates made for 0.2.0
   - Done when: results.csv has a row per arm and scenario with checksummed evidence, and a row whose evidence is missing fails the harness check; `bash tests/trials/test-benchmark-harness.sh`
-  - State: attempts 0/3; baseline 244 passing; branch todo/TASK-075-record-real-runs-agent from main; next: read docs
+  - State: attempts 1/3; baseline 244 passing; hyp: a rename left one use of the old variable in publish.sh add; branch todo/TASK-075-record-real-runs-agent from main; next: read docs
 - [ ] **FIX-104** · P1 · low · Say in todo-continue step 11 what a red-baseline stop reports as the next workable node and as the regression result, since no green baseline exists to compare against
   - Done when: step 11 names the red-baseline case and a pin in tests/run.sh fails without it; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#seen-not-changed

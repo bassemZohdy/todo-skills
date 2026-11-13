@@ -130,7 +130,34 @@ STUB_MODE=noop run "$bench/arms/no-methodology" 1-bugfix "$tmp/runs"
 bash "$bench/summarize.sh" "$csv" > "$tmp/summary.txt" 2>&1
 grep -q 'median' "$tmp/summary.txt" && grep -q 'mean' "$tmp/summary.txt" && grep -q 'spread' "$tmp/summary.txt" && grep -q 'no-methodology' "$tmp/summary.txt" \
   && ok "summarize.sh reports median, mean and spread per arm and scenario" || bad "summarize.sh: $(head -5 "$tmp/summary.txt")"
-[ "$(wc -l < "$bench/results/results.csv" | tr -d ' ')" = 1 ] && ok "the published results file holds only its header (no simulated rows)" || bad "results/results.csv has rows that no recorded run produced"
+# TASK-075: published real runs (publish.sh). The repository's table has a scored row for every arm and scenario and the
+# evidence of every row verifies. With the stub runs above as the source: a published row verifies, a row whose evidence is
+# missing or changed fails the check, and a run without evidence, or one published before, is refused and writes nothing.
+pubsh="$bench/publish.sh"; pub="$tmp/pub/results.csv"
+if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: every arm and scenario has a scored row and every row's evidence verifies"
+else bad "published results (TASK-075): $(tail -3 "$tmp/pub-repo.txt" | tr '
+' ' ')"; fi
+mkdir -p "$tmp/pub"; head -1 "$bench/results/results.csv" > "$pub"
+nsrc="$(($(wc -l < "$csv") - 1))"
+if BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" ../runs > "$tmp/pub-add.txt" 2>&1 && [ "$(($(wc -l < "$pub") - 1))" = "$nsrc" ]    && BENCH_RESULTS="$pub" bash "$pubsh" check > "$tmp/pub-check.txt" 2>&1; then ok "publish.sh add publishes every run of a table and the published rows verify"
+else bad "publish.sh add or check: $(tail -2 "$tmp/pub-add.txt" "$tmp/pub-check.txt" 2>/dev/null | tr '
+' ' ')"; fi
+onerow="$(sed -n 2p "$pub")"; onedir="$tmp/pub/${onerow##*,}"; oneid="${onerow%%,*}"
+mv "$onedir" "$onedir.gone" 2>/dev/null
+out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s
+' "$out" | grep -q "$oneid.*missing" && ok "a row whose evidence is missing fails the check" || bad "missing evidence passed the check: rc=$rc $out"
+mv "$onedir.gone" "$onedir" 2>/dev/null
+printf 'x' >> "$onedir/outcome.txt"
+out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s
+' "$out" | grep -q "$oneid.*changed" && ok "a row whose evidence changed after publishing fails the check" || bad "changed evidence passed the check: rc=$rc $out"
+before="$(wc -l < "$pub")"
+BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" ../runs > "$tmp/pub-dup.txt" 2>&1; rc=$?
+[ "$rc" -ne 0 ] && grep -q "refused: run .* is already published" "$tmp/pub-dup.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run that is already published is refused and nothing is written" || bad "duplicate publish: rc=$rc"
+{ head -1 "$csv"; sed -n 2p "$csv" | sed 's/^[^,]*,/no-such-run,/; s/,[^,]*$/,no-such-arm\/no-such-scenario\/no-such-run/'; } > "$tmp/ghost.csv"
+BENCH_RESULTS="$pub" bash "$pubsh" add "$tmp/ghost.csv" ../runs > "$tmp/pub-ghost.txt" 2>&1; rc=$?
+[ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no evidence" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run without an evidence folder is refused, so no row can be published without evidence" || bad "ghost publish: rc=$rc"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

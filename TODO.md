@@ -13,6 +13,7 @@
 - [ ] **TASK-110** · P2 · mid · Cut the text every /todo-continue run loads: it is about half of the input sent on each model call in the pi benchmark
   - Done when: the /todo-continue row of the load budget in docs/DEVELOPMENT.md is at least 10 percent lower than today and the load check passes with every pinned rule kept; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#cost-where-the-tokens-of-the-skills-arm-go
+  - State: branch todo/TASK-110-cut-text-every-todo from main; next: start TASK-110
 - [ ] **FEAT-111** · P2 · mid · Add a light path for a low leaf root that takes fewer model calls: fold the start commit into the claim commit and skip the refresh when the base has not moved since the claim
   - Done when: the path is in todo-continue and git-flow.md, pinned in tests/run.sh, and the happy-path assertions accept the shorter history; `bash tests/trials/selftest.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13/summary.md#cost-where-the-tokens-of-the-skills-arm-go

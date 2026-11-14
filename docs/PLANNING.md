@@ -50,7 +50,7 @@ A lane line in a plan doc reads `<name>: <what it covers>; independent of <lanes
 - A node with any descendant that is not `[ ]` is never dropped, merged or moved.
 - The change is shown as a diff: nodes added, dropped, split, merged, re-rated, re-ordered or moved to another lane, and plan-doc lines changed.
 - IDs are kept. A dropped ID is never reused (the Revisions line names it, and the ID rule counts it), and every `Depends:` or `From:` on it is removed or re-pointed in the same diff.
-- On your yes the change is applied, `- <date> · <your reason, verbatim> · <what changed>` is appended under Revisions, and the lint runs. The plan doc and `TODO.md` must agree afterwards.
+- On your yes the change is applied, `- <date> · <your reason, verbatim> · <what changed>` is appended under Revisions of an existing plan doc, and the lint runs. A revise creates no plan doc; a drop without one offers a doc holding only `## Revisions`, because the Revisions line is what keeps the dropped ID from being reused. A plan doc and `TODO.md` must agree afterwards.
 
 Dropping a single node is also possible with `/todo-update <ID> --status drop --note "<reason>"`, which logs it under Revisions the same way.
 

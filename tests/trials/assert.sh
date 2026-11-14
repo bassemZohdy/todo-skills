@@ -125,7 +125,7 @@ monorepo)
   chk "a task mentions the api package power work" 'grep -qi "power" TODO.md || git log --all --format=%s | grep -qi power'
   chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'
   chk "FEAT-001 drained on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'
-  chk "a power test exists on main" 'git grep -q "def test_power" main -- packages/api'
+  chk "a power test exists on main" 'git grep -Eq "def test_[a-z0-9_]*power" main -- packages/api'
   chk "main checked out, tree clean (README Tests line committed)" '[ "$(git branch --show-current)" = main ] && clean'
   chk "no todo branches left" '[ -z "$(git branch --list "todo/*")" ]'
   chk "nothing outside packages/api, backlog files and the README Tests line changed on main" '[ -z "$(git diff --name-only $(git rev-list --max-parents=0 HEAD) main -- . | grep -v -e TODO.md -e CHANGELOG.md -e .claude -e packages/api/ -e "^README.md$")" ]'
@@ -179,7 +179,7 @@ dirty-tree)
   # As for baseline-red, the repository alone proves nothing: the report must say why the command stopped.
   rep="${TRIAL_REPORT:-}"
   chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
-  chk "report says the tree is not clean and offers commit, stash or --worktree" '[ -s "$rep" ] && grep -Eiq "clean|uncommitted" "$rep" && grep -Eiq "stash|worktree" "$rep"'
+  chk "report says the tree is not clean and offers commit, stash or --worktree" '[ -s "$rep" ] && grep -Eiq "clean|uncommitted|working.tree" "$rep" && grep -Eiq "stash|worktree" "$rep"'
   ;;
 plan-stop)
   chk "the node's branch is checked out with claim, start and plan commits" 'git branch --show-current | grep -Eq "^todo/FEAT-001-[a-z0-9-]+$" && git log --format=%s $start..HEAD | tr "\n" "|" | grep -Eq "^chore\(backlog\): plan FEAT-001\|chore\(backlog\): start FEAT-001\|chore\(backlog\): claim FEAT-001 on todo/FEAT-001-[a-z0-9-]+\|$"'
@@ -217,7 +217,7 @@ no-git)
 add-fix)
   chk "a P0 FIX-002 root with a complexity (one global ID sequence)" 'grep -Eq "^- \[ \] \*\*FIX-002\*\* · P0 · (low|mid|high) · " TODO.md'
   chk "FIX-002 placed before the P1 root" '[ "$(grep -o "^- \[ \] \*\*[A-Z]*-[0-9]*" TODO.md | head -1)" = "- [ ] **FIX-002" ]'
-  chk "its Done when targets a test id" 'grep -A1 "FIX-002\*\*" TODO.md | grep -Eq "Done when: .*\`python3 -m unittest tests\.test_calc\.[A-Za-z]+\.test_[a-z_]+\`"'
+  chk "its Done when targets a test id" 'grep -A1 "FIX-002\*\*" TODO.md | grep -Eq "Done when: .*\`(cd tests && )?python3 -m unittest (tests\.)?test_calc\.[A-Za-z]+\.test_[a-z_]+\`"'
   chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
   chk "no code changed, nothing committed" 'unchanged && git diff --quiet -- calc.py tests'
   ;;

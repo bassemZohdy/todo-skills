@@ -957,6 +957,9 @@ printf 'import sys\nprint("| a |")\n' > "$tkt/tests/benchmark/tokens.py"; printf
 printf 'mail me at someone@example.com. Costs $5.\n<!-- tokens:begin -->\n| b |\n<!-- tokens:end -->\n' > "$tkt/docs/evals/token-cost-2026-01-01.md"
 tk_t="$(tokcheck "$tkt")"; rm -rf "$tkt"
 if [ "$(printf '%s\n' "$tk_t" | grep -c '^TOK')" -eq 4 ]; then ok "the breakdown check fails a mail address, an unlabelled figure and a stale table"; else bad "the breakdown check missed a gap: $tk_t"; fi
+# TASK-124: three trial assertions accept what Codex agents did while following the skill (2026-11-14): a Done when run from tests/, a test named with its ID, a report that says "working tree".
+ta="$root/tests/trials/assert.sh"
+if grep -qF '(cd tests && )?python3 -m unittest (tests\.)?test_calc' "$ta" && grep -qF 'def test_[a-z0-9_]*power' "$ta" && grep -qF 'clean|uncommitted|working.tree' "$ta"; then ok "assert.sh accepts a Done when run from tests/, a test named with its ID and a report that says working tree (TASK-124)"; else bad "assert.sh still rejects one of the three forms Codex used (TASK-124)"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

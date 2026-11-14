@@ -843,6 +843,18 @@ for t in codex linux-codex windows-codex fix existing-project lane-concurrency; 
   ! grep -qF "test-$t-evidence.sh" "$root/tests/trials/README.md" || ev_bad="$ev_bad README(test-$t-evidence.sh)"
 done
 if [ -z "$ev_bad" ]; then ok "no test verifies committed evidence (TASK-121.3)"; else bad "tests of committed evidence remain:$ev_bad"; fi
+# TASK-121.4, TASK-121.5: the docs point at the summary of a batch (or a results CSV), never into the folders of its evidence,
+# and none calls what docs/evals holds retained or checksummed evidence.
+evcheck() {   # <file>...: prints one line per problem
+  local f
+  for f in "$@"; do
+    grep -oE '(docs/)?evals/[A-Za-z0-9._-]+/[A-Za-z0-9._/#-]*' "$root/$f" \
+      | grep -vE '^(docs/)?evals/[A-Za-z0-9._-]+/(summary\.md(#[A-Za-z0-9_-]*)?|results(/[A-Za-z0-9._/-]*)?)$' | sed "s#^#$f: #"
+    ! grep -qiE 'retained evidence|retained, checksummed|checksummed trial evidence' "$root/$f" || echo "$f: calls docs/evals retained or checksummed evidence"
+  done
+}
+ev_out="$(evcheck README.md docs/trials.md tests/trials/README.md)"
+if [ -z "$ev_out" ]; then ok "README.md, docs/trials.md and tests/trials/README.md point at batch summaries, not evidence folders (TASK-121.4)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

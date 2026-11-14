@@ -19,10 +19,9 @@
     - Links: Depends: TASK-121.1
   - [x] **TASK-121.3** · low · Delete the six tests that verify committed evidence (test-codex-evidence.sh, test-linux-codex-evidence.sh, test-windows-codex-evidence.sh, test-fix-evidence.sh, test-existing-project-evidence.sh, test-lane-concurrency-evidence.sh) and their rows in tests/trials/README.md
     - Done when: none of the six files exists and tests/trials/README.md names none of them; `bash tests/run.sh`
-  - [/] **TASK-121.4** · low · Point README.md, docs/trials.md and tests/trials/README.md at summary.md files and results CSV files instead of evidence folders
+  - [x] **TASK-121.4** · low · Point README.md, docs/trials.md and tests/trials/README.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the three links into a docs/evals batch folder other than its summary.md or a results CSV, or calls its contents retained evidence; `bash tests/run.sh`
     - Links: Depends: TASK-121.3
-    - State: attempts 0/3; baseline 253 passing; branch todo/TASK-121.4-readme-links-to-results from todo/TASK-121-results-only; next: read docs
   - [ ] **TASK-121.5** · low · Point docs/agent-compatibility.md, docs/COMPARISON.md, docs/DEVELOPMENT.md and docs/distribution.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the four links into a docs/evals batch folder other than its summary.md or a results CSV, or calls its contents retained evidence; `bash tests/run.sh`
     - Links: Depends: TASK-121.3

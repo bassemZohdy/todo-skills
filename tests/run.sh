@@ -456,6 +456,18 @@ for sk125 in todo-add todo-update todo-plan; do
 done
 if [ -z "$d125" ]; then ok "todo-add, todo-update and todo-plan add the lane line when they use a lane the Lanes section does not declare (FEAT-125.4)"; else bad "undeclared lane rule missing from (FEAT-125.4):$d125"; fi
 
+# A file with a Lanes section (FEAT-125.6): the stop hook, the report generator and the replay script accept it (verify reads
+# no backlog file), and this repository's own TODO.md declares its lane.
+lz="$(mktemp -d)"; l6_bad=""
+cp "$fx/ok-lanes.md" "$lz/TODO.md"; printf '# Changelog\n\n## [Unreleased]\n' > "$lz/CHANGELOG.md"
+( cd "$lz" && git init -q && git config user.email t@example.invalid && git config user.name t && git add -A && git commit -qm base ) >/dev/null 2>&1
+out="$(cd "$lz" && printf '{}' | bash "$hook")"; [ -z "$out" ] || l6_bad="$l6_bad hook"
+out="$(cd "$lz" && printf 'project: x\n' | bash "$root/tools/todo-report.sh")"; printf '%s' "$out" | grep -qF 'the HTTP service' || l6_bad="$l6_bad report"
+out="$(cd "$lz" && bash "$root/tools/todo-replay.sh" HEAD 2>&1)"; [ $? -eq 0 ] && printf '%s' "$out" | grep -q 'nothing to replay' || l6_bad="$l6_bad replay"
+rm -rf "$lz"
+grep -qE '^## .*Lanes$' "$root/TODO.md" && grep -qE '^- main: ' "$root/TODO.md" && ! bash "$root/tools/todo-lint.sh" "$root/TODO.md" "$root/CHANGELOG.md" 2>&1 | grep -q '^WARN W9' || l6_bad="$l6_bad repo-TODO.md"
+if [ -z "$l6_bad" ]; then ok "the stop hook, report generator and replay script accept a Lanes section, and this repository's TODO.md declares its lane (FEAT-125.6)"; else bad "Lanes section in the scripts (FEAT-125.6):$l6_bad"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

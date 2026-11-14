@@ -13,7 +13,7 @@
     - Done when: run.sh pins the new template and the offer, and the trial setups that start from an empty backlog expect the section; `bash tests/trials/selftest.sh`
   - [x] **FEAT-125.4** · mid · /todo-add --lane, a Lane edit in /todo-update and /todo-plan add the lane line when they use a lane that is not declared yet
     - Done when: run.sh pins the rule in all three skills and fails when one of them lacks it; `bash tests/run.sh`
-  - [ ] **FEAT-125.5** · mid · /todo-status, /todo-report and the page template show each lane's description from the section
+  - [x] **FEAT-125.5** · mid · /todo-status, /todo-report and the page template show each lane's description from the section
     - Done when: the status page check renders a lane description from a fixture with the section and still renders a fixture without it; `bash tests/run.sh`
   - [ ] **FEAT-125.6** · low · The stop hook, verify, replay and report scripts and the trial fixtures accept a file with the section, and this repository's TODO.md declares its lane
     - Done when: each script passes on a fixture with the section and an untouched trial setup still fails every scenario; `bash tests/trials/selftest.sh`

@@ -532,6 +532,23 @@ if command -v node >/dev/null 2>&1; then
 else
   skip "status page progressLine check (node is not installed)"
 fi
+# Lane descriptions (FEAT-125.5): the status page reads them from the Lanes section (its laneDescriptions function, run under
+# node) and still renders a file without the section; /todo-status and /todo-report say so.
+if command -v node >/dev/null 2>&1; then
+  ljs="$(sed -n '/^\/\/ ---- lanes/,/^\/\/ ---- end lanes/p' "$root/tools/template.html")"
+  lgot="$(printf '%s
+%s
+' "$ljs" 'const fs=require("fs");const a=laneDescriptions(fs.readFileSync(process.argv[2],"utf8")),b=laneDescriptions(fs.readFileSync(process.argv[3],"utf8"));process.stdout.write(a.api+"|"+a.web+"|"+Object.keys(b).length)' | node - "$fx/ok-lanes.md" "$fx/ok-valid.md" 2>&1)"
+  if [ -n "$ljs" ] && [ "$lgot" = "the HTTP service|the browser client|0" ]; then ok "status page laneDescriptions reads the Lanes section and returns nothing for a file without it (FEAT-125.5)"; else bad "status page laneDescriptions: got '$lgot' (FEAT-125.5)"; fi
+else
+  skip "status page laneDescriptions check (node is not installed)"
+fi
+l5_bad=""
+grep -qF 'laneDescriptions(raw(' "$root/tools/template.html" && grep -qF 'laneDesc[name]' "$root/tools/template.html" || l5_bad="$l5_bad page"
+grep -qF 'description from the `## 🛤️ Lanes` section' "$root/plugin/skills/todo-status/SKILL.md" || l5_bad="$l5_bad todo-status"
+grep -qF '`## 🛤️ Lanes` section' "$root/plugin/skills/todo-report/SKILL.md" || l5_bad="$l5_bad todo-report"
+if [ -z "$l5_bad" ]; then ok "the status page draws lane descriptions and /todo-status and /todo-report say where they come from (FEAT-125.5)"; else bad "lane descriptions in the status views (FEAT-125.5):$l5_bad"; fi
+
 st="$root/plugin/skills/todo-status/SKILL.md"
 if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
 # FEAT-042.4: the docs describe the three progress views and the issue 5 decision.

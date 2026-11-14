@@ -14,6 +14,7 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../../doc
 | `scenarios/<id>/prepare.sh` | Optional. The controller runs it after the start commit. Scenario 5 uses it to leave an interrupted session behind. |
 | `hidden/<id>/accept.sh`, `hidden/<id>/test_accept.py`, `hidden/lib.sh` | Hidden acceptance tests. The verifier runs them; they never enter the agent's repository. |
 | `arms/<name>/arm.md`, `arms/<name>/setup.sh` | A methodology: instructions placed before the requirement, plus an optional setup script run before the start commit. |
+| `variants/todo-skills-flow/` | Not a methodology of its own: the `todo-skills` arm with the optional helper `tools/todo-flow.sh` copied to `.todo/` (FEAT-129). Pass the folder to `run.sh` as the arm; it is outside `arms/`, so the coverage check does not ask for its rows |
 | `agents/codex.sh`, `agents/claude.sh`, `agents/pi.sh` | Adapters. Each starts one fresh agent process with `<repo> <prompt-file> <report-file>`. |
 | `run.sh` | Runner: one run of one arm on one scenario. |
 | `verify.sh` | Trusted verifier. |

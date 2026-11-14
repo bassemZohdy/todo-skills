@@ -15,7 +15,7 @@
     - Done when: scratch-repository checks pass for a child, a leaf root, a parent root with its Includes list and a merge conflict left for recovery; `bash tests/run.sh`
   - [x] **FEAT-129.3** · low · `/todo-continue` uses `.todo/todo-flow.sh` when it exists and works unchanged without it; the core, SECURITY.md and the docs list the script as optional and say what it writes
     - Done when: the skill text names the helper and its fallback, every load budget holds and the docs checks pass; `bash tests/run.sh`
-  - [ ] **FEAT-129.4** · mid · The trial setup and a benchmark arm can install the helper, and a scripted lifecycle run through the helper passes the existing `happy-path` and `decompose` follow-up assertions unchanged
+  - [x] **FEAT-129.4** · mid · The trial setup and a benchmark arm can install the helper, and a scripted lifecycle run through the helper passes the existing `happy-path` and `decompose` follow-up assertions unchanged
     - Done when: the selftest and the harness checks pass with the helper switch on and off; `bash tests/run.sh`
   - [ ] **FEAT-129.5** · mid · Measure the helper with fresh pi agents against a fresh baseline of the same 18 benchmark cells plus the lifecycle trials, and publish the results and the decision
     - Done when: the summary is linked from docs/trials.md, its run rows are in the published table and the token table is regenerated; `bash tests/run.sh`

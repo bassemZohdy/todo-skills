@@ -1062,6 +1062,18 @@ fl_out="$(bash "$root/tests/flow.sh" 2>&1)"
 printf '%s\n' "$fl_out" | grep -E '^(PASS|FAIL)  '
 pass=$((pass + $(printf '%s\n' "$fl_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$fl_out" | grep -c '^FAIL  ')))
 printf '%s\n' "$fl_out" | grep -q '^PASS  ' || bad "tests/flow.sh ran no check: $(printf '%s' "$fl_out" | tail -3 | tr '\n' ' ')"
+# FEAT-129.3: /todo-continue names the optional helper and the fallback by hand, the core lists it among the optional
+# scripts as the one that writes, and the tools page and the README describe it.
+fh_bad=""
+fh_c="$(tr -d '\r' < "$root/plugin/skills/todo-continue/SKILL.md")"
+printf '%s\n' "$fh_c" | grep -F '`.todo/todo-flow.sh`' | grep -q 'by hand' || fh_bad="$fh_bad [todo-continue names the helper and the fallback by hand]"
+for w in start complete drain; do printf '%s\n' "$fh_c" | grep -F '`.todo/todo-flow.sh`' | grep -qF "\`$w\`" || fh_bad="$fh_bad [todo-continue: $w]"; done
+grep -F '`todo-flow.sh`' "$root/plugin/skills/todo/SKILL.md" | grep -q 'commits' || fh_bad="$fh_bad [core lists the helper as the script that makes commits]"
+fh_t="$(tr -d '\r' < "$root/docs/TOOLS.md" | awk '/^## `todo-flow.sh`/ { on = 1; next } /^## / { on = 0 } on')"
+for w in start complete drain; do printf '%s\n' "$fh_t" | grep -q "todo-flow.sh $w" || fh_bad="$fh_bad [TOOLS.md: $w]"; done
+printf '%s\n' "$fh_t" | grep -q 'by hand' || fh_bad="$fh_bad [TOOLS.md: what a refusal means]"
+grep -q 'todo-flow.sh' "$root/README.md" || fh_bad="$fh_bad [README]"
+if [ -z "$fh_bad" ]; then ok "the skills, the tools page and the README describe the optional lifecycle helper and its fallback (FEAT-129.3)"; else bad "helper text (FEAT-129.3):$fh_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

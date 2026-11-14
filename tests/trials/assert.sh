@@ -196,7 +196,7 @@ decompose)
   chk "broken down, not built: no branch, no commit, no code" 'unchanged && git diff --quiet -- calc.py tests && [ -z "$(git status --porcelain | grep -v "^ M TODO.md$")" ]'
   ;;
 plan-inline)
-  chk "TODO.md holds at least three tasks, each open with a Done when that runs a unittest command" '[ "$(grep -Ec "^ *- \[ \] \*\*(FEAT|FIX|TASK)-[0-9]+" TODO.md)" -ge 3 ] && [ "$(grep -c "^ *- Done when: .*python3 -m unittest " TODO.md)" -ge 3 ]'
+  chk "TODO.md plans subtract, multiply and divide in open tasks whose Done when runs a unittest command (one leaf or three: the scope rule decides)" '[ "$(grep -Ec "^ *- \[ \] \*\*(FEAT|FIX|TASK)-[0-9]+" TODO.md)" -ge 1 ] && [ "$(grep -c "^ *- Done when: .*python3 -m unittest " TODO.md)" -ge 1 ] && grep -qi subtract TODO.md && grep -qi multiply TODO.md && grep -qi divide TODO.md'
   chk "the plan is inline: a Lanes section declaring main above the Task Tree" 'awk "/^## .*Lanes\$/ {l=NR} /^- main: / {m=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && t > m)}" TODO.md'
   chk "no plan doc and no Ref were written" '[ ! -e docs/plans ] && ! grep -q "Ref:" TODO.md'
   chk "the lint finds no violation and no undeclared lane" 'out="$(bash "$root/tools/todo-lint.sh" TODO.md CHANGELOG.md 2>&1)" && ! printf "%s" "$out" | grep -q "^WARN W9"'
@@ -226,6 +226,14 @@ add-fix)
   chk "a P0 FIX-002 root with a complexity (one global ID sequence)" 'grep -Eq "^- \[ \] \*\*FIX-002\*\* · P0 · (low|mid|high) · " TODO.md'
   chk "FIX-002 placed before the P1 root" '[ "$(grep -o "^- \[ \] \*\*[A-Z]*-[0-9]*" TODO.md | head -1)" = "- [ ] **FIX-002" ]'
   chk "its Done when targets a test id" 'grep -A1 "FIX-002\*\*" TODO.md | grep -Eq "Done when: .*\`(cd tests && )?python3 -m unittest (tests\.)?test_calc\.[A-Za-z]+\.test_[a-z_]+\`"'
+  chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
+  chk "no code changed, nothing committed" 'unchanged && git diff --quiet -- calc.py tests'
+  ;;
+add-lane)
+  chk "a FEAT-002 root in lane math with a complexity" 'grep -Eq "^- \[ \] \*\*FEAT-002\*\* · P[0-2] · (low|mid|high) · " TODO.md && grep -A3 "^- \[ \] \*\*FEAT-002\*\*" TODO.md | grep -q "Links: .*Lane: math"'
+  chk "the Lanes section declares math with a description, and still main" 'awk "/^## .*Lanes\$/ {l=NR} /^- math: +[^ ]/ {m=NR} /^- main: / {n=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && n > l && t > m && t > n)}" TODO.md'
+  chk "its Done when runs a unittest command" 'grep -A1 "FEAT-002\*\*" TODO.md | grep -Eq "Done when: .*\`(cd tests && )?python3 -m unittest [^\`]+\`"'
+  chk "the lint finds no violation and no undeclared lane" 'out="$(bash "$root/tools/todo-lint.sh" TODO.md CHANGELOG.md 2>&1)" && ! printf "%s" "$out" | grep -q "^WARN W9"'
   chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
   chk "no code changed, nothing committed" 'unchanged && git diff --quiet -- calc.py tests'
   ;;

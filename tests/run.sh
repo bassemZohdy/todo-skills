@@ -471,7 +471,7 @@ if [ -z "$l6_bad" ]; then ok "the stop hook, report generator and replay script 
 # /todo-plan plans inline (TASK-126.1): the lanes and the tree go into TODO.md with no PROJECT.md and no Ref by default, a
 # complex goal is offered one doc per root by the /todo-add rule, and an existing PROJECT.md is still read and edited.
 p126=""; tp126="$root/plugin/skills/todo-plan/SKILL.md"
-for ph in '**Plan inline.**' 'write no plan doc and no `Ref:`' 'more than 6 nodes' '`docs/plans/<ROOT-ID>-<slug>.md`' 'An existing `docs/plans/PROJECT.md` is read'; do
+for ph in '**Plan inline.**' '`main` needs no line, and a single-track plan adds none' 'write no plan doc and no `Ref:`' 'more than 6 nodes' '`docs/plans/<ROOT-ID>-<slug>.md`' 'An existing `docs/plans/PROJECT.md` is read'; do
   grep -qF -- "$ph" "$tp126" || p126="$p126 [$ph]"
 done
 ! grep -qF 'Draft the plan doc `docs/plans/PROJECT.md`' "$tp126" && ! grep -qF 'each root gets `Ref: docs/plans/PROJECT.md`' "$tp126" && ! sed -n 3p "$tp126" | grep -qF 'into a plan doc' || p126="$p126 [old default]"

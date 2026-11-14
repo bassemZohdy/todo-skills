@@ -18,7 +18,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
-| Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
+| Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop` | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |
 
 The expected end state of every scenario is in the table in [tests/trials/README.md](../tests/trials/README.md).
@@ -101,6 +101,10 @@ Later that day TASK-110 cut the text every `/todo-continue` run loads by 12 perc
 Those runs raised wording gaps; FIX-114 (the plan stop, the breakdown and a blocked node) and FIX-115 (six sentences two or more reports called unclear) closed them, and 17 more fresh runs on the reworded text passed: [docs/evals/pi-glm-2026-11-13-wording/summary.md](evals/pi-glm-2026-11-13-wording/summary.md).
 
 Claude Code then ran all 34 scenarios on that text (`claude -p`, Windows 11 with Git Bash, one fresh run each): 32 passed on the first run, `happy-path` failed once because the agent wrote CRLF line endings with a Python script and passed on the rerun, and `ci-local` failed twice because headless Claude Code may not write `.git/hooks` (the skill printed the hook, as it says to). The three newest scenarios passed first time. Codex was probed once and could not run `python3` in its Windows sandbox, so the Codex half stays open (TASK-116). [docs/evals/claude-code-2026-11-13/summary.md](evals/claude-code-2026-11-13/summary.md).
+
+### pi runs on the Lanes section and inline planning (2026-11-14)
+
+FEAT-125 (the optional `## 🛤️ Lanes` section of `TODO.md`) and TASK-126 (`/todo-plan` plans inside `TODO.md`, `/todo-init` only points to it) changed the text of five commands. Fresh pi agents (GLM 5.3) ran six scenarios on it, including the new `plan-inline` and `add-lane`: five passed, and `plan-inline` failed once on an assertion that required three tasks where the agent correctly wrote one leaf; it passed after the assertion and one sentence of `/todo-plan` were corrected. Details, the points the agents found unclear and the limits: [docs/evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md](evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md).
 
 ### Limits of the earlier by-hand runs
 

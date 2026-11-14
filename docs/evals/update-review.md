@@ -60,7 +60,7 @@ The original text was not supplied, only a summary of it. The experiment therefo
 listed features** (a `# Task:` heading, IN_PROGRESS status, `task/<name>` branch and `.worktrees/`, five checkboxes per
 subtask, commit hashes, `## Open Questions`, a session log and `[closes subtask #X]`):
 [`update-review/lean-template.md`](update-review/lean-template.md). `bash tools/todo-lint.sh lean-template.md /dev/null`
-exits 1 with **16 × I3 and 5 × I6** ([output](update-review/lean-template-lint.txt)): the heading and the extra sections
+exits 1 with **16 × I3 and 5 × I6** (output): the heading and the extra sections
 break I6, and the status lines, subtask checkboxes and log lines break I3. So the template cannot share a repository with
 the backlog.
 

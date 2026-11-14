@@ -1,1 +1,0 @@
-bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trials/win-20261108/runs2/race-claim-conflict/repo /c/Users/<user>/todo-trials/win-20261108/runs2/race-claim-conflict/evidence/20261108T114455Z-352169/prompt.txt /c/Users/<user>/todo-trials/win-20261108/runs2/race-claim-conflict/evidence/20261108T114455Z-352169/report.txt   # see codex-exec.sh for the codex flags

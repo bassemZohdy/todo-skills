@@ -1,7 +1,0 @@
-pi 1.5.2
-provider zai
-model glm-5.3
-thinking default
-tools read,powershell,edit,write
-node v24.16.0
-java version "25.0.2" 2026-01-20 LTS

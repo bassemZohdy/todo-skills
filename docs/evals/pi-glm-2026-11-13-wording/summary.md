@@ -1,5 +1,7 @@
 # pi + GLM 5.3: FIX-114 and FIX-115 reruns (2026-11-13)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 The first agent runs of the plan stop, the breakdown of a node and a blocked node (TASK-113, [the load-cut batch](../pi-glm-2026-11-13-load-cut/summary.md)) and the 31 trial reports on the cut text raised wording gaps. FIX-114 and FIX-115 closed them; fresh pi agents reran the scenarios each change touches. Same agent, model and host as the batches before it: pi 1.5.2, `glm-5.3`, Windows 11 with Git Bash, unisolated verifier. One run per scenario and text.
 
 | Text | Change | Scenarios | Result |

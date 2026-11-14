@@ -1,3 +1,0 @@
-      7 Bash
-      1 Read
-      1 Edit

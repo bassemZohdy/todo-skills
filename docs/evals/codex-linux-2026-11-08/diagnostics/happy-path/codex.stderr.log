@@ -1,7 +1,0 @@
-docker : Error: filesystem path `"/prompt` must be absolute, use `~/...`, or start with `:`
-At line:2 char:140
-+ ... appy-path'; docker run --rm --security-opt seccomp=unconfined --mount ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (Error: filesyst... start with `:`:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 

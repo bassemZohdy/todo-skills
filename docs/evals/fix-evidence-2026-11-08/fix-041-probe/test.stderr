@@ -1,9 +1,0 @@
-test_network_denied (test_boundary.Boundary.test_network_denied) ... ok
-test_read_denied (test_boundary.Boundary.test_read_denied) ... ok
-test_workspace_write (test_boundary.Boundary.test_workspace_write) ... ok
-test_write_denied (test_boundary.Boundary.test_write_denied) ... ok
-
-----------------------------------------------------------------------
-Ran 4 tests in 0.047s
-
-OK

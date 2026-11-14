@@ -1,5 +1,7 @@
 # pi + GLM 5.3: fresh-agent trials and benchmark (2026-11-12)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 Fresh [pi](https://github.com/badlogic/pi-mono) agents (pi 1.5.2, provider `zai`, model `glm-5.3`, pi's default thinking level `high`) followed the skills in the 29 trial scenarios and in the agent benchmark that had never been run. Codex 0.167.2 (`gpt-6.1-terra`, read-only, no tools) reviewed the findings and the new scripts. Host: Windows 11, Git Bash, Python 3.13 (Microsoft Store alias), **Node 24 and Java 25** (the repo targets Node 22 and Java 17; the TypeScript and Java scenarios passed anyway).
 
 **What this is not.** A single model family, one host, one run per scenario (four for `blocked-sibling`), three runs per benchmark cell. The trial assertions ran **unisolated** (`TRIAL_WINDOWS_ISOLATION=0`; `verifier.txt` in every run says so), so these results are not equal to the isolated Windows batches in `docs/evals/codex-windows-2026-11-08/`. Nothing here replaces the Claude Code and Codex evidence.

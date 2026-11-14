@@ -1,3 +1,0 @@
-AuthorizationManager check failed.
-    + CategoryInfo          : SecurityError: (:) [], ParentContainsErrorRecordException
-    + FullyQualifiedErrorId : UnauthorizedAccess

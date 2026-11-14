@@ -1,5 +1,7 @@
 # pi + GLM 5.3: second reading, fixes and reruns (2026-11-13)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 The 2026-11-12 batch ([summary](../pi-glm-2026-11-12/summary.md)) fixed eight wording gaps and left the rest of its 33 trial reports unread in detail. This batch read every ambiguity section of those reports, changed the skill text in four pull requests, and reran fresh [pi](https://github.com/badlogic/pi-mono) agents on each version of the new text. Same setup as the day before: pi 1.5.2, provider `zai`, model `glm-5.3`, default thinking level, Windows 11 with Git Bash, Node 24, Java 25, the same isolation flags, the same prompts (`tests/trials/prompt.sh`).
 
 **What this is not.** One model family, one host, one run per scenario and text version. The trial assertions ran **unisolated** (`TRIAL_WINDOWS_ISOLATION=0`), so these results are not equal to the isolated Windows batches. No Claude Code or Codex run was made on the new text. The reruns show that the new text does not break the lifecycle and that the reported ambiguities changed; they are not a controlled A/B test.

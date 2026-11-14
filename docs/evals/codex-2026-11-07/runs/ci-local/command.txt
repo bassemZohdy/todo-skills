@@ -1,1 +1,0 @@
-bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trial-base/codex-runs/ci-local/repo /c/Users/<user>/todo-trial-base/codex-runs/ci-local/evidence/20261107T191808Z-1427/prompt.txt /c/Users/<user>/todo-trial-base/codex-runs/ci-local/evidence/20261107T191808Z-1427/report.txt   # see codex-exec.sh for the codex flags

@@ -1,3 +1,0 @@
-# FIX-041 Windows isolation probes
-
-MXC denied dummy login, evaluator, evidence and sibling reads and writes, permitted scratch Git operations, and ran four native Python boundary checks. Git Bash did not start under MXC (0xc0000142), including outside the outer session sandbox. Elevated sandbox provisioning succeeded, but a minimal command timed out after 15 seconds. Hosted Windows 2022 and 2025 reported MXC unavailable; elevated hosted probes are recorded in the linked run. Results are infrastructure limitations, not a passing verifier. No real credentials were used. The approved local provisioning created Codex sandbox accounts and may change sandbox configuration.

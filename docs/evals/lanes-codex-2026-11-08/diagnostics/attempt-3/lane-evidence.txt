@@ -1,3 +1,0 @@
-worktrees: 2
-events: 6
-execution: concurrent

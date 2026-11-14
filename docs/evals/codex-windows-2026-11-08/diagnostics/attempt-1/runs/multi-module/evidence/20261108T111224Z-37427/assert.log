@@ -1,7 +1,0 @@
-INFO  verifier: windows-assert-exec.sh, elevated Windows sandbox, python C:\Users\<user>\AppData\Local\Programs\Python\Python313\python.exe
-PASS  no .pyc tracked
-PASS  no tag created
-PASS  new commit subjects are conventional or merges
-PASS  node commits carry Refs: and Reviewed: trailers
-PASS  merge commits use the skill message
-runner error: runner pipe closed before exit

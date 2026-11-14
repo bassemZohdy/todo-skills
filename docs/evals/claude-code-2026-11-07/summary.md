@@ -1,11 +1,13 @@
 # Independent Claude Code lifecycle evaluation, 2026-11-07
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 Evaluated commit: `7208627` (exported with `git archive`; `main` later moved to `194a982`, a docs-only backlog commit, which the evaluation did not use).
 Executor: fresh `claude -p` processes (Claude Code 2.1.319, model `claude-sonnet-5-5`), one per scenario invocation, each started with `--setting-sources project,local --strict-mcp-config --no-session-persistence` so no user-level skills, plugins or MCP servers were loaded. The scratch project's own `.claude/skills` were the only todo skills available.
 Verification: `tests/trials/assert.sh` run by the controller after each process ended, from the pinned export. The agents' own reports were not used as verdicts.
 Independence: no Codex result was read before or during execution. `TASK-018` to `TASK-024` (Codex findings, commit `194a982`) were first read after all runs finished, for de-duplication only.
 
-Data: [results.json](results.json) (all 38 runs), per-run folders in [runs/](runs/), checksums in [SHA256SUMS](SHA256SUMS). Logs are redacted (the local user name is replaced by `<user>`); checksums cover the redacted files.
+Data: results.json (all 38 runs), per-run folders in runs/, checksums in SHA256SUMS. Logs are redacted (the local user name is replaced by `<user>`); checksums cover the redacted files.
 
 ## Environment
 

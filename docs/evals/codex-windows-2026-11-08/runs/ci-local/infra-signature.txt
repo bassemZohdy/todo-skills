@@ -1,1 +1,0 @@
-- No CI configuration or remote was found. The pre-push hook was not written because `.git` is read-only in this environment. To install it yourself, create `.git/hooks/pre-push` containing:

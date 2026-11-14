@@ -25,10 +25,9 @@
   - [x] **TASK-121.5** · low · Point docs/agent-compatibility.md, docs/COMPARISON.md, docs/DEVELOPMENT.md and docs/distribution.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the four links into a docs/evals batch folder other than its summary.md or a results CSV, or calls its contents retained evidence; `bash tests/run.sh`
     - Links: Depends: TASK-121.3
-  - [/] **TASK-121.6** · mid · Remove the per-run folders under docs/evals with a script (about 2,900 files, one mechanical change) and turn links to them inside the summaries into plain text
+  - [x] **TASK-121.6** · mid · Remove the per-run folders under docs/evals with a script (about 2,900 files, one mechanical change) and turn links to them inside the summaries into plain text
     - Done when: git ls-files docs/evals lists only Markdown and CSV files and every link inside docs/evals resolves, and tests/run.sh fails on a copy that adds another file type; `bash tests/run.sh`
     - Links: Depends: TASK-121.1, TASK-121.2, TASK-121.4, TASK-121.5
-    - State: attempts 0/3; baseline 255 passing; branch todo/TASK-121.6-remove-evidence-folders from todo/TASK-121-results-only; next: read docs
 - [ ] **TASK-087** · P2 · mid · Widen the Claude Code evidence: every recorded batch ran on Windows 11 with Git Bash, none on Linux or macOS, and no Claude Code lane run has the worker-activity records that prove concurrency (docs/agent-compatibility.md)
   - Done when: a dated docs/evals folder holds a checksummed Linux or macOS batch that agent-compatibility.md cites, and a lane run without worker-activity records fails to read as concurrent; `bash tests/trials/test-lane-evidence.sh`
 - [ ] **TASK-116** · P2 · mid · Rerun the trial scenarios on the revised skill text with Codex: on this Windows host Codex cannot run python3 in its sandbox (probe of 2026-11-13 stopped at the baseline), and a Linux run needs a container with Codex set up in it

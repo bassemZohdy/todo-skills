@@ -2,7 +2,7 @@
 
 The benchmark measures whether a methodology pays for itself. It runs the same six requirements under each of three
 methodology "arms" and compares verified outcomes, tokens, turns and time. The harness doesn't depend on any arm, and
-it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](results/results.csv) holds those runs
+it has been run with one real agent so far (pi with GLM 5.3, [results](../../docs/evals/pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](../../docs/evals/benchmark/results/results.csv) holds those runs
 (see "Published results" and "Status").
 
 ## Layout
@@ -19,8 +19,8 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../pi-glm
 | `verify.sh` | Trusted verifier. |
 | `usage.sh` | Reads token usage from the CLI's own output. |
 | `summarize.sh` | Statistics per arm and scenario. |
-| `publish.sh` | Publishes the runs of a table into `results/results.csv` and checks every published row against its evidence. |
-| `results/results.csv`, `results/sources.csv` | The published real runs, and for each the table it came from and the hash `run.sh` recorded. |
+| `publish.sh` | Publishes the runs of a table into `docs/evals/benchmark/results/results.csv` and checks every published row against its evidence. |
+| `docs/evals/benchmark/results/results.csv`, `sources.csv` | The published real runs, and for each the table it came from and the hash `run.sh` recorded. |
 
 ### Scenarios
 
@@ -50,16 +50,16 @@ From the repository root, on a disposable machine. The verifier runs code the ag
 it in a sandbox. Use a logged-in agent CLI:
 
 ```bash
-export BENCH_AGENT=docs/evals/benchmark/agents/codex.sh BENCH_MODEL=<model>    # or agents/claude.sh
-export BENCH_HIDDEN=/path/outside/the/agents/reach/hidden                    # a copy of docs/evals/benchmark/hidden
+export BENCH_AGENT=tests/benchmark/agents/codex.sh BENCH_MODEL=<model>    # or agents/claude.sh
+export BENCH_HIDDEN=/path/outside/the/agents/reach/hidden                    # a copy of tests/benchmark/hidden
 for rep in 1 2 3; do
   for arm in todo-skills lean-baseline no-methodology; do
     for s in 1-bugfix 2-api-feature 3-security-token 4-multi-module 5-interrupted 6-ambiguous; do
-      bash docs/evals/benchmark/run.sh docs/evals/benchmark/arms/$arm $s ~/bench-runs
+      bash tests/benchmark/run.sh tests/benchmark/arms/$arm $s ~/bench-runs
     done
   done
 done
-bash docs/evals/benchmark/summarize.sh ~/bench-runs/results.csv
+bash tests/benchmark/summarize.sh ~/bench-runs/results.csv
 ```
 
 Keep `~/bench-runs` outside the agent's writable area and outside the temporary folder (see
@@ -114,8 +114,8 @@ whole harness repository.
 `results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row's evidence is missing or changed, or when an arm and a scenario have no scored row.
 
 ```bash
-bash docs/evals/benchmark/publish.sh add <runs>/results.csv <evidence root>   # every run of the table, or none
-bash docs/evals/benchmark/publish.sh check --coverage
+bash tests/benchmark/publish.sh add <runs>/results.csv <evidence root>   # every run of the table, or none
+bash tests/benchmark/publish.sh check --coverage
 ```
 
 - **Evidence.** A run's full evidence folder holds the agent's session and a bundle of its repository, which can name the host and the user. What is committed is a reviewed subset (the report, the verifier log, the usage), kept in the dated folder of its batch under `docs/evals/`. `<evidence root>` is that folder, written relative to `results/`. Copying a whole runs folder here is possible too, but check it for secrets and personal data first.
@@ -128,4 +128,4 @@ The harness is tested with a stub agent: `bash tests/trials/test-benchmark-harne
 was made on 2026-11-12 with pi and GLM 5.3 (`agents/pi.sh`, 3 runs per cell, isolation `provisional`; every cell is in
 `docs/evals/pi-glm-2026-11-12/benchmark/results.csv`). On 2026-11-13 only the `todo-skills` arm was rerun, on the text with the leftover-work rule (FEAT-100): `5-interrupted`, which it had failed 3 of 3, passed 6 of 6; the decision record asked for above is in `docs/evals/pi-glm-2026-11-13/summary.md`. The arm was run once more on the text with the cut load (TASK-110), one run per scenario: 6 of 6 passed, and the input tokens did not fall measurably (`docs/evals/pi-glm-2026-11-13-load-cut/summary.md`). No Claude Code or Codex run has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
 todo-skills arm needs (TASK-045: 6 of 8 lifecycle runs INFRA_ERROR), and a full protocol is 54 or more agent runs, which is
-the maintainer's cost to choose. See [the update review](../update-review.md), Ruling 3.
+the maintainer's cost to choose. See [the update review](../../docs/evals/update-review.md), Ruling 3.

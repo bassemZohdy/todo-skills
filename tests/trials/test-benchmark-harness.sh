@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FEAT-055: self-test of the agent benchmark in docs/evals/benchmark with a stub agent; no real agent runs.
+# FEAT-055: self-test of the agent benchmark in tests/benchmark with a stub agent; no real agent runs.
 # Checks, for every scenario and arm: a correct solution is PASS, doing nothing is FAIL, and each run writes hashed evidence
 # and one CSV row. Then: editing the visible tests cannot pass a scenario (the hidden tests decide), editing the hidden tests
 # or verifier is INFRA_ERROR, a failing or missing agent is INFRA_ERROR, a silent agent is UNVERIFIED, the first attempt is
@@ -9,11 +9,22 @@
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
-bench="$root/docs/evals/benchmark"
+bench="$root/tests/benchmark"
+pubdir="$root/docs/evals/benchmark"
 sol="$here/benchmark-solutions"
 pass=0; fail=0
 ok()  { pass=$((pass + 1)); printf 'PASS  %s\n' "$1"; }
 bad() { fail=$((fail + 1)); printf 'FAIL  %s\n' "$1"; }
+# TASK-121.1: the harness is test code and lives in tests/benchmark; docs/evals/benchmark keeps only the published results.
+if [ "$(ls "$pubdir" 2>/dev/null | tr '
+' ' ')" = "results " ]; then ok "docs/evals/benchmark holds only results/"; else bad "docs/evals/benchmark holds: $(ls "$pubdir" 2>/dev/null | tr '
+' ' ')"; fi
+old='docs/evals/benchmark/(arms|scenarios|hidden|agents|run\.sh|publish\.sh|summarize\.sh|usage\.sh|verify\.sh|README\.md)'
+if git -C "$root" rev-parse --git-dir >/dev/null 2>&1; then
+  stale="$(git -C "$root" grep -lE "$old" -- . ':!CHANGELOG.md' ':!TODO.md' 2>/dev/null | tr '
+' ' ')"
+  if [ -z "$stale" ]; then ok "no tracked file names the old harness path"; else bad "the old harness path is still named in: $stale"; fi
+fi
 [ -f "$bench/run.sh" ] || { echo "FAIL  no benchmark runner at $bench/run.sh"; exit 1; }
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 # A private copy of the hidden tests, so the tamper case below cannot touch the repository's copy.
@@ -137,7 +148,7 @@ pubsh="$bench/publish.sh"; pub="$tmp/pub/results.csv"
 if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: every arm and scenario has a scored row and every row's evidence verifies"
 else bad "published results (TASK-075): $(tail -3 "$tmp/pub-repo.txt" | tr '
 ' ' ')"; fi
-mkdir -p "$tmp/pub"; head -1 "$bench/results/results.csv" > "$pub"
+mkdir -p "$tmp/pub"; head -1 "$pubdir/results/results.csv" > "$pub"
 nsrc="$(($(wc -l < "$csv") - 1))"
 if BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" ../runs > "$tmp/pub-add.txt" 2>&1 && [ "$(($(wc -l < "$pub") - 1))" = "$nsrc" ]    && BENCH_RESULTS="$pub" bash "$pubsh" check > "$tmp/pub-check.txt" 2>&1; then ok "publish.sh add publishes every run of a table and the published rows verify"
 else bad "publish.sh add or check: $(tail -2 "$tmp/pub-add.txt" "$tmp/pub-check.txt" 2>/dev/null | tr '

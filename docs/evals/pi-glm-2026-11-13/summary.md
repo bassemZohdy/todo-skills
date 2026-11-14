@@ -83,7 +83,7 @@ The 2026-11-12 summary measured about 25 times the control's input tokens and le
 - A run makes a median of **29 model calls** (all 18 cells; the control arm 6, `lean-baseline` 13.5). The context is about 6k tokens at the first call and about 49k at the last; the input total is that context re-sent on every call (95% served from cache).
 - So the multiplier is about five times the calls of the control arm at about five times the input per call (a median of 34k tokens per call against 7k). The skill text is about half of that 34k, so both levers count: what is read, and how many calls a node takes.
 
-**Decision record** (asked for by `docs/evals/benchmark/README.md` once real results exist; proposals only, nothing here is implemented):
+**Decision record** (asked for by `tests/benchmark/README.md` once real results exist; proposals only, nothing here is implemented):
 
 1. On these six small tasks `lean-baseline` matched `todo-skills` on hidden-test outcomes (15/18 each on 2026-11-12, before FEAT-100) at about an eighth of the input tokens. What the hidden tests do not measure (a green history, traceability, a drained changelog, resumability) is what the extra calls buy.
 2. Candidates for an optional "light" path for a `low` leaf root, to be decided by the maintainer and tested with trials before any change: fold the start commit into the claim commit (one commit and one status round fewer), skip the refresh when the base has not moved since the claim, and let `todo-init` and `todo-add` share one read of the core in a single session.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Agent benchmark runner (FEAT-055): one fresh-context run of one methodology arm on one scenario, scored by the trusted
 # verifier against hidden acceptance tests. Appends one row to <runs-dir>/results.csv and prints the outcome.
-# Usage: BENCH_AGENT=<adapter> bash docs/evals/benchmark/run.sh <arm-dir> <scenario-id> <runs-dir>
+# Usage: BENCH_AGENT=<adapter> bash tests/benchmark/run.sh <arm-dir> <scenario-id> <runs-dir>
 #   <arm-dir>       any folder with arm.md (instructions put before the requirement; may be empty) and an optional setup.sh
 #   <scenario-id>   a folder name under scenarios/ (1-bugfix ... 6-ambiguous)
 #   <runs-dir>      where evidence goes; keep it outside every folder the agent may write
@@ -20,7 +20,7 @@
 # Exit: 0 when a run was recorded, 2 when it could not start.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "$here/../../.." && pwd)"
+root="$(cd "$here/../.." && pwd)"
 usage() { echo "usage: BENCH_AGENT=<adapter> bash run.sh <arm-dir> <scenario-id> <runs-dir>" >&2; exit 2; }
 arm_dir="${1:-}"; scen="${2:-}"; runs="${3:-}"
 [ -n "$arm_dir" ] && [ -n "$scen" ] && [ -n "$runs" ] || usage
@@ -97,6 +97,6 @@ sum_u() { local k="$1" t=0 v i; for i in $(seq 1 "$a"); do v="$(sed -n "s/^$k=//
   case "$v" in ''|*[!0-9]*) echo unavailable; return ;; esac; t=$((t + v)); done; echo "$t"; }
 dur=0; for i in $(seq 1 "$a"); do dur=$((dur + $(cat "$ev/attempt-$i/duration.txt"))); done
 csv="$runs/results.csv"
-[ -s "$csv" ] || head -1 "$here/results/results.csv" > "$csv"
+[ -s "$csv" ] || head -1 "$root/docs/evals/benchmark/results/results.csv" > "$csv"
 echo "$run_id,$(date -u +%Y-%m-%dT%H:%M:%SZ),$arm,$scen,$(basename "$agent" .sh),$agent_version,$(printf '%s' "$model" | tr ',' ';'),$isolation,$first,$outcome,$a,$ae,${ve:-not run},$dur,$(sum_u input_tokens),$(sum_u output_tokens),$(sum_u cached_tokens),$(sum_u llm_calls),$(sum_u subagent_calls),$evsha,$rel" >> "$csv"
 echo "outcome: $outcome (first attempt: $first, attempts: $a, isolation: $isolation) evidence: $ev"

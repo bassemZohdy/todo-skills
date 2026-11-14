@@ -77,7 +77,7 @@ the backlog.
 Each item is one root, worked through the repository's own workflow.
 
 1. **TASK-054 (A + I), P0:** this review, tests that README's version equals both manifests and the newest CHANGELOG heading and that the README install path exists, and a README line naming each agent with its evidence file. F1 and F8 found no wrong text, so no claim changes.
-2. **FEAT-055 (B), P0:** a benchmark harness in `docs/evals/benchmark/` with six scenarios, three arms, a trusted verifier, a CSV and a stub-agent self-test.
+2. **FEAT-055 (B), P0:** a benchmark harness in `tests/benchmark/` with six scenarios, three arms, a trusted verifier, a CSV and a stub-agent self-test.
 3. **FEAT-056 (C), P1:** two-verdict reviewer `Reviewed: subagent, spec <ok|fail> quality <ok|fail>, <n> findings fixed`, keeping `Reviewed: self, <n> findings fixed`.
 4. **FEAT-057 (D), P1:** optional root review before the drain, reusing the design-review mechanism, which moves into a shared `reference/review.md`.
 5. **FEAT-058 (E), P1:** ambiguity checklist and stop triggers in a new `reference/clarify.md`, loaded by `/todo-plan` and `/todo-add` only when the request is unclear.

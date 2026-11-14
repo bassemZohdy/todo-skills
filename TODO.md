@@ -14,7 +14,7 @@
   - State: branch todo/TASK-121-results-only from main; next: build children
   - [x] **TASK-121.1** · mid · Move the benchmark harness (arms, scenarios, hidden, run.sh, publish.sh, summarize.sh, usage.sh, verify.sh, agents and its README) from docs/evals/benchmark to tests/benchmark, leaving results/ where it is, because tests do not belong under docs
     - Done when: tests/benchmark/run.sh exists, docs/evals/benchmark holds only results/, and no file in the repository names the old harness path; `bash tests/trials/test-benchmark-harness.sh`
-  - [ ] **TASK-121.2** · mid · Make the benchmark publisher independent of evidence folders: publish.sh add and check read only the CSV files, and results.csv drops evidence_dir and keeps evidence_sha256 as the identity of the archive kept on the machine that ran it
+  - [x] **TASK-121.2** · mid · Make the benchmark publisher independent of evidence folders: publish.sh add and check read only the CSV files, and results.csv drops evidence_dir and keeps evidence_sha256 as the identity of the archive kept on the machine that ran it
     - Done when: publish.sh check passes on results.csv with no evidence folder on disk and fails on a row without evidence_sha256; `bash tests/trials/test-benchmark-harness.sh`
     - Links: Depends: TASK-121.1
   - [ ] **TASK-121.3** · low · Delete the six tests that verify committed evidence (test-codex-evidence.sh, test-linux-codex-evidence.sh, test-windows-codex-evidence.sh, test-fix-evidence.sh, test-existing-project-evidence.sh, test-lane-concurrency-evidence.sh) and their rows in tests/trials/README.md

@@ -19,8 +19,8 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../../doc
 | `verify.sh` | Trusted verifier. |
 | `usage.sh` | Reads token usage from the CLI's own output. |
 | `summarize.sh` | Statistics per arm and scenario. |
-| `publish.sh` | Publishes the runs of a table into `docs/evals/benchmark/results/results.csv` and checks every published row against its evidence. |
-| `docs/evals/benchmark/results/results.csv`, `sources.csv` | The published real runs, and for each the table it came from and the hash `run.sh` recorded. |
+| `publish.sh` | Publishes the runs of a table into `docs/evals/benchmark/results/results.csv` and checks the published table (columns, evidence hash, coverage). |
+| `docs/evals/benchmark/results/results.csv` | The published real runs: the results of each run and the hash `run.sh` recorded over its evidence, which stays on the machine that ran it. |
 
 ### Scenarios
 
@@ -111,16 +111,16 @@ whole harness repository.
 
 ## Published results
 
-`results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row's evidence is missing or changed, or when an arm and a scenario have no scored row.
+`results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row has the wrong columns or no valid evidence hash, when a run id is published twice, or when an arm and a scenario have no scored row.
 
 ```bash
-bash tests/benchmark/publish.sh add <runs>/results.csv <evidence root>   # every run of the table, or none
+bash tests/benchmark/publish.sh add <runs>/results.csv   # every run of the table, or none
 bash tests/benchmark/publish.sh check --coverage
 ```
 
-- **Evidence.** A run's full evidence folder holds the agent's session and a bundle of its repository, which can name the host and the user. What is committed is a reviewed subset (the report, the verifier log, the usage), kept in the dated folder of its batch under `docs/evals/`. `<evidence root>` is that folder, written relative to `results/`. Copying a whole runs folder here is possible too, but check it for secrets and personal data first.
-- **Hashes.** A published row is the run's own row with `evidence_dir` pointing at the published folder and `evidence_sha256` computed from that folder's file listing, so a published file that changes or goes missing fails the check. The hash `run.sh` recorded for the complete run is kept in `results/sources.csv` with the table the row came from.
-- **What is in it now** (67 rows, all pi with GLM 5.3, isolation `provisional`): the 56 rows of 2026-11-12 (three arms, three runs per cell, two of them INFRA_ERROR) and the 11 rows of 2026-11-13 (`todo-skills` arm only, on the revised skill text). The `todo-skills` rows therefore mix two versions of the skills: `5-interrupted` is 0 of 3 on the first and 6 of 6 on the second. Summarize a source table, not the published one, when comparing arms.
+- **Results only.** The evidence of a run (the agent's session, a bundle of its repository, prompts, verifier logs) can name the host and the user, and it is not published. It stays on the machine that ran the batch.
+- **Hashes.** A published row is the run's own row without its last field, `evidence_dir`, which is a folder on that machine. Its `evidence_sha256` is the hash `run.sh` recorded over the complete evidence of the run, so whoever holds that evidence can show that it is the one behind the row. Nobody else can check it, and the summaries say so.
+- **What is in it now** (73 rows, all pi with GLM 5.3, isolation `provisional`): the 56 rows of 2026-11-12 (three arms, three runs per cell, two of them INFRA_ERROR) and the 17 rows of 2026-11-13 (`todo-skills` arm only, on the revised skill text). The `todo-skills` rows therefore mix several versions of the skills: `5-interrupted` is 0 of 3 on the first and 6 of 6 on the second. Summarize a source table, not the published one, when comparing arms.
 
 ## Status
 

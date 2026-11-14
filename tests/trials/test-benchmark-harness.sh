@@ -141,34 +141,39 @@ STUB_MODE=noop run "$bench/arms/no-methodology" 1-bugfix "$tmp/runs"
 bash "$bench/summarize.sh" "$csv" > "$tmp/summary.txt" 2>&1
 grep -q 'median' "$tmp/summary.txt" && grep -q 'mean' "$tmp/summary.txt" && grep -q 'spread' "$tmp/summary.txt" && grep -q 'no-methodology' "$tmp/summary.txt" \
   && ok "summarize.sh reports median, mean and spread per arm and scenario" || bad "summarize.sh: $(head -5 "$tmp/summary.txt")"
-# TASK-075: published real runs (publish.sh). The repository's table has a scored row for every arm and scenario and the
-# evidence of every row verifies. With the stub runs above as the source: a published row verifies, a row whose evidence is
-# missing or changed fails the check, and a run without evidence, or one published before, is refused and writes nothing.
+# TASK-075, TASK-121.2: published real runs (publish.sh). The evidence of a run stays where it ran, so the published table is
+# checked on its own: every row has the published columns and a recorded evidence hash (the identity of that evidence), the
+# repository's table scores every arm and scenario, and add refuses a run published before or one without a recorded hash.
 pubsh="$bench/publish.sh"; pub="$tmp/pub/results.csv"
-if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: every arm and scenario has a scored row and every row's evidence verifies"
-else bad "published results (TASK-075): $(tail -3 "$tmp/pub-repo.txt" | tr '
-' ' ')"; fi
+if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: every arm and scenario has a scored row and every row is well formed"
+else bad "published results (TASK-075): $(tail -3 "$tmp/pub-repo.txt" | tr '\n' ' ')"; fi
+if [ "$(ls "$pubdir/results" | tr '\n' ' ')" = "results.csv " ]; then ok "the published results folder holds results.csv only"; else bad "the published results folder holds: $(ls "$pubdir/results" | tr '\n' ' ')"; fi
+if head -1 "$pubdir/results/results.csv" | grep -q 'evidence_dir'; then bad "the published table still has an evidence_dir column"; else ok "the published table has no evidence_dir column"; fi
 mkdir -p "$tmp/pub"; head -1 "$pubdir/results/results.csv" > "$pub"
 nsrc="$(($(wc -l < "$csv") - 1))"
-if BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" ../runs > "$tmp/pub-add.txt" 2>&1 && [ "$(($(wc -l < "$pub") - 1))" = "$nsrc" ]    && BENCH_RESULTS="$pub" bash "$pubsh" check > "$tmp/pub-check.txt" 2>&1; then ok "publish.sh add publishes every run of a table and the published rows verify"
-else bad "publish.sh add or check: $(tail -2 "$tmp/pub-add.txt" "$tmp/pub-check.txt" 2>/dev/null | tr '
-' ' ')"; fi
-onerow="$(sed -n 2p "$pub")"; onedir="$tmp/pub/${onerow##*,}"; oneid="${onerow%%,*}"
-mv "$onedir" "$onedir.gone" 2>/dev/null
+if BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" > "$tmp/pub-add.txt" 2>&1 && [ "$(($(wc -l < "$pub") - 1))" = "$nsrc" ] \
+   && BENCH_RESULTS="$pub" bash "$pubsh" check > "$tmp/pub-check.txt" 2>&1; then ok "publish.sh add copies every run of a table without an evidence folder and check passes"
+else bad "publish.sh add or check: $(tail -2 "$tmp/pub-add.txt" "$tmp/pub-check.txt" 2>/dev/null | tr '\n' ' ')"; fi
+oneid="$(sed -n 2p "$pub" | cut -d, -f1)"
+cp "$pub" "$tmp/pub-good.csv"
+sed -i '2s/,[^,]*$/,/' "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
-[ "$rc" -ne 0 ] && printf '%s
-' "$out" | grep -q "$oneid.*missing" && ok "a row whose evidence is missing fails the check" || bad "missing evidence passed the check: rc=$rc $out"
-mv "$onedir.gone" "$onedir" 2>/dev/null
-printf 'x' >> "$onedir/outcome.txt"
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*evidence hash" && ok "a row without an evidence hash fails the check" || bad "a row without a hash passed the check: rc=$rc $out"
+cp "$tmp/pub-good.csv" "$pub"
+sed -i '2s/,[^,]*$/,not-a-hash/' "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
-[ "$rc" -ne 0 ] && printf '%s
-' "$out" | grep -q "$oneid.*changed" && ok "a row whose evidence changed after publishing fails the check" || bad "changed evidence passed the check: rc=$rc $out"
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*evidence hash" && ok "a row whose evidence hash is not a SHA-256 fails the check" || bad "a malformed hash passed the check: rc=$rc $out"
+cp "$tmp/pub-good.csv" "$pub"
+sed -i '2s/^\([^,]*\),/\1,extra,/' "$pub"
+out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*columns" && ok "a row with the wrong number of columns fails the check" || bad "a wrong column count passed the check: rc=$rc $out"
+cp "$tmp/pub-good.csv" "$pub"
 before="$(wc -l < "$pub")"
-BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" ../runs > "$tmp/pub-dup.txt" 2>&1; rc=$?
-[ "$rc" -ne 0 ] && grep -q "refused: run .* is already published" "$tmp/pub-dup.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run that is already published is refused and nothing is written" || bad "duplicate publish: rc=$rc"
-{ head -1 "$csv"; sed -n 2p "$csv" | sed 's/^[^,]*,/no-such-run,/; s/,[^,]*$/,no-such-arm\/no-such-scenario\/no-such-run/'; } > "$tmp/ghost.csv"
-BENCH_RESULTS="$pub" bash "$pubsh" add "$tmp/ghost.csv" ../runs > "$tmp/pub-ghost.txt" 2>&1; rc=$?
-[ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no evidence" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run without an evidence folder is refused, so no row can be published without evidence" || bad "ghost publish: rc=$rc"
+BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" > "$tmp/pub-dup.txt" 2>&1; rc=$?
+[ "$rc" -ne 0 ] && grep -q "refused: run .* is already published" "$tmp/pub-dup.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run that is already published is refused and nothing is written" || bad "duplicate publish: rc=$rc $(cat "$tmp/pub-dup.txt")"
+{ head -1 "$csv"; sed -n 2p "$csv" | sed 's/^[^,]*,/no-such-run,/; s/,[^,]*,[^,]*$/,,x/'; } > "$tmp/ghost.csv"
+BENCH_RESULTS="$pub" bash "$pubsh" add "$tmp/ghost.csv" > "$tmp/pub-ghost.txt" 2>&1; rc=$?
+[ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no recorded evidence hash" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run without a recorded evidence hash is refused and nothing is written" || bad "ghost publish: rc=$rc $(cat "$tmp/pub-ghost.txt")"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

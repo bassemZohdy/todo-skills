@@ -97,6 +97,6 @@ sum_u() { local k="$1" t=0 v i; for i in $(seq 1 "$a"); do v="$(sed -n "s/^$k=//
   case "$v" in ''|*[!0-9]*) echo unavailable; return ;; esac; t=$((t + v)); done; echo "$t"; }
 dur=0; for i in $(seq 1 "$a"); do dur=$((dur + $(cat "$ev/attempt-$i/duration.txt"))); done
 csv="$runs/results.csv"
-[ -s "$csv" ] || head -1 "$root/docs/evals/benchmark/results/results.csv" > "$csv"
+[ -s "$csv" ] || printf '%s,evidence_dir\n' "$(head -1 "$root/docs/evals/benchmark/results/results.csv" | tr -d '\r')" > "$csv"
 echo "$run_id,$(date -u +%Y-%m-%dT%H:%M:%SZ),$arm,$scen,$(basename "$agent" .sh),$agent_version,$(printf '%s' "$model" | tr ',' ';'),$isolation,$first,$outcome,$a,$ae,${ve:-not run},$dur,$(sum_u input_tokens),$(sum_u output_tokens),$(sum_u cached_tokens),$(sum_u llm_calls),$(sum_u subagent_calls),$evsha,$rel" >> "$csv"
 echo "outcome: $outcome (first attempt: $first, attempts: $a, isolation: $isolation) evidence: $ev"

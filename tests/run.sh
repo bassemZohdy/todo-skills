@@ -463,7 +463,7 @@ cp "$fx/ok-lanes.md" "$lz/TODO.md"; printf '# Changelog\n\n## [Unreleased]\n' > 
 ( cd "$lz" && git init -q && git config user.email t@example.invalid && git config user.name t && git add -A && git commit -qm base ) >/dev/null 2>&1
 out="$(cd "$lz" && printf '{}' | bash "$hook")"; [ -z "$out" ] || l6_bad="$l6_bad hook"
 out="$(cd "$lz" && printf 'project: x\n' | bash "$root/tools/todo-report.sh")"; printf '%s' "$out" | grep -qF 'the HTTP service' || l6_bad="$l6_bad report"
-out="$(cd "$lz" && bash "$root/tools/todo-replay.sh" HEAD 2>&1)"; [ $? -eq 0 ] && printf '%s' "$out" | grep -q 'nothing to replay' || l6_bad="$l6_bad replay"
+if out="$(cd "$lz" && bash "$root/tools/todo-replay.sh" HEAD 2>&1)" && printf '%s' "$out" | grep -q 'nothing to replay'; then :; else l6_bad="$l6_bad replay"; fi
 rm -rf "$lz"
 grep -qE '^## .*Lanes$' "$root/TODO.md" && grep -qE '^- main: ' "$root/TODO.md" && ! bash "$root/tools/todo-lint.sh" "$root/TODO.md" "$root/CHANGELOG.md" 2>&1 | grep -q '^WARN W9' || l6_bad="$l6_bad repo-TODO.md"
 if [ -z "$l6_bad" ]; then ok "the stop hook, report generator and replay script accept a Lanes section, and this repository's TODO.md declares its lane (FEAT-125.6)"; else bad "Lanes section in the scripts (FEAT-125.6):$l6_bad"; fi

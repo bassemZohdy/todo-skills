@@ -19,8 +19,9 @@ The core rules. Run directly it is read-only: it lists the commands, runs the in
 Sets up or checks the backlog workspace. Idempotent: run it again at any time.
 
 1. Checks git. Outside a repository it says the skills will run in no-git mode; it runs `git init` only if you ask.
-2. Looks for `README.md`, `docs/`, `TODO.md` and `CHANGELOG.md`, and creates only what is missing: `TODO.md` with its two headings, `CHANGELOG.md` with the Keep a Changelog intro and `## [Unreleased]`. A `CHANGELOG.md` without `[Unreleased]` gets that heading above the newest version and nothing else. New files stay uncommitted (they are backlog files).
+2. Looks for `README.md`, `docs/`, `TODO.md` and `CHANGELOG.md`, and creates only what is missing: `TODO.md` with a `## 🛤️ Lanes` section (the `main` lane) above the Task Tree, `CHANGELOG.md` with the Keep a Changelog intro and `## [Unreleased]`. A `CHANGELOG.md` without `[Unreleased]` gets that heading above the newest version and nothing else. New files stay uncommitted (they are backlog files).
 3. Never overwrites an existing `TODO.md`:
+   - **Tree format without a Lanes section**: offers to add one above the Task Tree, the `main` lane plus one line per `Lane:` a root already uses; written on your yes.
    - **Old three-section format** (In Progress, Ready, Blocked; Scope, Out of Scope, Validation, Progress): offers a migration to roots of the task tree. Complexity is rated (`mid` when unsure), every `Done when` must pass lint before anything is written, and each Out of Scope item is moved into a `docs/` note or dropped only as you decide.
    - **Size-only format** (`· S ·` where the complexity now goes): offers to insert a complexity before each size.
    - **Anything else** (a free-form list): offers to move it aside to `TODO.legacy.md`.

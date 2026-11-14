@@ -121,6 +121,7 @@ release)
   ;;
 monorepo)
   chk "TODO.md exists with the task tree heading" '[ -f TODO.md ] && grep -q "^## .*Task Tree" TODO.md'
+  chk "TODO.md declares the main lane in a Lanes section above the Task Tree" 'awk "/^## .*Lanes\$/ {l=NR} /^- main: / {m=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && t > m)}" TODO.md'
   chk "the human-written CHANGELOG entries survive" 'grep -q "Greeting helper in the web package" CHANGELOG.md && grep -q "## \[1.2.0\] - 2026-09-15" CHANGELOG.md'
   chk "a task mentions the api package power work" 'grep -qi "power" TODO.md || git log --all --format=%s | grep -qi power'
   chk "Done when / regression use a real command (make test or the api suite)" 'grep -E "make test|unittest" TODO.md || git log --all -p | grep -E "make test|unittest"'

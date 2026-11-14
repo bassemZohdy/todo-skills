@@ -6,8 +6,9 @@
 #   Leaves are tasks without children. Done = [x] leaves plus the leaves of roots drained into ## [Unreleased] (an entry's
 #   Includes: IDs that are no other included ID's parent, or the entry itself without Includes:). Cells: # for done
 #   (rounded down), ! for blocked leaves (rounded, at least 1 when any is blocked), - for the rest.
+# The file may hold one optional "## … Lanes" section before the Task Tree, one "- <name>: <what it covers>" line per lane (I6 on a misplaced, repeated or malformed one); "main" is always declared.
 # Needs only bash, awk, grep, sed and tr. Prints one "FAIL I<n>: ..." line per violation.
-# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test, W8 a Ref path that does not exist) that never change the exit code.
+# Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test, W8 a Ref path that does not exist, W9 a Lane that no Lanes section declares) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 # --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
 todo_skills_version="0.5.1"
@@ -142,8 +143,25 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
 { sub(/\r$/, "") }
 /^[ \t]*$/ { next }
 /^# / { h1++; if ($0 != "# Active Backlog") fail("I6", "line " NR ": first heading must be exactly: # Active Backlog"); next }
-/^## / { h2++; if ($0 !~ /Task Tree$/) fail("I6", "line " NR ": section heading must end in Task Tree (found: " $0 ")"); next }
+/^## / {
+  if ($0 ~ /Lanes$/) {   # FEAT-125.1: an optional section of lane lines, before the Task Tree
+    hl++; inlanes = 1
+    if (h2 > 0) fail("I6", "line " NR ": the Lanes section must come before the Task Tree")
+    else if (hl > 1) fail("I6", "line " NR ": more than one Lanes section")
+    next
+  }
+  inlanes = 0; h2++
+  if ($0 !~ /Task Tree$/) fail("I6", "line " NR ": section heading must end in Task Tree or Lanes (found: " $0 ")")
+  next
+}
 /^#+ / { fail("I6", "line " NR ": unexpected heading: " $0); next }
+inlanes {
+  if ($0 !~ /^- [a-z][a-z0-9-]*: +[^ ]/) { fail("I6", "line " NR ": a lane line reads - <name>: <what it covers> (found: " $0 ")"); next }
+  ln = $0; sub(/^- /, "", ln); sub(/:.*/, "", ln)
+  if (ln in declared) fail("I6", "line " NR ": lane " ln " is declared twice")
+  declared[ln] = 1
+  next
+}
 /^ *- \[[^]]\] / {
   if ($0 !~ /^ *- \[[^]]\] \*\*[A-Z]+-[0-9]+(\.[0-9]+)*\*\*/) { fail("I3", "line " NR ": malformed task header"); next }
   match($0, /^ */); ind = RLENGTH
@@ -223,6 +241,7 @@ BEGIN { cur = 0; prevlvl = -1; nn = 0 }
         sub(/^Lane: */, "", p)
         if (nlvl[cur] != 0) fail("I3", "line " NR ": " id ": Lane is allowed on root tasks only")
         else if (p !~ /^[a-z][a-z0-9-]*$/) fail("I3", "line " NR ": " id ": lane name must be lowercase letters, digits and dashes (found: " p ")")
+        else if (p != "main" && !(p in declared)) warn("W9", "line " NR ": " id ": lane " p " is not declared in a Lanes section" (hl ? "" : " (the file has none; add one above the Task Tree)"))
       }
       else fail("I3", "line " NR ": " id ": Links accepts only Ref, Depends, From and Lane (found: " p ")")
     }

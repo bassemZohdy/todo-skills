@@ -102,6 +102,10 @@ Those runs raised wording gaps; FIX-114 (the plan stop, the breakdown and a bloc
 
 Claude Code then ran all 34 scenarios on that text (`claude -p`, Windows 11 with Git Bash, one fresh run each): 32 passed on the first run, `happy-path` failed once because the agent wrote CRLF line endings with a Python script and passed on the rerun, and `ci-local` failed twice because headless Claude Code may not write `.git/hooks` (the skill printed the hook, as it says to). The three newest scenarios passed first time. Codex was probed once and could not run `python3` in its Windows sandbox, so the Codex half stays open (TASK-116). [docs/evals/claude-code-2026-11-13/summary.md](evals/claude-code-2026-11-13/summary.md).
 
+### pi runs on the Lanes section and inline planning (2026-11-14)
+
+FEAT-125 (the optional `## 🛤️ Lanes` section of `TODO.md`) and TASK-126 (`/todo-plan` plans inside `TODO.md`, `/todo-init` only points to it) changed the text of five commands. Fresh pi agents (GLM 5.3) ran six scenarios on it, including the new `plan-inline` and `add-lane`: five passed, and `plan-inline` failed once on an assertion that required three tasks where the agent correctly wrote one leaf; it passed after the assertion and one sentence of `/todo-plan` were corrected. Details, the points the agents found unclear and the limits: [docs/evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md](evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md).
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

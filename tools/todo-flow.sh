@@ -7,6 +7,13 @@
 #   bash .todo/todo-flow.sh start <ID> <n> | none | red: <ids>
 #       the baseline is the argument. Unclaimed tree (run on the base): tree claim, fast-forward of the base. Then the
 #       missing branches down to the node, [/] with its State, and the start commit.
+#   bash .todo/todo-flow.sh complete <ID> -m '<type>(<scope>): <title>' [-b '<body line>']... [-- <path>...]
+#       after review and a green verify, on the node's branch: commits the paths and the changed backlog files (body
+#       "Refs: <ID>" plus the -b lines: Red:, Reviewed:, Checked:). A child is set [x] and merged into its parent's
+#       branch; a root is refreshed from the base (rerun the checks when it says the base brought changes).
+#   bash .todo/todo-flow.sh drain <ROOT-ID> [-t <type>] [--merge]
+#       after the last gate, on the root branch: the CHANGELOG entry (type: feat or fix by prefix; give -t for a TASK),
+#       the subtree removed from TODO.md, the drain commit; with --merge the merge into the base, else its commands.
 # TODO_BASE names the base branch when it is not the README "Base:" line or one of main, master, trunk, develop.
 # Needs bash, git, awk, sed and grep. No network, no tag, no push, no forced delete. --version prints the release.
 todo_skills_version="0.5.1"
@@ -83,13 +90,45 @@ slug() {
 }
 has() { git show-ref -q --verify "refs/heads/$1"; }
 # Changed backlog files (core "Backlog files"): README.md only while its diff adds nothing but Tests: and Base: lines.
+readme_only() {   # <diff range>: README.md changed there, and only by added Tests: and Base: lines
+  local d; d="$(git diff "$1" -U0 -- README.md 2>/dev/null | tr -d '\r' | grep '^[+-]' | grep -vE '^(\+\+\+|---)')"
+  [ -n "$d" ] && ! printf '%s\n' "$d" | grep -qvE '^\+((Tests|Base):.*)?$'
+}
 backlog() {
-  local f d
+  local f
   for f in TODO.md CHANGELOG.md docs/plans/PROJECT.md docs/plans/"$root"-*.md; do
     [ -e "$f" ] && [ -n "$(git status --porcelain -- "$f")" ] && printf '%s\n' "$f"
   done
-  d="$(git diff HEAD -U0 -- README.md 2>/dev/null | tr -d '\r' | grep '^[+-]' | grep -vE '^(\+\+\+|---)')"
-  [ -z "$d" ] || printf '%s\n' "$d" | grep -qvE '^\+((Tests|Base):.*)?$' || echo README.md
+  if readme_only HEAD; then echo README.md; fi
+}
+join() { awk '{ o = o (NR > 1 ? ", " : "") $0 } END { print o }'; }
+# C <entry> <heading>: the CHANGELOG text on stdin with the entry as the first item of "### <heading>" under
+# "## [Unreleased]"; a missing heading is created in Keep a Changelog order, with a blank line around it.
+C() {
+  E="$1" H="$2" LC_ALL=C awk '
+    BEGIN { e = ENVIRON["E"]; h = "### " ENVIRON["H"]; n = split("Added Changed Deprecated Removed Fixed Security", o, " "); for (i = 1; i <= n; i++) rank["### " o[i]] = i }
+    { L[NR] = $0 }
+    END {
+      for (us = 1; us <= NR && L[us] !~ /^## \[Unreleased\]/; us++) ;
+      for (ue = us + 1; ue <= NR && L[ue] !~ /^## /; ue++) ;
+      at = us; mode = "end"
+      for (i = us + 1; i < ue; i++) {
+        if (L[i] != "") at = i
+        if (L[i] == h) {
+          mode = "empty"; at = i
+          for (j = i + 1; j < ue && L[j] !~ /^### /; j++) if (L[j] ~ /^- /) { mode = "item"; at = j; break }
+          break
+        }
+        if (L[i] ~ /^### / && rank[L[i]] > rank[h]) { mode = "before"; at = i; break }
+      }
+      for (i = 1; i <= NR; i++) {
+        if (i == at && mode == "item") print e
+        if (i == at && mode == "before") { print h; print ""; print e; print "" }
+        print L[i]
+        if (i == at && mode == "empty") { print ""; print e }
+        if (i == at && mode == "end") { print ""; print h; print ""; print e }
+      }
+    }'
 }
 # commit <subject> <body> [path...]: lints, then commits the paths and the changed backlog files by explicit path.
 commit() {
@@ -150,5 +189,69 @@ start)
   edit "$id" set / "attempts 0/3; baseline $bl; branch $prev from $from; next: read docs"
   commit "chore(backlog): start $id" ""
   report; echo "State: $(Q "$id" state)" ;;
-*) refuse "unknown command '$cmd' (start)" ;;
+complete)
+  subj=""; body="Refs: $id"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -m) subj="${2-}"; shift; shift ;;
+      -b) body="$body
+${2-}"; shift; shift ;;
+      --) shift; break ;;
+      *) refuse "unknown option $1 (-m, -b, --)" ;;
+    esac
+  done
+  [ -n "$subj" ] || refuse "complete needs -m '<type>(<scope>): <title>'"
+  for f in "$@"; do [ -e "$f" ] || git ls-files --error-unmatch -- "$f" >/dev/null 2>&1 || refuse "no such path: $f"; done
+  [ "$m" = "/" ] || refuse "$id is not the active [/] task"
+  st="$(Q "$id" state)"; nb="$(printf '%s\n' "$st" | branch_of)"
+  [ "$cur" = "$nb" ] || refuse "$id works on ${nb:-no branch}, and $cur is checked out"
+  Q "$id" kids | grep -qv ' x$' && refuse "$id has open children"
+  if [ "$id" != "$root" ]; then
+    from="$(printf '%s\n' "$st" | sed -nE 's/^.* from ([^ ;]+).*$/\1/p')"; has "$from" || refuse "the parent's branch ${from:-?} does not exist"
+    edit "$id" set x -
+    commit "$subj" "$body" "$@"
+    git switch -q "$from" && git merge -q --no-ff -m "Merge $id into ${id%.*}" "$nb" || stop "the merge of $nb into $from did not finish: resolve it as reference/git-flow-edge.md, Git conflicts, says, then git commit --no-edit and git branch -d $nb"
+    git branch -q -d "$nb" || stop "could not delete $nb"
+  else
+    commit "$subj" "$body" "$@"; h1="$(git rev-parse HEAD)"
+    git merge -q -m "Merge $base into $root" "$base" || stop "the refresh from $base did not finish: resolve it as reference/git-flow-edge.md, Git conflicts, says, then git commit --no-edit and rerun the checks"
+    if [ "$(git rev-parse HEAD)" = "$h1" ]; then echo "refresh: $base brought nothing"; else echo "refresh: $base brought changes: rerun Done when and the regression before the drain"; fi
+  fi
+  report ;;
+drain)
+  typ=""; mg=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -t) typ="${2-}"; shift; shift ;;
+      --merge) mg=1; shift ;;
+      *) refuse "unknown option $1 (-t, --merge)" ;;
+    esac
+  done
+  [ "$id" = "$root" ] || refuse "only a root is drained"
+  [ "$m" = "/" ] || refuse "$id is not the active [/] root"
+  rb="$(Q "$id" state | branch_of)"; [ "$cur" = "$rb" ] || refuse "$id works on ${rb:-no branch}, and $cur is checked out"
+  Q "$id" kids | grep -qv ' x$' && refuse "$id has open children"
+  [ -f CHANGELOG.md ] && grep -q '^## \[Unreleased\]' CHANGELOG.md || refuse "CHANGELOG.md has no ## [Unreleased] section"
+  grep -q "^- \*\*$id\*\* " CHANGELOG.md && refuse "CHANGELOG.md already has an entry for $id: finish that drain by hand"
+  git status --porcelain --untracked-files=no | cut -c4- | grep -qvE '^(TODO\.md|CHANGELOG\.md|README\.md|docs/plans/.*)$' && refuse "uncommitted changes: run complete first"
+  case "$id" in FEAT-*) hd=Added; t=feat ;; FIX-*) hd=Fixed; t=fix ;; *) hd=Changed; t=task ;; esac
+  ttl="$(Q "$id" title)"; dw="$(Q "$id" 'done')"; ln="$(Q "$id" links)"
+  val="$(printf '%s\n' "${dw%%; regression:*}" | grep -o '`[^`]*`' | join)"
+  ref="$(printf '%s\n' "$ln" | sed -nE 's/^(.* )?Ref: ([^ ]+).*$/\2/p')"; frm="$(printf '%s\n' "$ln" | sed -nE 's/^(.* )?From: ([^ ]+).*$/\2/p')"
+  docs="$(git diff --name-only "$base...HEAD" | grep -E '^(README\.md$|docs/)' | grep -vE "^docs/plans/(PROJECT\.md$|$id-)" | while IFS= read -r f; do if [ "$f" != README.md ] || ! readme_only "$base...HEAD"; then printf '%s\n' "$f"; fi; done | join)"
+  inc="$(Q "$id" kids | cut -d' ' -f1 | join)"
+  refile CHANGELOG.md C "- **$id** (${typ:-$t}): ${ttl%.}.${ref:+ Ref: $ref.}${val:+ Validated: $val.}${frm:+ From: $frm.}${docs:+ Docs: updated $docs.}${inc:+ Includes: $inc.}" "$hd"
+  edit "$id" drop
+  commit "chore(backlog): drain $id" "Refs: $id${inc:+
+Includes: $inc}"
+  mc="git switch $base && git merge --no-ff -m \"Merge $id into $base\" $rb && git branch -d $rb"
+  if [ "$mg" = 1 ]; then
+    git merge-base --is-ancestor "$base" HEAD || stop "$base moved since the refresh: refresh and verify again, then: $mc"
+    [ -z "$(git status --porcelain --untracked-files=no)" ] || stop "the checkout is not clean: commit or stash, then: $mc"
+    git switch -q "$base" && git merge -q --no-ff -m "Merge $id into $base" "$rb" && git branch -q -d "$rb" || stop "the merge into $base did not finish"
+  else
+    echo "to merge: $mc"
+  fi
+  report ;;
+*) refuse "unknown command '$cmd' (start, complete, drain)" ;;
 esac

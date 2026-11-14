@@ -440,6 +440,14 @@ grep -qF 'declared in the `## 🛤️ Lanes` section of `TODO.md`' "$c125" && gr
 grep -qF '| W9 |' "$r125" || l125="$l125 REFERENCE(W9)"
 if [ -z "$l125" ]; then ok "the core skill and REFERENCE.md show the Lanes section, name where lanes are declared, extend the I6 row and document W9 (FEAT-125.2)"; else bad "Lanes section docs (FEAT-125.2):$l125"; fi
 
+# /todo-init and the Lanes section (FEAT-125.3): a new TODO.md is written with the section and the main lane, a tree-format file
+# without it gets an offer, and the monorepo trial (which starts without a TODO.md) expects the section.
+i125=""; ti125="$root/plugin/skills/todo-init/SKILL.md"
+grep -qF '## 🛤️ Lanes' "$ti125" && grep -qF -- '- main: the default track' "$ti125" || i125="$i125 template"
+grep -qF 'has no `## … Lanes` section' "$ti125" || i125="$i125 offer"
+grep -qF 'Lanes' <(awk '/^monorepo\)/,/^  ;;/' "$root/tests/trials/assert.sh") || i125="$i125 monorepo-assertion"
+if [ -z "$i125" ]; then ok "todo-init writes the Lanes section into a new TODO.md and offers it for a tree-format file without one; the monorepo trial expects it (FEAT-125.3)"; else bad "todo-init Lanes section (FEAT-125.3):$i125"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

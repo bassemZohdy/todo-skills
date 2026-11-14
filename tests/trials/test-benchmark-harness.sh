@@ -156,15 +156,15 @@ if BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" > "$tmp/pub-add.txt" 2>&1 && [ 
 else bad "publish.sh add or check: $(tail -2 "$tmp/pub-add.txt" "$tmp/pub-check.txt" 2>/dev/null | tr '\n' ' ')"; fi
 oneid="$(sed -n 2p "$pub" | cut -d, -f1)"
 cp "$pub" "$tmp/pub-good.csv"
-sed -i '2s/,[^,]*$/,/' "$pub"
+sed '2s/,[^,]*$/,/' "$pub" > "$pub.new" && mv "$pub.new" "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
 [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*evidence hash" && ok "a row without an evidence hash fails the check" || bad "a row without a hash passed the check: rc=$rc $out"
 cp "$tmp/pub-good.csv" "$pub"
-sed -i '2s/,[^,]*$/,not-a-hash/' "$pub"
+sed '2s/,[^,]*$/,not-a-hash/' "$pub" > "$pub.new" && mv "$pub.new" "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
 [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*evidence hash" && ok "a row whose evidence hash is not a SHA-256 fails the check" || bad "a malformed hash passed the check: rc=$rc $out"
 cp "$tmp/pub-good.csv" "$pub"
-sed -i '2s/^\([^,]*\),/\1,extra,/' "$pub"
+sed '2s/^\([^,]*\),/\1,extra,/' "$pub" > "$pub.new" && mv "$pub.new" "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
 [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*columns" && ok "a row with the wrong number of columns fails the check" || bad "a wrong column count passed the check: rc=$rc $out"
 cp "$tmp/pub-good.csv" "$pub"

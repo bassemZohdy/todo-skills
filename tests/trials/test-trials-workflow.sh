@@ -36,20 +36,26 @@ if [ -z "$out" ]; then ok "trials.yml follows every rule"; else bad "trials.yml 
 grep -qE '@openai/codex@[0-9]+\.[0-9]+\.[0-9]+' "$wf" 2>/dev/null && ok "installs a named Codex CLI version" || bad "no pinned Codex CLI install"
 grep -qE '@anthropic-ai/claude-code@[0-9]+\.[0-9]+\.[0-9]+' "$wf" 2>/dev/null && ok "installs a named Claude Code CLI version" || bad "no pinned Claude Code CLI install"
 
-# the negative cases: a copy that breaks one rule must be reported
+# the negative cases: a copy that breaks one rule must differ from the file and be reported. Only commands that BSD sed and awk
+# (macOS) have are used: no 0,/re/ address, no \n in a replacement and no interval in an awk regex (FIX-122).
 if [ -f "$wf" ]; then
-  neg() {  # name, sed expression applied to a copy
-    sed -E "$2" "$wf" > "$tmp/$1.yml"
-    if [ -n "$(problems "$tmp/$1.yml")" ]; then ok "a copy that $3 is reported"; else bad "a copy that $3 passes"; fi
+  check() {  # name, what the copy does; the copy is already in $tmp/<name>.yml
+    if cmp -s "$wf" "$tmp/$1.yml"; then bad "the copy that $2 is identical to trials.yml"
+    elif [ -n "$(problems "$tmp/$1.yml")" ]; then ok "a copy that $2 is reported"
+    else bad "a copy that $2 passes"; fi
   }
-  neg push 's/^  workflow_dispatch:/  push:\n  workflow_dispatch:/' "adds a push trigger"
-  neg pr 's/^  workflow_dispatch:/  pull_request:\n  workflow_dispatch:/' "adds a pull_request trigger"
-  neg sched 's/^  workflow_dispatch:/  schedule:\n  workflow_dispatch:/' "adds a schedule trigger"
-  neg unpin '0,/(uses:[[:space:]]*[^@[:space:]]+)@[0-9a-f]{40}/s//\1@v4/' "uses an unpinned action"
-  neg secret '0,/^    steps:/s//    env:\n      K: ${{ secrets.OPENAI_API_KEY }}\n    steps:/' "reads a secret"
-  neg write 's/^  contents: read/  contents: write/' "may write to the repository"
-  neg unver 's/(npm (install|i) .*)@[0-9]+\.[0-9]+\.[0-9]+/\1/' "installs a CLI without a version"
-  neg nomac 's/macos-latest/ubuntu-latest/' "drops macOS"
+  addtrigger() {  # name, trigger line: inserts the trigger under on:
+    awk -v t="$2" '{ print } /^on:/ { print t }' "$wf" > "$tmp/$1.yml"
+  }
+  addtrigger push '  push:'; check push "adds a push trigger"
+  addtrigger pr '  pull_request:'; check pr "adds a pull_request trigger"
+  addtrigger sched '  schedule:'; check sched "adds a schedule trigger"
+  n="$(grep -n 'uses:' "$wf" | head -1 | cut -d: -f1)"
+  sed "${n}s/@[0-9a-f]*/@v4/" "$wf" > "$tmp/unpin.yml"; check unpin "uses an unpinned action"
+  { cat "$wf"; printf '      - run: echo ${{ secrets.OPENAI_API_KEY }}\n'; } > "$tmp/secret.yml"; check secret "reads a secret"
+  sed 's/^  contents: read/  contents: write/' "$wf" > "$tmp/write.yml"; check write "may write to the repository"
+  sed -E 's/(npm (install|i) .*)@[0-9]+\.[0-9]+\.[0-9]+/\1/' "$wf" > "$tmp/unver.yml"; check unver "installs a CLI without a version"
+  sed 's/macos-latest/ubuntu-latest/' "$wf" > "$tmp/nomac.yml"; check nomac "drops macOS"
 fi
 [ -f "$wf" ] && ! grep -qE '^on:' "$wf" && bad "no on: block"
 

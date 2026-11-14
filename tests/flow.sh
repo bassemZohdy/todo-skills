@@ -120,5 +120,93 @@ mk "$tmp/g"; printf '\nBase: `trunk`\n' >> README.md; g commit -qam "docs: base"
 [ "$rc" -eq 0 ] && [ "$(git log -1 --format=%s trunk)" = "chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc" ] && grep -q "baseline 4 passing; branch todo/FEAT-001-add-subtract-function-calc from trunk" TODO.md \
   && ok "the README Base: line names the base, and '<n> passing' is accepted as the baseline" || bad "README Base: rc=$rc $out"
 
+# complete and drain (FEAT-129.2). A whole tree: a child, a grandchild, both integration steps, the root's drain with Includes.
+body() { git log -1 --format=%b "$1" | grep . | tr '\n' '|'; }
+parents() { git log -1 --format=%P "$1" | wc -w | tr -d ' '; }
+mk "$tmp/h"; git checkout -q -- TODO.md; mkdir docs; printf '# Math\n' > docs/math.md; printf '# Changelog\n\n## [Unreleased]\n\n### Changed\n\n- **TASK-000** (chore): Old. Validated: `true`.\n\n## [0.1.0] - 2026-01-01\n\n### Added\n\n- first\n' > CHANGELOG.md; g add -A; g commit -qm "docs: math"
+c2=todo/FEAT-002.2-root-function
+fl start FEAT-002.2 2 >/dev/null; printf 'def root(a):\n    return a ** 0.5\n' >> calc.py; printf 'import unittest\n' > tests/test_root.py
+out="$(fl complete FEAT-002.2 -m 'feat(calc): root function' -b 'Red: AttributeError: module calc has no attribute root' -b 'Reviewed: self, 0 findings fixed' -- calc.py tests/test_root.py)"; rc=$?
+[ "$rc" -eq 0 ] && [ "$(git symbolic-ref --short HEAD)" = "$r2" ] && [ "$(git log -1 --format=%s)" = "Merge FEAT-002.2 into FEAT-002" ] && [ "$(parents HEAD)" = 2 ] && ! git show-ref -q --verify "refs/heads/$c2" \
+  && ok "complete of a child commits it, merges it --no-ff into its parent's branch and deletes its branch" || bad "complete child: rc=$rc $out"
+[ "$(git log -1 --format=%s HEAD^2)" = "feat(calc): root function" ] && [ "$(body HEAD^2)" = "Refs: FEAT-002.2|Red: AttributeError: module calc has no attribute root|Reviewed: self, 0 findings fixed|" ] \
+  && [ "$(git diff --name-only HEAD^2~1 HEAD^2 | tr '\n' ' ')" = "TODO.md calc.py tests/test_root.py " ] \
+  && ok "the node commit has the given subject, the body Refs, Red, Reviewed, and the node's files plus TODO.md" || bad "complete child commit: $(body HEAD^2) / $(git diff --name-only HEAD^2~1 HEAD^2 | tr '\n' ' ')"
+grep -q '^  - \[x\] \*\*FEAT-002.2\*\*' TODO.md && ! grep -A2 'FEAT-002.2\*\*' TODO.md | grep -q 'State:' && [ -z "$(git status --porcelain)" ] && lintok \
+  && ok "the child is [x] without a State line, the tree is clean and the lint passes" || bad "complete child TODO: $(grep -A2 'FEAT-002.2\*\*' TODO.md)"
+fl start FEAT-002.1.1 none >/dev/null; printf 'import unittest\n' > tests/test_exp.py; fl complete FEAT-002.1.1 -m 'feat(calc): exponent parser' -- tests/test_exp.py >/dev/null
+[ "$(git symbolic-ref --short HEAD)" = "$c1" ] && [ "$(git log -1 --format=%s)" = "Merge FEAT-002.1.1 into FEAT-002.1" ] && ok "a grandchild merges into the child's branch" || bad "complete grandchild: on $(git symbolic-ref --short HEAD), $(git log -1 --format=%s)"
+fl start FEAT-002.1 3 >/dev/null; out="$(fl complete FEAT-002.1 -m 'test(calc): power integration')"; rc=$?
+[ "$rc" -eq 0 ] && [ "$(git symbolic-ref --short HEAD)" = "$r2" ] && [ "$(git log -1 --format=%s)" = "Merge FEAT-002.1 into FEAT-002" ] && [ "$(git diff --name-only HEAD^2~1 HEAD^2)" = "TODO.md" ] \
+  && ok "an integration step without files commits TODO.md alone and merges into the root branch" || bad "complete integration step: rc=$rc $out"
+fl start FEAT-002 3 >/dev/null; printf 'Power, root and log.\n' >> docs/math.md; mainsha="$(git rev-parse main)"
+out="$(fl complete FEAT-002 -m 'docs(calc): describe the math functions' -- docs/math.md)"; rc=$?
+[ "$rc" -eq 0 ] && [ "$(git symbolic-ref --short HEAD)" = "$r2" ] && [ "$(git log -1 --format=%s)" = "docs(calc): describe the math functions" ] && grep -q '^- \[/\] \*\*FEAT-002\*\*' TODO.md && printf '%s' "$out" | grep -q "refresh: main brought nothing" \
+  && ok "complete of a root commits it, keeps it [/] and reports a refresh that brought nothing" || bad "complete root: rc=$rc $out"
+out="$(fl drain FEAT-002)"; rc=$?
+# shellcheck disable=SC2016  # the backticks are Markdown
+want='- **FEAT-002** (feat): Add the Power, Root and Log functions for the calculator. Ref: docs/math.md. Validated: `python3 -m unittest discover -s tests`. Docs: updated docs/math.md. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2.'
+[ "$rc" -eq 0 ] && [ "$(sed -n 5,9p CHANGELOG.md | tr '\n' '|')" = "### Added||$want||### Changed|" ] && ok "drain writes the core's entry under a new Added heading placed before Changed, with Ref, Validated, Docs and Includes" || bad "drain entry: rc=$rc $(sed -n 3,9p CHANGELOG.md)"
+! grep -q 'FEAT-002' TODO.md && [ "$(tail -1 TODO.md)" = "## 🌳 Task Tree" ] && lintok && [ "$(git log -1 --format=%s)" = "chore(backlog): drain FEAT-002" ] && [ "$(body HEAD)" = "Refs: FEAT-002|Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.2|" ] \
+  && [ "$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" = "CHANGELOG.md TODO.md " ] && ok "the drain removes the subtree and commits both backlog files with Refs and Includes" || bad "drain commit: $(body HEAD) / $(tail -3 TODO.md)"
+[ "$(git symbolic-ref --short HEAD)" = "$r2" ] && [ "$(git rev-parse main)" = "$mainsha" ] && printf '%s' "$out" | grep -qF "git switch main && git merge --no-ff -m \"Merge FEAT-002 into main\" $r2 && git branch -d $r2" \
+  && ok "without --merge the drain stays on the root branch and prints the merge commands" || bad "drain without --merge: $out"
+
+# A leaf FIX root: the base moves before the refresh, the entry goes under a new Fixed heading, and --merge lands it on the base.
+mk "$tmp/i"; git checkout -q -- TODO.md
+# shellcheck disable=SC2016
+printf '%s\n' '- [ ] **FIX-003** · P0 · low · Reject a division by zero in `divide`.' '  - Done when: a zero divisor raises ValueError; `python3 -m unittest tests.test_div`; regression: `python3 -m unittest discover -s tests`' '  - Links: From: FEAT-002' >> TODO.md
+printf '# Changelog\n\n## [Unreleased]\n\n### Changed\n\n- **TASK-000** (chore): Old. Validated: `true`.\n\n## [0.1.0] - 2026-01-01\n' > CHANGELOG.md; g add CHANGELOG.md; g commit -qm "docs: changelog" -- CHANGELOG.md
+f3=todo/FIX-003-reject-division-by-zero
+fl start FIX-003 1 >/dev/null; printf 'def divide(a, b):\n    return a / b\n' >> calc.py
+git switch -q main 2>/dev/null; g stash -q; printf 'notes\n' > NOTES.md; g add NOTES.md; g commit -qm "docs: notes" -- NOTES.md; git switch -q "$f3"; g stash pop -q
+out="$(fl complete FIX-003 -m 'fix(calc): reject a division by zero' -b 'Red: ZeroDivisionError' -- calc.py)"; rc=$?
+[ "$rc" -eq 0 ] && [ "$(git log -1 --format=%s)" = "Merge main into FIX-003" ] && [ -f NOTES.md ] && printf '%s' "$out" | grep -q "refresh: main brought changes" \
+  && ok "complete of a root refreshes from a base that moved and says the checks must be rerun" || bad "complete root refresh: rc=$rc $out"
+out="$(fl drain FIX-003 --merge)"; rc=$?
+# shellcheck disable=SC2016
+want='- **FIX-003** (fix): Reject a division by zero in `divide`. Validated: `python3 -m unittest tests.test_div`. From: FEAT-002.'
+[ "$rc" -eq 0 ] && [ "$(sed -n 7,12p CHANGELOG.md | tr '\n' '|')" = "- **TASK-000** (chore): Old. Validated: \`true\`.||### Fixed||$want||" ] && [ "$(sed -n 13p CHANGELOG.md)" = "## [0.1.0] - 2026-01-01" ] \
+  && ok "a FIX entry opens a Fixed heading after Changed, keeps one final period, leaves the regression command out and names From" || bad "drain FIX entry: rc=$rc $(sed -n 5,13p CHANGELOG.md)"
+[ "$(git symbolic-ref --short HEAD)" = main ] && [ "$(git log -1 --format=%s)" = "Merge FIX-003 into main" ] && [ "$(parents HEAD)" = 2 ] && ! git show-ref -q --verify "refs/heads/$f3" && [ "$(git log -1 --format=%s HEAD^2)" = "chore(backlog): drain FIX-003" ] && [ "$(body HEAD^2)" = "Refs: FIX-003|" ] && ! grep -q FIX-003 TODO.md && grep -q 'FEAT-002' TODO.md && lintok \
+  && ok "drain --merge merges the root --no-ff into the base, deletes its branch and leaves the other roots" || bad "drain --merge: on $(git symbolic-ref --short HEAD), $(git log -1 --format=%s)"
+
+# A TASK root takes its type from -t, and its entry is the first item of an existing heading; a CRLF CHANGELOG keeps CRLF.
+mk "$tmp/j"; git checkout -q -- TODO.md
+# shellcheck disable=SC2016
+printf '%s\n' '- [ ] **TASK-004** · P0 · low · Describe the calculator in the README' '  - Done when: the README names add; `python3 -m unittest discover -s tests`' >> TODO.md
+printf '# Changelog\r\n\r\n## [Unreleased]\r\n\r\n### Changed\r\n\r\n- **TASK-000** (chore): Old. Validated: `true`.\r\n' > CHANGELOG.md; g add CHANGELOG.md; g commit -qm "docs: changelog" -- CHANGELOG.md
+fl start TASK-004 1 >/dev/null; printf 'It adds.\n' >> README.md; fl complete TASK-004 -m 'docs(readme): describe the calculator' -- README.md >/dev/null; out="$(fl drain TASK-004 -t docs --merge)"; rc=$?
+# shellcheck disable=SC2016
+want='- **TASK-004** (docs): Describe the calculator in the README. Validated: `python3 -m unittest discover -s tests`. Docs: updated README.md.'
+[ "$rc" -eq 0 ] && [ "$(tr -d '\r' < CHANGELOG.md | sed -n 5,8p | tr '\n' '|')" = "### Changed||$want|- **TASK-000** (chore): Old. Validated: \`true\`.|" ] && [ "$(tr -cd '\r' < CHANGELOG.md | wc -c)" -eq "$(tr -cd '\n' < CHANGELOG.md | wc -c)" ] \
+  && ok "a TASK entry takes -t as its type, comes first under the existing Changed heading and keeps a CRLF CHANGELOG" || bad "drain TASK entry: rc=$rc $out $(tr -d '\r' < CHANGELOG.md | sed -n 5,8p)"
+
+# A merge conflict in complete stops with the merge open, the state "Interrupted work" and git-flow-edge recover.
+mk "$tmp/k"; git checkout -q -- TODO.md; fl start FEAT-002.2 2 >/dev/null
+git switch -q "$r2"; printf 'def add(a, b):\n    return b + a\n' > calc.py; g commit -qm "refactor(calc): swap operands" -- calc.py; git switch -q "$c2"; printf 'def add(a, b):\n    return a + b + 0\n' > calc.py
+out="$(fl complete FEAT-002.2 -m 'feat(calc): root function' -- calc.py)"; rc=$?
+[ "$rc" -eq 1 ] && [ "$(git symbolic-ref --short HEAD)" = "$r2" ] && git rev-parse -q --verify MERGE_HEAD >/dev/null && git show-ref -q --verify "refs/heads/$c2" && git show "$c2:TODO.md" | grep -q '^  - \[x\] \*\*FEAT-002.2\*\*' && printf '%s' "$out" | grep -q "Git conflicts" \
+  && ok "a conflicting child merge stops with the merge open, the child [x] on its branch and the recovery rule named" || bad "complete conflict: rc=$rc $out"
+
+# Refusals of complete and drain.
+mk "$tmp/l"; git checkout -q -- TODO.md
+refused "complete of a task that is not active" "is not the active" complete FEAT-002.2 -m 'feat(calc): x'
+fl start FEAT-002.2 2 >/dev/null
+refused "complete without a subject" "needs -m" complete FEAT-002.2
+refused "complete with a path that does not exist" "no such path" complete FEAT-002.2 -m 'feat(calc): x' -- nothing.py
+refused "drain of a task that is not a root" "only a root" drain FEAT-002.2
+git switch -q "$r2"; refused "complete away from the task's branch" "is not the active" complete FEAT-002.2 -m 'feat(calc): x'; git switch -q "$c2"
+fl complete FEAT-002.2 -m 'feat(calc): root' >/dev/null
+refused "drain of a root that is not active" "is not the active" drain FEAT-002
+mk "$tmp/m"; fl start FEAT-001 1 >/dev/null
+printf 'x = 1\n' >> calc.py; refused "drain with uncommitted work" "uncommitted" drain FEAT-001; git checkout -q -- calc.py
+printf '# Changelog\n' > CHANGELOG.md; refused "drain without an Unreleased section" "Unreleased" drain FEAT-001; git checkout -q -- CHANGELOG.md
+printf 'def sub(a, b):\n    return a - b\n' >> calc.py; fl complete FEAT-001 -m 'feat(calc): subtract' -- calc.py >/dev/null
+git switch -q main; printf 'n\n' > N.md; g add N.md; g commit -qm "docs: n" -- N.md; git switch -q todo/FEAT-001-add-subtract-function-calc
+out="$(fl drain FEAT-001 --merge)"; rc=$?
+[ "$rc" -eq 1 ] && [ "$(git log -1 --format=%s)" = "chore(backlog): drain FEAT-001" ] && [ "$(git log -1 --format=%s main)" = "docs: n" ] && printf '%s' "$out" | grep -q "moved since the refresh" \
+  && ok "drain --merge does not merge when the base moved after the refresh: it drains, stops and says to refresh and verify" || bad "drain --merge on a moved base: rc=$rc $out"
+
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

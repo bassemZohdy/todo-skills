@@ -18,7 +18,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
-| Backlog commands | `add-fix`, `update-block`, `update-drop` | Python |
+| Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop` | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |
 
 The expected end state of every scenario is in the table in [tests/trials/README.md](../tests/trials/README.md).

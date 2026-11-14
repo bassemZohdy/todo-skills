@@ -229,6 +229,14 @@ add-fix)
   chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
   chk "no code changed, nothing committed" 'unchanged && git diff --quiet -- calc.py tests'
   ;;
+add-lane)
+  chk "a FEAT-002 root in lane math with a complexity" 'grep -Eq "^- \[ \] \*\*FEAT-002\*\* · P[0-2] · (low|mid|high) · " TODO.md && grep -A3 "^- \[ \] \*\*FEAT-002\*\*" TODO.md | grep -q "Links: .*Lane: math"'
+  chk "the Lanes section declares math with a description, and still main" 'awk "/^## .*Lanes\$/ {l=NR} /^- math: +[^ ]/ {m=NR} /^- main: / {n=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && n > l && t > m && t > n)}" TODO.md'
+  chk "its Done when runs a unittest command" 'grep -A1 "FEAT-002\*\*" TODO.md | grep -Eq "Done when: .*\`(cd tests && )?python3 -m unittest [^\`]+\`"'
+  chk "the lint finds no violation and no undeclared lane" 'out="$(bash "$root/tools/todo-lint.sh" TODO.md CHANGELOG.md 2>&1)" && ! printf "%s" "$out" | grep -q "^WARN W9"'
+  chk "FEAT-001 untouched" '[ -z "$(git diff $start -- TODO.md | grep "^-" | grep -v "^---")" ]'
+  chk "no code changed, nothing committed" 'unchanged && git diff --quiet -- calc.py tests'
+  ;;
 update-block)
   chk "FEAT-002 is [!] with a manual Blocked line" 'grep -A3 "\[!\] \*\*FEAT-002" TODO.md | grep -q "Blocked: .*rounding.* → n/a (manual) → "'
   chk "FEAT-001 untouched, only FEAT-002 lines changed" '[ "$(git diff -U0 $start -- TODO.md | grep -c "^[-+][^-+]")" -le 3 ] && grep -q "^- \[ \] \*\*FEAT-001" TODO.md'

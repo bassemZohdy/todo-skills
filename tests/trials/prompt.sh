@@ -25,6 +25,7 @@ case "$scenario" in
   regress-block)      task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   no-git)             task='Run `/todo-continue`. Stop after one invocation.' ;;
   add-fix)            task='Run `/todo-add "add() crashes with a TypeError traceback when given None; it should raise ValueError(\"add needs numbers\")" --priority P0`. Do not ask questions; the description is complete.' ;;
+  add-lane)           task='Run `/todo-add "add a power function to calc.py that raises the first number to the second" --lane math`. Do not ask questions; the description is complete. The user confirms the lane line you propose: "yes".' ;;
   update-block)       task='Run `/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"`.' ;;
   update-drop)        task='Run `/todo-update FEAT-002 --status drop --note "duplicate of FEAT-001"`. The user confirms the drop: "yes".' ;;
   status-readonly)    task='Run `/todo-status`.' ;;

@@ -488,6 +488,19 @@ done
 grep -qF 'plan doc has a dated revision line naming FEAT-003' "$root/tests/trials/assert.sh" || r126="$r126 [replan trial assertion]"
 if [ -z "$r126" ]; then ok "/todo-plan --revise creates no plan doc, logs Revisions only into an existing one and keeps the drop rule (TASK-126.2)"; else bad "/todo-plan --revise without a plan doc (TASK-126.2):$r126"; fi
 
+# One owner for planning (TASK-126.3): /todo-init (--plan, or a goal in its message) only points to /todo-plan, with no
+# questions and no PROJECT.md of its own, and the docs name /todo-plan as the planning command.
+o126=""; ti126="$root/plugin/skills/todo-init/SKILL.md"
+grep -qF 'point to `/todo-plan`' "$ti126" || o126="$o126 [todo-init pointer]"
+grep -qF 'or when both hold:' "$ti126" || o126="$o126 [todo-init trigger]"
+{ ! grep -q 'PROJECT.md' "$ti126" && ! grep -qiE 'pre-planning|at most 3 short questions' "$ti126"; } || o126="$o126 [todo-init still plans]"
+grep -qiE 'pre-planning' "$root/plugin/skills/todo/SKILL.md" && o126="$o126 [core still says pre-planning]"
+grep -qE 'todo-init`?/`?todo-plan' "$root/plugin/skills/todo/SKILL.md" && o126="$o126 [core write policy names todo-init]"
+for f126 in README.md docs/COMMANDS.md docs/PLANNING.md docs/GETTING-STARTED.md docs/FILES.md; do
+  grep -E 'todo-init.*PROJECT\.md|--plan.*(PROJECT\.md|pre-planning|questions)|offers to save them' "$root/$f126" >/dev/null && o126="$o126 [$f126]"
+done
+if [ -z "$o126" ]; then ok "/todo-init --plan and a stated goal only point to /todo-plan: no questions, no PROJECT.md (TASK-126.3)"; else bad "one planning owner (TASK-126.3):$o126"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

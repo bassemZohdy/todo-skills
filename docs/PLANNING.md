@@ -8,7 +8,7 @@ How work gets into the tree before anyone builds it, how the plan changes later,
 |---|---|
 | `/todo-add "<description>"` | One task, or one request broken into a tree. Asks up to 3 questions when unclear |
 | `/todo-plan "<goal>"` | A goal that needs a plan: proposes the lanes and roots inside `TODO.md`; a plan doc per root only for a complex goal |
-| `/todo-init --plan` | The first session on a project: up to 3 questions, the answers saved as `docs/plans/PROJECT.md`, then `/todo-plan` for the tree |
+| `/todo-init --plan` | Only points to `/todo-plan`; `/todo-init` itself asks no planning question and writes no plan doc |
 
 None of them starts work, and none commits: their edits are backlog files that the next tree claim commits ([FILES.md](FILES.md#backlog-files-and-when-they-are-committed)). New roots are written only on the base branch.
 

@@ -24,7 +24,7 @@ It creates `TODO.md` and `CHANGELOG.md` if they are missing, detects git, the ba
 
 Optional:
 
-- `/todo-init --plan` asks up to three questions about the goal and saves the answers as `docs/plans/PROJECT.md`.
+- `/todo-init --plan` only points to `/todo-plan "<goal>"`, the one command that plans.
 - `/todo-init --ci` writes `.todo/check.sh` (lint + tests) and a CI job that runs it, or, without CI, a `pre-push` hook. Copy [`tools/todo-lint.sh`](../tools/todo-lint.sh) to `.todo/todo-lint.sh` first so the check includes the lint ([TOOLS.md](TOOLS.md)). Commit `.todo/` and the CI file yourself.
 
 ## 3. Add a task

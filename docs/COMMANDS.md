@@ -19,8 +19,9 @@ The core rules. Run directly it is read-only: it lists the commands, runs the in
 Sets up or checks the backlog workspace. Idempotent: run it again at any time.
 
 1. Checks git. Outside a repository it says the skills will run in no-git mode; it runs `git init` only if you ask.
-2. Looks for `README.md`, `docs/`, `TODO.md` and `CHANGELOG.md`, and creates only what is missing: `TODO.md` with its two headings, `CHANGELOG.md` with the Keep a Changelog intro and `## [Unreleased]`. A `CHANGELOG.md` without `[Unreleased]` gets that heading above the newest version and nothing else. New files stay uncommitted (they are backlog files).
+2. Looks for `README.md`, `docs/`, `TODO.md` and `CHANGELOG.md`, and creates only what is missing: `TODO.md` with a `## 🛤️ Lanes` section (the `main` lane) above the Task Tree, `CHANGELOG.md` with the Keep a Changelog intro and `## [Unreleased]`. A `CHANGELOG.md` without `[Unreleased]` gets that heading above the newest version and nothing else. New files stay uncommitted (they are backlog files).
 3. Never overwrites an existing `TODO.md`:
+   - **Tree format without a Lanes section**: offers to add one above the Task Tree, the `main` lane plus one line per `Lane:` a root already uses; written on your yes.
    - **Old three-section format** (In Progress, Ready, Blocked; Scope, Out of Scope, Validation, Progress): offers a migration to roots of the task tree. Complexity is rated (`mid` when unsure), every `Done when` must pass lint before anything is written, and each Out of Scope item is moved into a `docs/` note or dropped only as you decide.
    - **Size-only format** (`· S ·` where the complexity now goes): offers to insert a complexity before each size.
    - **Anything else** (a free-form list): offers to move it aside to `TODO.legacy.md`.
@@ -66,7 +67,7 @@ Adds work to the tree. It never starts work.
 | `--ref <docs-path>` | The governing doc, linked as `Ref:` (anchors allowed). The path must exist. Without it, a doc in `docs/` that clearly governs the work is proposed |
 | `--from <ID>` | Provenance, written as `From:`. The ID must exist in `TODO.md` or `CHANGELOG.md` |
 | `--parent <ID>` | Adds a child under an open `[ ]` node with at most one dot in its ID, in a tree nobody else has claimed. Children inherit the root's prefix, priority and lane, so `--priority`, `--lane` and `--type` are refused |
-| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes) |
+| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
 | `--clarify` | Always asks one round of questions first |
 
 1. Resolves `--ref`, an RTM link (only when an RTM exists), `--from` and `--parent`.
@@ -121,14 +122,14 @@ Manual changes to one node. Dotted IDs (`FEAT-002.1`) are allowed. With neither 
 
 `ready`, `blocked` and `revert` act where the node's state lives: on the tree's branches for a claimed tree (it names the branch and stops if you are elsewhere), on the base for an unclaimed tree. On a `todo/` branch the change is committed (`chore(backlog): ready|block|drop|revert <ID>`); on the base it stays an uncommitted backlog edit, except the claim release.
 
-**Field edits.** `--note` without a status, starting with `Title:`, `Done when:`, `Ref:`, `Depends:`, `From:`, `State:`, `Complexity:`, `Size:`, `Priority:` or `Lane:`, replaces that part with your text verbatim. Any other note is not applied. The usual rules hold: a `Done when` keeps a runnable, allowed command; a `Ref:` path and `Depends:`/`From:` IDs must exist; no dependency cycle; `Lane:` and `Priority:` on roots only. A `State:` edit is one way to reset the attempt counter. Field edits are refused on `[x]` nodes and, from outside the tree's branch, on a claimed tree. The skill never rewrites a `Done when` on its own.
+**Field edits.** `--note` without a status, starting with `Title:`, `Done when:`, `Ref:`, `Depends:`, `From:`, `State:`, `Complexity:`, `Size:`, `Priority:` or `Lane:`, replaces that part with your text verbatim (a `Lane:` the Lanes section does not declare gets its line there, with a description you give). Any other note is not applied. The usual rules hold: a `Done when` keeps a runnable, allowed command; a `Ref:` path and `Depends:`/`From:` IDs must exist; no dependency cycle; `Lane:` and `Priority:` on roots only. A `State:` edit is one way to reset the attempt counter. Field edits are refused on `[x]` nodes and, from outside the tree's branch, on a claimed tree. The skill never rewrites a `Done when` on its own.
 
 ## `/todo-status [--search <text>] [--last <N>]`
 
 Read-only: no edits, no bootstrapping, no git writes. Without a `TODO.md` it suggests `/todo-init`.
 
 - **Lint** result in one line, followed by the overall progress line (from `todo-lint.sh --progress` when `.todo/todo-lint.sh` exists, else computed by the same definition; see [TOOLS.md](TOOLS.md#todo-lintsh)).
-- **Tree** grouped by lane, with a progress bar per lane: each root with marker, complexity, title, its own progress bar of done/total leaves, priority and, when claimed, `claimed by <branch>` with the branch's last commit date (stale when the branch is gone). Claims are read from the base branch, so a tree branch also sees other trees as claimed. Finished subtrees collapse to a count.
+- **Tree** grouped by lane, with a progress bar and the lane's description from the `## 🛤️ Lanes` section per lane: each root with marker, complexity, title, its own progress bar of done/total leaves, priority and, when claimed, `claimed by <branch>` with the branch's last commit date (stale when the branch is gone). Claims are read from the base branch, so a tree branch also sees other trees as claimed. Finished subtrees collapse to a count.
 - **Active:** the `[/]` node, its ancestors, its `State:`, and in git mode the checked-out branch and whether it has changes.
 - **Next:** `resume <ID>`, or the first workable node with its `Done when`, or what blocks the tree.
 - **Blocked:** each `[!]` node with its reason and the action required.
@@ -140,7 +141,7 @@ The progress bars use 10 cells: `#` done, `!` blocked, `-` the rest. They are sh
 
 ## `/todo-report`
 
-Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs and the overall progress line (the same line as `todo-lint.sh --progress`, with a bar), lanes with progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan. Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
+Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs and the overall progress line (the same line as `todo-lint.sh --progress`, with a bar), lanes with their descriptions and progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan. Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
 
 ## `/todo-release [--version X.Y.Z]`
 

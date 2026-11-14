@@ -68,7 +68,7 @@ For the same kind of root, `/todo-continue` asks once, after the root is refresh
 
 ## Lanes
 
-A **lane** is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) goes in a root's `Links:`; children inherit it, and a root without it is in lane `main`. A lane can hold one root or many. Order across lanes is expressed only with `Depends:`; work that depends on another lane's open node is not workable, and that lane stops there.
+A **lane** is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) goes in a root's `Links:`; children inherit it, and a root without it is in lane `main`. A lane can hold one root or many. Order across lanes is expressed only with `Depends:`; work that depends on another lane's open node is not workable, and that lane stops there. Lanes are declared in the `## 🛤️ Lanes` section of `TODO.md`, one `- <name>: <what it covers>` line each (`main` always exists); the lint warns (W9) on a `Lane:` that is not declared there.
 
 | Run | What happens |
 |---|---|

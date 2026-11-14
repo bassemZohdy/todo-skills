@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W7) must pass with "WARN W<n>:".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W9) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
@@ -24,7 +24,7 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ] || [ "$expect" = "W8" ]; then
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ] || [ "$expect" = "W8" ] || [ "$expect" = "W9" ]; then
     if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
   elif [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi
@@ -429,6 +429,45 @@ if [ -z "$ti_bad" ]; then ok "todo-init says what to report without a marker fil
 ln107="$root/plugin/skills/todo/reference/lanes.md"
 if grep -qF 'the lane work of item 3' "$ln107" && grep -qF 'all lanes first, then item 4' "$ln107" && grep -qF 'possible for every root after the first' "$ln107" && ! grep -qF 'expect them for every root' "$ln107"; then ok "lanes.md says how a run without a subagent tool orders the lane work and the drains (FIX-107)"; else bad "lanes.md gaps for a run without a subagent tool (FIX-107)"; fi
 
+# The Lanes section (FEAT-125.2): the core skill and docs/REFERENCE.md show it in the TODO.md schema, say where lane names are
+# declared, give the I6 row the section and document the W9 warning; the old "exactly one section" wording is gone.
+l125=""; c125="$root/plugin/skills/todo/SKILL.md"; r125="$root/docs/REFERENCE.md"
+for f125 in "$c125" "$r125"; do
+  grep -qF '## 🛤️ Lanes' "$f125" && grep -qF -- '- main: the default track' "$f125" || l125="$l125 $(basename "$f125")(schema)"
+  grep -F '| I6 |' "$f125" | grep -qF 'Lanes' && ! grep -F '| I6 |' "$f125" | grep -qF 'plus one' || l125="$l125 $(basename "$f125")(I6)"
+done
+grep -qF 'declared in the `## 🛤️ Lanes` section of `TODO.md`' "$c125" && grep -qF 'W9' "$c125" || l125="$l125 core(where lanes are declared)"
+grep -qF '| W9 |' "$r125" || l125="$l125 REFERENCE(W9)"
+if [ -z "$l125" ]; then ok "the core skill and REFERENCE.md show the Lanes section, name where lanes are declared, extend the I6 row and document W9 (FEAT-125.2)"; else bad "Lanes section docs (FEAT-125.2):$l125"; fi
+
+# /todo-init and the Lanes section (FEAT-125.3): a new TODO.md is written with the section and the main lane, a tree-format file
+# without it gets an offer, and the monorepo trial (which starts without a TODO.md) expects the section.
+i125=""; ti125="$root/plugin/skills/todo-init/SKILL.md"
+grep -qF '## 🛤️ Lanes' "$ti125" && grep -qF -- '- main: the default track' "$ti125" || i125="$i125 template"
+grep -qF 'has no `## … Lanes` section' "$ti125" || i125="$i125 offer"
+grep -qF 'Lanes' <(awk '/^monorepo\)/,/^  ;;/' "$root/tests/trials/assert.sh") || i125="$i125 monorepo-assertion"
+if [ -z "$i125" ]; then ok "todo-init writes the Lanes section into a new TODO.md and offers it for a tree-format file without one; the monorepo trial expects it (FEAT-125.3)"; else bad "todo-init Lanes section (FEAT-125.3):$i125"; fi
+
+# A lane a command uses that the Lanes section does not declare (FEAT-125.4): /todo-add --lane, a Lane edit of /todo-update and
+# /todo-plan each add the lane line to TODO.md in the same change.
+d125=""
+for sk125 in todo-add todo-update todo-plan; do
+  grep -qF 'not declared in the `## 🛤️ Lanes` section' "$root/plugin/skills/$sk125/SKILL.md" || d125="$d125 $sk125"
+done
+if [ -z "$d125" ]; then ok "todo-add, todo-update and todo-plan add the lane line when they use a lane the Lanes section does not declare (FEAT-125.4)"; else bad "undeclared lane rule missing from (FEAT-125.4):$d125"; fi
+
+# A file with a Lanes section (FEAT-125.6): the stop hook, the report generator and the replay script accept it (verify reads
+# no backlog file), and this repository's own TODO.md declares its lane.
+lz="$(mktemp -d)"; l6_bad=""
+cp "$fx/ok-lanes.md" "$lz/TODO.md"; printf '# Changelog\n\n## [Unreleased]\n' > "$lz/CHANGELOG.md"
+( cd "$lz" && git init -q && git config user.email t@example.invalid && git config user.name t && git add -A && git commit -qm base ) >/dev/null 2>&1
+out="$(cd "$lz" && printf '{}' | bash "$hook")"; [ -z "$out" ] || l6_bad="$l6_bad hook"
+out="$(cd "$lz" && printf 'project: x\n' | bash "$root/tools/todo-report.sh")"; printf '%s' "$out" | grep -qF 'the HTTP service' || l6_bad="$l6_bad report"
+out="$(cd "$lz" && bash "$root/tools/todo-replay.sh" HEAD 2>&1)"; [ $? -eq 0 ] && printf '%s' "$out" | grep -q 'nothing to replay' || l6_bad="$l6_bad replay"
+rm -rf "$lz"
+grep -qE '^## .*Lanes$' "$root/TODO.md" && grep -qE '^- main: ' "$root/TODO.md" && ! bash "$root/tools/todo-lint.sh" "$root/TODO.md" "$root/CHANGELOG.md" 2>&1 | grep -q '^WARN W9' || l6_bad="$l6_bad repo-TODO.md"
+if [ -z "$l6_bad" ]; then ok "the stop hook, report generator and replay script accept a Lanes section, and this repository's TODO.md declares its lane (FEAT-125.6)"; else bad "Lanes section in the scripts (FEAT-125.6):$l6_bad"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"
@@ -505,6 +544,23 @@ if command -v node >/dev/null 2>&1; then
 else
   skip "status page progressLine check (node is not installed)"
 fi
+# Lane descriptions (FEAT-125.5): the status page reads them from the Lanes section (its laneDescriptions function, run under
+# node) and still renders a file without the section; /todo-status and /todo-report say so.
+if command -v node >/dev/null 2>&1; then
+  ljs="$(sed -n '/^\/\/ ---- lanes/,/^\/\/ ---- end lanes/p' "$root/tools/template.html")"
+  lgot="$(printf '%s
+%s
+' "$ljs" 'const fs=require("fs");const a=laneDescriptions(fs.readFileSync(process.argv[2],"utf8")),b=laneDescriptions(fs.readFileSync(process.argv[3],"utf8"));process.stdout.write(a.api+"|"+a.web+"|"+Object.keys(b).length)' | node - "$fx/ok-lanes.md" "$fx/ok-valid.md" 2>&1)"
+  if [ -n "$ljs" ] && [ "$lgot" = "the HTTP service|the browser client|0" ]; then ok "status page laneDescriptions reads the Lanes section and returns nothing for a file without it (FEAT-125.5)"; else bad "status page laneDescriptions: got '$lgot' (FEAT-125.5)"; fi
+else
+  skip "status page laneDescriptions check (node is not installed)"
+fi
+l5_bad=""
+grep -qF 'laneDescriptions(raw(' "$root/tools/template.html" && grep -qF 'laneDesc[name]' "$root/tools/template.html" || l5_bad="$l5_bad page"
+grep -qF 'description from the `## 🛤️ Lanes` section' "$root/plugin/skills/todo-status/SKILL.md" || l5_bad="$l5_bad todo-status"
+grep -qF '`## 🛤️ Lanes` section' "$root/plugin/skills/todo-report/SKILL.md" || l5_bad="$l5_bad todo-report"
+if [ -z "$l5_bad" ]; then ok "the status page draws lane descriptions and /todo-status and /todo-report say where they come from (FEAT-125.5)"; else bad "lane descriptions in the status views (FEAT-125.5):$l5_bad"; fi
+
 st="$root/plugin/skills/todo-status/SKILL.md"
 if grep -q '^## Progress' "$st" && grep -qF 'todo-lint.sh --progress' "$st" && grep -qF 'drained in [Unreleased]' "$st" && grep -qF '`!`' "$st" && grep -q 'per lane' "$st" && grep -qi 'never written to TODO.md' "$st"; then ok "todo-status shows progress bars with the lint's definition, never in TODO.md"; else bad "todo-status progress section missing or incomplete"; fi
 # FEAT-042.4: the docs describe the three progress views and the issue 5 decision.

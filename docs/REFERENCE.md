@@ -7,6 +7,10 @@ The formats and rules of the todo-skills. The model reads the rules in [`plugin/
 ```markdown
 # Active Backlog
 
+## 🛤️ Lanes
+
+- main: the default track
+
 ## 🌳 Task Tree
 
 - [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
@@ -22,7 +26,7 @@ The formats and rules of the todo-skills. The model reads the rules in [`plugin/
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
-The file is exactly the heading `# Active Backlog` and one section whose heading ends in `Task Tree`. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
+The file is the heading `# Active Backlog`, an optional section whose heading ends in `Lanes` and one section whose heading ends in `Task Tree`, in that order. The Lanes section holds one `- <name>: <what it covers>` line per lane (lowercase letters, digits and dashes, no repeats); `main` always exists, and a file without the section has only that lane. A root's `Lane:` that is not declared there gets the warning W9. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
 
 ### A task
 
@@ -142,7 +146,7 @@ Every command checks these first. `.todo/todo-lint.sh` (a copy of [`tools/todo-l
 | I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no `State:` together with `Blocked:`, a `Blocked:` line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size, a title, an ID of `FEAT-`, `FIX-` or `TASK-` plus at least three digits (children append `.n`), and `State:` items from the documented grammar (`attempts n/3` with n from 0 to 3, `baseline`, `tier`, `branch <name> from <branch>`, `hyp`, `no git`, `files`, `docs`, and a `next:` step from the list; the order of the items is not checked) |
 | I4 | `TODO.md` is at most 120 lines |
 | I5 | No task ID in `TODO.md` is also a `CHANGELOG.md` entry ID or `Includes:` ID (IDs named only in `Depends:` or `From:` do not count) |
-| I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
+| I6 | The file is `# Active Backlog`, at most one `## … Lanes` section (one `- <name>: <what it covers>` line per lane, no repeats), then exactly one `## … Task Tree` section |
 | I7 | Every ID in `Depends:` or `From:` exists in `TODO.md` or `CHANGELOG.md` |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indentation, no `[x]` root, no `[x]` node with open children, and any size matches the tree |
 | I9 | No dependency cycles, counting "a parent waits for its children" |
@@ -164,6 +168,7 @@ The lint prints `WARN` lines that never change its exit code:
 | W6 | A command that may download and run code from the network: `npx --yes`/`-y`, `pnpm dlx`, `yarn dlx`, `bunx`, `uvx`, `deno run` of a URL, `go run pkg@version`, `pip install`, `npm install`. Use a package already in the lockfile (`npx --no-install`) and install dependencies before the task. `todo-replay.sh` refuses these |
 | W7 | A flag that makes a runner execute no test: `--collect-only`, `--co`, `--passWithNoTests`, `-DskipTests`, `-Dmaven.test.skip`, `--no-run`. The run exits 0 without proving the behavior |
 | W8 | A `Ref:` path (the part before `#`) that does not exist, taken relative to the folder of the backlog file. The anchor is not checked. A URL is skipped. `/todo-continue` refuses to start a node whose `Ref:` is missing, so the warning shows it earlier |
+| W9 | A root's `Lane:` that no `## … Lanes` section declares (`main` always counts, and a file without the section declares only `main`). Add the lane line above the Task Tree |
 
 ## Requirements traceability (optional)
 

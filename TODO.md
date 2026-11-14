@@ -19,7 +19,3 @@
     - Done when: the selftest and the harness checks pass with the helper switch on and off; `bash tests/run.sh`
   - [ ] **FEAT-129.5** · mid · Measure the helper with fresh pi agents against a fresh baseline of the same 18 benchmark cells plus the lifecycle trials, and publish the results and the decision
     - Done when: the summary is linked from docs/trials.md, its run rows are in the published table and the token table is regenerated; `bash tests/run.sh`
-- [/] **FIX-130** · P0 · low · Remove the shellcheck SC2181 finding in the Lanes script check of tests/run.sh, which fails the CI test job on main since FEAT-125.6
-  - Done when: shellcheck reports nothing in the scripts under tools, .todo and tests; `bash tests/shellcheck.sh`
-  - Links: From: FEAT-125
-  - State: attempts 0/3; baseline red: shellcheck; branch todo/FIX-130-remove-shellcheck-sc2181-finding from main; next: read docs

@@ -894,6 +894,35 @@ evt="$(mktemp -d)"; mkdir -p "$evt/docs/evals/b1"
 printf 'log\n' > "$evt/docs/evals/b1/run.txt"; printf '# S\n\n[x](gone.md)\n' > "$evt/docs/evals/b1/summary.md"
 ev_t="$(evalscheck "$evt")"; rm -rf "$evt"
 if [ "$(printf '%s\n' "$ev_t" | grep -c '^EV')" -eq 3 ]; then ok "the docs/evals check fails another file type, a broken link and a summary without the note"; else bad "the docs/evals check missed a gap: $ev_t"; fi
+# TASK-121: docs/evals/README.md states that only results are published, and every relative link in README.md and docs/ resolves.
+doclinks() {   # <repo root>: prints one LINK line per broken relative link and one POLICY line when the rule is not written down
+python3 - "$1" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+files = ['README.md'] + [os.path.relpath(os.path.join(d, f), root).replace(os.sep, '/')
+                         for d, _, fs in os.walk(os.path.join(root, 'docs')) for f in fs if f.endswith('.md')]
+for rel in sorted(files):
+    p = os.path.join(root, rel)
+    if not os.path.exists(p):
+        continue
+    t = open(p, encoding='utf-8').read().replace('\r\n', '\n')
+    for m in re.finditer(r'\]\(([^)\s]+)\)', t):
+        x = m.group(1)
+        if re.match(r'[a-z][a-z0-9+.-]*:', x) or x.startswith('#'):
+            continue
+        x = x.split('#')[0]
+        if x and not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(p), x))):
+            print(f'LINK {rel}: {x}')
+pol = os.path.join(root, 'docs', 'evals', 'README.md')
+if not os.path.exists(pol) or 'Only results are published' not in open(pol, encoding='utf-8').read():
+    print('POLICY docs/evals/README.md does not say that only results are published')
+PY
+}
+dl_out="$(doclinks "$root")"
+if [ -z "$dl_out" ]; then ok "docs/evals/README.md states the rule and every link in README.md and docs/ resolves (TASK-121)"; else bad "docs links or policy:$(printf '%s' "$dl_out" | head -5 | tr '\n' ';')"; fi
+dlt="$(mktemp -d)"; mkdir -p "$dlt/docs/evals"; printf '[x](docs/gone.md)\n' > "$dlt/README.md"; printf '# E\n' > "$dlt/docs/evals/README.md"
+dl_t="$(doclinks "$dlt")"; rm -rf "$dlt"
+if [ "$(printf '%s\n' "$dl_t" | grep -c '^LINK\|^POLICY')" -eq 2 ]; then ok "the docs check fails a broken link and a missing policy"; else bad "the docs check missed a gap: $dl_t"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

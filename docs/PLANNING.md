@@ -7,7 +7,7 @@ How work gets into the tree before anyone builds it, how the plan changes later,
 | Command | Use it for |
 |---|---|
 | `/todo-add "<description>"` | One task, or one request broken into a tree. Asks up to 3 questions when unclear |
-| `/todo-plan "<goal>"` | A goal that needs a plan: writes `docs/plans/PROJECT.md` and proposes roots in lanes |
+| `/todo-plan "<goal>"` | A goal that needs a plan: proposes the lanes and roots inside `TODO.md`; a plan doc per root only for a complex goal |
 | `/todo-init --plan` | The first session on a project: up to 3 questions, the answers saved as `docs/plans/PROJECT.md`, then `/todo-plan` for the tree |
 
 None of them starts work, and none commits: their edits are backlog files that the next tree claim commits ([FILES.md](FILES.md#backlog-files-and-when-they-are-committed)). New roots are written only on the base branch.
@@ -23,7 +23,7 @@ None of them starts work, and none commits: their edits are backlog files that t
 
 ## The plan doc
 
-`docs/plans/PROJECT.md`, short, with these `##` sections in order:
+A plan doc is optional: `/todo-plan` offers one only for a complex goal, one per root (`docs/plans/<ROOT-ID>-<slug>.md`). An existing project plan, `docs/plans/PROJECT.md`, is still read and edited; it keeps these `##` sections in order:
 
 ```markdown
 ## Goal
@@ -38,9 +38,9 @@ web: the dashboard; independent of api
 - 2026-11-08 · the dashboard is out of scope · dropped FEAT-003
 ```
 
-Each lane line reads `<name>: <what it covers>; independent of <lanes>`. With only one track, the lane is `main`. Revisions stays empty until the first re-plan. The skills ask before creating `docs/`, and propose edits to an existing plan doc instead of a new draft.
+A lane line in a plan doc reads `<name>: <what it covers>; independent of <lanes>`; the lanes themselves are declared in the `## 🛤️ Lanes` section of `TODO.md`. With only one track, the lane is `main`. Revisions stays empty until the first re-plan. The skills ask before creating `docs/`, and propose edits to an existing plan doc instead of a new draft.
 
-`/todo-plan` gives each root `Ref: docs/plans/PROJECT.md` (with a section anchor when one fits) and a `Lane:` unless its lane is `main`, and orders roots so that independent lanes do not depend on each other. With an existing tree it proposes only new roots, and children under open roots of unclaimed trees. With an [RTM](REFERENCE.md#requirements-traceability-optional), roots that implement a listed requirement link to its row, and the row changes are shown with the tree.
+`/todo-plan` gives a root a `Ref:` only to its own plan doc, or to the section of an existing `PROJECT.md` that governs it, and a `Lane:` unless its lane is `main`, and orders roots so that independent lanes do not depend on each other. With an existing tree it proposes only new roots, and children under open roots of unclaimed trees. With an [RTM](REFERENCE.md#requirements-traceability-optional), roots that implement a listed requirement link to its row, and the row changes are shown with the tree.
 
 ## Re-planning
 

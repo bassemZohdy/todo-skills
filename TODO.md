@@ -10,9 +10,8 @@
   - Done when: a small goal leaves no docs/plans folder and no Ref, a complex one is offered a doc per root, and every child's check is green; `bash tests/run.sh`
   - Links: Depends: FEAT-125
   - State: branch todo/TASK-126-plan-inside-todo-md from main; next: build children
-  - [/] **TASK-126.1** · mid · /todo-plan drafts no PROJECT.md and writes no Ref by default, offers docs/plans/ROOT-ID-slug.md by the /todo-add rule for a complex goal, and still reads and edits a PROJECT.md that exists
+  - [x] **TASK-126.1** · mid · /todo-plan drafts no PROJECT.md and writes no Ref by default, offers docs/plans/ROOT-ID-slug.md by the /todo-add rule for a complex goal, and still reads and edits a PROJECT.md that exists
     - Done when: run.sh pins the default, the complex-goal offer and the existing-doc rule, and fails on the 0.5.1 wording; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 276 passing; branch todo/TASK-126.1-todo-plan-drafts-no from todo/TASK-126-plan-inside-todo-md; next: read docs
   - [ ] **TASK-126.2** · mid · /todo-plan --revise works without a plan doc: it proposes none and writes the Revisions line only when the doc exists
     - Done when: run.sh pins the rule and the plan-revise trial setup, which has a plan doc, still expects its dated Revisions line; `bash tests/trials/selftest.sh`
   - [ ] **TASK-126.3** · low · /todo-init --plan, and a goal stated in the /todo-init message, only point to /todo-plan: no questions asked and no PROJECT.md offered

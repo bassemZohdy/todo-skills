@@ -40,14 +40,14 @@ It adds, starts or changes no task (apart from a migration you confirmed).
 
 ## `/todo-plan [<goal>] [--revise [<reason>]]`
 
-Turns a goal into a plan doc and a proposed tree, or changes the plan when it no longer fits. It never starts work and never touches code. Details: [PLANNING.md](PLANNING.md).
+Turns a goal into a proposed tree with lanes inside `TODO.md` (a plan doc only for a complex goal), or changes the plan when it no longer fits. It never starts work and never touches code. Details: [PLANNING.md](PLANNING.md).
 
 **Plan (default).**
 
 1. Reads README, `docs/`, `TODO.md`, `CHANGELOG.md` and `docs/plans/PROJECT.md`.
 2. Asks at most 3 short questions the repo does not answer: the goal and its done-state, what is out of scope, which parts can run in parallel. For an unclear request it also runs the ambiguity checklist (undefined terms, acceptance criteria, actors, error and boundary cases, scope) and stops before writing anything when a business rule is missing, incompatible implementations fit, or authorization is unstated; questions are numbered with their trade-offs, at most 3 per round, and a question that must wait goes to the plan doc's Open questions or a `[!]` node.
-3. Drafts `docs/plans/PROJECT.md` (sections Goal, Scope, Out of scope, Lanes, Decisions, Open questions, Revisions), or proposes edits when it exists. It asks before creating `docs/`.
-4. Proposes the tree by the `/todo-add` rules: each root gets `Ref: docs/plans/PROJECT.md` and, outside lane `main`, a `Lane:`. Independent lanes do not depend on each other. With an existing tree it proposes only new roots (and children under open roots of unclaimed trees). A tree that would pass 120 lines is proposed as roots and first levels with `next: decompose`. With an RTM, it links roots to requirements and shows the row changes.
+3. Plans inline: drafts the lane lines of the `## 🛤️ Lanes` section with the tree and writes no plan doc and no `Ref:` for them. For a complex goal (more than 6 nodes, a `high` root, or on request) it also offers one doc per root, `docs/plans/<ROOT-ID>-<slug>.md`, and asks before creating `docs/`. An existing `docs/plans/PROJECT.md` is read and edits to it are proposed.
+4. Proposes the tree by the `/todo-add` rules: a root gets a `Ref:` only to its own plan doc (or the section of an existing `PROJECT.md` that governs it) and, outside lane `main`, a `Lane:`. Independent lanes do not depend on each other. With an existing tree it proposes only new roots (and children under open roots of unclaimed trees). A tree that would pass 120 lines is proposed as roots and first levels with `next: decompose`. With an RTM, it links roots to requirements and shows the row changes.
 5. Waits for your confirmation, writes only what you confirmed, and lints. Nothing is committed.
 
 **Revise (`--revise [<reason>]`).** Usable at any time, even mid-tree. Only `[ ]` nodes change; `[/]`, `[x]`, `[!]` and drained work are never edited, and a node with any descendant that is not `[ ]` is not dropped, merged or moved. The change is shown as a diff (nodes added, dropped, split, merged, re-rated, re-ordered or moved to another lane, plan-doc lines changed). IDs are kept; a dropped ID is never reused, and every `Depends:`/`From:` on it is removed or re-pointed in the same diff. On your yes it applies the change, appends `- <date> · <your reason> · <what changed>` under **Revisions**, and lints.

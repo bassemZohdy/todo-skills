@@ -42,7 +42,7 @@ The full walkthrough is in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). T
 |---|---|---|
 | `/todo` | `plugin/skills/todo` | Core rules: tree format, complexity (low/mid/high, for model choice) and optional sizes, IDs, git flow, invariants, Definition of Done, guardrails. Run directly, it only lists commands and checks invariants (read-only) |
 | `/todo-init [--plan] [--ci]` | `plugin/skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git, the base branch and the test command, migrates older formats, reports status. `--plan` asks up to 3 pre-planning questions and can save `docs/plans/PROJECT.md`; `--ci` sets up `.todo/check.sh` and a CI job or pre-push hook |
-| `/todo-plan [<goal>] [--revise [<reason>]]` | `plugin/skills/todo-plan` | Writes a plan doc and proposes a tree split into lanes. `--revise` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept |
+| `/todo-plan [<goal>] [--revise [<reason>]]` | `plugin/skills/todo-plan` | Proposes the lanes and a tree inside `TODO.md`, and offers a plan doc per root only for a complex goal. `--revise` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept |
 | `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]` | `plugin/skills/todo-add` | Adds a task, or splits a request into a tree until every leaf fits one context window, rating each node's complexity. Asks up to 3 questions when unclear |
 | `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--delegate] [--merge]` | `plugin/skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root to `CHANGELOG.md`. Lane flags run one subagent per lane |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `plugin/skills/todo-update` | Manual state changes (dotted IDs allowed), claim releases and in-place field edits |
@@ -137,7 +137,7 @@ Caveats:
 
 Known limits:
 
-- Planning is shallow: a short plan doc and the tree.
+- Planning is shallow: lanes and the tree in `TODO.md`, and a plan doc only for a complex goal.
 - The 120-line cap holds about 30 tasks; big trees are decomposed lazily.
 - Sharing claims between clones is left to git.
 - The review step is a self-review when no subagent tool exists.

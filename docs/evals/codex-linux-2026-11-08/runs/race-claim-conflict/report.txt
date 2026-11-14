@@ -1,5 +1,0 @@
-Stopped at **step 4**, before the start commit: the claim fast-forward failed because `main` had moved to a claim for **FEAT-001 — Add a subtract function to calc.py with a test** on `todo/FEAT-001-rival`. Following the lost-claim procedure, I deleted my unpublished bare claim branch.
-
-The regression command `python3 -m unittest discover -s tests` passed: **1 test**. My claim commit was `e4111ad`; no start commit was made. No files remain changed in the checkout, which is on `main`. The next workable node is **none** from this checkout because FEAT-001 is claimed. If the rival claim is your work, run `git switch todo/FEAT-001-rival` and rerun `/todo-continue` to resume it. Clearing context before the next task may help.
-
-Ambiguity encountered: the bare-claim definition says, **“`git diff --name-only <base> <branch>` lists only `TODO.md`, and that diff changes only the root's `State:` line.”** After the rival claim landed, the diff compared two different claim lines rather than an unclaimed root with my claim. I treated it as a bare claim because the diff changed only that line and `git log main..<branch>` showed exactly my one claim commit.

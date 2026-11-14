@@ -1,6 +1,0 @@
- CHANGELOG.md       | 3 +++
- TODO.md            | 2 --
- calc.py            | 3 +++
- tests/__init__.py  | 0
- tests/test_calc.py | 3 +++
- 5 files changed, 9 insertions(+), 2 deletions(-)

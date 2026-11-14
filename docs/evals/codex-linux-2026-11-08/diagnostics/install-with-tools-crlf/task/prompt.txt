@@ -1,1 +1,0 @@
-Run $todo-continue --merge on the scratch backlog. Complete one invocation and stop. Never push or fetch, never tag, and never use git add -A or git add .; use git -c user.email=t@t -c user.name=t if needed. Report the result and ambiguities.

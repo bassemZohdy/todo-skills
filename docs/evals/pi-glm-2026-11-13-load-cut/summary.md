@@ -1,5 +1,7 @@
 # pi + GLM 5.3: the load cut of TASK-110 (2026-11-13)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 TASK-110 moved the rarely used branches of `/todo-continue` out of the text every run loads and into reference files that are read on demand. This batch checks, with fresh agents, that nothing was lost on the way. Same agent, model and host as the batches before it: pi 1.5.2, `glm-5.3` (z.ai), Windows 11 with Git Bash, unisolated verifier.
 
 ## Skill text versions

@@ -1,6 +1,0 @@
-{
-  "commit": "0fc656b2889265c144cfc844c4a16c0c3daf25a3",
-  "host": "Windows 11 Pro 10.0.26300, Git Bash, codex-cli 0.167.0, elevated sandbox provisioned",
-  "env": "TRIAL_PYTHON set to a regular Python 3.13.7 install",
-  "logs": {"test-windows-verifier-isolation.log": 11, "test-verifier-failures.log": 8}
-}

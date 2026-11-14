@@ -1,5 +1,7 @@
 # Linux Codex lifecycle trials, 2026-11-08
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 Eight scenarios ran in separate scratch repositories using fresh Codex CLI 0.167.0 sessions with model `gpt-6.1-terra`. The tested project commit was `3a8b215ef3fc1b06ec2759d700151ee944000043`; the controller also had an uncommitted line-ending fix in `tests/run.sh`. Production skills and trial assertions were unchanged. The controller ran the assertions outside the agent. The multi-module assertion was additionally run in a separate, network-disabled Linux container with a read-only copy of the committed verifier.
 
 | Scenario | Verdict | Assertions |

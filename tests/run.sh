@@ -836,6 +836,93 @@ if [ "$(linkcheck "$lkt/cl.md" "$lkt/bare")" = NOTAGS ]; then ok "the link check
 rm -rf "$lkt"
 # The skip gate itself: a skip is tolerated locally and fails when CI is set.
 if (unset CI; skipgate 1) && ! (CI=true; skipgate 1) && (CI=true; skipgate 0); then ok "a skipped check fails under CI and is tolerated locally"; else bad "the skip gate does not fail a skipped check under CI"; fi
+# TASK-121.3: evidence of a run is not published, so no test verifies committed evidence and the harness README lists none.
+ev_bad=""
+for t in codex linux-codex windows-codex fix existing-project lane-concurrency; do
+  [ ! -e "$root/tests/trials/test-$t-evidence.sh" ] || ev_bad="$ev_bad test-$t-evidence.sh(exists)"
+  ! grep -qF "test-$t-evidence.sh" "$root/tests/trials/README.md" || ev_bad="$ev_bad README(test-$t-evidence.sh)"
+done
+if [ -z "$ev_bad" ]; then ok "no test verifies committed evidence (TASK-121.3)"; else bad "tests of committed evidence remain:$ev_bad"; fi
+# TASK-121.4, TASK-121.5: the docs point at the summary of a batch (or a results CSV), never into the folders of its evidence,
+# and none calls what docs/evals holds retained or checksummed evidence.
+evcheck() {   # <file>...: prints one line per problem
+  local f
+  for f in "$@"; do
+    grep -oE '(docs/)?evals/[A-Za-z0-9._-]+/[A-Za-z0-9._/#-]*' "$root/$f" \
+      | grep -vE '^(docs/)?evals/[A-Za-z0-9._-]+/(summary\.md(#[A-Za-z0-9_-]*)?|results(/[A-Za-z0-9._/-]*)?)$' | sed "s#^#$f: #"
+    ! grep -qiE 'retained evidence|retained, checksummed|checksummed trial evidence' "$root/$f" || echo "$f: calls docs/evals retained or checksummed evidence"
+  done
+}
+ev_out="$(evcheck README.md docs/trials.md tests/trials/README.md)"
+if [ -z "$ev_out" ]; then ok "README.md, docs/trials.md and tests/trials/README.md point at batch summaries, not evidence folders (TASK-121.4)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
+ev_out="$(evcheck docs/agent-compatibility.md docs/COMPARISON.md docs/DEVELOPMENT.md docs/distribution.md)"
+if [ -z "$ev_out" ]; then ok "the compatibility, comparison, development and distribution docs point at batch summaries, not evidence folders (TASK-121.5)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
+# TASK-121.6: docs/evals holds results only. Every file is Markdown or CSV, every relative link inside it resolves, every batch
+# summary says that only it is published, and none names a test that verified committed evidence.
+evalscheck() {   # <repo root>: prints one EV line per problem
+python3 - "$1" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+base = os.path.join(root, 'docs', 'evals')
+gone = re.compile(r'test-(codex|linux-codex|windows-codex|fix|existing-project|lane-concurrency)-evidence\.sh')
+for d, _, fs in sorted(os.walk(base)):
+    for f in sorted(fs):
+        p = os.path.join(d, f)
+        rel = os.path.relpath(p, root).replace(os.sep, '/')
+        if not f.endswith(('.md', '.csv')):
+            print(f'EV not Markdown or CSV: {rel}')
+            continue
+        if not f.endswith('.md'):
+            continue
+        text = open(p, encoding='utf-8').read().replace('\r\n', '\n')
+        for m in re.finditer(r'\]\(([^)\s]+)\)', text):
+            t = m.group(1)
+            if re.match(r'[a-z][a-z0-9+.-]*:', t) or t.startswith('#'):
+                continue
+            t = t.split('#')[0]
+            if t and not os.path.exists(os.path.normpath(os.path.join(d, t))):
+                print(f'EV broken link in {rel}: {t}')
+        if gone.search(text):
+            print(f'EV names a test that verified committed evidence: {rel}')
+        if f == 'summary.md' and os.path.dirname(rel) != 'docs/evals' and 'Only this summary is published' not in text:
+            print(f'EV batch summary does not say that only it is published: {rel}')
+PY
+}
+ev_out="$(evalscheck "$root")"
+if [ -z "$ev_out" ]; then ok "docs/evals holds Markdown and CSV only, its links resolve and its summaries say only they are published (TASK-121.6)"; else bad "docs/evals:$(printf '%s' "$ev_out" | head -5 | tr '\n' ';') ($(printf '%s\n' "$ev_out" | wc -l) problems)"; fi
+evt="$(mktemp -d)"; mkdir -p "$evt/docs/evals/b1"
+printf 'log\n' > "$evt/docs/evals/b1/run.txt"; printf '# S\n\n[x](gone.md)\n' > "$evt/docs/evals/b1/summary.md"
+ev_t="$(evalscheck "$evt")"; rm -rf "$evt"
+if [ "$(printf '%s\n' "$ev_t" | grep -c '^EV')" -eq 3 ]; then ok "the docs/evals check fails another file type, a broken link and a summary without the note"; else bad "the docs/evals check missed a gap: $ev_t"; fi
+# TASK-121: docs/evals/README.md states that only results are published, and every relative link in README.md and docs/ resolves.
+doclinks() {   # <repo root>: prints one LINK line per broken relative link and one POLICY line when the rule is not written down
+python3 - "$1" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+files = ['README.md'] + [os.path.relpath(os.path.join(d, f), root).replace(os.sep, '/')
+                         for d, _, fs in os.walk(os.path.join(root, 'docs')) for f in fs if f.endswith('.md')]
+for rel in sorted(files):
+    p = os.path.join(root, rel)
+    if not os.path.exists(p):
+        continue
+    t = open(p, encoding='utf-8').read().replace('\r\n', '\n')
+    for m in re.finditer(r'\]\(([^)\s]+)\)', t):
+        x = m.group(1)
+        if re.match(r'[a-z][a-z0-9+.-]*:', x) or x.startswith('#'):
+            continue
+        x = x.split('#')[0]
+        if x and not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(p), x))):
+            print(f'LINK {rel}: {x}')
+pol = os.path.join(root, 'docs', 'evals', 'README.md')
+if not os.path.exists(pol) or 'Only results are published' not in open(pol, encoding='utf-8').read():
+    print('POLICY docs/evals/README.md does not say that only results are published')
+PY
+}
+dl_out="$(doclinks "$root")"
+if [ -z "$dl_out" ]; then ok "docs/evals/README.md states the rule and every link in README.md and docs/ resolves (TASK-121)"; else bad "docs links or policy:$(printf '%s' "$dl_out" | head -5 | tr '\n' ';')"; fi
+dlt="$(mktemp -d)"; mkdir -p "$dlt/docs/evals"; printf '[x](docs/gone.md)\n' > "$dlt/README.md"; printf '# E\n' > "$dlt/docs/evals/README.md"
+dl_t="$(doclinks "$dlt")"; rm -rf "$dlt"
+if [ "$(printf '%s\n' "$dl_t" | grep -c '^LINK\|^POLICY')" -eq 2 ]; then ok "the docs check fails a broken link and a missing policy"; else bad "the docs check missed a gap: $dl_t"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

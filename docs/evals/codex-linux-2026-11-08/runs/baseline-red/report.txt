@@ -1,8 +1,0 @@
-**Stopped at step 3: baseline red.** FEAT-001, “Add subtract to calc.py,” cannot start because its regression command failed:
-
-- `python3 -m unittest discover -s tests` — 1 test run, 1 failure: `test_calc.CalcTest.test_add` (`-1 != 3`).
-- Files changed: none. Branch and commit created: none. Checked-out branch: `main`.
-- Next workable node: none until the baseline failure is resolved. Suggested follow-up on the base: `/todo-add "fix the failing baseline: test_calc.CalcTest.test_add" --type fix --priority P0`.
-- Consider clearing context before the next invocation.
-
-Ambiguities or contradictions encountered: **none**.

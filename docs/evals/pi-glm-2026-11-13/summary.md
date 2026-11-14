@@ -1,5 +1,7 @@
 # pi + GLM 5.3: second reading, fixes and reruns (2026-11-13)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 The 2026-11-12 batch ([summary](../pi-glm-2026-11-12/summary.md)) fixed eight wording gaps and left the rest of its 33 trial reports unread in detail. This batch read every ambiguity section of those reports, changed the skill text in four pull requests, and reran fresh [pi](https://github.com/badlogic/pi-mono) agents on each version of the new text. Same setup as the day before: pi 1.5.2, provider `zai`, model `glm-5.3`, default thinking level, Windows 11 with Git Bash, Node 24, Java 25, the same isolation flags, the same prompts (`tests/trials/prompt.sh`).
 
 **What this is not.** One model family, one host, one run per scenario and text version. The trial assertions ran **unisolated** (`TRIAL_WINDOWS_ISOLATION=0`), so these results are not equal to the isolated Windows batches. No Claude Code or Codex run was made on the new text. The reruns show that the new text does not break the lifecycle and that the reported ambiguities changed; they are not a controlled A/B test.
@@ -83,7 +85,7 @@ The 2026-11-12 summary measured about 25 times the control's input tokens and le
 - A run makes a median of **29 model calls** (all 18 cells; the control arm 6, `lean-baseline` 13.5). The context is about 6k tokens at the first call and about 49k at the last; the input total is that context re-sent on every call (95% served from cache).
 - So the multiplier is about five times the calls of the control arm at about five times the input per call (a median of 34k tokens per call against 7k). The skill text is about half of that 34k, so both levers count: what is read, and how many calls a node takes.
 
-**Decision record** (asked for by `docs/evals/benchmark/README.md` once real results exist; proposals only, nothing here is implemented):
+**Decision record** (asked for by `tests/benchmark/README.md` once real results exist; proposals only, nothing here is implemented):
 
 1. On these six small tasks `lean-baseline` matched `todo-skills` on hidden-test outcomes (15/18 each on 2026-11-12, before FEAT-100) at about an eighth of the input tokens. What the hidden tests do not measure (a green history, traceability, a drained changelog, resumability) is what the extra calls buy.
 2. Candidates for an optional "light" path for a `low` leaf root, to be decided by the maintainer and tested with trials before any change: fold the start commit into the claim commit (one commit and one status round fewer), skip the refresh when the base has not moved since the claim, and let `todo-init` and `todo-add` share one read of the core in a single session.

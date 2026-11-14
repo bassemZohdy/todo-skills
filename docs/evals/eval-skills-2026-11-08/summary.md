@@ -1,5 +1,7 @@
 # Existing-project trial without the FIX-035 workaround, 2026-11-08 (TASK-043)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 The [2026-11-08 Linux batch](../codex-linux-2026-11-08/summary.md#representative-existing-project-trial) completed a feature
 in a scratch clone of `bassemZohdy/eval-skills` only after the controller told the agent to commit the backlog between
 `/todo-add` and `/todo-continue`. [FIX-035](../fix-035.md) made the first tree claim carry an uncommitted new root. This
@@ -43,6 +45,7 @@ The agent reported one ambiguity, the same as before: the request does not say w
 
 ## Verify
 
-`bash tests/trials/test-existing-project-evidence.sh` checks `SHA256SUMS`, the session ids, exit codes and runners, that no
-prompt asks for a commit, the before and after heads of each step, the claim, drain and merge, and the independent results.
-It runs no agent. It is part of the trial harness tests in CI.
+When the evidence was published, a test checked its checksums, the session ids, exit codes and runners, that no prompt asks
+for a commit, the before and after heads of each step, the claim, drain and merge, and the independent results. The
+evidence is not published, so these results cannot be re-verified from this repository; the test was removed with it
+(TASK-121).

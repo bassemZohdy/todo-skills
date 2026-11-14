@@ -1,6 +1,8 @@
 # Codex lifecycle trials, 2026-11-07
 
-Eight lifecycle scenarios run by fresh `codex exec` processes (codex-cli 0.167.0, logged in with ChatGPT, model `gpt-6.1-terra`, Windows 11, Git Bash for the scripts), each checked afterwards by the controller's `tests/trials/assert.sh`. Evidence per scenario is in [runs/](runs/) (prompt, session log, session id, exit codes, report, assertion output, Git state, outcome, checksums), the machine-readable table is [results.json](results.json) and the whole folder is covered by [SHA256SUMS](SHA256SUMS). The user name is redacted in the logs and the per-run checksums were rebuilt over the redacted files. `bash tests/trials/test-codex-evidence.sh` verifies all of this.
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
+Eight lifecycle scenarios run by fresh `codex exec` processes (codex-cli 0.167.0, logged in with ChatGPT, model `gpt-6.1-terra`, Windows 11, Git Bash for the scripts), each checked afterwards by the controller's `tests/trials/assert.sh`. Evidence per scenario is in runs/ (prompt, session log, session id, exit codes, report, assertion output, Git state, outcome, checksums), the machine-readable table was results.json and the folder was covered by SHA256SUMS. The user name was redacted in the logs. The evidence is not published, so these results cannot be re-verified from this repository; a test that checked it was removed with it (TASK-121).
 
 Commit under test: `a0a546b` plus the harness changes of this change set (`run-codex.sh`, `codex-exec.sh`, `infra-signature.sh`, `snapshot-git.sh`). Python scenarios ran with `PYTHONNOUSERSITE=1` (another project on this host's Python path shadows a package named `tests`; see `docs/evals/claude-code-2026-11-07/summary.md`).
 
@@ -51,7 +53,6 @@ export PYTHONNOUSERSITE=1                       # Python scenarios on a host wit
 bash tests/trials/run-codex.sh ~/todo-trials baseline-red      # one scenario; runs dir outside the temp folder
 bash tests/trials/test-codex-isolation.sh                       # TASK-018
 bash tests/trials/test-codex-invocation.sh                      # TASK-024
-bash tests/trials/test-codex-evidence.sh                        # TASK-019: validates this folder
 ```
 
 Earlier diagnostic runs that led to the design above are not part of the evidence: two batches on a layout with the Git directory moved out (4 of 8 scenarios stopped on the worktree-list rule), and two batches before the infrastructure classifier existed (same agent behaviour, labelled FAIL instead of INFRA_ERROR).

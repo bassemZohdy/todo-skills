@@ -1,2 +1,0 @@
-PASS independent list: 14 unique expected targets, deterministic, no target writes
-PASS independent check: in sync, no target writes

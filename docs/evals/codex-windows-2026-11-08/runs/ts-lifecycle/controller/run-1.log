@@ -1,4 +1,0 @@
-PASS  main checked out, tree clean, node_modules not tracked
-
-9 passed, 4 failed
-outcome: INFRA_ERROR (/c/Users/<user>/todo-trials/win-20261108/runs2/ts-lifecycle/evidence/20261108T115315Z-463108-multi-20261108T115315Z-463042-1)

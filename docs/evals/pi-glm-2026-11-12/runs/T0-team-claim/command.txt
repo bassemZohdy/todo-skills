@@ -1,1 +1,0 @@
-cd /c/Users/<user>/Code/todo-skills-workspace/runs-pi2/team-claim/repo && timeout 1500 pi -p --provider zai --model glm-5.3 --tools read,powershell,edit,write --session-dir <evidence>/session --no-extensions --no-skills --no-context-files --no-prompt-templates --no-themes <prompt.txt>

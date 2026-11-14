@@ -1,5 +1,7 @@
 # Concurrent Codex lanes, 2026-11-08 (TASK-044)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 Earlier `multi-module` runs with Codex used the skill's no-subagent fallback: one agent worked both lanes one after
 another, and worktree events alone could not show concurrency ([FIX-036](../codex-linux-2026-11-08/summary.md)). This run
 starts **one fresh Codex process per lane at the same time** and records each worker's own activity.
@@ -81,7 +83,8 @@ Each agent's `report.txt` quotes them. Recurring ones:
 
 ## Verify
 
-`bash tests/trials/test-lane-concurrency-evidence.sh` checks both `SHA256SUMS` files, that the runner equals the one at the
-controller commit, the four distinct sessions and their profiles, recomputes each worker's activity from its stamped
-event stream and compares it with `activity.txt`, checks that each worker stayed in its worktree and ran Maven, the
-drains and merges, and asks `lane-evidence.sh` for the verdict. It runs no agent, and CI runs it.
+When the evidence was published, a test checked both `SHA256SUMS` files, that the runner equalled the one at the controller
+commit, the four distinct sessions and their profiles, recomputed each worker's activity from its stamped event stream and
+compared it with `activity.txt`, checked that each worker stayed in its worktree and ran Maven, the drains and merges, and
+asked `lane-evidence.sh` for the verdict. The evidence is not published, so these results cannot be re-verified from this
+repository; the test was removed with it (TASK-121).

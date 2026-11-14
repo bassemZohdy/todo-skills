@@ -468,6 +468,39 @@ rm -rf "$lz"
 grep -qE '^## .*Lanes$' "$root/TODO.md" && grep -qE '^- main: ' "$root/TODO.md" && ! bash "$root/tools/todo-lint.sh" "$root/TODO.md" "$root/CHANGELOG.md" 2>&1 | grep -q '^WARN W9' || l6_bad="$l6_bad repo-TODO.md"
 if [ -z "$l6_bad" ]; then ok "the stop hook, report generator and replay script accept a Lanes section, and this repository's TODO.md declares its lane (FEAT-125.6)"; else bad "Lanes section in the scripts (FEAT-125.6):$l6_bad"; fi
 
+# /todo-plan plans inline (TASK-126.1): the lanes and the tree go into TODO.md with no PROJECT.md and no Ref by default, a
+# complex goal is offered one doc per root by the /todo-add rule, and an existing PROJECT.md is still read and edited.
+p126=""; tp126="$root/plugin/skills/todo-plan/SKILL.md"
+for ph in '**Plan inline.**' 'write no plan doc and no `Ref:`' 'more than 6 nodes' '`docs/plans/<ROOT-ID>-<slug>.md`' 'An existing `docs/plans/PROJECT.md` is read'; do
+  grep -qF -- "$ph" "$tp126" || p126="$p126 [$ph]"
+done
+! grep -qF 'Draft the plan doc `docs/plans/PROJECT.md`' "$tp126" && ! grep -qF 'each root gets `Ref: docs/plans/PROJECT.md`' "$tp126" && ! sed -n 3p "$tp126" | grep -qF 'into a plan doc' || p126="$p126 [old default]"
+if [ -z "$p126" ]; then ok "/todo-plan plans inside TODO.md by default, offers a doc per root only for a complex goal and still edits an existing PROJECT.md (TASK-126.1)"; else bad "/todo-plan default (TASK-126.1):$p126"; fi
+
+# /todo-plan --revise needs no plan doc (TASK-126.2): it reads one only if it exists, writes the Revisions line only into an
+# existing doc, and a drop without one offers a doc holding only ## Revisions so the dropped ID is not reused. The trial that
+# revises with a plan doc still expects its dated Revisions line.
+r126=""; tr126="$root/plugin/skills/todo-plan/SKILL.md"
+for ph in 'a revise creates no plan doc' 'holding only `## Revisions`' 'without it a dropped ID could be reused'; do
+  grep -qF -- "$ph" "$tr126" || r126="$r126 [$ph]"
+done
+! grep -qF 'missing: propose creating it with only `## Revisions`' "$tr126" && ! grep -qF 'Plan step 3 order' "$tr126" || r126="$r126 [old revise wording]"
+grep -qF 'plan doc has a dated revision line naming FEAT-003' "$root/tests/trials/assert.sh" || r126="$r126 [replan trial assertion]"
+if [ -z "$r126" ]; then ok "/todo-plan --revise creates no plan doc, logs Revisions only into an existing one and keeps the drop rule (TASK-126.2)"; else bad "/todo-plan --revise without a plan doc (TASK-126.2):$r126"; fi
+
+# One owner for planning (TASK-126.3): /todo-init (--plan, or a goal in its message) only points to /todo-plan, with no
+# questions and no PROJECT.md of its own, and the docs name /todo-plan as the planning command.
+o126=""; ti126="$root/plugin/skills/todo-init/SKILL.md"
+grep -qF 'point to `/todo-plan`' "$ti126" || o126="$o126 [todo-init pointer]"
+grep -qF 'or when both hold:' "$ti126" || o126="$o126 [todo-init trigger]"
+{ ! grep -q 'PROJECT.md' "$ti126" && ! grep -qiE 'pre-planning|at most 3 short questions' "$ti126"; } || o126="$o126 [todo-init still plans]"
+grep -qiE 'pre-planning' "$root/plugin/skills/todo/SKILL.md" && o126="$o126 [core still says pre-planning]"
+grep -qE 'todo-init`?/`?todo-plan' "$root/plugin/skills/todo/SKILL.md" && o126="$o126 [core write policy names todo-init]"
+for f126 in README.md docs/COMMANDS.md docs/PLANNING.md docs/GETTING-STARTED.md docs/FILES.md; do
+  grep -E 'todo-init.*PROJECT\.md|--plan.*(PROJECT\.md|pre-planning|questions)|offers to save them' "$root/$f126" >/dev/null && o126="$o126 [$f126]"
+done
+if [ -z "$o126" ]; then ok "/todo-init --plan and a stated goal only point to /todo-plan: no questions, no PROJECT.md (TASK-126.3)"; else bad "one planning owner (TASK-126.3):$o126"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

@@ -5,7 +5,7 @@
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
-#   plan-stop | decompose | regress-block
+#   plan-stop | decompose | regress-block | plan-inline
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -281,6 +281,11 @@ decompose)
   - Done when: the three functions work; `python3 -m unittest discover -s tests`
   - State: next: decompose' > TODO.md
   g add -A && g commit -q -m "init with a root to break down"
+  ;;
+plan-inline)
+  # An empty backlog and a three-task goal: /todo-plan plans it inside TODO.md, with no plan doc (TASK-126.4).
+  printf '%s\n' "$head" > TODO.md
+  g add -A && g commit -q -m "init with an empty backlog"
   ;;
 regress-block)
   # A second test freezes the module's public names, so the node's own change turns the regression red in a test

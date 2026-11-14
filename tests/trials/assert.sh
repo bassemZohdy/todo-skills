@@ -195,6 +195,13 @@ decompose)
   chk "next: decompose is gone and the root is still open" '! grep -q "next: decompose" TODO.md && grep -q "^- \[ \] \*\*FEAT-001\*\* · P1 · mid · " TODO.md'
   chk "broken down, not built: no branch, no commit, no code" 'unchanged && git diff --quiet -- calc.py tests && [ -z "$(git status --porcelain | grep -v "^ M TODO.md$")" ]'
   ;;
+plan-inline)
+  chk "TODO.md holds at least three tasks, each open with a Done when that runs a unittest command" '[ "$(grep -Ec "^ *- \[ \] \*\*(FEAT|FIX|TASK)-[0-9]+" TODO.md)" -ge 3 ] && [ "$(grep -c "^ *- Done when: .*python3 -m unittest " TODO.md)" -ge 3 ]'
+  chk "the plan is inline: a Lanes section declaring main above the Task Tree" 'awk "/^## .*Lanes\$/ {l=NR} /^- main: / {m=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && t > m)}" TODO.md'
+  chk "no plan doc and no Ref were written" '[ ! -e docs/plans ] && ! grep -q "Ref:" TODO.md'
+  chk "the lint finds no violation and no undeclared lane" 'out="$(bash "$root/tools/todo-lint.sh" TODO.md CHANGELOG.md 2>&1)" && ! printf "%s" "$out" | grep -q "^WARN W9"'
+  chk "planned, not built or committed: only TODO.md changed" 'unchanged && git diff --quiet -- calc.py tests && [ -z "$(git status --porcelain | grep -v "^ M TODO.md$")" ]'
+  ;;
 regress-block)
   chk "the node's branch is checked out and FEAT-001 is [!] with a Blocked line" 'git branch --show-current | grep -Eq "^todo/FEAT-001-[a-z0-9-]+$" && grep -A3 "^- \[!\] \*\*FEAT-001\*\*" TODO.md | grep -Eq "Blocked: .+ → .+ → .+"'
   chk "the block is committed as chore(backlog): block FEAT-001 and the tree is clean" 'git log --format=%s $start..HEAD | grep -qx "chore(backlog): block FEAT-001" && clean'

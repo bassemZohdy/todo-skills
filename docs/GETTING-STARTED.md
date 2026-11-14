@@ -24,7 +24,7 @@ It creates `TODO.md` and `CHANGELOG.md` if they are missing, detects git, the ba
 
 Optional:
 
-- `/todo-init --plan` asks up to three questions about the goal and saves the answers as `docs/plans/PROJECT.md`.
+- `/todo-init --plan` only points to `/todo-plan "<goal>"`, the one command that plans.
 - `/todo-init --ci` writes `.todo/check.sh` (lint + tests) and a CI job that runs it, or, without CI, a `pre-push` hook. Copy [`tools/todo-lint.sh`](../tools/todo-lint.sh) to `.todo/todo-lint.sh` first so the check includes the lint ([TOOLS.md](TOOLS.md)). Commit `.todo/` and the CI file yourself.
 
 ## 3. Add a task
@@ -40,7 +40,7 @@ The skill may ask up to three short questions and checks the code to make sure t
   - Done when: an expired token gets 401; `npx jest tests/auth/expired.test.ts`
 ```
 
-For a bigger goal use `/todo-plan "<goal>"`: it writes a short plan doc (`docs/plans/PROJECT.md`), proposes a tree split into lanes, and waits for your confirmation. If the plan turns out wrong later, `/todo-plan --revise "<what is wrong>"` changes the open tasks and keeps the IDs ([PLANNING.md](PLANNING.md)).
+For a bigger goal use `/todo-plan "<goal>"`: it proposes the lanes and a tree inside `TODO.md` (a plan doc per root only if the goal is complex) and waits for your confirmation. If the plan turns out wrong later, `/todo-plan --revise "<what is wrong>"` changes the open tasks and keeps the IDs ([PLANNING.md](PLANNING.md)).
 
 ## 4. Run a task
 

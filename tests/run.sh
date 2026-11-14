@@ -448,6 +448,14 @@ grep -qF 'has no `## … Lanes` section' "$ti125" || i125="$i125 offer"
 grep -qF 'Lanes' <(awk '/^monorepo\)/,/^  ;;/' "$root/tests/trials/assert.sh") || i125="$i125 monorepo-assertion"
 if [ -z "$i125" ]; then ok "todo-init writes the Lanes section into a new TODO.md and offers it for a tree-format file without one; the monorepo trial expects it (FEAT-125.3)"; else bad "todo-init Lanes section (FEAT-125.3):$i125"; fi
 
+# A lane a command uses that the Lanes section does not declare (FEAT-125.4): /todo-add --lane, a Lane edit of /todo-update and
+# /todo-plan each add the lane line to TODO.md in the same change.
+d125=""
+for sk125 in todo-add todo-update todo-plan; do
+  grep -qF 'not declared in the `## 🛤️ Lanes` section' "$root/plugin/skills/$sk125/SKILL.md" || d125="$d125 $sk125"
+done
+if [ -z "$d125" ]; then ok "todo-add, todo-update and todo-plan add the lane line when they use a lane the Lanes section does not declare (FEAT-125.4)"; else bad "undeclared lane rule missing from (FEAT-125.4):$d125"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

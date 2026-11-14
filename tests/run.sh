@@ -1057,6 +1057,11 @@ if [ "$(printf '%s\n' "$tk_t" | grep -c '^TOK')" -eq 4 ]; then ok "the breakdown
 # TASK-124: three trial assertions accept what Codex agents did while following the skill (2026-11-14): a Done when run from tests/, a test named with its ID, a report that says "working tree".
 ta="$root/tests/trials/assert.sh"
 if grep -qF '(cd tests && )?python3 -m unittest (tests\.)?test_calc' "$ta" && grep -qF 'def test_[a-z0-9_]*power' "$ta" && grep -qF 'clean|uncommitted|working.tree' "$ta"; then ok "assert.sh accepts a Done when run from tests/, a test named with its ID and a report that says working tree (TASK-124)"; else bad "assert.sh still rejects one of the three forms Codex used (TASK-124)"; fi
+# The optional lifecycle helper (FEAT-129): tests/flow.sh runs tools/todo-flow.sh in scratch repositories, and its PASS and FAIL lines count here.
+fl_out="$(bash "$root/tests/flow.sh" 2>&1)"
+printf '%s\n' "$fl_out" | grep -E '^(PASS|FAIL)  '
+pass=$((pass + $(printf '%s\n' "$fl_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$fl_out" | grep -c '^FAIL  ')))
+printf '%s\n' "$fl_out" | grep -q '^PASS  ' || bad "tests/flow.sh ran no check: $(printf '%s' "$fl_out" | tail -3 | tr '\n' ' ')"
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

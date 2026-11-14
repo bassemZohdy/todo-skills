@@ -923,6 +923,40 @@ if [ -z "$dl_out" ]; then ok "docs/evals/README.md states the rule and every lin
 dlt="$(mktemp -d)"; mkdir -p "$dlt/docs/evals"; printf '[x](docs/gone.md)\n' > "$dlt/README.md"; printf '# E\n' > "$dlt/docs/evals/README.md"
 dl_t="$(doclinks "$dlt")"; rm -rf "$dlt"
 if [ "$(printf '%s\n' "$dl_t" | grep -c '^LINK\|^POLICY')" -eq 2 ]; then ok "the docs check fails a broken link and a missing policy"; else bad "the docs check missed a gap: $dl_t"; fi
+# TASK-119: the benchmark README links a dated token-cost breakdown. Its table is the output of tests/benchmark/tokens.py on the
+# published results, so a reader can recompute it; figures that needed the raw logs are marked as measured locally; it holds no
+# mail address, and a money figure says that it is computed from published pricing, with the date.
+tokcheck() {   # <repo root>: prints one TOK line per problem
+python3 - "$1" <<'PY'
+import os, re, subprocess, sys
+root = sys.argv[1]
+readme = open(os.path.join(root, 'tests', 'benchmark', 'README.md'), encoding='utf-8').read()
+m = re.search(r'\]\((\.\./\.\./docs/evals/token-cost-\d{4}-\d{2}-\d{2}\.md)\)', readme)
+if not m:
+    print('TOK tests/benchmark/README.md links no dated token-cost breakdown'); sys.exit()
+doc = os.path.normpath(os.path.join(root, 'tests', 'benchmark', m.group(1)))
+if not os.path.exists(doc):
+    print('TOK the linked breakdown does not exist'); sys.exit()
+t = open(doc, encoding='utf-8').read().replace('\r\n', '\n')
+if re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', t): print('TOK the breakdown holds a mail address')
+if 'measured locally' not in t: print('TOK the breakdown does not mark the figures that needed the raw logs as measured locally')
+if re.search(r'[$€£]\s?\d|\bUSD\b', t) and 'computed from published pricing' not in t: print('TOK a money figure is not labelled as computed from published pricing')
+b = re.search(r'<!-- tokens:begin -->\n(.*?)\n<!-- tokens:end -->', t, re.S)
+if not b: print('TOK the breakdown has no generated table'); sys.exit()
+out = subprocess.run([sys.executable, os.path.join(root, 'tests', 'benchmark', 'tokens.py'),
+                      os.path.join(root, 'docs', 'evals', 'benchmark', 'results', 'results.csv')],
+                     capture_output=True, text=True).stdout.strip()
+if out != b.group(1).strip(): print('TOK the table is not the output of tests/benchmark/tokens.py on results.csv')
+PY
+}
+tok_out="$(tokcheck "$root")"
+if [ -z "$tok_out" ]; then ok "the token-cost breakdown is linked, recomputable from results.csv and free of mail addresses (TASK-119)"; else bad "token-cost breakdown:$(printf '%s' "$tok_out" | tr '\n' ';')"; fi
+tkt="$(mktemp -d)"; mkdir -p "$tkt/tests/benchmark" "$tkt/docs/evals/benchmark/results"
+printf '[b](../../docs/evals/token-cost-2026-01-01.md)\n' > "$tkt/tests/benchmark/README.md"
+printf 'import sys\nprint("| a |")\n' > "$tkt/tests/benchmark/tokens.py"; printf 'x\n' > "$tkt/docs/evals/benchmark/results/results.csv"
+printf 'mail me at someone@example.com. Costs $5.\n<!-- tokens:begin -->\n| b |\n<!-- tokens:end -->\n' > "$tkt/docs/evals/token-cost-2026-01-01.md"
+tk_t="$(tokcheck "$tkt")"; rm -rf "$tkt"
+if [ "$(printf '%s\n' "$tk_t" | grep -c '^TOK')" -eq 4 ]; then ok "the breakdown check fails a mail address, an unlabelled figure and a stale table"; else bad "the breakdown check missed a gap: $tk_t"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

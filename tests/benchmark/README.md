@@ -118,6 +118,7 @@ bash tests/benchmark/publish.sh add <runs>/results.csv   # every run of the tabl
 bash tests/benchmark/publish.sh check --coverage
 ```
 
+- **Token cost.** [A dated breakdown](../../docs/evals/token-cost-2026-11-14.md) splits the published rows into uncached input, cached input and output and says where a todo-skills run spends them. Its table is the output of `python3 tests/benchmark/tokens.py docs/evals/benchmark/results/results.csv`.
 - **Results only.** The evidence of a run (the agent's session, a bundle of its repository, prompts, verifier logs) can name the host and the user, and it is not published. It stays on the machine that ran the batch.
 - **Hashes.** A published row is the run's own row without its last field, `evidence_dir`, which is a folder on that machine. Its `evidence_sha256` is the hash `run.sh` recorded over the complete evidence of the run, so whoever holds that evidence can show that it is the one behind the row. Nobody else can check it, and the summaries say so.
 - **What is in it now** (73 rows, all pi with GLM 5.3, isolation `provisional`): the 56 rows of 2026-11-12 (three arms, three runs per cell, two of them INFRA_ERROR) and the 17 rows of 2026-11-13 (`todo-skills` arm only, on the revised skill text). The `todo-skills` rows therefore mix several versions of the skills: `5-interrupted` is 0 of 3 on the first and 6 of 6 on the second. Summarize a source table, not the published one, when comparing arms.

@@ -2,6 +2,10 @@
 
 ## 🌳 Task Tree
 
+- [ ] **FIX-122** · P0 · low · Make tests/trials/test-trials-workflow.sh portable: on the macOS runner its copies that add a trigger, drop a pin or add a secret were built with GNU sed (0,/re/ and a newline in the replacement), so two negative cases failed and the trigger cases passed only by accident (test (macos-latest) of run 43526940722)
+  - Done when: every copy the test builds differs from trials.yml and is reported, using only commands that BSD sed and awk have; `bash tests/trials/test-trials-workflow.sh`
+  - Links: Ref: tests/trials/README.md · From: TASK-118
+  - State: branch todo/FIX-122-portable-workflow-test from main; next: start FIX-122
 - [ ] **TASK-119** · P1 · low · Publish the token cost of a todo-skills run split into the parts a reader can act on: uncached input, cached input and output per arm, one-time setup (todo-init and todo-add, calls before the first branch) against per-node work, and calls by activity (git, backlog files, tests, skill reads) with counts only and no tool output text (the 2026-11-12 medians: 1.04M input tokens against 41K for no methodology, 95 percent cached, 18.3K output tokens against 1.7K)
   - Done when: tests/benchmark/README.md links a dated breakdown that quotes only numbers recomputable from docs/evals/benchmark/results/results.csv and marks every figure that needed the raw logs, which stay off GitHub, as measured locally, labels any money figure as computed from published pricing with its date, and holds no profile name, mail address or tool output text, and tests/run.sh fails on a copy that adds a mail address; `bash tests/run.sh`
   - Links: Ref: docs/evals/pi-glm-2026-11-13-load-cut/summary.md#cost-what-the-cut-changed · From: TASK-110

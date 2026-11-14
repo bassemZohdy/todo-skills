@@ -477,6 +477,17 @@ done
 ! grep -qF 'Draft the plan doc `docs/plans/PROJECT.md`' "$tp126" && ! grep -qF 'each root gets `Ref: docs/plans/PROJECT.md`' "$tp126" && ! sed -n 3p "$tp126" | grep -qF 'into a plan doc' || p126="$p126 [old default]"
 if [ -z "$p126" ]; then ok "/todo-plan plans inside TODO.md by default, offers a doc per root only for a complex goal and still edits an existing PROJECT.md (TASK-126.1)"; else bad "/todo-plan default (TASK-126.1):$p126"; fi
 
+# /todo-plan --revise needs no plan doc (TASK-126.2): it reads one only if it exists, writes the Revisions line only into an
+# existing doc, and a drop without one offers a doc holding only ## Revisions so the dropped ID is not reused. The trial that
+# revises with a plan doc still expects its dated Revisions line.
+r126=""; tr126="$root/plugin/skills/todo-plan/SKILL.md"
+for ph in 'a revise creates no plan doc' 'holding only `## Revisions`' 'without it a dropped ID could be reused'; do
+  grep -qF -- "$ph" "$tr126" || r126="$r126 [$ph]"
+done
+! grep -qF 'missing: propose creating it with only `## Revisions`' "$tr126" && ! grep -qF 'Plan step 3 order' "$tr126" || r126="$r126 [old revise wording]"
+grep -qF 'plan doc has a dated revision line naming FEAT-003' "$root/tests/trials/assert.sh" || r126="$r126 [replan trial assertion]"
+if [ -z "$r126" ]; then ok "/todo-plan --revise creates no plan doc, logs Revisions only into an existing one and keeps the drop rule (TASK-126.2)"; else bad "/todo-plan --revise without a plan doc (TASK-126.2):$r126"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

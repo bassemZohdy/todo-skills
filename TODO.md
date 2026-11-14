@@ -9,8 +9,9 @@
     - Done when: fixtures ok-lanes, I6-lanes-after-tree, I6-lane-duplicate and W9-undeclared-lane give those results, an invalid lane line is rejected, and the tools/ and .todo/ copies stay identical; `bash tests/run.sh`
   - [x] **FEAT-125.2** · low · Core skill and docs/REFERENCE.md describe the section: the schema block, the I6 row and the Lanes paragraph, inside the load budget
     - Done when: run.sh pins the new schema and I6 wording and no load-budget row is exceeded; `bash tests/run.sh`
-  - [ ] **FEAT-125.3** · low · /todo-init writes the section with the main lane into a new TODO.md and offers to add it to an existing tree-format file
+  - [/] **FEAT-125.3** · low · /todo-init writes the section with the main lane into a new TODO.md and offers to add it to an existing tree-format file
     - Done when: run.sh pins the new template and the offer, and the trial setups that start from an empty backlog expect the section; `bash tests/trials/selftest.sh`
+    - State: attempts 0/3; baseline 271 passing; branch todo/FEAT-125.3-todo-init-writes-section from todo/FEAT-125-declare-lanes-in-todo; next: read docs
   - [ ] **FEAT-125.4** · mid · /todo-add --lane, a Lane edit in /todo-update and /todo-plan add the lane line when they use a lane that is not declared yet
     - Done when: run.sh pins the rule in all three skills and fails when one of them lacks it; `bash tests/run.sh`
   - [ ] **FEAT-125.5** · mid · /todo-status, /todo-report and the page template show each lane's description from the section

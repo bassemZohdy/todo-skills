@@ -22,7 +22,7 @@
   - [x] **TASK-121.4** · low · Point README.md, docs/trials.md and tests/trials/README.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the three links into a docs/evals batch folder other than its summary.md or a results CSV, or calls its contents retained evidence; `bash tests/run.sh`
     - Links: Depends: TASK-121.3
-  - [ ] **TASK-121.5** · low · Point docs/agent-compatibility.md, docs/COMPARISON.md, docs/DEVELOPMENT.md and docs/distribution.md at summary.md files and results CSV files instead of evidence folders
+  - [x] **TASK-121.5** · low · Point docs/agent-compatibility.md, docs/COMPARISON.md, docs/DEVELOPMENT.md and docs/distribution.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the four links into a docs/evals batch folder other than its summary.md or a results CSV, or calls its contents retained evidence; `bash tests/run.sh`
     - Links: Depends: TASK-121.3
   - [ ] **TASK-121.6** · mid · Remove the per-run folders under docs/evals with a script (about 2,900 files, one mechanical change) and turn links to them inside the summaries into plain text

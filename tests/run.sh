@@ -855,6 +855,8 @@ evcheck() {   # <file>...: prints one line per problem
 }
 ev_out="$(evcheck README.md docs/trials.md tests/trials/README.md)"
 if [ -z "$ev_out" ]; then ok "README.md, docs/trials.md and tests/trials/README.md point at batch summaries, not evidence folders (TASK-121.4)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
+ev_out="$(evcheck docs/agent-compatibility.md docs/COMPARISON.md docs/DEVELOPMENT.md docs/distribution.md)"
+if [ -z "$ev_out" ]; then ok "the compatibility, comparison, development and distribution docs point at batch summaries, not evidence folders (TASK-121.5)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -29,7 +29,7 @@ tests/
   fixtures-rtm/                  RTM fixtures: docs-only, readme-only, both, neither, stale, duplicate, archived-ok
   trials/                        Agent trial harness (tests/trials/README.md)
   benchmark/                     Agent benchmark harness (tests/benchmark/README.md); its published results are in docs/evals/benchmark/results
-docs/                            Documentation; docs/evals/ holds retained, checksummed trial evidence
+docs/                            Documentation; docs/evals/ holds the summaries and results of trial batches
 .todo/                           This repository's own check: check.sh and a copy of tools/todo-lint.sh
 .github/workflows/               test.yml (tests: Ubuntu, macOS and Windows with Git Bash), todo-check.yml (backlog lint), windows-verifier-test.yml; each has a concurrency group and a timeout per job, and every `uses:` is pinned to a commit SHA that `.github/dependabot.yml` keeps current (all checked by tests/run.sh)
 .gitignore                       Generated files: docs/status.html.tmp, built ZIP archives, __pycache__
@@ -140,4 +140,4 @@ When a change touches a command, flag, file, scenario or script, update the page
 | A trial scenario or harness script | [tests/trials/README.md](../tests/trials/README.md), [trials.md](trials.md) |
 | What has been observed on an agent | [agent-compatibility.md](agent-compatibility.md), the README Status |
 
-Retained evidence under `docs/evals/` is checksummed and is never edited after the fact; add a new dated folder instead.
+Only results are published: `docs/evals/` holds one summary per batch and the results CSV files, and a published summary is not edited after the fact (add a new dated folder instead). The evidence behind a batch (prompts, session logs, Git state) is not published; it stays on the machine that ran it.

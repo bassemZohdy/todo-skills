@@ -196,7 +196,7 @@ decompose)
   chk "broken down, not built: no branch, no commit, no code" 'unchanged && git diff --quiet -- calc.py tests && [ -z "$(git status --porcelain | grep -v "^ M TODO.md$")" ]'
   ;;
 plan-inline)
-  chk "TODO.md holds at least three tasks, each open with a Done when that runs a unittest command" '[ "$(grep -Ec "^ *- \[ \] \*\*(FEAT|FIX|TASK)-[0-9]+" TODO.md)" -ge 3 ] && [ "$(grep -c "^ *- Done when: .*python3 -m unittest " TODO.md)" -ge 3 ]'
+  chk "TODO.md plans subtract, multiply and divide in open tasks whose Done when runs a unittest command (one leaf or three: the scope rule decides)" '[ "$(grep -Ec "^ *- \[ \] \*\*(FEAT|FIX|TASK)-[0-9]+" TODO.md)" -ge 1 ] && [ "$(grep -c "^ *- Done when: .*python3 -m unittest " TODO.md)" -ge 1 ] && grep -qi subtract TODO.md && grep -qi multiply TODO.md && grep -qi divide TODO.md'
   chk "the plan is inline: a Lanes section declaring main above the Task Tree" 'awk "/^## .*Lanes\$/ {l=NR} /^- main: / {m=NR} /^## .*Task Tree\$/ {t=NR} END {exit !(l && m > l && t > m)}" TODO.md'
   chk "no plan doc and no Ref were written" '[ ! -e docs/plans ] && ! grep -q "Ref:" TODO.md'
   chk "the lint finds no violation and no undeclared lane" 'out="$(bash "$root/tools/todo-lint.sh" TODO.md CHANGELOG.md 2>&1)" && ! printf "%s" "$out" | grep -q "^WARN W9"'

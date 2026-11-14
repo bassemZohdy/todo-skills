@@ -9,6 +9,7 @@
 - [ ] **TASK-126** · P1 · mid · Plan inside TODO.md by default: /todo-plan writes lanes and the tree and offers a plan doc only for a complex goal (more than 6 nodes, a high root, or on request), and /todo-init --plan only points to it
   - Done when: a small goal leaves no docs/plans folder and no Ref, a complex one is offered a doc per root, and every child's check is green; `bash tests/run.sh`
   - Links: Depends: FEAT-125
+  - State: branch todo/TASK-126-plan-inside-todo-md from main; next: build children
   - [ ] **TASK-126.1** · mid · /todo-plan drafts no PROJECT.md and writes no Ref by default, offers docs/plans/ROOT-ID-slug.md by the /todo-add rule for a complex goal, and still reads and edits a PROJECT.md that exists
     - Done when: run.sh pins the default, the complex-goal offer and the existing-doc rule, and fails on the 0.5.1 wording; `bash tests/run.sh`
   - [ ] **TASK-126.2** · mid · /todo-plan --revise works without a plan doc: it proposes none and writes the Revisions line only when the doc exists

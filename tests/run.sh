@@ -501,6 +501,14 @@ for f126 in README.md docs/COMMANDS.md docs/PLANNING.md docs/GETTING-STARTED.md 
 done
 if [ -z "$o126" ]; then ok "/todo-init --plan and a stated goal only point to /todo-plan: no questions, no PROJECT.md (TASK-126.3)"; else bad "one planning owner (TASK-126.3):$o126"; fi
 
+# The report suggests the host's goal command (TASK-128): /todo-continue step 11 names Claude Code's /goal for the rest of the
+# backlog, only while a workable node remains, and COMMANDS.md says so.
+g128=""; tc128="$root/plugin/skills/todo-continue/SKILL.md"
+grep -qF 'the host has a goal command (Claude Code: `/goal`)' "$tc128" || g128="$g128 [step 11]"
+grep -qF 'only while a workable node remains' "$tc128" || g128="$g128 [condition]"
+grep -qF '/goal' "$root/docs/COMMANDS.md" || g128="$g128 [COMMANDS.md]"
+if [ -z "$g128" ]; then ok "/todo-continue suggests the host's goal command in its report while a workable node remains (TASK-128)"; else bad "goal command suggestion (TASK-128):$g128"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

@@ -5,8 +5,9 @@
 - [ ] **FEAT-125** · P1 · mid · Declare lanes in TODO.md itself: an optional Lanes section above the Task Tree, one line per lane (name: what it covers), so lane names need no plan doc
   - Done when: a TODO.md with the section lints clean, one without it still lints clean, and every child's check is green; `bash tests/run.sh`
   - State: branch todo/FEAT-125-declare-lanes-in-todo from main; next: build children
-  - [ ] **FEAT-125.1** · mid · Lint accepts one Lanes section before the Task Tree, fails I6 on a misplaced, duplicate or malformed lane line, and warns W9 on a root whose Lane is not declared (no section declares only main)
+  - [/] **FEAT-125.1** · mid · Lint accepts one Lanes section before the Task Tree, fails I6 on a misplaced, duplicate or malformed lane line, and warns W9 on a root whose Lane is not declared (no section declares only main)
     - Done when: fixtures ok-lanes, I6-lanes-after-tree, I6-lane-duplicate and W9-undeclared-lane give those results, an invalid lane line is rejected, and the tools/ and .todo/ copies stay identical; `bash tests/run.sh`
+    - State: attempts 0/3; baseline 263 passing; branch todo/FEAT-125.1-lint-accepts-one-lanes from todo/FEAT-125-declare-lanes-in-todo; next: read docs
   - [ ] **FEAT-125.2** · low · Core skill and docs/REFERENCE.md describe the section: the schema block, the I6 row and the Lanes paragraph, inside the load budget
     - Done when: run.sh pins the new schema and I6 wording and no load-budget row is exceeded; `bash tests/run.sh`
   - [ ] **FEAT-125.3** · low · /todo-init writes the section with the main lane into a new TODO.md and offers to add it to an existing tree-format file

@@ -857,6 +857,43 @@ ev_out="$(evcheck README.md docs/trials.md tests/trials/README.md)"
 if [ -z "$ev_out" ]; then ok "README.md, docs/trials.md and tests/trials/README.md point at batch summaries, not evidence folders (TASK-121.4)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
 ev_out="$(evcheck docs/agent-compatibility.md docs/COMPARISON.md docs/DEVELOPMENT.md docs/distribution.md)"
 if [ -z "$ev_out" ]; then ok "the compatibility, comparison, development and distribution docs point at batch summaries, not evidence folders (TASK-121.5)"; else bad "links into evidence folders:$(printf '%s' "$ev_out" | tr '\n' ';')"; fi
+# TASK-121.6: docs/evals holds results only. Every file is Markdown or CSV, every relative link inside it resolves, every batch
+# summary says that only it is published, and none names a test that verified committed evidence.
+evalscheck() {   # <repo root>: prints one EV line per problem
+python3 - "$1" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+base = os.path.join(root, 'docs', 'evals')
+gone = re.compile(r'test-(codex|linux-codex|windows-codex|fix|existing-project|lane-concurrency)-evidence\.sh')
+for d, _, fs in sorted(os.walk(base)):
+    for f in sorted(fs):
+        p = os.path.join(d, f)
+        rel = os.path.relpath(p, root).replace(os.sep, '/')
+        if not f.endswith(('.md', '.csv')):
+            print(f'EV not Markdown or CSV: {rel}')
+            continue
+        if not f.endswith('.md'):
+            continue
+        text = open(p, encoding='utf-8').read().replace('\r\n', '\n')
+        for m in re.finditer(r'\]\(([^)\s]+)\)', text):
+            t = m.group(1)
+            if re.match(r'[a-z][a-z0-9+.-]*:', t) or t.startswith('#'):
+                continue
+            t = t.split('#')[0]
+            if t and not os.path.exists(os.path.normpath(os.path.join(d, t))):
+                print(f'EV broken link in {rel}: {t}')
+        if gone.search(text):
+            print(f'EV names a test that verified committed evidence: {rel}')
+        if f == 'summary.md' and os.path.dirname(rel) != 'docs/evals' and 'Only this summary is published' not in text:
+            print(f'EV batch summary does not say that only it is published: {rel}')
+PY
+}
+ev_out="$(evalscheck "$root")"
+if [ -z "$ev_out" ]; then ok "docs/evals holds Markdown and CSV only, its links resolve and its summaries say only they are published (TASK-121.6)"; else bad "docs/evals:$(printf '%s' "$ev_out" | head -5 | tr '\n' ';') ($(printf '%s\n' "$ev_out" | wc -l) problems)"; fi
+evt="$(mktemp -d)"; mkdir -p "$evt/docs/evals/b1"
+printf 'log\n' > "$evt/docs/evals/b1/run.txt"; printf '# S\n\n[x](gone.md)\n' > "$evt/docs/evals/b1/summary.md"
+ev_t="$(evalscheck "$evt")"; rm -rf "$evt"
+if [ "$(printf '%s\n' "$ev_t" | grep -c '^EV')" -eq 3 ]; then ok "the docs/evals check fails another file type, a broken link and a summary without the note"; else bad "the docs/evals check missed a gap: $ev_t"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

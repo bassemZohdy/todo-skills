@@ -1,1 +1,0 @@
-You are a trial agent. Work only in /work. Read .claude/skills/todo-continue/SKILL.md and the required core rules. Run /todo-continue once; stop after the claim step or earlier if the skill says to stop. Do not build, modify hooks, push, fetch, tag, or use git add -A or git add .. If needed use git -c user.name=t -c user.email=t@t. Report the result and ambiguities.

@@ -1,1 +1,0 @@
-bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trials/win-20261108/runs2/baseline-red/repo /c/Users/<user>/todo-trials/win-20261108/runs2/baseline-red/evidence/20261108T114141Z-314106/prompt.txt /c/Users/<user>/todo-trials/win-20261108/runs2/baseline-red/evidence/20261108T114141Z-314106/report.txt   # see codex-exec.sh for the codex flags

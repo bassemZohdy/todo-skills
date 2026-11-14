@@ -1,8 +1,0 @@
-git : Cloning into '[USER]\AppData\Local\Temp\todo-linux-codex-20261108\representative-eval-skills\repo'...
-At line:2 char:224
-+ ... | Out-Null; git -c core.autocrlf=false clone --no-hardlinks --single- ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (Cloning into 'C...skills\repo'...:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-done.

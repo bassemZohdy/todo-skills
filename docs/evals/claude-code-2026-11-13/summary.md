@@ -1,5 +1,7 @@
 # Claude Code on the revised skill text (2026-11-13)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 TASK-112 asked for the trial scenarios to be rerun on the revised skill text with Claude Code and Codex, because only pi with GLM 5.3 had run them after FIX-098 to FIX-103. This is the Claude Code half; the Codex half is TASK-116 (see "Codex").
 
 ## What ran

@@ -1,8 +1,0 @@
-﻿PASS  rival claim remains on main
-PASS  unpublished non-bare branch retained
-PASS  pending task survives on retained branch
-PASS  main checked out
-PASS  working tree clean
-PASS  no implementation started
-
-6 passed, 0 failed

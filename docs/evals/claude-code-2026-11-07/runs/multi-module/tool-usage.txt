@@ -1,5 +1,0 @@
-     20 Bash
-      9 Write
-      9 Read
-      5 Edit
-      1 TaskStop

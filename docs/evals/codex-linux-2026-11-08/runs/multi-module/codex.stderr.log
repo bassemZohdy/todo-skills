@@ -1,9 +1,0 @@
-docker : 2026-11-07T23:34:50.454122Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to 
-find expected lines in /work.todo/FEAT-001/TODO.md:
-At line:2 char:1143
-+ ... " -Recurse; docker run --rm --security-opt seccomp=unconfined --env M ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (2026-11-07T23:3...AT-001/TODO.md::String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-- [ ] **FEAT-001**

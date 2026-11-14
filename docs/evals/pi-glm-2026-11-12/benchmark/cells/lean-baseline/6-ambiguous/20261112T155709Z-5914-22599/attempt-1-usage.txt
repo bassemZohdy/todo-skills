@@ -1,6 +1,0 @@
-input_tokens=42145
-output_tokens=2069
-cached_tokens=36864
-llm_calls=5
-subagent_calls=unavailable
-usage_source=pi session log (summed assistant usage)

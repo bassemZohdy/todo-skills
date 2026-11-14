@@ -1,5 +1,7 @@
 # Windows Codex lifecycle trials with the isolated verifier, 2026-11-08 (TASK-045)
 
+> Only this summary is published. The evidence of these runs (prompts, session logs, Git state, checksums) stays with the maintainer; paths below that point into it no longer exist in the repository.
+
 The eight lifecycle scenarios of the [2026-11-07 batch](../codex-2026-11-07/summary.md), repeated on the same host
 (Windows 11 Pro 10.0.26300, Git Bash, codex-cli 0.167.0, model `gpt-6.1-terra`) with the controller at
 `533b2bb` (`controller-sha.txt`). Each scenario ran in fresh `codex exec` sessions in the unelevated workspace-write
@@ -55,8 +57,8 @@ writing" (ci-local), and continue's "Baseline" pointing at verification step 6 w
 
 ## Verify
 
-`bash tests/trials/test-windows-codex-evidence.sh` checks the checksums and the eight scenarios with
-`test-codex-evidence.sh` (fresh sessions, and verdicts that agree with their exit codes and signatures). It also checks
-that every assertion log ran in the elevated Windows verifier, that every non-PASS verdict has a cause, the multi-node
-controllers, and that no user name is left in a path. The user name in host paths is redacted to `<user>`; per-run
-checksums were rebuilt over the redacted files. It runs no agent.
+When the evidence was published, a test checked the checksums, the eight scenarios (fresh sessions, verdicts that agree
+with their exit codes and signatures), that every assertion log ran in the elevated Windows verifier, that every non-PASS
+verdict has a cause, the multi-node controllers, and that no user name was left in a path. The user name in host paths was
+redacted to `<user>`. The evidence is not published, so these results cannot be re-verified from this repository; the
+test was removed with it (TASK-121).

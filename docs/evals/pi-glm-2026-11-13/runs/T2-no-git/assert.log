@@ -1,7 +1,0 @@
-PASS  tests pass on the checked-out branch
-PASS  lint passes on the checked-out branch
-PASS  still not a git repository
-PASS  subtract and its test written
-PASS  FEAT-001 drained with the core format
-
-5 passed, 0 failed

@@ -1,7 +1,0 @@
-You are a trial agent testing a set of agent skills. Your ONLY working folder is /c/Users/<user>/Code/todo-skills-workspace/runs-pi3/java-lifecycle/repo (cd there with an absolute path in every shell call). Do not read or write outside it, except the worktrees the skills create at ../<repo>.todo/.
-
-The skills are in .claude/skills/<name>/SKILL.md inside that folder (core rules: .claude/skills/todo/SKILL.md and .claude/skills/todo/reference/*.md). Slash commands are not available: to run /todo-x, read .claude/skills/todo-x/SKILL.md and follow it literally, loading what it tells you to load. Never push or fetch, never use git add -A or git add ., never tag. If git needs an identity, use git -c user.email=t@t -c user.name=t.
-
-Task: Run `/todo-continue --merge`. It executes one node per invocation, so run it again after each report until the skill says nothing is left to continue and the root is merged into main.
-
-Reply with (1) the report the skill asks for, and (2) every ambiguity, contradiction or unclear instruction you hit in the skill text, each with the exact quoted text and how you resolved it ("none" if none).

@@ -1,4 +1,0 @@
-     11 Bash
-      3 Edit
-      1 TaskStop
-      1 Read

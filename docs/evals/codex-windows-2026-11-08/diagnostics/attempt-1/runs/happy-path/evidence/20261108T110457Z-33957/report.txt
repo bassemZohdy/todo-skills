@@ -1,8 +1,0 @@
-Stopped at **step 3, baseline**, before changing any files or creating a branch.
-
-- **FEAT-001 — Add subtract to calc.py:** `python3 -m unittest discover -s tests` could not run: “The system cannot execute the specified program.” No baseline test count was established.
-- **Files changed:** none. **Branch:** `main`. **Commit:** none.
-- **Next workable node:** FEAT-001, once the test command can run.
-- The skill suggests `/todo-add "fix the failing baseline: <failing test ids>" --type fix --priority P0`; no test IDs are available because the test runner did not start. Consider clearing context before the next invocation.
-
-**Ambiguities encountered:** none.

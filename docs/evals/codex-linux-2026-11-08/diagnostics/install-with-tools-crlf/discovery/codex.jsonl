@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a1b868-b489-7fc1-b13f-e8030165db85"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update"}}
-{"type":"turn.completed","usage":{"input_tokens":15983,"cached_input_tokens":12160,"cache_write_input_tokens":0,"output_tokens":30,"reasoning_output_tokens":0}}

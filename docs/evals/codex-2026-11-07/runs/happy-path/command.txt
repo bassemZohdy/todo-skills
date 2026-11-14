@@ -1,1 +1,0 @@
-bash tests/trials/codex-exec.sh /c/Users/<user>/todo-trial-base/codex-runs/happy-path/repo /c/Users/<user>/todo-trial-base/codex-runs/happy-path/evidence/20261107T191722Z-874/prompt.txt /c/Users/<user>/todo-trial-base/codex-runs/happy-path/evidence/20261107T191722Z-874/report.txt   # see codex-exec.sh for the codex flags

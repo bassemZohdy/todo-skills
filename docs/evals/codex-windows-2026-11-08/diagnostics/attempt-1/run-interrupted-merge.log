@@ -1,4 +1,0 @@
-PASS  exactly one new commit (the merge)
-
-15 passed, 1 failed
-outcome: INFRA_ERROR (/c/Users/<user>/todo-trials/win-20261108/runs/interrupted-merge/evidence/20261108T110706Z-34824)

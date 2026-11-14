@@ -1,1 +1,0 @@
-fatal: cannot lock ref 'refs/heads/todo/FEAT-001-add-subtract-function-calc': unable to create directory for .git/refs/heads/todo/FEAT-001-add-subtract-function-calc

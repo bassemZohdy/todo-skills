@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-14
+
 ### Added
 
 - **TASK-123** (task): Dropped before any edit. It would have cut the skill text a run keeps in context. A run reads 62.6 KB of skill files (about 16K tokens, roughly 30 percent of its uncached input), but the files are already compact: moving the old-format migration out of `todo-init` and trimming the core gives about 3.6 KB, a 6 percent cut, about 2 percent of uncached input. That is below the spread of 18 runs (TASK-110 cut 6 percent of the text and no saving in input could be shown either), so a benchmark could not decide it. Recorded in `docs/evals/pi-glm-2026-11-14-batched-steps/summary.md`. Validated: `bash tests/run.sh`.
@@ -237,7 +239,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/dfb5ce1...v0.4.0
 [0.3.1]: https://github.com/bassemZohdy/todo-skills/compare/bf8d251...dfb5ce1

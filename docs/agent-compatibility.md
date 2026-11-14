@@ -1,6 +1,6 @@
 # Agent compatibility
 
-What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-11, against version 0.5.0. The recorded runs below were made on 0.4.0 or earlier: 0.5.0 added skill text and scripts (the optional reviews, the ambiguity pass, `todo-replay.sh`, lint warnings), and no agent run was repeated for it, so the Claude Code and Codex trial results are evidence for 0.4.0. The only agent runs on the 0.5.0 text are the pi runs of 2026-11-12 (section "pi" below).
+What has been checked on each agent, and what has not. Nothing here claims support that was not observed. Last reviewed 2026-11-14, against version 0.5.1. The Claude Code and Codex batches of 2026-11-07 and 2026-11-08 were made on 0.4.0 or earlier, so they are evidence for 0.4.0. The skill text since then was run by pi on 2026-11-12 and 2026-11-13, by Claude Code on all 34 scenarios on 2026-11-13, and by Codex in Linux containers on 27 of the 34 scenarios on 2026-11-14 (sections below).
 
 | Check | Claude Code | Codex |
 |---|---|---|

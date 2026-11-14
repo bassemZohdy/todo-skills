@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs todo-lint.sh and todo-stop-hook.sh against the static fixtures in tests/fixtures.
-# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W7) must pass with "WARN W<n>:".
+# A fixture named ok-*.md must pass. A fixture named I<n>-*.md must fail with "FAIL I<n>:". W<n>-*.md (W1-W9) must pass with "WARN W<n>:".
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
@@ -24,7 +24,7 @@ for f in "$fx"/*.md; do
   expect="${name%%-*}"
   out="$(bash "$lint" "$f" "$changelog" 2>&1)"
   rc=$?
-  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ] || [ "$expect" = "W8" ]; then
+  if [ "$expect" = "W1" ] || [ "$expect" = "W2" ] || [ "$expect" = "W3" ] || [ "$expect" = "W4" ] || [ "$expect" = "W5" ] || [ "$expect" = "W6" ] || [ "$expect" = "W7" ] || [ "$expect" = "W8" ] || [ "$expect" = "W9" ]; then
     if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -q "WARN $expect:"; then ok "$name"; else bad "$name: expected WARN $expect with rc=0, got rc=$rc: $out"; fi
   elif [ "$expect" = "ok" ]; then
     if [ "$rc" -eq 0 ]; then if printf '%s\n' "$out" | grep -q "^WARN"; then bad "$name: unexpected warning: $out"; else ok "$name"; fi; else bad "$name: expected OK, got: $out"; fi

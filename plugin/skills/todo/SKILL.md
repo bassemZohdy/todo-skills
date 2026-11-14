@@ -51,10 +51,14 @@ Never tag, force-push, reset hard or clean. The one forced branch delete is of a
 ```markdown
 # Active Backlog
 
+## 🛤️ Lanes
+
+- main: the default track
+
 ## 🌳 Task Tree
 ```
 
-Exactly this heading and one section. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree is the two headings and no tasks.
+Exactly this heading, an optional `## … Lanes` section (one `- <name>: <what it covers>` line per lane; without it the only lane is `main`) and one Task Tree section, in that order. No In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks.
 
 A task is **2 to 4 lines**: what to do, how it is validated, optional links and state.
 
@@ -125,7 +129,7 @@ A node is **workable** when: it is `[ ]`; every child is `[x]`; every `Depends:`
 
 ### Lanes
 
-A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main` (so `--lane main` selects those roots). Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lane names are listed in the plan doc `docs/plans/PROJECT.md` when one exists.
+A lane is a named track of root trees that one agent context works alone, in order. `Lane: <name>` (a lowercase letter, then lowercase letters, digits or dashes) on a root puts its whole tree in that lane; children inherit it and a root without it is in lane `main` (so `--lane main` selects those roots). Lanes are context, not tasks: a lane may hold one task or many, lanes run in parallel with each other (`/todo-continue --all-lanes`) and roots inside a lane run in sequence. Cross-lane order is only expressed with `Depends:`. Lanes are declared in the `## 🛤️ Lanes` section of `TODO.md` (`main` always exists); a `Lane:` not declared there gets lint warning W9.
 
 Order: roots P0 → P1 → P2, then by ID number (the global sequence, ignoring the prefix) (with `--lane` only that lane's roots); within a root, depth-first in document order. A parent whose children are all `[x]` is workable: that is its **integration step**.
 
@@ -172,7 +176,7 @@ Read only where a skill or another reference names them, from `reference/` (`../
 | I3 | Each task has a non-vacuous `Done when` with a backticked command, at most 4 lines, only the four fields, no State together with Blocked, a Blocked line on every `[!]`, a priority on roots only, a complexity of `low`, `mid` or `high`, an optional valid size and a title |
 | I4 | TODO.md is at most 120 lines |
 | I5 | No task ID in TODO.md is also a CHANGELOG.md entry ID or `Includes:` ID (IDs named only in `Depends:` or `From:` do not count) |
-| I6 | The file is exactly `# Active Backlog` plus one `## … Task Tree` section |
+| I6 | The file is `# Active Backlog`, at most one `## … Lanes` section (one `- <name>: <what it covers>` line per lane, no repeats), then exactly one `## … Task Tree` section |
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, and any size given matches the tree |
 | I9 | No dependency cycles, counting "parent waits for its children" |

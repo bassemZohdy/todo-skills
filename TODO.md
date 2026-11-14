@@ -7,9 +7,8 @@
   - State: branch todo/FEAT-125-declare-lanes-in-todo from main; next: build children
   - [x] **FEAT-125.1** · mid · Lint accepts one Lanes section before the Task Tree, fails I6 on a misplaced, duplicate or malformed lane line, and warns W9 on a root whose Lane is not declared (no section declares only main)
     - Done when: fixtures ok-lanes, I6-lanes-after-tree, I6-lane-duplicate and W9-undeclared-lane give those results, an invalid lane line is rejected, and the tools/ and .todo/ copies stay identical; `bash tests/run.sh`
-  - [/] **FEAT-125.2** · low · Core skill and docs/REFERENCE.md describe the section: the schema block, the I6 row and the Lanes paragraph, inside the load budget
+  - [x] **FEAT-125.2** · low · Core skill and docs/REFERENCE.md describe the section: the schema block, the I6 row and the Lanes paragraph, inside the load budget
     - Done when: run.sh pins the new schema and I6 wording and no load-budget row is exceeded; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 270 passing; branch todo/FEAT-125.2-core-skill-docs-reference from todo/FEAT-125-declare-lanes-in-todo; next: read docs
   - [ ] **FEAT-125.3** · low · /todo-init writes the section with the main lane into a new TODO.md and offers to add it to an existing tree-format file
     - Done when: run.sh pins the new template and the offer, and the trial setups that start from an empty backlog expect the section; `bash tests/trials/selftest.sh`
   - [ ] **FEAT-125.4** · mid · /todo-add --lane, a Lane edit in /todo-update and /todo-plan add the lane line when they use a lane that is not declared yet

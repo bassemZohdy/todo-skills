@@ -429,6 +429,17 @@ if [ -z "$ti_bad" ]; then ok "todo-init says what to report without a marker fil
 ln107="$root/plugin/skills/todo/reference/lanes.md"
 if grep -qF 'the lane work of item 3' "$ln107" && grep -qF 'all lanes first, then item 4' "$ln107" && grep -qF 'possible for every root after the first' "$ln107" && ! grep -qF 'expect them for every root' "$ln107"; then ok "lanes.md says how a run without a subagent tool orders the lane work and the drains (FIX-107)"; else bad "lanes.md gaps for a run without a subagent tool (FIX-107)"; fi
 
+# The Lanes section (FEAT-125.2): the core skill and docs/REFERENCE.md show it in the TODO.md schema, say where lane names are
+# declared, give the I6 row the section and document the W9 warning; the old "exactly one section" wording is gone.
+l125=""; c125="$root/plugin/skills/todo/SKILL.md"; r125="$root/docs/REFERENCE.md"
+for f125 in "$c125" "$r125"; do
+  grep -qF '## 🛤️ Lanes' "$f125" && grep -qF -- '- main: the default track' "$f125" || l125="$l125 $(basename "$f125")(schema)"
+  grep -F '| I6 |' "$f125" | grep -qF 'Lanes' && ! grep -F '| I6 |' "$f125" | grep -qF 'plus one' || l125="$l125 $(basename "$f125")(I6)"
+done
+grep -qF 'declared in the `## 🛤️ Lanes` section of `TODO.md`' "$c125" && grep -qF 'W9' "$c125" || l125="$l125 core(where lanes are declared)"
+grep -qF '| W9 |' "$r125" || l125="$l125 REFERENCE(W9)"
+if [ -z "$l125" ]; then ok "the core skill and REFERENCE.md show the Lanes section, name where lanes are declared, extend the I6 row and document W9 (FEAT-125.2)"; else bad "Lanes section docs (FEAT-125.2):$l125"; fi
+
 # Cross-reference gaps (FIX-108): the blocked path of todo-update no longer cites a section it does not load, the node
 # commit applies to a root too, the commit scope is not a source root, and the ID placement covers a class or file.
 x108=""; tc108="$root/plugin/skills/todo-continue/SKILL.md"

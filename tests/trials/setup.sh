@@ -33,6 +33,22 @@ PY
 printf '# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [Unreleased]\n' > CHANGELOG.md
 head='# Active Backlog
 
+## 🛤️ Lanes
+
+- main: the default track
+
+## 🌳 Task Tree
+'
+# The two-lane scenarios declare the lanes their roots use in the Lanes section (FEAT-125.6).
+head_lanes='# Active Backlog
+
+## 🛤️ Lanes
+
+- main: the default track
+- math: the calculator
+- text: the text helpers
+- core: the core module
+
 ## 🌳 Task Tree
 '
 # LF in the working copy on every host: with core.autocrlf=true (Git for Windows) the first branch switch rewrote TODO.md
@@ -213,7 +229,7 @@ CL
   g add -A && g commit -q -m "initial monorepo"
   ;;
 lanes)
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  printf '%s\n%s\n' "$head_lanes" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - Links: Lane: math
 - [ ] **FEAT-002** · P1 · low · Add shout to text.py
@@ -395,7 +411,7 @@ XML
   printf 'package mini.core;\n\nimport static org.junit.jupiter.api.Assertions.assertEquals;\nimport org.junit.jupiter.api.Test;\n\nclass AddTest {\n    @Test\n    void adds() {\n        assertEquals(3, Calc.add(1, 2));\n    }\n}\n' > core/src/test/java/mini/core/AddTest.java
   printf 'package mini.text;\n\npublic class Text {\n    public static String upper(String s) {\n        return s.toUpperCase();\n    }\n}\n' > text/src/main/java/mini/text/Text.java
   printf 'package mini.text;\n\nimport static org.junit.jupiter.api.Assertions.assertEquals;\nimport org.junit.jupiter.api.Test;\n\nclass UpperTest {\n    @Test\n    void uppers() {\n        assertEquals("A", Text.upper("a"));\n    }\n}\n' > text/src/test/java/mini/text/UpperTest.java
-  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to the core module (Calc.java)
+  printf '%s\n%s\n' "$head_lanes" '- [ ] **FEAT-001** · P1 · low · Add subtract to the core module (Calc.java)
   - Done when: subtract(5, 3) returns 2; `mvn -B test -pl core -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true`; regression: `mvn -B test`
   - Links: Lane: core
 - [ ] **FEAT-002** · P1 · low · Add shout to the text module (Text.java)

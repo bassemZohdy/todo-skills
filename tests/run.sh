@@ -836,6 +836,13 @@ if [ "$(linkcheck "$lkt/cl.md" "$lkt/bare")" = NOTAGS ]; then ok "the link check
 rm -rf "$lkt"
 # The skip gate itself: a skip is tolerated locally and fails when CI is set.
 if (unset CI; skipgate 1) && ! (CI=true; skipgate 1) && (CI=true; skipgate 0); then ok "a skipped check fails under CI and is tolerated locally"; else bad "the skip gate does not fail a skipped check under CI"; fi
+# TASK-121.3: evidence of a run is not published, so no test verifies committed evidence and the harness README lists none.
+ev_bad=""
+for t in codex linux-codex windows-codex fix existing-project lane-concurrency; do
+  [ ! -e "$root/tests/trials/test-$t-evidence.sh" ] || ev_bad="$ev_bad test-$t-evidence.sh(exists)"
+  ! grep -qF "test-$t-evidence.sh" "$root/tests/trials/README.md" || ev_bad="$ev_bad README(test-$t-evidence.sh)"
+done
+if [ -z "$ev_bad" ]; then ok "no test verifies committed evidence (TASK-121.3)"; else bad "tests of committed evidence remain:$ev_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -17,9 +17,8 @@
   - [x] **TASK-121.2** · mid · Make the benchmark publisher independent of evidence folders: publish.sh add and check read only the CSV files, and results.csv drops evidence_dir and keeps evidence_sha256 as the identity of the archive kept on the machine that ran it
     - Done when: publish.sh check passes on results.csv with no evidence folder on disk and fails on a row without evidence_sha256; `bash tests/trials/test-benchmark-harness.sh`
     - Links: Depends: TASK-121.1
-  - [/] **TASK-121.3** · low · Delete the six tests that verify committed evidence (test-codex-evidence.sh, test-linux-codex-evidence.sh, test-windows-codex-evidence.sh, test-fix-evidence.sh, test-existing-project-evidence.sh, test-lane-concurrency-evidence.sh) and their rows in tests/trials/README.md
+  - [x] **TASK-121.3** · low · Delete the six tests that verify committed evidence (test-codex-evidence.sh, test-linux-codex-evidence.sh, test-windows-codex-evidence.sh, test-fix-evidence.sh, test-existing-project-evidence.sh, test-lane-concurrency-evidence.sh) and their rows in tests/trials/README.md
     - Done when: none of the six files exists and tests/trials/README.md names none of them; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 252 passing; branch todo/TASK-121.3-drop-evidence-tests from todo/TASK-121-results-only; next: read docs
   - [ ] **TASK-121.4** · low · Point README.md, docs/trials.md and tests/trials/README.md at summary.md files and results CSV files instead of evidence folders
     - Done when: none of the three links into docs/evals other than a summary.md, a results CSV or the policy README; `bash tests/run.sh`
     - Links: Depends: TASK-121.3

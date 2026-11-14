@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publishes real benchmark runs into results/results.csv and checks what was published (TASK-075).
+# Publishes real benchmark runs into docs/evals/benchmark/results/results.csv and checks what was published (TASK-075).
 # Usage: bash publish.sh add <runs results.csv> <evidence root>     append every run of a table that run.sh wrote
 #        bash publish.sh check [--coverage]                          verify every published row against its evidence
 # A published row is the run's own row with two fields replaced, never typed by hand:
@@ -7,17 +7,17 @@
 #                    root relative to the folder of the published table (for example ../../pi-glm-2026-11-12/benchmark/cells),
 #                    so the published evidence can be a redacted subset that lives with its batch and is not copied here.
 #   evidence_sha256  the SHA-256 of that folder's listing: one "<sha256>  <path>" line per file, sorted by path. The hash
-#                    run.sh recorded covers the complete, unredacted run; it is kept in results/sources.csv with the table
+#                    run.sh recorded covers the complete, unredacted run; it is kept in docs/evals/benchmark/results/sources.csv with the table
 #                    the row came from.
 # add refuses the whole table, and writes nothing, when a run has no evidence folder or no file in it, when a run id is
 # already published, or when the table's header differs from the published one.
 # check fails when a row's evidence folder is missing, empty or no longer matches its hash. With --coverage it also fails
 # when an arm in arms/ and a scenario in scenarios/ have no scored row (PASS or FAIL) between them.
-# Environment: BENCH_RESULTS, the published table (default: results/results.csv next to this script).
+# Environment: BENCH_RESULTS, the published table (default: docs/evals/benchmark/results/results.csv).
 # Needs bash, awk, find, sort, and sha256sum or shasum. Runs no agent and no command from the tables.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-pub="${BENCH_RESULTS:-$here/results/results.csv}"
+pub="${BENCH_RESULTS:-$here/../../docs/evals/benchmark/results/results.csv}"
 usage() { echo "usage: bash publish.sh add <runs results.csv> <evidence root> | check [--coverage]" >&2; exit 2; }
 [ -f "$pub" ] || { echo "no published table at $pub" >&2; exit 2; }
 pubdir="$(cd "$(dirname "$pub")" && pwd)"

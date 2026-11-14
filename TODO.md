@@ -12,9 +12,8 @@
   - Done when: docs/evals/README.md states the rule, every link in README.md and docs reaches a file that exists, and tests/run.sh fails on a copy that adds another file type under docs/evals or a link to a missing file; `bash tests/run.sh`
   - Links: Ref: tests/benchmark/README.md · From: TASK-119
   - State: branch todo/TASK-121-results-only from main; next: build children
-  - [/] **TASK-121.1** · mid · Move the benchmark harness (arms, scenarios, hidden, run.sh, publish.sh, summarize.sh, usage.sh, verify.sh, agents and its README) from docs/evals/benchmark to tests/benchmark, leaving results/ where it is, because tests do not belong under docs
+  - [x] **TASK-121.1** · mid · Move the benchmark harness (arms, scenarios, hidden, run.sh, publish.sh, summarize.sh, usage.sh, verify.sh, agents and its README) from docs/evals/benchmark to tests/benchmark, leaving results/ where it is, because tests do not belong under docs
     - Done when: tests/benchmark/run.sh exists, docs/evals/benchmark holds only results/, and no file in the repository names the old harness path; `bash tests/trials/test-benchmark-harness.sh`
-    - State: attempts 0/3; baseline 252 passing; branch todo/TASK-121.1-move-benchmark-harness from todo/TASK-121-results-only; next: read docs
   - [ ] **TASK-121.2** · mid · Make the benchmark publisher independent of evidence folders: publish.sh add and check read only the CSV files, and results.csv drops evidence_dir and keeps evidence_sha256 as the identity of the archive kept on the machine that ran it
     - Done when: publish.sh check passes on results.csv with no evidence folder on disk and fails on a row without evidence_sha256; `bash tests/trials/test-benchmark-harness.sh`
     - Links: Depends: TASK-121.1

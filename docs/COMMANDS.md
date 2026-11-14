@@ -33,7 +33,7 @@ Sets up or checks the backlog workspace. Idempotent: run it again at any time.
 
 | Flag | Effect |
 |---|---|
-| `--plan` | Also when the tree is empty and your message states a goal. Asks at most 3 short questions the repo does not answer (goal and done-state, out of scope, parallel lanes) and offers to save them as `docs/plans/PROJECT.md`. Then points to `/todo-plan` |
+| `--plan` | Also when the tree is empty and your message states a goal. Asks nothing and writes nothing: points to `/todo-plan "<goal>"`, the one planning command |
 | `--ci` | Sets up `.todo/check.sh`, a CI job or a local `pre-push` hook, each on your yes, and runs `.todo/check.sh` once. Rules in [TOOLS.md](TOOLS.md#ci-todo-init---ci) |
 
 It adds, starts or changes no task (apart from a migration you confirmed).

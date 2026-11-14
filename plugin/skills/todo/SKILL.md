@@ -9,7 +9,7 @@ The repository is a closed-loop state machine built from files that already exis
 
 | Layer | File(s) | Role | Write policy |
 |---|---|---|---|
-| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-init`/`todo-plan`/`todo-add`/`todo-update`; the README `Tests:` line by `todo-init` on a yes; the optional RTM (`reference/rtm.md`) by `todo-plan`/`todo-add`/`todo-continue` only when it already exists; `docs/status.html` by `todo-report` |
+| Requirements | `README.md`, `docs/*.md` | Ground truth: contracts, specs, setup, long plans | Read-mostly. Edited under "Documentation drift" in `todo-continue`; plan docs (`docs/plans/`) by `todo-plan`/`todo-add`/`todo-update`; the README `Tests:` line by `todo-init` on a yes; the optional RTM (`reference/rtm.md`) by `todo-plan`/`todo-add`/`todo-continue` only when it already exists; `docs/status.html` by `todo-report` |
 | Active queue | `TODO.md` | One task tree. A tracker of work items, not a place for design | Edited only by the todo-* skills |
 | Validation | Source code + test suites | Ground truth for "done" | Changed only for the task at hand |
 | Archive | `CHANGELOG.md` | Permanent, append-only (Keep a Changelog + Conventional Commits) | Only `## [Unreleased]` (on release: renamed to the version, a new empty one above it, and the link lines at the end) is touched, by a root drain and the confirmed `/todo-release`; `todo-init` creates the file or adds a missing `[Unreleased]` |
@@ -26,7 +26,7 @@ Prefer native file tools (Read/Edit/Write) for file edits; however you edit, cha
 
 | Command | Purpose |
 |---|---|
-| `/todo-init` | Bootstrap files, detect test command and git, optional pre-planning and CI setup, migrate the old format |
+| `/todo-init` | Bootstrap files, detect test command and git, optional CI setup, migrate the old format; points to `/todo-plan` for planning |
 | `/todo-plan` | Plan the work into lanes and a tree; revise the plan at any time |
 | `/todo-add` | Add a task, or break a request into a tree |
 | `/todo-continue` | Execute the next task node, verify it, merge it into its parent |

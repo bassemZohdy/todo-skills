@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FEAT-125** (feat): Declare lanes in `TODO.md` itself. An optional `## 🛤️ Lanes` section above the Task Tree holds one `- <name>: <what it covers>` line per lane, so lane names no longer need a plan doc. The lint accepts it, fails I6 on a misplaced, repeated or malformed one, and warns W9 on a root whose `Lane:` is not declared (`main` always counts; a file without the section still lints clean). `/todo-init` writes the section with the `main` lane and offers it for a tree-format file without one; `/todo-add --lane`, a `Lane:` edit of `/todo-update` and `/todo-plan` add the line of a lane they use that is not declared yet; `/todo-status` and the `docs/status.html` page show each lane's description. The core skill, `docs/REFERENCE.md`, `docs/COMMANDS.md` and `docs/PLANNING.md` describe it, and this repository's `TODO.md` declares its lane. Validated: `bash tests/run.sh`. Docs: updated docs/COMMANDS.md, docs/PLANNING.md, docs/REFERENCE.md. Includes: FEAT-125.1, FEAT-125.2, FEAT-125.3, FEAT-125.4, FEAT-125.5, FEAT-125.6.
+
 ## [0.5.1] - 2026-11-14
 
 ### Added

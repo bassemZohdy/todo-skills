@@ -67,7 +67,7 @@ Adds work to the tree. It never starts work.
 | `--ref <docs-path>` | The governing doc, linked as `Ref:` (anchors allowed). The path must exist. Without it, a doc in `docs/` that clearly governs the work is proposed |
 | `--from <ID>` | Provenance, written as `From:`. The ID must exist in `TODO.md` or `CHANGELOG.md` |
 | `--parent <ID>` | Adds a child under an open `[ ]` node with at most one dot in its ID, in a tree nobody else has claimed. Children inherit the root's prefix, priority and lane, so `--priority`, `--lane` and `--type` are refused |
-| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes) |
+| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
 | `--clarify` | Always asks one round of questions first |
 
 1. Resolves `--ref`, an RTM link (only when an RTM exists), `--from` and `--parent`.
@@ -122,7 +122,7 @@ Manual changes to one node. Dotted IDs (`FEAT-002.1`) are allowed. With neither 
 
 `ready`, `blocked` and `revert` act where the node's state lives: on the tree's branches for a claimed tree (it names the branch and stops if you are elsewhere), on the base for an unclaimed tree. On a `todo/` branch the change is committed (`chore(backlog): ready|block|drop|revert <ID>`); on the base it stays an uncommitted backlog edit, except the claim release.
 
-**Field edits.** `--note` without a status, starting with `Title:`, `Done when:`, `Ref:`, `Depends:`, `From:`, `State:`, `Complexity:`, `Size:`, `Priority:` or `Lane:`, replaces that part with your text verbatim. Any other note is not applied. The usual rules hold: a `Done when` keeps a runnable, allowed command; a `Ref:` path and `Depends:`/`From:` IDs must exist; no dependency cycle; `Lane:` and `Priority:` on roots only. A `State:` edit is one way to reset the attempt counter. Field edits are refused on `[x]` nodes and, from outside the tree's branch, on a claimed tree. The skill never rewrites a `Done when` on its own.
+**Field edits.** `--note` without a status, starting with `Title:`, `Done when:`, `Ref:`, `Depends:`, `From:`, `State:`, `Complexity:`, `Size:`, `Priority:` or `Lane:`, replaces that part with your text verbatim (a `Lane:` the Lanes section does not declare gets its line there, with a description you give). Any other note is not applied. The usual rules hold: a `Done when` keeps a runnable, allowed command; a `Ref:` path and `Depends:`/`From:` IDs must exist; no dependency cycle; `Lane:` and `Priority:` on roots only. A `State:` edit is one way to reset the attempt counter. Field edits are refused on `[x]` nodes and, from outside the tree's branch, on a claimed tree. The skill never rewrites a `Done when` on its own.
 
 ## `/todo-status [--search <text>] [--last <N>]`
 

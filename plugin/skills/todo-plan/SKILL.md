@@ -1,6 +1,6 @@
 ---
 name: todo-plan
-description: Plan or re-plan the work in the TODO.md task tree. Use for /todo-plan [<goal>] [--revise [<reason>]]. Turns a goal into a plan doc (docs/plans/PROJECT.md) and a proposed tree with lanes, or revises the plan at any time when it no longer fits. Only open [ ] nodes are changed; started or finished work is never touched. Shows the change and waits for confirmation. Never starts work.
+description: Plan or re-plan the work in the TODO.md task tree. Use for /todo-plan [<goal>] [--revise [<reason>]]. Turns a goal into a proposed tree with lanes inside TODO.md (a plan doc only for a complex goal), or revises the plan at any time when it no longer fits. Only open [ ] nodes are changed; started or finished work is never touched. Shows the change and waits for confirmation. Never starts work.
 argument-hint: "[<goal>] [--revise [<reason>]]"
 ---
 
@@ -14,14 +14,10 @@ Never starts work and never touches code. Without `--revise` it plans; with it, 
 
 1. Run the invariant check. Read README.md, `docs/`, `TODO.md`, `CHANGELOG.md`, and `docs/plans/PROJECT.md` if it exists.
 2. **Ask once**, at most 3 short questions, only for what the repo does not answer: the goal and its done-state, what is out of scope, and which parts can run in parallel (independent tracks). Skip any that are answered. When the goal is still unclear, read `../todo/reference/clarify.md` and apply its checklist and stop triggers.
-3. Draft the plan doc `docs/plans/PROJECT.md` (not written yet; ask first before creating `docs/` if it is absent; if the doc exists, propose edits to it instead of a new draft). Keep it short, sections as `##` headings in this order:
-   - **Goal**, **Scope**, **Out of scope**.
-   - **Lanes**: one line each, `<name>: <what it covers>; independent of <lanes>`. A lane is a track one agent can work alone. Use `main` when there is only one.
-   - **Decisions** and **Open questions**.
-   - **Revisions**: empty until the first revise.
-4. With an existing tree, propose only new roots (and children under open `[ ]` roots in unclaimed trees); changes to existing nodes go through `--revise`. Propose the tree with the `/todo-add` rules (scope, complexity, `Done when`, 3 levels; if it would pass 120 lines, propose roots and first levels only, with `next: decompose` where a node still needs children): each root gets `Ref: docs/plans/PROJECT.md` (only when that doc exists or is written in the same confirmation) (with a section anchor when one fits) and, unless its lane is `main`, a `Lane:` in `Links:`. A lane not declared in the `## 🛤️ Lanes` section of `TODO.md` gets its line there from the Lanes you drafted, in the same confirmation (the section is created above the Task Tree when the file has none; `main` needs no line). Order roots so independent lanes do not `Depends:` on each other. Show IDs, complexity, lanes and one-line titles.
+3. **Plan inline.** The plan is the Lanes section and the tree in `TODO.md`: draft one lane line each, `- <name>: <what it covers>` (add `; independent of <lanes>` when it helps; `main` when there is one track), and write no plan doc and no `Ref:` for it. **Complex goal** (more than 6 nodes in total, a `high` root, or the user asks): also offer one doc per root, `docs/plans/<ROOT-ID>-<slug>.md` (compute the root ID by the core ID rules) with `##` sections Goal, Scope, Out of scope, Decisions and Open questions, linked by that root's `Ref:`; ask first before creating `docs/` if it is absent. An existing `docs/plans/PROJECT.md` is read, and edits to it are proposed instead of a new draft.
+4. With an existing tree, propose only new roots (and children under open `[ ]` roots in unclaimed trees); changes to existing nodes go through `--revise`. Propose the tree with the `/todo-add` rules (scope, complexity, `Done when`, 3 levels; if it would pass 120 lines, propose roots and first levels only, with `next: decompose` where a node still needs children): a root gets a `Ref:` only to its own plan doc, or to the section of an existing `docs/plans/PROJECT.md` that governs it, and, unless its lane is `main`, a `Lane:` in `Links:`. A lane not declared in the `## 🛤️ Lanes` section of `TODO.md` gets its line there from the Lanes you drafted, in the same confirmation (the section is created above the Task Tree when the file has none; `main` needs no line). Order roots so independent lanes do not `Depends:` on each other. Show IDs, complexity, lanes and one-line titles.
    If an RTM exists (`../todo/reference/rtm.md`: `docs/RTM.md`, else README `## RTM`), link roots that implement a listed requirement with `Ref: <rtm path>#<Req>` and show the RTM row changes with the tree; with no RTM, skip this and do not offer one more than once.
-5. **Wait for confirmation.** Then write the plan doc and the tree, only what the user confirms. Lint. Do not commit; the next tree claim commits them (core "Backlog files").
+5. **Wait for confirmation.** Then write the lane lines, the tree and any plan doc the user accepted, only what the user confirms. Lint. Do not commit; the next tree claim commits them (core "Backlog files").
 
 ## Revise (`--revise`)
 

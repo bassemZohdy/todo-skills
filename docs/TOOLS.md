@@ -97,11 +97,11 @@ The only script that writes. It makes the git and backlog writes of one lifecycl
 
 | Exit | Meaning |
 |---|---|
-| 0 | Done; the commits it made and the checked-out branch are printed |
+| 0 | Done. It prints the commits it made, the checked-out branch, whether the tree is clean and the `todo/` branches left (`drain` also prints the entry it wrote), so the agent need not check the result again |
 | 1 | A step failed after something was written (a failed fast-forward, a merge conflict, a failing lint): it stops there, in the state the skills' recovery rules expect, and names the rule |
 | 2 | Refused before anything changed, with the reason: go on by hand |
 
-It refuses whatever is not the plain case: a linked worktree, a folder that is not the repository root, a task with open children, a second active task, a root branch that already exists, a tree claimed by another branch, a failing lint. The base branch is `TODO_BASE`, else the README `Base:` line, else the first of `main`, `master`, `trunk`, `develop`. It runs `.todo/todo-lint.sh` before a commit when you copied that too, runs no project command, never pushes, tags or force-deletes, and merges into the base only with `--merge`. A CRLF `TODO.md` or `CHANGELOG.md` keeps its line endings. `tests/flow.sh` checks all of this in scratch repositories.
+It refuses whatever is not the plain case: a linked worktree, a folder that is not the repository root, a task with open children, a second active task, a root branch that already exists, a tree claimed by another branch, a failing lint. The base branch is `TODO_BASE`, else the README `Base:` line, else the first of `main`, `master`, `trunk`, `develop`. It runs `.todo/todo-lint.sh` before a commit when you copied that too, runs no project command, never pushes, tags or force-deletes, and merges into the base only with `--merge`. A CRLF `TODO.md` or `CHANGELOG.md` keeps its line endings. The script is kept at 200 lines or fewer, one read for an agent that reads it before use. `tests/flow.sh` checks all of this in scratch repositories.
 
 ## `todo-stop-hook.sh`
 

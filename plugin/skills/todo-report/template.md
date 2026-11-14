@@ -25,7 +25,7 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
 .lanes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .lane{border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer}.lane.on{outline:2px solid var(--acc)}
-.lane h3{margin:0 0 4px;font-size:15px}.lane small{color:var(--mute)}
+.lane h3{margin:0 0 4px;font-size:15px}.lane small{color:var(--mute)}.lane p.ld{margin:0 0 6px;font-size:13px;color:var(--mute)}
 .tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 input,select,button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 8px}button{cursor:pointer}
 ul.tree{list-style:none;margin:0;padding-left:18px}ul.tree.top{padding-left:0}
@@ -102,6 +102,10 @@ function progressLine(todo,changelog){
   return 'Progress: ['+'#'.repeat(nd)+'!'.repeat(nb)+'-'.repeat(10-nd-nb)+'] '+d+'/'+total+' leaves · '+active+' active · '+blocked+' blocked · '+roots+' roots open · '+dr+' drained in [Unreleased]';
 }
 // ---- end progress
+// ---- lanes: the descriptions in the optional `## … Lanes` section of TODO.md (FEAT-125.5)
+function laneDescriptions(todo){const d=Object.create(null);let on=false;todo.split('\n').forEach(l=>{l=l.replace(/\r$/,'');
+  if(/^## /.test(l))on=/Lanes\s*$/.test(l);else if(on){const m=l.match(/^- ([a-z][a-z0-9-]*): +(.+)$/);if(m)d[m[1]]=m[2].trim()}});return d}
+// ---- end lanes
 // ---- render
 $('title').textContent=(meta.project||'Project')+' · status';
 $('sub').textContent='Generated '+(meta.generated||'')+(meta.base?' · base '+meta.base:'')+(meta.branch?' · on '+meta.branch:'');
@@ -113,11 +117,12 @@ $('progress').textContent=progressLine(raw('d-todo'),raw('d-changelog'));
 {const m=$('progress').textContent.match(/ (\d+)\/(\d+) leaves/);$('progbar').firstChild.style.width=(m&&+m[2]?100*m[1]/m[2]:0)+'%'}
 let laneSel='';
 const lanes=Object.create(null);roots.forEach(r=>(lanes[r.lane]=lanes[r.lane]||[]).push(r));
+const laneDesc=laneDescriptions(raw('d-todo'));
 function drawLanes(){$('lanes').textContent='';
   if(!roots.length){$('lanes').append(el('div','empty','No tasks in the tree.'));return}
-  Object.keys(lanes).sort().forEach(name=>{const rs=lanes[name],ds=rs.flatMap(r=>[r,...desc(r)]),dn=ds.filter(n=>n.mk==='x').length;
+  [...new Set([...Object.keys(lanes),...Object.keys(laneDesc)])].sort().forEach(name=>{const rs=lanes[name]||[],ds=rs.flatMap(r=>[r,...desc(r)]),dn=ds.filter(n=>n.mk==='x').length;
     const d=el('div','lane'+(laneSel===name?' on':''));d.onclick=()=>{laneSel=laneSel===name?'':name;drawLanes();drawTree()};
-    d.append(el('h3','',name),el('small','',rs.length+' root'+(rs.length>1?'s':'')+' · '+ds.length+' nodes · '+ds.filter(n=>n.mk==='/').length+' active · '+ds.filter(n=>n.mk==='!').length+' blocked'));
+    d.append(el('h3','',name),laneDesc[name]?el('p','ld',laneDesc[name]):'',el('small','',rs.length+' root'+(rs.length>1?'s':'')+' · '+ds.length+' nodes · '+ds.filter(n=>n.mk==='/').length+' active · '+ds.filter(n=>n.mk==='!').length+' blocked'));
     const b=el('div','bar');const i=el('i');i.style.width=(ds.length?100*dn/ds.length:0)+'%';b.append(i);d.append(b);$('lanes').append(d)})}
 const MK={x:['[x]','x'],'/':['[/]','s'],'!':['[!]','b'],' ':['[ ]','o']};
 let expandAll=false;

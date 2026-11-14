@@ -34,7 +34,8 @@ Most scenarios are within the spread of the earlier runs. 4-multi-module used mo
 - Prose that allows a chained command did not change how the model batches: it still ran the claim, switch and merge steps as separate calls.
 - Correctness did not change: 18 of 18 passed on the hidden tests.
 - The text change was not merged. It added skill text for no measured gain.
-- Two levers remain, neither tried: shrinking the skill text every call re-sends (about 40% of one measured run's input), and a helper script for claim and start, which would break the "Markdown only" rule of this project.
+- Shrinking the skill text was checked and dropped (TASK-123): a run reads 62.6 KB of skill files, but a safe cut is about 3.6 KB (6%), about 2% of uncached input, too small for 18 runs to show.
+- One lever remains, untried: a helper script for claim and start, which would break the "Markdown only" rule of this project.
 
 ## Limits
 

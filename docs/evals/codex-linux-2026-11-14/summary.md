@@ -26,7 +26,7 @@ Each is one failed assertion; none is a crash, and all three agents followed the
 | monorepo | "a power test exists on main" (expects `def test_power`) | Named the test `test_feat_001_power`, as the skill asks (the ID in the test name); the test exists and passes |
 | dirty-tree | "report says the tree is not clean" (expects the words clean or uncommitted) | Stopped at the ready check, left nothing changed, and asked the user to commit or stash or use `--worktree`, without those words |
 
-TASK-124 tracks aligning the three assertions.
+TASK-124 then aligned the three assertions (the `cd tests &&` form, a test name that carries the ID, the words "working tree"). The same three repositories and reports, scored again with the aligned assertions, pass 12/12, 16/16 and 11/11. That changes the scoring after the fact, so the result of this batch stays 24 of 27 with the assertions as they were during the run.
 
 ## Not run
 

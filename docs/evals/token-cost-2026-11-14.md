@@ -13,9 +13,10 @@ Scope: pi with GLM 5.3 on six small tasks, isolation `provisional`, 17 to 20 run
 | 2026-11-12 | no-methodology | 18 | 41,237 | 2,769 | 92% | 1,689 | 6 | 26 |
 | 2026-11-12 | todo-skills | 20 | 1,039,495 | 47,417 | 95% | 18,269 | 29 | 310 |
 | 2026-11-13 | todo-skills | 17 | 1,034,971 | 52,929 | 94% | 18,644 | 31 | 402 |
+| 2026-11-14 | todo-skills | 18 | 1,072,291 | 52,187 | 95% | 18,149 | 31 | 292 |
 <!-- tokens:end -->
 
-Input tokens include the cached part, so the uncached input of a run is the difference. The two todo-skills rows are different versions of the skill text, and the 2026-11-13 row ran only that arm.
+Input tokens include the cached part, so the uncached input of a run is the difference. The three todo-skills rows are different versions of the skill text, and the 2026-11-13 and 2026-11-14 rows ran only that arm. The 2026-11-14 row is [the batched-steps test](pi-glm-2026-11-14-batched-steps/summary.md): the same median model calls as the row before it.
 
 ## Reading it
 
@@ -43,7 +44,7 @@ Six runs of the todo-skills arm on 2026-11-13 (one per scenario, the text after 
 
 - **The ceremony is the largest part.** Git and the two backlog files are 74 of the 162 calls, about 53% of the input and about 41% of the output tokens.
 - **Setup.** The calls before the first branch (reading the init and add skills, writing the backlog) are a median 30% of a run's input (28% to 33% in five runs; the sixth stopped to ask a question after 9 calls).
-- **What a fix could save.** If the git and backlog-file calls shrank to four per node, the logs predict 37% to 50% fewer input tokens in five of the six runs. That is an upper estimate: some of those calls read state and cannot be removed. TASK-120 tests it with a fresh benchmark.
+- **What a fix could save.** If the git and backlog-file calls shrank to four per node, the logs predict 37% to 50% fewer input tokens in five of the six runs. That is an upper estimate: some of those calls read state and cannot be removed. TASK-120 tested the cheapest fix, wording that allows chained commands, on 18 fresh runs: the median stayed at 31 calls, so wording alone did not capture it ([summary](pi-glm-2026-11-14-batched-steps/summary.md)).
 
 ## Limits
 

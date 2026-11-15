@@ -17,6 +17,5 @@
     - Done when: the skill text names the helper and its fallback, every load budget holds and the docs checks pass; `bash tests/run.sh`
   - [x] **FEAT-129.4** · mid · The trial setup and a benchmark arm can install the helper, and a scripted lifecycle run through the helper passes the existing `happy-path` and `decompose` follow-up assertions unchanged
     - Done when: the selftest and the harness checks pass with the helper switch on and off; `bash tests/run.sh`
-  - [/] **FEAT-129.5** · mid · Measure the helper with fresh pi agents against a fresh baseline of the same 18 benchmark cells plus the lifecycle trials, after fitting the helper to what a pilot run shows (one read, an end-state report), and publish the results and the decision
+  - [x] **FEAT-129.5** · mid · Measure the helper with fresh pi agents against a fresh baseline of the same 18 benchmark cells plus the lifecycle trials, after fitting the helper to what a pilot run shows (one read, an end-state report), and publish the results and the decision
     - Done when: the summary is linked from docs/trials.md, its run rows are in the published table and the token table is regenerated; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 327 passing; branch todo/FEAT-129.5-measure-helper-fresh-pi from todo/FEAT-129-add-optional-helper-script; next: read docs

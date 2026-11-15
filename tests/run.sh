@@ -1148,6 +1148,16 @@ for a in checkout setup-node setup-python setup-java setup-go; do
 done
 has131 todo/reference/ci.md "write the version they use"
 if [ -z "$r131" ]; then ok "review round 3: I10 names the redirect, a drained unmerged root does not end the run, and ci.md keeps up with the actions this repository uses (TASK-131)"; else bad "review round 3 (TASK-131):$r131"; fi
+# Round 4, two rules that were only implied: "lane runs" meant --all-lanes, but nothing said so, and --lane <name> alone
+# still completes one node; and only /todo-status and /todo-report said what a command does without a TODO.md.
+r131=""
+for f in todo/SKILL.md todo-continue/SKILL.md todo/reference/routing.md; do not131 "$f" 'lane runs'; done
+has131 todo-continue/SKILL.md 'Complete at most one node per invocation (`--all-lanes` excepted).'
+has131 todo-continue/SKILL.md 'except with --all-lanes, where one subagent per lane works one root of that lane'
+has131 todo/SKILL.md 'Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.'
+grep -qF 'Without a `TODO.md`, every command but `/todo` and `/todo-init`' "$root/docs/COMMANDS.md" || r131="$r131 [docs/COMMANDS.md lacks the missing TODO.md rule]"
+if grep -qiF 'lane runs' "$root/README.md" "$root/docs/COMMANDS.md" "$root/docs/LIFECYCLE.md" "$root/docs/REFERENCE.md"; then r131="$r131 [a doc still says lane runs where it means --all-lanes]"; fi
+if [ -z "$r131" ]; then ok "review round 4: the one-node exception names --all-lanes and the core says what a command does without a TODO.md (TASK-131)"; else bad "review round 4 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -91,7 +91,7 @@ Complexity says how hard the reasoning is, not how big the change is, so an agen
 
 A parent is rated by its integration step alone (usually `low` or `mid`). A one-file race condition is `high`; a five-file rename is `low`.
 
-**Model routing (optional).** A README line such as `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands) maps levels to models. With that line and a subagent tool, `/todo-continue --delegate` and lane runs give each node a subagent on the mapped model, the reviewer runs at the node's tier or higher, and after a failed attempt the next one runs one tier higher (`low` → `mid` → `high`, recorded as `tier:`). Without either, complexity is only a hint and the work runs in the current model.
+**Model routing (optional).** A README line such as `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands) maps levels to models. With that line and a subagent tool, `/todo-continue --delegate` and `--all-lanes` give each node a subagent on the mapped model, the reviewer runs at the node's tier or higher, and after a failed attempt the next one runs one tier higher (`low` → `mid` → `high`, recorded as `tier:`). Without either, complexity is only a hint and the work runs in the current model.
 
 ## IDs
 

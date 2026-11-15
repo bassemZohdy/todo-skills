@@ -106,7 +106,7 @@ A parent is rated by its integration step alone (usually `low` or `mid`); its ch
 
 ### Model routing (optional)
 
-A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both, read `reference/routing.md` (`--delegate`, lane runs, the reviewer's tier, escalation after a failed attempt).
+A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both, read `reference/routing.md` (`--delegate`, `--all-lanes`, the reviewer's tier, escalation after a failed attempt).
 
 ## IDs
 
@@ -184,7 +184,7 @@ Read only where a skill or another reference names them, from `reference/` (`../
 
 **The invariant check** ("lint" in the skills) means: if `.todo/todo-lint.sh` exists in the project, run `bash .todo/todo-lint.sh` from the repository root (read it first under "Command safety" in `reference/verification.md`); otherwise check I1-I10 by reading. The plugin itself ships Markdown only: the lint and the other optional scripts (`todo-verify.sh`, `todo-rtm.sh`, `todo-replay.sh`, the Stop hook, `todo-report.sh`, `todo-flow.sh`; all read-only except `todo-replay.sh --run`, which runs commands, and `todo-flow.sh`, which makes a node's commits) live in the `tools/` folder of the todo-skills repository, and a user who wants them copies them into the project by hand (the skills never download anything). The lint needs bash, awk, grep, sed and tr and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). A lint run after an edit that fails means the edit is wrong: fix it or undo it before you stop.
 
-On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report.
+On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report. Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.
 
 ## Hard guardrails
 

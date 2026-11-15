@@ -1,6 +1,6 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except lane runs, where one subagent per lane works one root of that lane.
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except with --all-lanes, where one subagent per lane works one root of that lane.
 argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--d
 
 First load the `todo` core skill and read `reference/git-flow.md` and `reference/verification.md` from its folder (`reference/lanes.md` too with a lane flag). If you cannot load a skill by name, read `../todo/SKILL.md` and those files from `../todo/reference/`.
 
-Complete at most one node per invocation (lane runs excepted). Flags, all optional; an invalid combination is reported and nothing runs:
+Complete at most one node per invocation (`--all-lanes` excepted). Flags, all optional; an invalid combination is reported and nothing runs:
 - `--plan`: after reading, propose a plan and stop before any code is written; the next run asks for the approval (step 6). Not with a lane flag.
 - `--lane <name>`: only roots of that lane, in order. `--all-lanes [--seq]`: one subagent per lane, in parallel (`--seq`: one after another); see `reference/lanes.md`. Not together, and not with `--worktree`.
 - `--worktree`: work in a separate worktree; the main checkout is never switched (`reference/git-flow.md`, "--worktree").

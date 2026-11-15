@@ -6,6 +6,7 @@ Common to all commands:
 
 - Each command first loads the `todo` core skill, checks for git (`git rev-parse --is-inside-work-tree`) and runs the invariant check (the lint, `.todo/todo-lint.sh` when it exists, otherwise by reading). Outside a git repository it warns once and runs in [no-git mode](GIT-FLOW.md#no-git-mode).
 - A command runs only itself and never chains into another unprompted.
+- Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.
 - On an invariant violation a command reports it, changes nothing and asks. The one repair: a writing command (`/todo-continue`, `/todo-add`, `/todo-update`, `/todo-plan`) deletes a subtree from `TODO.md` when its IDs are exactly the root and `Includes:` IDs of one CHANGELOG entry (a drain that was interrupted), and says so.
 - When a rule conflicts with an explicit instruction from you, the agent states the conflict and asks.
 - In Claude Code with the plugin, commands are namespaced (`/todo-skills:todo-add`). In Codex, start them with `$todo-add` or plain language.
@@ -83,7 +84,7 @@ New roots, including a `--from` follow-up without `--parent`, are added only on 
 
 ## `/todo-continue [flags]`
 
-Executes the next workable node end to end. It completes at most one node per invocation, except lane runs.
+Executes the next workable node end to end. It completes at most one node per invocation, except with `--all-lanes`.
 
 | Flag | Effect |
 |---|---|

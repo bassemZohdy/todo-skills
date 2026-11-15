@@ -41,7 +41,8 @@ if [ "$red_baseline" = 0 ]; then
   elif [ -f pom.xml ]; then chk "tests pass on the checked-out branch" 'mvn -q -B test'
   else chk "tests pass on the checked-out branch" 'python3 -m unittest discover -s tests'; fi
 fi
-chk "lint passes on the checked-out branch" 'bash "$lint" TODO.md CHANGELOG.md'
+# no-backlog has no TODO.md by design: the command must stop without writing one.
+[ "$scenario" = no-backlog ] || chk "lint passes on the checked-out branch" 'bash "$lint" TODO.md CHANGELOG.md'
 
 case "$scenario" in
 interrupted-merge)
@@ -250,6 +251,13 @@ update-drop)
   ;;
 status-readonly)
   chk "nothing changed" 'unchanged && clean'
+  ;;
+no-backlog)
+  chk "no TODO.md was written and nothing else changed" '[ ! -e TODO.md ] && unchanged && clean'
+# shellcheck disable=SC2034
+  rep="${TRIAL_REPORT:-}"
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  chk "report says TODO.md is missing and suggests /todo-init" '[ -s "$rep" ] && grep -q "TODO\.md" "$rep" && grep -q "todo-init" "$rep"'
   ;;
 report)
   chk "docs/status.html written, no placeholder left" '[ -s docs/status.html ] && ! grep -q "__TODO__\|__CHANGELOG__\|__META__" docs/status.html'

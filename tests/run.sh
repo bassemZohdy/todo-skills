@@ -1158,6 +1158,23 @@ has131 todo/SKILL.md 'Without a `TODO.md`, every command but `/todo` and `/todo-
 grep -qF 'Without a `TODO.md`, every command but `/todo` and `/todo-init`' "$root/docs/COMMANDS.md" || r131="$r131 [docs/COMMANDS.md lacks the missing TODO.md rule]"
 if grep -qiF 'lane runs' "$root/README.md" "$root/docs/COMMANDS.md" "$root/docs/LIFECYCLE.md" "$root/docs/REFERENCE.md"; then r131="$r131 [a doc still says lane runs where it means --all-lanes]"; fi
 if [ -z "$r131" ]; then ok "review round 4: the one-node exception names --all-lanes and the core says what a command does without a TODO.md (TASK-131)"; else bad "review round 4 (TASK-131):$r131"; fi
+# Round 5, the rounds' own edits read again, and an agent scenario for the rule round 4 added: the no-git State example
+# says "a dash" instead of a bare "->"; the lane trial prompts and the controller's comments say "item" as lanes.md now
+# does; and the trial scenario no-backlog passes only when /todo-add stops without writing a TODO.md and names /todo-init.
+r131=""
+has131 todo-continue/SKILL.md "files: <a root's rolled-up files, or a dash>;"
+if grep -q 'step [0-9] of .claude/skills/todo/reference/lanes.md\|lanes.md,* step [0-9]' "$root/tests/trials/prompt.sh" "$root/tests/trials/run-codex-lanes.sh"; then r131="$r131 [a lane trial prompt still calls an item of lanes.md a step]"; fi
+n131="$(mktemp -d)"
+if bash "$root/tests/trials/setup.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then
+  printf 'There is no TODO.md in this project. Run /todo-init first; nothing was added.\n' > "$n131/report.txt"
+  TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1 || r131="$r131 [no-backlog: a stop that names /todo-init does not pass]"
+  printf 'Added FEAT-001.\n' > "$n131/report.txt"
+  if TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then r131="$r131 [no-backlog: a report without /todo-init passes]"; fi
+  printf 'There is no TODO.md in this project. Run /todo-init first.\n' > "$n131/report.txt"; printf '# Active Backlog\n' > "$n131/repo/TODO.md"
+  if TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then r131="$r131 [no-backlog: a written TODO.md passes]"; fi
+else r131="$r131 [no-backlog: setup failed]"; fi
+rm -rf "$n131"
+if [ -z "$r131" ]; then ok "review round 5: the trial scenario no-backlog checks that a command stops without a TODO.md, and the lane prompts say item (TASK-131)"; else bad "review round 5 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -5,7 +5,7 @@
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
-#   plan-stop | decompose | regress-block | plan-inline | add-lane
+#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -317,6 +317,11 @@ baseline-red)
 no-git)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  ;;
+no-backlog)
+  # A project that never ran /todo-init: a hand-written CHANGELOG and no TODO.md. Every command but /todo and /todo-init
+  # says so, suggests /todo-init and stops (the core, TASK-131).
+  g add -A && g commit -q -m "init without a backlog"
   ;;
 add-fix)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

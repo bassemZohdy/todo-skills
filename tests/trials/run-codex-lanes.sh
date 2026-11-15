@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Runs `lanes` or `multi-module` with one fresh Codex process per lane, all started at the same time (TASK-044).
 # Usage: [TRIAL_LABEL=<word>] [TRIAL_LANE_WRITE="<abs path> ..."] bash tests/trials/run-codex-lanes.sh <runs-dir> <lanes|multi-module>
-# Codex has no subagent tool, so the controller is the coordinator's subagent tool (reference/lanes.md, step 3):
-#   coordinate  a fresh `codex exec` runs /todo-continue --all-lanes --merge in the main checkout (steps 0-2: claims and
-#               worktrees) and, at step 3, writes each lane's subagent instructions to <repo>.todo/<ROOT-ID>.brief.md
+# Codex has no subagent tool, so the controller is the coordinator's subagent tool (reference/lanes.md, item 3):
+#   coordinate  a fresh `codex exec` runs /todo-continue --all-lanes --merge in the main checkout (items 0-2: claims and
+#               worktrees) and, at item 3, writes each lane's subagent instructions to <repo>.todo/<ROOT-ID>.brief.md
 #   lanes       the controller accepts a brief only when <repo>.todo/<ROOT-ID> is a worktree of this repository on a
 #               todo/<ROOT-ID>-* branch whose TODO.md holds that root, one brief per lane, and starts one fresh `codex exec`
 #               per accepted brief at the same time; each may write only its own worktree, the shared .git and that
 #               worktree's own metadata folder .git/worktrees/<name> (Codex protects a writable root's Git metadata
 #               read-only unless it is granted explicitly, and Git cannot lock the worktree's index without it)
-#   finish      a fresh `codex exec` runs /todo-continue --all-lanes --merge again; its step 0 takes the roots at next: drain
-#               to step 4 (refresh, verify, drain, merge) and step 5 (report). Skipped (finish-skipped.txt) when a worker
+#   finish      a fresh `codex exec` runs /todo-continue --all-lanes --merge again; its item 0 takes the roots at next: drain
+#               to item 4 (refresh, verify, drain, merge) and item 5 (report). Skipped (finish-skipped.txt) when a worker
 #               exited non-zero (INFRA_ERROR) or left its root branch without next: drain (FAIL): the finishing
 #               coordinator would then do that lane's work itself, one lane after another
 # Activity (lane-evidence.sh's second argument): the controller stamps every line of each worker's `codex exec --json`
@@ -150,7 +150,7 @@ bash "$here/snapshot-git.sh" "$repo" > "$ev/after-lanes-git-state.txt" 2>&1
 # 3. finish: a fresh coordinator drains and merges what the lanes left at next: drain
 workers_ok=1; unfinished=""
 for f in "$ev"/lanes/*/agent-exit.txt; do [ ! -f "$f" ] || [ "$(cat "$f")" = 0 ] || workers_ok=0; done
-for i in ${ids[@]+"${!ids[@]}"}; do   # each lane must leave its root at next: drain (lanes.md step 3), committed
+for i in ${ids[@]+"${!ids[@]}"}; do   # each lane must leave its root at next: drain (lanes.md item 3), committed
   git -C "${wts[$i]}" show HEAD:TODO.md 2>/dev/null | tr -d '\r' | awk -v id="${ids[$i]}" '
     /^- \[/ { r = index($0, "**" id "**") > 0; next } r && /next: drain/ { found = 1 } END { exit !found }' \
     || unfinished="$unfinished ${ids[$i]}"

@@ -4,7 +4,7 @@ Loaded by `/todo-continue` and by `/todo-update` when it claims or releases. Par
 
 ## Git flow
 
-One branch per node: `todo/<ID>-<slug>`. Slug: lowercase the title, turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`), drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain, join them with hyphens (nothing left means `task`). The base branch is defined in the core ("Git mode").
+One branch per node: `todo/<ID>-<slug>`. Slug: lowercase the title, turn punctuation into spaces (`calc.py` becomes the two words `calc` and `py`), drop the words a, an, the, to, of, and, for, with, keep the first 4 words that remain, join them with hyphens (nothing left means `task`).
 
 - **Order for the first node of a tree** (each step only after the previous one succeeded):
   1. Read `git show <base>:TODO.md` (a base without `TODO.md` means no claim). If the selected root's `State:` there names a branch, stop and report it. Record whether the selected root is absent from that committed base but present in the main checkout's uncommitted backlog; carry those edits into the claim. Never reuse a `todo/<ID>-…` branch that is not yours.

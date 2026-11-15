@@ -1125,6 +1125,29 @@ sed -n 1,6p "$p131/in/TODO.md" > "$p131/none/TODO.md"
 (cd "$p131/none" && printf 'project: x\n' | bash "$root/tools/todo-report.sh") | grep -q '>__PLAN__<' || r131="$r131 [the report script drops the placeholder without a plan doc]"
 rm -rf "$p131"
 if [ -z "$r131" ]; then ok "review round 2: the status page, a revise and a drop use the plan doc of a root, not only PROJECT.md (TASK-131)"; else bad "review round 2 (TASK-131):$r131"; fi
+# Round 3, the skills against the lint, the docs and this repository's own workflows: the core's I10 left out the redirect
+# outside the repository that the lint refuses and docs/REFERENCE.md lists; /todo-continue did not say whether a run goes on
+# after it finds a drained root that is not merged yet; /todo-init did not say that a new TODO.md follows the move to
+# TODO.legacy.md; a --worktree baseline ignored the FIX node that may start red; ci.md named action majors two or three
+# releases old. Two sentences that only repeated another always-loaded file made the room in the /todo-continue budget.
+r131=""
+has131 todo/SKILL.md 'output redirected to a path outside the repository'
+l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-001** · P1 · low · Rename a flag\n  - Done when: the flag is renamed; `npm test > ../out.txt`\n' > "$l131/TODO.md"
+(cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I10.*redirected outside the repository' || r131="$r131 [the lint no longer refuses a redirect outside the repository]"
+rm -rf "$l131"
+has131 todo-continue/SKILL.md 'without it, put its merge commands in the report and go on selecting'
+has131 todo-init/SKILL.md 'the new `TODO.md` is then created as above'
+has131 todo/reference/git-flow-edge.md 'the node may not start red by `/todo-continue` step 3'
+not131 todo/reference/git-flow.md 'The base branch is defined in the core'; not131 todo/reference/verification.md 'An attempt and the 3-attempt limit'
+for a in checkout setup-node setup-python setup-java setup-go; do
+  v131="$(grep -o "actions/$a@v[0-9]*" "$root/plugin/skills/todo/reference/ci.md" | sort -u | tr '\n' ' ')"
+  [ "$v131" = "$(grep -o "actions/$a@v[0-9]*" "$root/docs/TOOLS.md" | sort -u | tr '\n' ' ')" ] && [ -n "$v131" ] || r131="$r131 [ci.md and docs/TOOLS.md name different versions of actions/$a: $v131]"
+  # An action this repository's own workflows use is not older in ci.md than the major they pin (the "# vN" comment).
+  w131="$(grep -ho "actions/$a@[0-9a-f]* # v[0-9]*" "$root"/.github/workflows/*.yml | sed 's/.*# v//' | sort -n | tail -1)"
+  [ -z "$w131" ] || [ "${v131#*@v}" -ge "$w131" ] 2>/dev/null || r131="$r131 [ci.md recommends $v131, older than the v$w131 this repository's workflows use]"
+done
+has131 todo/reference/ci.md "write the version they use"
+if [ -z "$r131" ]; then ok "review round 3: I10 names the redirect, a drained unmerged root does not end the run, and ci.md keeps up with the actions this repository uses (TASK-131)"; else bad "review round 3 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

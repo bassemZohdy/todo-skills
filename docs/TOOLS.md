@@ -143,7 +143,7 @@ One entrypoint, `.todo/check.sh`, runs the backlog lint and the project's tests.
    | Other CI (`Jenkinsfile`, `azure-pipelines.yml`, `.circleci/`, …) | Nothing; the one step to add is printed: `bash .todo/check.sh` |
    | No CI and no `origin` on `github.com` | The local fallback |
 
-   The GitHub workflow runs on `push` to the base and on `pull_request` with `permissions: contents: read`, using `actions/checkout@v4` and the setup step for the runtime: `actions/setup-node@v4` (`package.json`), `actions/setup-python@v5` (Python markers or a `python`/`pytest`/`uv` test command), `actions/setup-java@v4` with Temurin 21 (`pom.xml`, `build.gradle`), `actions/setup-go@v5` (`go.mod`), none for Cargo, Make or plain bash.
+   The GitHub workflow runs on `push` to the base and on `pull_request` with `permissions: contents: read`, using `actions/checkout@v7` and the setup step for the runtime: `actions/setup-node@v7` (`package.json`), `actions/setup-python@v7` (Python markers or a `python`/`pytest`/`uv` test command), `actions/setup-java@v6` with Temurin 21 (`pom.xml`, `build.gradle`), `actions/setup-go@v7` (`go.mod`), none for Cargo, Make or plain bash. These are the majors current on 2026-11-15; when the repository's other workflows already use one of these actions, the skill writes the version they use.
 
 4. **Local fallback:** a git `pre-push` hook (`.git/hooks/pre-push`, not versioned) that runs `bash .todo/check.sh` and refuses the push when it fails. An existing hook is never overwritten; when the hook cannot be written, its two lines and the `chmod +x` command are printed for you.
 

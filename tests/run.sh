@@ -1112,7 +1112,7 @@ if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc ass
 # PROJECT.md even when the root had its own plan doc, where /todo-plan --revise writes its Revisions line.
 r131=""
 has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each of those under a line `----- <path> -----`'
-has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(the changed root's own, else \`PROJECT.md\`)"
+has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(named by the root's \`Ref:\`, else \`PROJECT.md\`)"
 has131 todo-update/SKILL.md "when the node's root has its own plan doc"; has131 todo-update/SKILL.md "the root's own doc first"
 p131="$(mktemp -d)"; mkdir -p "$p131/in/docs/plans" "$p131/none"
 printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **FEAT-001** · P1 · mid · Add a parser\n  - Done when: it parses; `npm test`\n  - Links: Ref: docs/plans/FEAT-001-add-parser.md#goal\n- [ ] **FEAT-002** · P1 · mid · Add a printer\n  - Done when: it prints; `npm test`\n  - Links: Ref: docs/plans/../../outside.md · Depends: FEAT-001\n' > "$p131/in/TODO.md"
@@ -1234,7 +1234,12 @@ has131 todo-update/SKILL.md 'Then run the invariant check, before anything is ch
 has131 todo/SKILL.md 'the entries of one list have no blank line between them'
 has131 todo-plan/SKILL.md 'after the last of Goal and Scope that exists (else first), as one bullet per dropped item (ID, title, reason)'
 not131 todo-continue/SKILL.md 'Adjacent findings go to the report'
-if [ -z "$r131" ]; then ok "review round 10: four sentences that two or more agent reports named say what is meant (TASK-132)"; else bad "review round 10 (TASK-132):$r131"; fi
+# Round 11, named twice or more by the four confirmation runs: how /todo-update blocks a node that has no State, which root's plan
+# doc a drop uses, and where the baseline of a no-git run is taken.
+has131 todo-update/SKILL.md 'a node without `State:` gets it as its last field line, after `Links:`'
+has131 todo-continue/SKILL.md 'before its branch exists (no git: in the working folder)'
+has131 todo-plan/SKILL.md "(named by the root's \`Ref:\`, else \`PROJECT.md\`)"
+if [ -z "$r131" ]; then ok "review rounds 10 and 11: seven sentences that two or more agent reports named say what is meant (TASK-132)"; else bad "review round 10 (TASK-132):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

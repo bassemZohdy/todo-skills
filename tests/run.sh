@@ -1222,7 +1222,10 @@ has131 todo-continue/SKILL.md '(lint warning W3; `python -m unittest`'; not131 t
 has131 todo-continue/SKILL.md 'carry the ID: in a docstring or comment when `Done when` already names the test (a test id, class or file), otherwise in the test name.'
 has131 todo/reference/git-flow.md 'from the main checkout, which must be clean, backlog files included'
 has131 todo-plan/SKILL.md 'could be reused); otherwise a revise creates no plan doc.'; not131 todo-plan/SKILL.md 'step 4 covers a drop'
-if [ -z "$r131" ]; then ok "review round 8: four sentences a second batch of agents called unclear say what is meant (TASK-131)"; else bad "review round 8 (TASK-131):$r131"; fi
+# Round 9, five more agents on the text after round 8 (all passed): nothing new of substance. One phrase could be misread,
+# "the branch named after `from`", which meant the branch name that follows the word from in State.
+has131 todo-continue/SKILL.md 'the branch that follows `from` in its `State:`'; not131 todo-continue/SKILL.md 'named after `from`'
+if [ -z "$r131" ]; then ok "review rounds 8 and 9: five sentences later batches of agents called unclear say what is meant (TASK-131)"; else bad "review rounds 8 and 9 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

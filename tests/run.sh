@@ -545,7 +545,7 @@ for s in 'the next run asks for the approval (step 6)' 'at once when the failure
 if [ -z "$f14_bad" ]; then ok "the plan stop, the breakdown and the block answer what the first agent runs asked (FIX-114)"; else bad "plan stop, breakdown, block (FIX-114):$f14_bad"; fi
 # FIX-115: six sentences that two or more reports on the cut text called unclear (same summary, "What the reports say on T5").
 f15_bad=""; f15_sk="$root/plugin/skills"
-for s in 'already names the test' 'the `[x]` node the core check found' 'switch to it unless it is checked out' 'without git also `files:`'; do grep -qF -- "$s" "$f15_sk/todo-continue/SKILL.md" || f15_bad="$f15_bad todo-continue('$s')"; done
+for s in 'already names the test' 'the `[x]` node that core "Interrupted work comes first" found' 'switch to it unless it is checked out' 'without git also `files:`'; do grep -qF -- "$s" "$f15_sk/todo-continue/SKILL.md" || f15_bad="$f15_bad todo-continue('$s')"; done
 for s in 'a `Tests:` inside a sentence counts as that line' 'or when both hold:'; do grep -qF -- "$s" "$f15_sk/todo-init/SKILL.md" || f15_bad="$f15_bad todo-init('$s')"; done
 grep -qF -- 'as in (feat!) at the start of an entry' "$f15_sk/todo-release/SKILL.md" || f15_bad="$f15_bad todo-release(breaking-change marker)"
 if [ -z "$f15_bad" ]; then ok "six sentences that reports called unclear say what is meant (FIX-115)"; else bad "unclear sentences (FIX-115):$f15_bad"; fi
@@ -1112,7 +1112,7 @@ if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc ass
 # PROJECT.md even when the root had its own plan doc, where /todo-plan --revise writes its Revisions line.
 r131=""
 has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each of those under a line `----- <path> -----`'
-has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(the changed root's own, else \`PROJECT.md\`)"
+has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(named by the root's \`Ref:\`, else \`PROJECT.md\`)"
 has131 todo-update/SKILL.md "when the node's root has its own plan doc"; has131 todo-update/SKILL.md "the root's own doc first"
 p131="$(mktemp -d)"; mkdir -p "$p131/in/docs/plans" "$p131/none"
 printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **FEAT-001** · P1 · mid · Add a parser\n  - Done when: it parses; `npm test`\n  - Links: Ref: docs/plans/FEAT-001-add-parser.md#goal\n- [ ] **FEAT-002** · P1 · mid · Add a printer\n  - Done when: it prints; `npm test`\n  - Links: Ref: docs/plans/../../outside.md · Depends: FEAT-001\n' > "$p131/in/TODO.md"
@@ -1211,7 +1211,7 @@ has131 todo-continue/SKILL.md "No git: 4.1's review offer, then 4.2 and 4.3 (a)-
 has131 todo/SKILL.md '`reference/lanes.md` (a `/todo-continue` lane flag)'
 has131 todo-add/SKILL.md 'A single new leaf needs no confirmation; a new lane line does.'
 has131 todo-add/SKILL.md "Write only tasks that come from the user's request."; not131 todo-add/SKILL.md 'Nothing enters TODO.md unless'
-has131 todo-plan/SKILL.md 'placed by the order of Plan step 3'
+# (round 10 replaced the wording of this one, see below)
 has131 todo-report/SKILL.md '(`PROJECT.md` gets none)'
 if [ -z "$r131" ]; then ok "review round 7: ten sentences that fresh agents called unclear say what is meant (TASK-131)"; else bad "review round 7 (TASK-131):$r131"; fi
 # Round 8, seven agents again on the text after round 7 (all passed): none raised a round 7 sentence the same way. Four
@@ -1226,6 +1226,20 @@ has131 todo-plan/SKILL.md 'could be reused); otherwise a revise creates no plan 
 # "the branch named after `from`", which meant the branch name that follows the word from in State.
 has131 todo-continue/SKILL.md 'the branch that follows `from` in its `State:`'; not131 todo-continue/SKILL.md 'named after `from`'
 if [ -z "$r131" ]; then ok "review rounds 8 and 9: five sentences later batches of agents called unclear say what is meant (TASK-131)"; else bad "review rounds 8 and 9 (TASK-131):$r131"; fi
+# Round 10 (TASK-132), the sentences that two or more of the 23 agent reports named and rounds 7 to 9 had not changed: "first"
+# without an anchor in /todo-update, the check that finds an interrupted merge, where a created Out of scope section goes
+# and what it holds, and the blank lines of a created CHANGELOG heading against "no blank line between entries".
+r131=""
+has131 todo-update/SKILL.md 'Then run the invariant check, before anything is changed.'; not131 todo-update/SKILL.md 'Run the invariant check first.'
+has131 todo/SKILL.md 'the entries of one list have no blank line between them'
+has131 todo-plan/SKILL.md 'after the last of Goal and Scope that exists (else first), as one bullet per dropped item (ID, title, reason)'
+not131 todo-continue/SKILL.md 'Adjacent findings go to the report'
+# Round 11, named twice or more by the four confirmation runs: how /todo-update blocks a node that has no State, which root's plan
+# doc a drop uses, and where the baseline of a no-git run is taken.
+has131 todo-update/SKILL.md 'a node without `State:` gets it as its last field line, after `Links:`'
+has131 todo-continue/SKILL.md 'before its branch exists (no git: in the working folder)'
+has131 todo-plan/SKILL.md "(named by the root's \`Ref:\`, else \`PROJECT.md\`)"
+if [ -z "$r131" ]; then ok "review rounds 10 and 11: seven sentences that two or more agent reports named say what is meant (TASK-132)"; else bad "review round 10 (TASK-132):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

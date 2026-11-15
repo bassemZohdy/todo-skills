@@ -112,7 +112,7 @@ FEAT-129 tested `tools/todo-flow.sh`, an optional script that makes a node's cla
 
 ### pi runs on the text after a review in rounds (2026-11-15)
 
-TASK-131 reviewed the text of all nine skills and their reference files in rounds, fixing contradictions, stale pointers and gaps and pinning each fix with a check. Fresh pi agents (GLM 5.3) then ran the changed text in three batches, 23 runs over 15 scenarios, among them the new `no-backlog` (a command stops without a `TODO.md`) and `drained-unmerged` (a root drained without `--merge` does not end the next run): all 23 passed on the first try. What the agents called unclear fed three more rounds, which changed fifteen sentences. Details, what was left as it is and the limits: [docs/evals/pi-glm-2026-11-15-skill-review/summary.md](evals/pi-glm-2026-11-15-skill-review/summary.md).
+TASK-131 reviewed the text of all nine skills and their reference files in rounds, fixing contradictions, stale pointers and gaps and pinning each fix with a check. Fresh pi agents (GLM 5.3) then ran the changed text in three batches, 32 runs over 15 scenarios in five batches, among them the new `no-backlog` (a command stops without a `TODO.md`) and `drained-unmerged` (a root drained without `--merge` does not end the next run): all 32 passed on the first try. What the agents called unclear fed five more rounds, which changed twenty-two sentences, until a batch raised nothing that met the rule. Details, what was left as it is and the limits: [docs/evals/pi-glm-2026-11-15-skill-review/summary.md](evals/pi-glm-2026-11-15-skill-review/summary.md).
 
 ### Limits of the earlier by-hand runs
 

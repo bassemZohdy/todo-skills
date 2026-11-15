@@ -4,7 +4,7 @@
 
 FEAT-129 asked whether a script can cut the model calls and tokens of a todo-skills run. Git commands and edits of `TODO.md` and `CHANGELOG.md` were about half of the calls in [the earlier measurement](../token-cost-2026-11-14.md), and wording alone did not reduce them ([TASK-120](../pi-glm-2026-11-14-batched-steps/summary.md)). The candidate is `tools/todo-flow.sh`, an optional script with three commands (`start`, `complete`, `drain`) that make the same branches, commits and backlog lines as the skill text, one call each. `/todo-continue` uses it when the project has `.todo/todo-flow.sh` and works as before without it.
 
-## Result: the targets were not met, and the helper is not merged
+## Result: the targets were not met
 
 The targets were set before the runs: median model calls at least 25% lower, median uncached input plus output tokens at least 30% lower, no fewer PASS outcomes, and no scenario with a higher median call count.
 
@@ -19,7 +19,7 @@ The targets were set before the runs: median model calls at least 25% lower, med
 | First-attempt PASS | 18 of 18 | 18 of 18 | |
 | Final outcome PASS | 18 of 18 | 18 of 18 | |
 
-Model calls fell by 10%, not 25%. Uncached input plus output rose by 5% where the target was a 30% fall. `6-ambiguous` used more calls with the helper (median 12 to 14). Correctness did not change. By the rule set beforehand the current design stays and the change is dropped.
+Model calls fell by 10%, not 25%. Uncached input plus output rose by 5% where the target was a 30% fall. `6-ambiguous` used more calls with the helper (median 12 to 14). Correctness did not change. By the rule set beforehand the change would have been dropped. The owner chose to merge the helper anyway, as an optional tool, after seeing these numbers (see "The decision" below).
 
 | Scenario | Calls, baseline | Calls, helper | Median | Uncached input plus output, baseline | With the helper | Median |
 |---|---|---|---|---|---|---|
@@ -79,7 +79,11 @@ Every refusal left the repository unchanged and the agent then followed the step
 - A helper script removes most bookkeeping calls safely: the same commits, no failed run, no refusal that left a mess. It is worth about three model calls and 16% of the (mostly cached) input of a small task, and nothing in the tokens charged at full rate.
 - The bookkeeping was never the larger part of a small run. Half of the calls are setup, and the rest is reading, editing and testing code.
 - The saving would be larger on a tree with many nodes, since each node saves about seven calls and the script is read once. No scenario here has more than one or two nodes, so that is an estimate, not a result.
-- The helper stays on its branch, unmerged. The rows of both batches are published either way.
+- The rows of both batches are published either way.
+
+## The decision
+
+The helper missed both targets, and the test's own rule said to drop it. The owner merged it anyway as an optional script: it changes nothing for a project that does not copy it, it made no run fail, and it saves bookkeeping calls on every node. Read the numbers above as its measured effect on small tasks, not as a claim that it makes a run cheaper: on the tokens charged at full rate it does not.
 
 ## Limits
 

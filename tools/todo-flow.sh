@@ -104,7 +104,7 @@ C() {   # <entry> <heading>: the CHANGELOG on stdin with the entry first under "
     }'
 }
 commit() {   # <subject> <body> [path...]: lints, then commits the paths and the changed backlog files by explicit path
-  local subj="$1" body="$2" f p=(); shift 2; for f in "$@"; do p+=("$f"); done
+  local subj="$1" body="$2" f p=(); shift 2; for f in ${1+"$@"}; do p+=("$f"); done
   while IFS= read -r f; do [ -z "$f" ] || p+=("$f"); done <<EOF
 $(backlog)
 EOF
@@ -127,7 +127,7 @@ for b in main master trunk develop; do [ -n "$base" ] || ! has "$b" || base="$b"
 st="$(Q "$id" state)"; nb="$(printf '%s\n' "$st" | branch_of)"
 case "$cmd" in
 start)
-  bl="$*"; bl="${bl% passing}"; case "$bl" in none|red:\ ?*) ;; *[!0-9]*|"") refuse "the baseline must be <n>, none or red: <ids>" ;; *) bl="$bl passing" ;; esac
+  bl="${*-}"; bl="${bl% passing}"; case "$bl" in none|red:\ ?*) ;; *[!0-9]*|"") refuse "the baseline must be <n>, none or red: <ids>" ;; *) bl="$bl passing" ;; esac
   [ "$m" = " " ] || refuse "$id is not an open [ ] task"
   grep -q '^ *- \[/\] \*\*' TODO.md && refuse "another task is active [/]"
   Q "$id" kids | grep -qv ' x$' && refuse "$id has open children"
@@ -158,16 +158,16 @@ start)
 complete)
   subj=""; body="Refs: $id"; while [ $# -gt 0 ]; do case "$1" in -m) subj="${2-}"; shift; shift ;; -b) body="$body$nl${2-}"; shift; shift ;; --) shift; break ;; *) refuse "unknown option $1 (-m, -b, --)" ;; esac; done
   [ -n "$subj" ] || refuse "complete needs -m '<type>(<scope>): <title>'"
-  for f in "$@"; do [ -e "$f" ] || git ls-files --error-unmatch -- "$f" >/dev/null 2>&1 || refuse "no such path: $f"; done
+  for f in ${1+"$@"}; do [ -e "$f" ] || git ls-files --error-unmatch -- "$f" >/dev/null 2>&1 || refuse "no such path: $f"; done
   [ "$m" = "/" ] || refuse "$id is not the active [/] task"
   [ "$cur" = "$nb" ] || refuse "$id works on ${nb:-no branch}, and $cur is checked out"
   Q "$id" kids | grep -qv ' x$' && refuse "$id has open children"
   if [ "$id" != "$root" ]; then   # a child: [x], its commit, the merge into its parent's branch
     from="$(printf '%s\n' "$st" | sed -nE 's/^.* from ([^ ;]+).*$/\1/p')"; has "$from" || refuse "the parent's branch ${from:-?} does not exist"
-    edit "$id" set x -; commit "$subj" "$body" "$@"; git switch -q "$from" && git merge -q --no-ff -m "Merge $id into ${id%.*}" "$nb" || stop "the merge of $nb into $from did not finish: resolve it as reference/git-flow-edge.md, Git conflicts, says, then git commit --no-edit and git branch -d $nb"
+    edit "$id" set x -; commit "$subj" "$body" ${1+"$@"}; git switch -q "$from" && git merge -q --no-ff -m "Merge $id into ${id%.*}" "$nb" || stop "the merge of $nb into $from did not finish: resolve it as reference/git-flow-edge.md, Git conflicts, says, then git commit --no-edit and git branch -d $nb"
     git branch -q -d "$nb" || stop "could not delete $nb"
   else   # a root: its commit, then the refresh from the base
-    commit "$subj" "$body" "$@"; h1="$(git rev-parse HEAD)"
+    commit "$subj" "$body" ${1+"$@"}; h1="$(git rev-parse HEAD)"
     git merge -q -m "Merge $base into $root" "$base" || stop "the refresh from $base did not finish: resolve it as reference/git-flow-edge.md, Git conflicts, says, then git commit --no-edit and rerun the checks"
     if [ "$(git rev-parse HEAD)" = "$h1" ]; then echo "refresh: $base brought nothing"; else echo "refresh: $base brought changes: rerun Done when and the regression before the drain"; fi
   fi

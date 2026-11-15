@@ -41,8 +41,9 @@ mk() {
 MD
   git add -A && git commit -qm "chore: project" || exit 1
   # shellcheck disable=SC2016  # the backticks are Markdown, not a command substitution
-  sed -i.bak 's/^- \[ \] \*\*FEAT-002\*\*/- [ ] **FEAT-001** · P0 · low · Add a subtract function to `calc.py`\n  - Done when: subtract is covered; `python3 -m unittest discover -s tests`\n&/' TODO.md && rm -f TODO.md.bak
+  awk '/^- \[ \] \*\*FEAT-002\*\*/ { print "- [ ] **FEAT-001** · P0 · low · Add a subtract function to `calc.py`"; print "  - Done when: subtract is covered; `python3 -m unittest discover -s tests`" } { print }' TODO.md > TODO.md.new && mv TODO.md.new TODO.md   # awk, not sed: BSD sed writes no newline for \n
 }
+crlf() { awk '{ printf "%s\r\n", $0 }' "$1" > "$1.new" && mv "$1.new" "$1"; }   # the file with CRLF line endings, on every sed
 fl() { bash .todo/todo-flow.sh "$@" 2>&1; }
 snap() { printf '%s|%s|%s|%s' "$(git rev-parse HEAD)" "$(git symbolic-ref --short HEAD)" "$(git for-each-ref --format='%(refname)%(objectname)' refs/heads | tr '\n' ' ')" "$(git status --porcelain | tr '\n' ' ')"; }
 subjects() { git log --reverse --format=%s "$1" | tr '\n' '|'; }
@@ -112,7 +113,7 @@ out="$(fl start FEAT-001 1)"; rc=$?
   && printf '%s' "$out" | grep -q "Failed fast-forward" && ok "a failed fast-forward stops on the base, keeps the claim branch and names the recovery rule" || bad "failed fast-forward: rc=$rc $out on $(git symbolic-ref --short HEAD)"
 
 # A CRLF backlog keeps its line endings, and TODO_BASE and the README Base: line choose the base.
-mk "$tmp/f"; sed -i.bak 's/$/\r/' TODO.md && rm -f TODO.md.bak; git switch -q -c develop; fl start FEAT-001 2 >/dev/null; rc=$?
+mk "$tmp/f"; crlf TODO.md; git switch -q -c develop; fl start FEAT-001 2 >/dev/null; rc=$?
 [ "$rc" -eq 2 ] && ok "without a Base: line the base is main, so a start on develop is refused" || bad "base detection: rc=$rc"
 out="$(TODO_BASE=develop bash .todo/todo-flow.sh start FEAT-001 2 2>&1)"; rc=$?
 [ "$rc" -eq 0 ] && [ "$(git log -1 --format=%s develop)" = "chore(backlog): claim FEAT-001 on todo/FEAT-001-add-subtract-function-calc" ] && [ "$(tr -cd '\r' < TODO.md | wc -c)" -eq "$(tr -cd '\n' < TODO.md | wc -c)" ] \

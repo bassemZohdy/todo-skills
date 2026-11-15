@@ -1097,7 +1097,7 @@ has131 todo/reference/lanes.md 'goes to item 4'; not131 todo/reference/lanes.md 
 has131 todo/reference/lanes.md 'an "item" is one of the numbered items below'
 has131 todo/reference/deliverables.md '"Command safety" in `reference/verification.md`'; not131 todo/reference/deliverables.md 'rules above'
 has131 todo/reference/review.md 'a plan made inline has none'; has131 todo/reference/review.md 'no plan doc: the reply'
-has131 todo-continue/SKILL.md "No git: item 1's review offer, items 2 and 3 (a)-(c)."
+has131 todo-continue/SKILL.md "review offer, then 4.2 and 4.3 (a)-(c)."
 has131 todo-continue/SKILL.md '(not with `--worktree` or `--all-lanes`)'
 for f in todo/SKILL.md todo-add/SKILL.md todo-update/SKILL.md; do has131 "$f" 'a lowercase letter, then lowercase letters, digits or dashes'; done
 has131 todo-update/SKILL.md 'Complexity, Size, Priority or Lane in place'
@@ -1111,7 +1111,7 @@ if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc ass
 # a root, which is the only kind /todo-plan still offers; a revise read only PROJECT.md; and a drop logged the ID in
 # PROJECT.md even when the root had its own plan doc, where /todo-plan --revise writes its Revisions line.
 r131=""
-has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each after a line `----- <path> -----`'
+has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each of those under a line `----- <path> -----`'
 has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(the changed root's own, else \`PROJECT.md\`)"
 has131 todo-update/SKILL.md "when the node's root has its own plan doc"; has131 todo-update/SKILL.md "the root's own doc first"
 p131="$(mktemp -d)"; mkdir -p "$p131/in/docs/plans" "$p131/none"
@@ -1135,7 +1135,7 @@ has131 todo/SKILL.md 'output redirected to a path outside the repository'
 l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-001** · P1 · low · Rename a flag\n  - Done when: the flag is renamed; `npm test > ../out.txt`\n' > "$l131/TODO.md"
 (cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I10.*redirected outside the repository' || r131="$r131 [the lint no longer refuses a redirect outside the repository]"
 rm -rf "$l131"
-has131 todo-continue/SKILL.md 'without it, put its merge commands in the report and go on selecting'
+has131 todo-continue/SKILL.md 'in the report and go on selecting'
 has131 todo-init/SKILL.md 'the new `TODO.md` is then created as above'
 has131 todo/reference/git-flow-edge.md 'the node may not start red by `/todo-continue` step 3'
 not131 todo/reference/git-flow.md 'The base branch is defined in the core'; not131 todo/reference/verification.md 'An attempt and the 3-attempt limit'
@@ -1196,6 +1196,24 @@ if bash "$root/tests/trials/setup.sh" "$d131/repo" drained-unmerged >/dev/null 2
 else r131="$r131 [drained-unmerged: setup failed]"; fi
 rm -rf "$d131"
 if [ -z "$r131" ]; then ok "review round 6: the trial scenario drained-unmerged checks that a run names the unmerged root and goes on to the next one (TASK-131)"; else bad "review round 6 (TASK-131):$r131"; fi
+# Round 7, what eleven fresh pi agents (GLM 5.3) called unclear on the text after round 6, all of them passing: two reports
+# each on the low complexity example that was phrased for fixes, on a root's marker before its drain, and on which tree the
+# interrupted-merge check means; one each on two sentences the earlier rounds wrote (the drained root sharing a bullet with
+# the interrupted drain, "item 1" under item 4), on lanes.md read for /todo-add --lane, on a lone leaf that adds a lane
+# line, on a sentence that read like a licence to create TODO.md, on where Out of scope goes without a Scope section, and
+# on which plan docs get the path line on the status page.
+r131=""
+has131 todo/SKILL.md 'a guard or small function the task line fully states'; not131 todo/SKILL.md 'whose fix the task line states'
+has131 todo-continue/SKILL.md '(A root stays `[/]`: item 4 drains it.)'
+has131 todo-continue/SKILL.md "(on a \`todo/\` branch, for that branch's tree; core"
+has131 todo-continue/SKILL.md '   - **Drained root branch not yet merged into the base:** with `--merge` go to 10.4.4, report and stop; without it, put the merge commands of 10.4.4 in the report and go on selecting.'
+has131 todo-continue/SKILL.md "No git: 4.1's review offer, then 4.2 and 4.3 (a)-(c)."
+has131 todo/SKILL.md '`reference/lanes.md` (a `/todo-continue` lane flag)'
+has131 todo-add/SKILL.md 'A single new leaf needs no confirmation; a new lane line does.'
+has131 todo-add/SKILL.md "Write only tasks that come from the user's request."; not131 todo-add/SKILL.md 'Nothing enters TODO.md unless'
+has131 todo-plan/SKILL.md 'placed by the order of Plan step 3'
+has131 todo-report/SKILL.md '(`PROJECT.md` gets none)'
+if [ -z "$r131" ]; then ok "review round 7: ten sentences that fresh agents called unclear say what is meant (TASK-131)"; else bad "review round 7 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

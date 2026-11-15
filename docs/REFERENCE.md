@@ -85,7 +85,7 @@ Complexity says how hard the reasoning is, not how big the change is, so an agen
 
 | Complexity | Meaning | Examples |
 |---|---|---|
-| `low` | Mechanical: the cause and the change are already known | Rename, docs, config, a guard or small function whose fix the task line states |
+| `low` | Mechanical: the cause and the change are already known | Rename, docs, config, a guard or small function the task line fully states |
 | `mid` | Ordinary work that needs some investigation or design (the default) | A new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | Concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 

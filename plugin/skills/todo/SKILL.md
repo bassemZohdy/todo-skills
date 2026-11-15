@@ -98,7 +98,7 @@ A node at level L (a root is level 0) has its header indented `2L` spaces and it
 
 | Complexity | Meaning | Examples |
 |---|---|---|
-| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function whose fix the task line states |
+| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function the task line fully states |
 | `mid` | Ordinary work that needs some investigation or design (the default) | a new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 
@@ -164,7 +164,7 @@ One entry per root. Parts in this order, each only when it applies: `Ref:` (the 
 
 Read only where a skill or another reference names them, from `reference/` (`../todo/reference/` from a command skill).
 
-- Loaded with their command: `reference/git-flow.md` and `reference/verification.md` (`/todo-continue`, `/todo-update --status in-progress`), `reference/done-when.md` (`/todo-add`, `/todo-plan`), `reference/lanes.md` (a lane flag), `reference/ci.md` (`/todo-init --ci`).
+- Loaded with their command: `reference/git-flow.md` and `reference/verification.md` (`/todo-continue`, `/todo-update --status in-progress`), `reference/done-when.md` (`/todo-add`, `/todo-plan`), `reference/lanes.md` (a `/todo-continue` lane flag), `reference/ci.md` (`/todo-init --ci`).
 - Read only when the pointer to them applies: `reference/git-flow-edge.md`, `reference/failures.md`, `reference/deliverables.md`, `reference/doc-drift.md`, `reference/plan-step.md`, `reference/routing.md`, and the optional `reference/rtm.md`, `reference/review.md` and `reference/clarify.md`.
 
 ## Invariants (every todo-* skill checks these first)

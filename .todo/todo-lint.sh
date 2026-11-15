@@ -11,7 +11,7 @@
 # Prints WARN lines (W1 presence-only check, W2 name-filtered tests, W3 unfamiliar runner, W4 piped test runner, W5 no negative case on a high or security node, W6 a command that may download and run remote code, W7 a flag that makes a runner execute no test, W8 a Ref path that does not exist, W9 a Lane that no Lanes section declares) that never change the exit code.
 # Exit codes: 0 all invariants hold, 1 violations found, 2 TODO.md not found.
 # --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
-todo_skills_version="0.5.1"
+todo_skills_version="0.6.0"
 if [ "${1:-}" = "--version" ]; then echo "todo-lint.sh $todo_skills_version"; exit 0; fi
 progress=0
 if [ "${1:-}" = "--progress" ]; then progress=1; shift; fi

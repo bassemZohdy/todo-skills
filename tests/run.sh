@@ -836,11 +836,11 @@ sv="$root/tests/set-version.sh"; svt="$(mktemp -d)"
 mkdir -p "$svt/tools" "$svt/plugin/.claude-plugin" "$svt/plugin/.codex-plugin" "$svt/.todo"
 cp "$root"/tools/todo-*.sh "$svt/tools/"; cp "$root/tools/todo-lint.sh" "$svt/.todo/todo-lint.sh"
 cp "$root/plugin/.claude-plugin/plugin.json" "$svt/plugin/.claude-plugin/"; cp "$root/plugin/.codex-plugin/plugin.json" "$svt/plugin/.codex-plugin/"
-cp "$root/README.md" "$svt/README.md"; printf '## [Unreleased]\n\n## [0.6.0] - 2026-12-01\n' > "$svt/CHANGELOG.md"
-if bash "$sv" 0.6 "$svt" >/dev/null 2>&1 || bash "$sv" v0.6.0 "$svt" >/dev/null 2>&1; then bad "set-version.sh accepted a malformed version"; else
-  if ! stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | grep -qv 'CHANGELOG heading' && ! grep -q '"version": *"0.6.0"' "$svt/plugin/.claude-plugin/plugin.json"; then ok "set-version.sh refuses a malformed version and changes nothing"; else bad "set-version.sh changed files for a malformed version"; fi
+cp "$root/README.md" "$svt/README.md"; printf '## [Unreleased]\n\n## [9.8.0] - 2026-12-01\n' > "$svt/CHANGELOG.md"
+if bash "$sv" 9.8 "$svt" >/dev/null 2>&1 || bash "$sv" v9.8.0 "$svt" >/dev/null 2>&1; then bad "set-version.sh accepted a malformed version"; else
+  if ! stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | grep -qv 'CHANGELOG heading' && ! grep -q '"version": *"9.8.0"' "$svt/plugin/.claude-plugin/plugin.json"; then ok "set-version.sh refuses a malformed version and changes nothing"; else bad "set-version.sh changed files for a malformed version"; fi
 fi
-if bash "$sv" 0.6.0 "$svt" >/dev/null 2>&1 && [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}")" ] && grep -qi 'version 0.6.0' "$svt/README.md" && cmp -s "$svt/.todo/todo-lint.sh" "$svt/tools/todo-lint.sh"; then ok "set-version.sh moves the manifests, README and every stamp to a new version in one step"; else bad "set-version.sh left a version unchanged: $(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | tr '\n' ';')"; fi
+if bash "$sv" 9.8.0 "$svt" >/dev/null 2>&1 && [ -z "$(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}")" ] && grep -qi 'version 9.8.0' "$svt/README.md" && cmp -s "$svt/.todo/todo-lint.sh" "$svt/tools/todo-lint.sh"; then ok "set-version.sh moves the manifests, README and every stamp to a new version in one step"; else bad "set-version.sh left a version unchanged: $(stampcheck "$svt/tools" "$svt/plugin" "$svt/CHANGELOG.md" "${stamped_tools[@]}" | tr '\n' ';')"; fi
 rm -rf "$svt"
 # Static analysis (TASK-073): the shell scripts in scope are shellcheck-clean, and a seeded unquoted variable fails the same check.
 if command -v shellcheck >/dev/null 2>&1; then

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-15
+
 ### Added
 
 - **FEAT-129** (feat): Add an optional helper script `tools/todo-flow.sh` that makes a node's lifecycle commits in one call per step. Copied to `.todo/todo-flow.sh`, its `start`, `complete` and `drain` commands make the tree claim, the fast-forward of the base, the branches, the start commit, the node commit with its merge into the parent (a root: the refresh from the base), the CHANGELOG entry, the drain commit and, with `--merge`, the merge into the base: the same commits and backlog lines `/todo-continue` otherwise makes one by one. `/todo-continue` uses it when the file exists and is unchanged without it. It decides nothing, refuses anything but the plain case before a file changes, and is the only script in `tools/` that writes. Measured with fresh pi + GLM 5.3 agents on 18 benchmark cells each way: the median model calls fell from 29 to 26 and the input tokens by 16%, the uncached input plus output did not fall, and 18 of 18 passed both times. That missed the targets set for it (25% and 30%); it was merged as an optional tool by the owner's decision (`docs/evals/pi-glm-2026-11-15-flow-helper/summary.md`). The token table of the benchmark now has one row per batch, not per calendar date. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/DEVELOPMENT.md, docs/FILES.md, docs/TOOLS.md, docs/evals/pi-glm-2026-11-15-flow-helper/summary.md, docs/evals/token-cost-2026-11-14.md, docs/trials.md. Includes: FEAT-129.1, FEAT-129.2, FEAT-129.3, FEAT-129.4, FEAT-129.5.
@@ -256,7 +258,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bassemZohdy/todo-skills/compare/dfb5ce1...v0.4.0

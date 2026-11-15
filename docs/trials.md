@@ -106,6 +106,10 @@ Claude Code then ran all 34 scenarios on that text (`claude -p`, Windows 11 with
 
 FEAT-125 (the optional `## 🛤️ Lanes` section of `TODO.md`) and TASK-126 (`/todo-plan` plans inside `TODO.md`, `/todo-init` only points to it) changed the text of five commands. Fresh pi agents (GLM 5.3) ran six scenarios on it, including the new `plan-inline` and `add-lane`: five passed, and `plan-inline` failed once on an assertion that required three tasks where the agent correctly wrote one leaf; it passed after the assertion and one sentence of `/todo-plan` were corrected. Details, the points the agents found unclear and the limits: [docs/evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md](evals/pi-glm-2026-11-14-lanes-inline-planning/summary.md).
 
+### pi runs with a helper script for the bookkeeping (2026-11-15)
+
+FEAT-129 tested `tools/todo-flow.sh`, an optional script that makes a node's claim, start, completion and drain commits in one call each. Fresh pi agents (GLM 5.3) ran the 18 benchmark cells of the `todo-skills` arm with and without it: 18 of 18 passed both times, the median model calls fell from 29 to 26 and the uncached input plus output did not fall, against targets of 25% and 30%. Twelve lifecycle scenarios passed on the same text, one of them without the helper. The helper was not merged. Details and limits: [docs/evals/pi-glm-2026-11-15-flow-helper/summary.md](evals/pi-glm-2026-11-15-flow-helper/summary.md).
+
 ### Limits of the earlier by-hand runs
 
 - The executor of the three runs in the first table was not an independent fresh-context agent: the scenarios were executed by hand against the skill text. They show the lifecycle is executable and the assertions are satisfiable, not that an unprimed agent finds the same path. The fresh-agent runs above provide later evidence for Claude Code and Codex.

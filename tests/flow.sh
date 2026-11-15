@@ -49,6 +49,8 @@ subjects() { git log --reverse --format=%s "$1" | tr '\n' '|'; }
 lintok() { bash .todo/todo-lint.sh >/dev/null 2>&1; }
 
 if [ ! -f "$flow" ]; then bad "tools/todo-flow.sh is missing"; printf '\n%d passed, %d failed\n' "$pass" "$fail"; exit 1; fi
+# One read: an agent that reads a script 200 lines at a time needs a single call for it (a pilot run needed two for 258 lines).
+[ "$(wc -l < "$flow")" -le 200 ] && ok "the helper is at most 200 lines, one read for an agent" || bad "the helper has $(wc -l < "$flow") lines, more than one 200-line read"
 
 # start, leaf root: a pending root on the base is claimed, published by a fast-forward and started, in the prescribed commits.
 mk "$tmp/a"; out="$(fl start FEAT-001 1)"; rc=$?
@@ -60,7 +62,7 @@ rb=todo/FEAT-001-add-subtract-function-calc
   && ok "the base gained exactly the claim commit, with the root still [ ] and its claim State" || bad "start leaf root: the base is $(git log -1 --format=%s main)"
 grep -A2 '^- \[/\] \*\*FEAT-001\*\*' TODO.md | grep -qx "  - State: attempts 0/3; baseline 1 passing; branch $rb from main; next: read docs" && [ -z "$(git status --porcelain)" ] && lintok \
   && ok "the node is [/] with the start State, the tree is clean and the lint passes" || bad "start leaf root: $(grep -A2 'FEAT-001\*\*' TODO.md) / $(git status --porcelain)"
-printf '%s\n' "$out" | grep -q "chore(backlog): start FEAT-001" && printf '%s\n' "$out" | grep -qx "on $rb" && ok "start reports its commits and the checked-out branch" || bad "start report: $out"
+printf '%s\n' "$out" | grep -q "chore(backlog): start FEAT-001" && printf '%s\n' "$out" | grep -qx "now on $rb, tree clean; todo branches: $rb" && ok "start reports its commits, the checked-out branch, a clean tree and the todo branches" || bad "start report: $out"
 
 # start, a grandchild of an unclaimed tree: claim with "build children", the branch chain, one start commit holding the ancestor State.
 mk "$tmp/b"; git checkout -q -- TODO.md; out="$(fl start FEAT-002.1.1 none)"; rc=$?
@@ -151,6 +153,8 @@ want='- **FEAT-002** (feat): Add the Power, Root and Log functions for the calcu
   && [ "$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" = "CHANGELOG.md TODO.md " ] && ok "the drain removes the subtree and commits both backlog files with Refs and Includes" || bad "drain commit: $(body HEAD) / $(tail -3 TODO.md)"
 [ "$(git symbolic-ref --short HEAD)" = "$r2" ] && [ "$(git rev-parse main)" = "$mainsha" ] && printf '%s' "$out" | grep -qF "git switch main && git merge --no-ff -m \"Merge FEAT-002 into main\" $r2 && git branch -d $r2" \
   && ok "without --merge the drain stays on the root branch and prints the merge commands" || bad "drain without --merge: $out"
+printf '%s
+' "$out" | grep -qxF "entry: $want" && ok "drain prints the CHANGELOG entry it wrote" || bad "drain does not print its entry: $out"
 
 # A leaf FIX root: the base moves before the refresh, the entry goes under a new Fixed heading, and --merge lands it on the base.
 mk "$tmp/i"; git checkout -q -- TODO.md
@@ -170,6 +174,8 @@ want='- **FIX-003** (fix): Reject a division by zero in `divide`. Validated: `py
   && ok "a FIX entry opens a Fixed heading after Changed, keeps one final period, leaves the regression command out and names From" || bad "drain FIX entry: rc=$rc $(sed -n 5,13p CHANGELOG.md)"
 [ "$(git symbolic-ref --short HEAD)" = main ] && [ "$(git log -1 --format=%s)" = "Merge FIX-003 into main" ] && [ "$(parents HEAD)" = 2 ] && ! git show-ref -q --verify "refs/heads/$f3" && [ "$(git log -1 --format=%s HEAD^2)" = "chore(backlog): drain FIX-003" ] && [ "$(body HEAD^2)" = "Refs: FIX-003|" ] && ! grep -q FIX-003 TODO.md && grep -q 'FEAT-002' TODO.md && lintok \
   && ok "drain --merge merges the root --no-ff into the base, deletes its branch and leaves the other roots" || bad "drain --merge: on $(git symbolic-ref --short HEAD), $(git log -1 --format=%s)"
+printf '%s
+' "$out" | grep -qx "now on main, tree clean; todo branches: none" && ok "after --merge the report says the base is checked out, the tree is clean and no todo branch is left" || bad "drain --merge report: $out"
 
 # A TASK root takes its type from -t, and its entry is the first item of an existing heading; a CRLF CHANGELOG keeps CRLF.
 mk "$tmp/j"; git checkout -q -- TODO.md

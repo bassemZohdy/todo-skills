@@ -1054,6 +1054,15 @@ printf 'import sys\nprint("| a |")\n' > "$tkt/tests/benchmark/tokens.py"; printf
 printf 'mail me at someone@example.com. Costs $5.\n<!-- tokens:begin -->\n| b |\n<!-- tokens:end -->\n' > "$tkt/docs/evals/token-cost-2026-01-01.md"
 tk_t="$(tokcheck "$tkt")"; rm -rf "$tkt"
 if [ "$(printf '%s\n' "$tk_t" | grep -c '^TOK')" -eq 4 ]; then ok "the breakdown check fails a mail address, an unlabelled figure and a stale table"; else bad "the breakdown check missed a gap: $tk_t"; fi
+# FEAT-129.5: the token table has one row per batch, not per calendar date. The runs of an arm less than six hours apart
+# are one batch, dated by its first run: a batch that crosses midnight (UTC) stays one row, and two batches of one arm on
+# the same date are two rows, each with the hour of its first run.
+tkb="$(mktemp -d)"
+{ echo "run_id,date_utc,arm,scenario,agent,agent_version,model,isolation,first_outcome,final_outcome,attempts,agent_exit,verifier_exit,duration_s,input_tokens,output_tokens,cached_tokens,llm_calls,subagent_calls,evidence_sha256"
+  for t in 2026-01-01T01:00:00Z 2026-01-01T02:30:00Z 2026-01-01T20:00:00Z 2026-01-01T23:50:00Z 2026-01-02T00:10:00Z; do echo "r$t,$t,arm-a,s,pi,1,m,provisional,PASS,PASS,1,0,0,10,100,10,50,5,unavailable,x"; done
+  echo "r6,2026-01-01T03:00:00Z,arm-b,s,pi,1,m,provisional,PASS,PASS,1,0,0,10,100,10,50,5,unavailable,x"; } > "$tkb/r.csv"
+tkb_out="$(python3 "$root/tests/benchmark/tokens.py" "$tkb/r.csv" 2>&1 | sed 1,2d | cut -d'|' -f2-4 | tr -d ' ' | tr '\n' ';')"; rm -rf "$tkb"
+if [ "$tkb_out" = "2026-01-0101h|arm-a|2;2026-01-0120h|arm-a|3;2026-01-01|arm-b|1;" ]; then ok "the token table groups runs by batch: one row across midnight, two rows for two batches of an arm on one date (FEAT-129.5)"; else bad "token table batches (FEAT-129.5): $tkb_out"; fi
 # TASK-124: three trial assertions accept what Codex agents did while following the skill (2026-11-14): a Done when run from tests/, a test named with its ID, a report that says "working tree".
 ta="$root/tests/trials/assert.sh"
 if grep -qF '(cd tests && )?python3 -m unittest (tests\.)?test_calc' "$ta" && grep -qF 'def test_[a-z0-9_]*power' "$ta" && grep -qF 'clean|uncommitted|working.tree' "$ta"; then ok "assert.sh accepts a Done when run from tests/, a test named with its ID and a report that says working tree (TASK-124)"; else bad "assert.sh still rejects one of the three forms Codex used (TASK-124)"; fi

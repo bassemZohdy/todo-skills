@@ -60,7 +60,7 @@ For a `high` root, or one that touches security, data migration or concurrency, 
 
 - **Fresh-context reviewer:** a new subagent gets only the plan doc, the root and its children as written in `TODO.md`, and the `Ref` path. It reads and comments; it never edits files or runs tests. Without a subagent tool, the agent offers a review in a new session from the same files.
 - **External tool:** a design-review skill or tool the project already uses runs on the same inputs instead. This repository neither bundles nor requires one.
-- Accepted findings go through `--revise`; declined or open ones are recorded under Open questions.
+- Accepted findings go through `--revise`; declined or open ones are recorded under the plan doc's Open questions. A plan made inline has no plan doc: they stay in the reply and nothing is written.
 
 ## Root review (optional)
 

@@ -1107,6 +1107,24 @@ l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-00
 (cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I3.*a lowercase letter, then lowercase letters, digits or dashes' || r131="$r131 [the lint does not say how a lane name starts]"
 rm -rf "$l131"
 if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc assumptions agree across the skill files (TASK-131)"; else bad "review round 1 (TASK-131):$r131"; fi
+# Round 2, what planning inside TODO.md (TASK-126) left behind: the status page showed only PROJECT.md, never the plan doc of
+# a root, which is the only kind /todo-plan still offers; a revise read only PROJECT.md; and a drop logged the ID in
+# PROJECT.md even when the root had its own plan doc, where /todo-plan --revise writes its Revisions line.
+r131=""
+has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each after a line `----- <path> -----`'
+has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(the changed root's own, else \`PROJECT.md\`)"
+has131 todo-update/SKILL.md "when the node's root has its own plan doc"; has131 todo-update/SKILL.md "the root's own doc first"
+p131="$(mktemp -d)"; mkdir -p "$p131/in/docs/plans" "$p131/none"
+printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **FEAT-001** · P1 · mid · Add a parser\n  - Done when: it parses; `npm test`\n  - Links: Ref: docs/plans/FEAT-001-add-parser.md#goal\n- [ ] **FEAT-002** · P1 · mid · Add a printer\n  - Done when: it prints; `npm test`\n  - Links: Ref: docs/plans/../../outside.md · Depends: FEAT-001\n' > "$p131/in/TODO.md"
+printf 'the project plan\n' > "$p131/in/docs/plans/PROJECT.md"; printf 'the <b>root plan\n' > "$p131/in/docs/plans/FEAT-001-add-parser.md"
+printf 'an unlinked plan\n' > "$p131/in/docs/plans/FEAT-009-other.md"; printf 'outside the plans folder\n' > "$p131/outside.md"
+p131_out="$(cd "$p131/in" && printf 'project: x\n' | bash "$root/tools/todo-report.sh" | tr -d '\r' | tr '\n' '|')"
+case "$p131_out" in *'the project plan||----- docs/plans/FEAT-001-add-parser.md -----|the &lt;b>root plan|'*) ;; *) r131="$r131 [the report script does not add a root's plan doc after PROJECT.md]" ;; esac
+case "$p131_out" in *'an unlinked plan'*|*'outside the plans folder'*) r131="$r131 [the report script reads a plan doc no Ref names, or a path outside docs/plans]" ;; esac
+sed -n 1,6p "$p131/in/TODO.md" > "$p131/none/TODO.md"
+(cd "$p131/none" && printf 'project: x\n' | bash "$root/tools/todo-report.sh") | grep -q '>__PLAN__<' || r131="$r131 [the report script drops the placeholder without a plan doc]"
+rm -rf "$p131"
+if [ -z "$r131" ]; then ok "review round 2: the status page, a revise and a drop use the plan doc of a root, not only PROJECT.md (TASK-131)"; else bad "review round 2 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Fills template.html with TODO.md, CHANGELOG.md, docs/plans/PROJECT.md and META lines, encoded so text cannot
+# Fills template.html with TODO.md, CHANGELOG.md, the plan docs (docs/plans/PROJECT.md and each docs/plans/*.md that a
+# Ref: in TODO.md names) and META lines, encoded so text cannot
 # break out of the page's script blocks (& -> &amp;, < -> &lt;; the page decodes them).
 # Usage, from the repository root:  bash tools/todo-report.sh < meta.txt > docs/status.html
 #   meta.txt: one "key: value" per line (may be empty). Writes only to stdout. Needs bash and sed.
@@ -18,7 +19,16 @@ fill() {   # $1 placeholder, rest of line handled by caller
     __META__) printf '%s' "$meta" | enc ;;
     __TODO__) [ -f TODO.md ] && enc < TODO.md ;;
     __CHANGELOG__) [ -f CHANGELOG.md ] && enc < CHANGELOG.md ;;
-    __PLAN__) if [ -f docs/plans/PROJECT.md ]; then enc < docs/plans/PROJECT.md; else printf '__PLAN__'; fi ;;
+    __PLAN__) plan_n=0   # PROJECT.md first, then each docs/plans/*.md a Ref: in TODO.md names, under a line with its path
+      while IFS= read -r plan_p; do
+        [ -n "$plan_p" ] && [ -f "$plan_p" ] || continue
+        [ "$plan_n" = 0 ] || printf '\n'
+        [ "$plan_p" = docs/plans/PROJECT.md ] || printf -- '----- %s -----\n' "$plan_p"
+        enc < "$plan_p"; plan_n=$((plan_n + 1))
+      done <<EOF
+$( { echo docs/plans/PROJECT.md; grep -oE 'Ref: docs/plans/[A-Za-z0-9._-]+\.md' TODO.md | cut -c6-; } | awk '!seen[$0]++')
+EOF
+      [ "$plan_n" -gt 0 ] || printf '__PLAN__' ;;
   esac
 }
 while IFS= read -r line || [ -n "$line" ]; do

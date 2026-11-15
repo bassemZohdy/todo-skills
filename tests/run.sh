@@ -1214,6 +1214,15 @@ has131 todo-add/SKILL.md "Write only tasks that come from the user's request."; 
 has131 todo-plan/SKILL.md 'placed by the order of Plan step 3'
 has131 todo-report/SKILL.md '(`PROJECT.md` gets none)'
 if [ -z "$r131" ]; then ok "review round 7: ten sentences that fresh agents called unclear say what is meant (TASK-131)"; else bad "review round 7 (TASK-131):$r131"; fi
+# Round 8, seven agents again on the text after round 7 (all passed): none raised a round 7 sentence the same way. Four
+# older ones came up a second time or were new: W3 named without saying what it is, the "it" that must be clean before a root
+# merges, the test-name rule that put the exception last, and "a revise creates no plan doc" stated apart from its exception.
+r131=""
+has131 todo-continue/SKILL.md '(lint warning W3; `python -m unittest`'; not131 todo-continue/SKILL.md "the lint's W3 warning"
+has131 todo-continue/SKILL.md 'carry the ID: in a docstring or comment when `Done when` already names the test (a test id, class or file), otherwise in the test name.'
+has131 todo/reference/git-flow.md 'from the main checkout, which must be clean, backlog files included'
+has131 todo-plan/SKILL.md 'could be reused); otherwise a revise creates no plan doc.'; not131 todo-plan/SKILL.md 'step 4 covers a drop'
+if [ -z "$r131" ]; then ok "review round 8: four sentences a second batch of agents called unclear say what is meant (TASK-131)"; else bad "review round 8 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

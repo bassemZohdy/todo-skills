@@ -1083,6 +1083,149 @@ for w in start complete drain; do printf '%s\n' "$fh_t" | grep -q "todo-flow.sh 
 printf '%s\n' "$fh_t" | grep -q 'by hand' || fh_bad="$fh_bad [TOOLS.md: what a refusal means]"
 grep -q 'todo-flow.sh' "$root/README.md" || fh_bad="$fh_bad [README]"
 if [ -z "$fh_bad" ]; then ok "the skills, the tools page and the README describe the optional lifecycle helper and its fallback (FEAT-129.3)"; else bad "helper text (FEAT-129.3):$fh_bad"; fi
+# TASK-131: review rounds over the skill text. Each line pins one fix: a phrase a file under plugin/skills must hold (has131)
+# or must no longer hold (not131). One check per round, so a failure names the round and the phrase.
+r131=""
+has131() { tr -d '\r' < "$root/plugin/skills/$1" | grep -qF -- "$2" || r131="$r131 [$1 lacks: $2]"; }
+not131() { if tr -d '\r' < "$root/plugin/skills/$1" | grep -qF -- "$2"; then r131="$r131 [$1 still says: $2]"; fi; }
+# Round 1, pointers and names that disagreed between files: the coordinator's own items in lanes.md were called steps, which
+# the file reserves for /todo-continue; deliverables.md pointed "above" at rules that live in verification.md; the design
+# review assumed a plan doc, which an inline plan does not have; the no-git drain dropped the root review that review.md
+# describes for no git; the lane-name rule had three wordings; /todo-update's description left out Size; rtm.md let /todo-add
+# offer an RTM that /todo-add never offers; the helper sentence did not exclude the two modes that never switch the main checkout.
+has131 todo/reference/lanes.md 'goes to item 4'; not131 todo/reference/lanes.md 'goes to step 4'
+has131 todo/reference/lanes.md 'an "item" is one of the numbered items below'
+has131 todo/reference/deliverables.md '"Command safety" in `reference/verification.md`'; not131 todo/reference/deliverables.md 'rules above'
+has131 todo/reference/review.md 'a plan made inline has none'; has131 todo/reference/review.md 'no plan doc: the reply'
+has131 todo-continue/SKILL.md "review offer, then 4.2 and 4.3 (a)-(c)."
+has131 todo-continue/SKILL.md '(not with `--worktree` or `--all-lanes`)'
+for f in todo/SKILL.md todo-add/SKILL.md todo-update/SKILL.md; do has131 "$f" 'a lowercase letter, then lowercase letters, digits or dashes'; done
+has131 todo-update/SKILL.md 'Complexity, Size, Priority or Lane in place'
+has131 todo/reference/rtm.md '`/todo-add` never offers it'
+has131 todo-add/SKILL.md 'the next claim or start commit carries the backlog edit'
+l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-001** · P1 · low · Rename a flag\n  - Done when: the flag is renamed; `npm test`\n  - Links: Lane: 2fast\n' > "$l131/TODO.md"
+(cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I3.*a lowercase letter, then lowercase letters, digits or dashes' || r131="$r131 [the lint does not say how a lane name starts]"
+rm -rf "$l131"
+if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc assumptions agree across the skill files (TASK-131)"; else bad "review round 1 (TASK-131):$r131"; fi
+# Round 2, what planning inside TODO.md (TASK-126) left behind: the status page showed only PROJECT.md, never the plan doc of
+# a root, which is the only kind /todo-plan still offers; a revise read only PROJECT.md; and a drop logged the ID in
+# PROJECT.md even when the root had its own plan doc, where /todo-plan --revise writes its Revisions line.
+r131=""
+has131 todo-report/SKILL.md 'then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each of those under a line `----- <path> -----`'
+has131 todo-plan/SKILL.md "any doc a root's \`Ref:\` names"; has131 todo-plan/SKILL.md "(the changed root's own, else \`PROJECT.md\`)"
+has131 todo-update/SKILL.md "when the node's root has its own plan doc"; has131 todo-update/SKILL.md "the root's own doc first"
+p131="$(mktemp -d)"; mkdir -p "$p131/in/docs/plans" "$p131/none"
+printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **FEAT-001** · P1 · mid · Add a parser\n  - Done when: it parses; `npm test`\n  - Links: Ref: docs/plans/FEAT-001-add-parser.md#goal\n- [ ] **FEAT-002** · P1 · mid · Add a printer\n  - Done when: it prints; `npm test`\n  - Links: Ref: docs/plans/../../outside.md · Depends: FEAT-001\n' > "$p131/in/TODO.md"
+printf 'the project plan\n' > "$p131/in/docs/plans/PROJECT.md"; printf 'the <b>root plan\n' > "$p131/in/docs/plans/FEAT-001-add-parser.md"
+printf 'an unlinked plan\n' > "$p131/in/docs/plans/FEAT-009-other.md"; printf 'outside the plans folder\n' > "$p131/outside.md"
+p131_out="$(cd "$p131/in" && printf 'project: x\n' | bash "$root/tools/todo-report.sh" | tr -d '\r' | tr '\n' '|')"
+case "$p131_out" in *'the project plan||----- docs/plans/FEAT-001-add-parser.md -----|the &lt;b>root plan|'*) ;; *) r131="$r131 [the report script does not add a root's plan doc after PROJECT.md]" ;; esac
+case "$p131_out" in *'an unlinked plan'*|*'outside the plans folder'*) r131="$r131 [the report script reads a plan doc no Ref names, or a path outside docs/plans]" ;; esac
+sed -n 1,6p "$p131/in/TODO.md" > "$p131/none/TODO.md"
+(cd "$p131/none" && printf 'project: x\n' | bash "$root/tools/todo-report.sh") | grep -q '>__PLAN__<' || r131="$r131 [the report script drops the placeholder without a plan doc]"
+rm -rf "$p131"
+if [ -z "$r131" ]; then ok "review round 2: the status page, a revise and a drop use the plan doc of a root, not only PROJECT.md (TASK-131)"; else bad "review round 2 (TASK-131):$r131"; fi
+# Round 3, the skills against the lint, the docs and this repository's own workflows: the core's I10 left out the redirect
+# outside the repository that the lint refuses and docs/REFERENCE.md lists; /todo-continue did not say whether a run goes on
+# after it finds a drained root that is not merged yet; /todo-init did not say that a new TODO.md follows the move to
+# TODO.legacy.md; a --worktree baseline ignored the FIX node that may start red; ci.md named action majors two or three
+# releases old. Two sentences that only repeated another always-loaded file made the room in the /todo-continue budget.
+r131=""
+has131 todo/SKILL.md 'output redirected to a path outside the repository'
+l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-001** · P1 · low · Rename a flag\n  - Done when: the flag is renamed; `npm test > ../out.txt`\n' > "$l131/TODO.md"
+(cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I10.*redirected outside the repository' || r131="$r131 [the lint no longer refuses a redirect outside the repository]"
+rm -rf "$l131"
+has131 todo-continue/SKILL.md 'in the report and go on selecting'
+has131 todo-init/SKILL.md 'the new `TODO.md` is then created as above'
+has131 todo/reference/git-flow-edge.md 'the node may not start red by `/todo-continue` step 3'
+not131 todo/reference/git-flow.md 'The base branch is defined in the core'; not131 todo/reference/verification.md 'An attempt and the 3-attempt limit'
+for a in checkout setup-node setup-python setup-java setup-go; do
+  v131="$(grep -o "actions/$a@v[0-9]*" "$root/plugin/skills/todo/reference/ci.md" | sort -u | tr '\n' ' ')"
+  [ "$v131" = "$(grep -o "actions/$a@v[0-9]*" "$root/docs/TOOLS.md" | sort -u | tr '\n' ' ')" ] && [ -n "$v131" ] || r131="$r131 [ci.md and docs/TOOLS.md name different versions of actions/$a: $v131]"
+  # An action this repository's own workflows use is not older in ci.md than the major they pin (the "# vN" comment).
+  w131="$(grep -ho "actions/$a@[0-9a-f]* # v[0-9]*" "$root"/.github/workflows/*.yml | sed 's/.*# v//' | sort -n | tail -1)"
+  [ -z "$w131" ] || [ "${v131#*@v}" -ge "$w131" ] 2>/dev/null || r131="$r131 [ci.md recommends $v131, older than the v$w131 this repository's workflows use]"
+done
+has131 todo/reference/ci.md "write the version they use"
+if [ -z "$r131" ]; then ok "review round 3: I10 names the redirect, a drained unmerged root does not end the run, and ci.md keeps up with the actions this repository uses (TASK-131)"; else bad "review round 3 (TASK-131):$r131"; fi
+# Round 4, two rules that were only implied: "lane runs" meant --all-lanes, but nothing said so, and --lane <name> alone
+# still completes one node; and only /todo-status and /todo-report said what a command does without a TODO.md.
+r131=""
+for f in todo/SKILL.md todo-continue/SKILL.md todo/reference/routing.md; do not131 "$f" 'lane runs'; done
+has131 todo-continue/SKILL.md 'Complete at most one node per invocation (`--all-lanes` excepted).'
+has131 todo-continue/SKILL.md 'except with --all-lanes, where one subagent per lane works one root of that lane'
+has131 todo/SKILL.md 'Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.'
+grep -qF 'Without a `TODO.md`, every command but `/todo` and `/todo-init`' "$root/docs/COMMANDS.md" || r131="$r131 [docs/COMMANDS.md lacks the missing TODO.md rule]"
+if grep -qiF 'lane runs' "$root/README.md" "$root/docs/COMMANDS.md" "$root/docs/LIFECYCLE.md" "$root/docs/REFERENCE.md"; then r131="$r131 [a doc still says lane runs where it means --all-lanes]"; fi
+if [ -z "$r131" ]; then ok "review round 4: the one-node exception names --all-lanes and the core says what a command does without a TODO.md (TASK-131)"; else bad "review round 4 (TASK-131):$r131"; fi
+# Round 5, the rounds' own edits read again, and an agent scenario for the rule round 4 added: the no-git State example
+# says "a dash" instead of a bare "->"; the lane trial prompts and the controller's comments say "item" as lanes.md now
+# does; and the trial scenario no-backlog passes only when /todo-add stops without writing a TODO.md and names /todo-init.
+r131=""
+has131 todo-continue/SKILL.md "files: <a root's rolled-up files, or a dash>;"
+if grep -q 'step [0-9] of .claude/skills/todo/reference/lanes.md\|lanes.md,* step [0-9]' "$root/tests/trials/prompt.sh" "$root/tests/trials/run-codex-lanes.sh"; then r131="$r131 [a lane trial prompt still calls an item of lanes.md a step]"; fi
+n131="$(mktemp -d)"
+if bash "$root/tests/trials/setup.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then
+  printf 'There is no TODO.md in this project. Run /todo-init first; nothing was added.\n' > "$n131/report.txt"
+  TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1 || r131="$r131 [no-backlog: a stop that names /todo-init does not pass]"
+  printf 'Added FEAT-001.\n' > "$n131/report.txt"
+  if TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then r131="$r131 [no-backlog: a report without /todo-init passes]"; fi
+  printf 'There is no TODO.md in this project. Run /todo-init first.\n' > "$n131/report.txt"; printf '# Active Backlog\n' > "$n131/repo/TODO.md"
+  if TRIAL_REPORT="$n131/report.txt" bash "$root/tests/trials/assert.sh" "$n131/repo" no-backlog >/dev/null 2>&1; then r131="$r131 [no-backlog: a written TODO.md passes]"; fi
+else r131="$r131 [no-backlog: setup failed]"; fi
+rm -rf "$n131"
+if [ -z "$r131" ]; then ok "review round 5: the trial scenario no-backlog checks that a command stops without a TODO.md, and the lane prompts say item (TASK-131)"; else bad "review round 5 (TASK-131):$r131"; fi
+# Round 6, a scenario for the sentence round 3 settled: drained-unmerged starts on the branch of a root that was drained
+# without --merge. A lifecycle scripted with the helper (FEAT-002 from main, FEAT-001 left alone) passes its assertions with a
+# report that names FEAT-001's merge commands, and fails with a report that does not.
+r131=""
+d131="$(mktemp -d)"
+if bash "$root/tests/trials/setup.sh" "$d131/repo" drained-unmerged >/dev/null 2>&1; then
+  ( cd "$d131/repo" || exit 1
+    export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@example.invalid GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@example.invalid
+    git switch -q main && bash "$root/tools/todo-flow.sh" start FEAT-002 1 || exit 1
+    printf '\ndef multiply(a, b):\n    return a * b\n' >> calc.py
+    awk '/^if __name__/ { print "    def test_multiply(self):"; print "        # FEAT-002"; print "        self.assertEqual(calc.multiply(2, 3), 6)" } { print }' tests/test_calc.py > tests/test_calc.py.tmp && mv tests/test_calc.py.tmp tests/test_calc.py
+    bash "$root/tools/todo-flow.sh" complete FEAT-002 -m 'feat(calc): add a multiply function to calc.py with a test' -b "Red: AttributeError: module 'calc' has no attribute 'multiply'" -b 'Reviewed: self, 0 findings fixed' -- calc.py tests/test_calc.py || exit 1
+    bash "$root/tools/todo-flow.sh" drain FEAT-002 ) >/dev/null 2>&1 || r131="$r131 [drained-unmerged: the scripted FEAT-002 lifecycle failed]"
+  printf 'FEAT-001 is drained on its branch and not merged. To merge it: git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-function-calc\nFEAT-002: done and drained on its branch.\n' > "$d131/report.txt"
+  d131_res="$(PYTHONNOUSERSITE=1 TRIAL_REPORT="$d131/report.txt" bash "$root/tests/trials/assert.sh" "$d131/repo" drained-unmerged 2>&1)"
+  if printf '%s\n' "$d131_res" | grep -q '^FAIL' || ! printf '%s\n' "$d131_res" | grep -q '^PASS'; then r131="$r131 [drained-unmerged: the expected end state does not pass: $(printf '%s\n' "$d131_res" | grep '^FAIL' | tr '\n' ';')]"; fi
+  printf 'FEAT-002: done and drained on its branch.\n' > "$d131/report.txt"
+  if PYTHONNOUSERSITE=1 TRIAL_REPORT="$d131/report.txt" bash "$root/tests/trials/assert.sh" "$d131/repo" drained-unmerged >/dev/null 2>&1; then r131="$r131 [drained-unmerged: a report without FEAT-001's merge commands passes]"; fi
+else r131="$r131 [drained-unmerged: setup failed]"; fi
+rm -rf "$d131"
+if [ -z "$r131" ]; then ok "review round 6: the trial scenario drained-unmerged checks that a run names the unmerged root and goes on to the next one (TASK-131)"; else bad "review round 6 (TASK-131):$r131"; fi
+# Round 7, what eleven fresh pi agents (GLM 5.3) called unclear on the text after round 6, all of them passing: two reports
+# each on the low complexity example that was phrased for fixes, on a root's marker before its drain, and on which tree the
+# interrupted-merge check means; one each on two sentences the earlier rounds wrote (the drained root sharing a bullet with
+# the interrupted drain, "item 1" under item 4), on lanes.md read for /todo-add --lane, on a lone leaf that adds a lane
+# line, on a sentence that read like a licence to create TODO.md, on where Out of scope goes without a Scope section, and
+# on which plan docs get the path line on the status page.
+r131=""
+has131 todo/SKILL.md 'a guard or small function the task line fully states'; not131 todo/SKILL.md 'whose fix the task line states'
+has131 todo-continue/SKILL.md '(A root stays `[/]`: item 4 drains it.)'
+has131 todo-continue/SKILL.md "(on a \`todo/\` branch, for that branch's tree; core"
+has131 todo-continue/SKILL.md '   - **Drained root branch not yet merged into the base:** with `--merge` go to 10.4.4, report and stop; without it, put the merge commands of 10.4.4 in the report and go on selecting.'
+has131 todo-continue/SKILL.md "No git: 4.1's review offer, then 4.2 and 4.3 (a)-(c)."
+has131 todo/SKILL.md '`reference/lanes.md` (a `/todo-continue` lane flag)'
+has131 todo-add/SKILL.md 'A single new leaf needs no confirmation; a new lane line does.'
+has131 todo-add/SKILL.md "Write only tasks that come from the user's request."; not131 todo-add/SKILL.md 'Nothing enters TODO.md unless'
+has131 todo-plan/SKILL.md 'placed by the order of Plan step 3'
+has131 todo-report/SKILL.md '(`PROJECT.md` gets none)'
+if [ -z "$r131" ]; then ok "review round 7: ten sentences that fresh agents called unclear say what is meant (TASK-131)"; else bad "review round 7 (TASK-131):$r131"; fi
+# Round 8, seven agents again on the text after round 7 (all passed): none raised a round 7 sentence the same way. Four
+# older ones came up a second time or were new: W3 named without saying what it is, the "it" that must be clean before a root
+# merges, the test-name rule that put the exception last, and "a revise creates no plan doc" stated apart from its exception.
+r131=""
+has131 todo-continue/SKILL.md '(lint warning W3; `python -m unittest`'; not131 todo-continue/SKILL.md "the lint's W3 warning"
+has131 todo-continue/SKILL.md 'carry the ID: in a docstring or comment when `Done when` already names the test (a test id, class or file), otherwise in the test name.'
+has131 todo/reference/git-flow.md 'from the main checkout, which must be clean, backlog files included'
+has131 todo-plan/SKILL.md 'could be reused); otherwise a revise creates no plan doc.'; not131 todo-plan/SKILL.md 'step 4 covers a drop'
+# Round 9, five more agents on the text after round 8 (all passed): nothing new of substance. One phrase could be misread,
+# "the branch named after `from`", which meant the branch name that follows the word from in State.
+has131 todo-continue/SKILL.md 'the branch that follows `from` in its `State:`'; not131 todo-continue/SKILL.md 'named after `from`'
+if [ -z "$r131" ]; then ok "review rounds 8 and 9: five sentences later batches of agents called unclear say what is meant (TASK-131)"; else bad "review rounds 8 and 9 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

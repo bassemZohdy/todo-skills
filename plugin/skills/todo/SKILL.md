@@ -98,7 +98,7 @@ A node at level L (a root is level 0) has its header indented `2L` spaces and it
 
 | Complexity | Meaning | Examples |
 |---|---|---|
-| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function whose fix the task line states |
+| `low` | Mechanical: the cause and the change are already known, no investigation | rename, docs, config, a guard or small function the task line fully states |
 | `mid` | Ordinary work that needs some investigation or design (the default) | a new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 
@@ -106,7 +106,7 @@ A parent is rated by its integration step alone (usually `low` or `mid`); its ch
 
 ### Model routing (optional)
 
-A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both, read `reference/routing.md` (`--delegate`, lane runs, the reviewer's tier, escalation after a failed attempt).
+A project maps levels to models with one README line, for example `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands). Without that line, or without a subagent tool, complexity is only a hint and work runs in the current model. With both, read `reference/routing.md` (`--delegate`, `--all-lanes`, the reviewer's tier, escalation after a failed attempt).
 
 ## IDs
 
@@ -164,7 +164,7 @@ One entry per root. Parts in this order, each only when it applies: `Ref:` (the 
 
 Read only where a skill or another reference names them, from `reference/` (`../todo/reference/` from a command skill).
 
-- Loaded with their command: `reference/git-flow.md` and `reference/verification.md` (`/todo-continue`, `/todo-update --status in-progress`), `reference/done-when.md` (`/todo-add`, `/todo-plan`), `reference/lanes.md` (a lane flag), `reference/ci.md` (`/todo-init --ci`).
+- Loaded with their command: `reference/git-flow.md` and `reference/verification.md` (`/todo-continue`, `/todo-update --status in-progress`), `reference/done-when.md` (`/todo-add`, `/todo-plan`), `reference/lanes.md` (a `/todo-continue` lane flag), `reference/ci.md` (`/todo-init --ci`).
 - Read only when the pointer to them applies: `reference/git-flow-edge.md`, `reference/failures.md`, `reference/deliverables.md`, `reference/doc-drift.md`, `reference/plan-step.md`, `reference/routing.md`, and the optional `reference/rtm.md`, `reference/review.md` and `reference/clarify.md`.
 
 ## Invariants (every todo-* skill checks these first)
@@ -180,11 +180,11 @@ Read only where a skill or another reference names them, from `reference/` (`../
 | I7 | Every ID in `Depends:` or `From:` exists in TODO.md or CHANGELOG.md |
 | I8 | Tree integrity: child ID = parent ID + `.n`, depth at most 3, even indent, no `[x]` root, no `[x]` node with open children, and any size given matches the tree |
 | I9 | No dependency cycles, counting "parent waits for its children" |
-| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, the shell builtins `eval` and `exec`, a download whose output goes straight to a shell, one-liner code flags (`sh`/`bash`/`zsh`/`python` -c, `node`/`ruby`/`perl` -e, `php` -r), `find -exec rm` and `-delete`, publish, upload and deploy commands (`npm publish`, `twine upload`, `docker push`, `mvn deploy` and the like), and reads of credential files (SSH keys, cloud and tool credentials) |
+| I10 | No forbidden command in `Done when`: `sudo`, `rm -r`/`-f`, `git push`, `git reset --hard`, `git clean`, `chmod -R`, `mkfs`, `dd if=`, the shell builtins `eval` and `exec`, a download whose output goes straight to a shell, one-liner code flags (`sh`/`bash`/`zsh`/`python` -c, `node`/`ruby`/`perl` -e, `php` -r), `find -exec rm` and `-delete`, publish, upload and deploy commands (`npm publish`, `twine upload`, `docker push`, `mvn deploy` and the like), reads of credential files (SSH keys, cloud and tool credentials), and output redirected to a path outside the repository |
 
 **The invariant check** ("lint" in the skills) means: if `.todo/todo-lint.sh` exists in the project, run `bash .todo/todo-lint.sh` from the repository root (read it first under "Command safety" in `reference/verification.md`); otherwise check I1-I10 by reading. The plugin itself ships Markdown only: the lint and the other optional scripts (`todo-verify.sh`, `todo-rtm.sh`, `todo-replay.sh`, the Stop hook, `todo-report.sh`, `todo-flow.sh`; all read-only except `todo-replay.sh --run`, which runs commands, and `todo-flow.sh`, which makes a node's commits) live in the `tools/` folder of the todo-skills repository, and a user who wants them copies them into the project by hand (the skills never download anything). The lint needs bash, awk, grep, sed and tr and prints non-failing `WARN` lines for weak `Done when` commands. Its failures win over your own reading; a pass does not replace judging a command's safety (`reference/verification.md`). A lint run after an edit that fails means the edit is wrong: fix it or undo it before you stop.
 
-On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report.
+On a violation, report it, change nothing, and ask, with one exception: a writing command (`todo-continue`, `todo-add`, `todo-update`, `todo-plan`) repairs **I5** when the IDs in TODO.md that are also in CHANGELOG.md are exactly the root and `Includes:` IDs of one CHANGELOG entry (an interrupted drain): delete that subtree from TODO.md and say so. `/todo`, `/todo-status` and `/todo-report` only report. Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.
 
 ## Hard guardrails
 

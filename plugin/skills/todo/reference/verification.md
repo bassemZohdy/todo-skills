@@ -15,8 +15,6 @@ A node closes only through this protocol.
 7. **No cheating.** No deleted, skipped or weakened tests. A run that executed zero tests does not count. A failure masked by `|| true`, `; exit 0` or an unchecked pipe does not count, and a test file or path the command names must exist. The optional `todo-verify.sh <exit status> '<command>' < output` (core; read-only, runs nothing) rejects these cases and non-zero exits; `--strict` before the exit status also rejects output with no recognizable passing count, unchecked pipes such as `cmd | tail`, `set +e` and `|| echo`. The lint rejects masked failures in a `Done when` (I3).
 8. **Parents** (integration step): when every child is `[x]`, run the parent's `Done when` and the regression. Add one test only if the children's tests do not already cover the combined behavior. No feature code. A root's integration step and drain happen in one invocation, with the full suite last.
 
-An attempt and the 3-attempt limit are defined in `reference/failures.md`, read when a run fails.
-
 ## Definition of Done (optional)
 
 If README.md, CONTRIBUTING.md or `docs/` has a heading named exactly `Definition of Done` followed by a list, that list applies to every node on top of `Done when`. Command items follow the safety rules below; statements are checked by inspection and reported one by one. A missing item blocks the node (`reference/failures.md`), naming the item; it is not an attempt.

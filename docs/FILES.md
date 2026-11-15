@@ -77,7 +77,7 @@ No skill tags, fetches, pulls or pushes. Sharing commits with other clones is gi
 | `/todo-continue` | Everything above that the node needs | The node's code and tests, `TODO.md`, `CHANGELOG.md` (drain), README/`docs/` (drift), RTM Verification | Claim, start, plan, node, merges into the parent, block, decompose, drain; the merge into the base only with `--merge` |
 | `/todo-update` | `TODO.md`, `CHANGELOG.md`, the plan doc | `TODO.md`; a Revisions line in the plan doc and RTM Tasks on a drop | On a `todo/` branch: ready, block, drop, revert. Anywhere: a claim release on the base. `--status in-progress`: the claim and start commits |
 | `/todo-status` | `TODO.md`, `CHANGELOG.md`, git | Nothing | None |
-| `/todo-report` | `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md`, git, the template | `docs/status.html` only | None |
+| `/todo-report` | `TODO.md`, `CHANGELOG.md`, `docs/plans/PROJECT.md` and the plan docs a `Ref:` names, git, the template | `docs/status.html` only | None |
 | `/todo-release` | `CHANGELOG.md`, `TODO.md`, git tags, version files (listed, not edited) | `CHANGELOG.md` | `chore(release): X.Y.Z`, `CHANGELOG.md` only |
 
 ## Never touched

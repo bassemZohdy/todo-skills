@@ -6,6 +6,7 @@ Common to all commands:
 
 - Each command first loads the `todo` core skill, checks for git (`git rev-parse --is-inside-work-tree`) and runs the invariant check (the lint, `.todo/todo-lint.sh` when it exists, otherwise by reading). Outside a git repository it warns once and runs in [no-git mode](GIT-FLOW.md#no-git-mode).
 - A command runs only itself and never chains into another unprompted.
+- Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.
 - On an invariant violation a command reports it, changes nothing and asks. The one repair: a writing command (`/todo-continue`, `/todo-add`, `/todo-update`, `/todo-plan`) deletes a subtree from `TODO.md` when its IDs are exactly the root and `Includes:` IDs of one CHANGELOG entry (a drain that was interrupted), and says so.
 - When a rule conflicts with an explicit instruction from you, the agent states the conflict and asks.
 - In Claude Code with the plugin, commands are namespaced (`/todo-skills:todo-add`). In Codex, start them with `$todo-add` or plain language.
@@ -52,7 +53,7 @@ Turns a goal into a proposed tree with lanes inside `TODO.md` (a plan doc only f
 
 **Revise (`--revise [<reason>]`).** Usable at any time, even mid-tree. Only `[ ]` nodes change; `[/]`, `[x]`, `[!]` and drained work are never edited, and a node with any descendant that is not `[ ]` is not dropped, merged or moved. The change is shown as a diff (nodes added, dropped, split, merged, re-rated, re-ordered or moved to another lane, lane lines and, when a plan doc exists, its lines changed). IDs are kept; a dropped ID is never reused, and every `Depends:`/`From:` on it is removed or re-pointed in the same diff. On your yes it applies the change, appends `- <date> · <your reason> · <what changed>` under **Revisions** of an existing plan doc, and lints. A revise creates no plan doc; only a drop with none offers one holding just `## Revisions`, so the dropped ID is not reused.
 
-**Design review (optional).** For a `high` root, or one touching security, data migration or concurrency, or changing an existing public interface (adding one does not count), it offers once a review by a fresh-context subagent (or an external design-review tool the project already uses). It never blocks a plan on it. Accepted findings go through `--revise`; the rest are recorded under **Open questions**. `/todo-continue` offers the matching root review before such a root drains ([PLANNING.md](PLANNING.md#root-review-optional)).
+**Design review (optional).** For a `high` root, or one touching security, data migration or concurrency, or changing an existing public interface (adding one does not count), it offers once a review by a fresh-context subagent (or an external design-review tool the project already uses). It never blocks a plan on it. Accepted findings go through `--revise`; the rest are recorded under the plan doc's **Open questions** (without a plan doc they stay in the reply). `/todo-continue` offers the matching root review before such a root drains ([PLANNING.md](PLANNING.md#root-review-optional)).
 
 New roots, and changes to unclaimed trees, are written only on the base branch. Nodes of a claimed tree can change only from that tree's branch; elsewhere they are listed as locked.
 
@@ -67,7 +68,7 @@ Adds work to the tree. It never starts work.
 | `--ref <docs-path>` | The governing doc, linked as `Ref:` (anchors allowed). The path must exist. Without it, a doc in `docs/` that clearly governs the work is proposed |
 | `--from <ID>` | Provenance, written as `From:`. The ID must exist in `TODO.md` or `CHANGELOG.md` |
 | `--parent <ID>` | Adds a child under an open `[ ]` node with at most one dot in its ID, in a tree nobody else has claimed. Children inherit the root's prefix, priority and lane, so `--priority`, `--lane` and `--type` are refused |
-| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
+| `--lane <name>` | Puts a root in a lane (a lowercase letter, then lowercase letters, digits or dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
 | `--clarify` | Always asks one round of questions first |
 
 1. Resolves `--ref`, an RTM link (only when an RTM exists), `--from` and `--parent`.
@@ -76,14 +77,14 @@ Adds work to the tree. It never starts work.
 4. Splits and rates: every leaf is one change that fits one context window and touches at most 5 files; at most 3 levels; each node gets a complexity and a `Done when` with a runnable command that targets a test id or path ([VERIFICATION.md](VERIFICATION.md#writing-a-done-when)). Containers get their own `Done when`. No size unless the tree already uses sizes or you ask.
 5. A request that needs more than 6 nodes or more detail than 4 lines: offers a plan file `docs/plans/<ROOT-ID>-<slug>.md` linked with `Ref:`.
 6. Keeps `TODO.md` within 120 lines: if the tree would not fit, it adds the root and first level, with `State: next: decompose` on nodes that still need children. If even that does not fit, it refuses.
-7. Shows a tree of more than one node and waits for your confirmation; a single new leaf needs none.
-8. Assigns IDs (one global sequence, never reused) and inserts roots in order (P0 → P1 → P2, then by ID); children go last under their parent. Nothing is committed: the next claim commit carries it.
+7. Shows a tree of more than one node and waits for your confirmation; a single new leaf needs none, a new lane line does.
+8. Assigns IDs (one global sequence, never reused) and inserts roots in order (P0 → P1 → P2, then by ID); children go last under their parent. Nothing is committed: the next claim or start commit carries it.
 
 New roots, including a `--from` follow-up without `--parent`, are added only on the base branch.
 
 ## `/todo-continue [flags]`
 
-Executes the next workable node end to end. It completes at most one node per invocation, except lane runs.
+Executes the next workable node end to end. It completes at most one node per invocation, except with `--all-lanes`.
 
 | Flag | Effect |
 |---|---|
@@ -97,7 +98,7 @@ Executes the next workable node end to end. It completes at most one node per in
 An invalid combination is reported and nothing runs.
 
 1. **Git mode and invariants.** A violation only on a `[/]` node's `State:` line gets a proposed fix; the interrupted-drain I5 repair applies; anything else stops.
-2. **Select by status.** First interrupted work: an `[x]` node whose merge into its parent did not happen is merged and nothing else is done; a root branch with its CHANGELOG entry uncommitted gets its drain commit. Then a `[/]` node is resumed from its `State:` (uncommitted changes that fit its task line are its earlier work; anything else stops). Otherwise the first workable `[ ]` node in order. Claimed trees are skipped with a resume hint, `[!]` nodes are skipped, `[x]` nodes are never touched. A node with `next: decompose` is broken down, shown to you and written after you confirm; it is not built.
+2. **Select by status.** First interrupted work: an `[x]` node whose merge into its parent did not happen is merged and nothing else is done; a root branch with its CHANGELOG entry uncommitted gets its drain commit. A root branch that is drained but not merged into the base yet is merged with `--merge`; without it the run names it in the report with its merge commands and goes on. Then a `[/]` node is resumed from its `State:` (uncommitted changes that fit its task line are its earlier work; anything else stops). Otherwise the first workable `[ ]` node in order. Claimed trees are skipped with a resume hint, `[!]` nodes are skipped, `[x]` nodes are never touched. A node with `next: decompose` is broken down, shown to you and written after you confirm; it is not built.
 3. **Ready check** for a new node: lint clean, the `Ref:` exists, the tree is clean. A node of an unclaimed tree starts from the base branch. A `Depends:` satisfied only by the base's CHANGELOG first merges the base into the start branch. The **baseline**: the regression command runs on the start branch. Green records the pass count; no tests records `baseline none`. Red stops everything, except a `FIX` node whose `Done when` runs one of the failing tests (`baseline red: <ids>`); otherwise it suggests a `/todo-add … --type fix --priority P0`.
 4. **Branch first.** In an unclaimed tree: root branch, tree claim commit, fast-forward of the base; only after that succeeds, the missing ancestor branches and the node's branch ([GIT-FLOW.md](GIT-FLOW.md#tree-claims)).
 5. **Start.** On the node's branch: `[/]`, a new `State:` (`attempts 0/3; baseline …; branch … from …; next: read docs`), commit `chore(backlog): start <ID>`.
@@ -117,7 +118,7 @@ Manual changes to one node. Dotted IDs (`FEAT-002.1`) are allowed. With neither 
 | `in-progress` | For a workable node only (not with another `[/]` node, open children, unmet `Depends:`, a blocked ancestor, a tree claimed by another branch, or `next: decompose`). Runs the `/todo-continue` ready check, branch, claim and start steps, and builds nothing |
 | `ready` | On a claimed `[ ]` root: **releases the claim** (stale or, after an explicit yes, live), committing `chore(backlog): release <ID>` on the base. On `[/]` or `[!]`: back to `[ ]` with `State: attempts 0/3; branch …; next: resume` (the branch is kept; the `Blocked:` gist goes into the reply). On any other `[ ]`: nothing to do |
 | `blocked` | `[!]` with a `Blocked:` line built from `--note` and the last failing command (`n/a (manual)` without one). Stops autonomous work |
-| `drop` | Deletes the node and its subtree after you confirm, with a reason in `--note`. Refused on `[/]`, `[x]`, a claimed root, or a node with any descendant that is not `[ ]`. References to the dropped IDs are removed or re-pointed, ancestor sizes updated, and the IDs logged under Revisions in `docs/plans/PROJECT.md` (offered when the file is missing) so they are never reused. A node's own branch is listed with the `git branch -D` command for you to run. Never written to CHANGELOG |
+| `drop` | Deletes the node and its subtree after you confirm, with a reason in `--note`. Refused on `[/]`, `[x]`, a claimed root, or a node with any descendant that is not `[ ]`. References to the dropped IDs are removed or re-pointed, ancestor sizes updated, and the IDs logged under Revisions in the root's own plan doc, else in `docs/plans/PROJECT.md` (offered when neither exists) so they are never reused. A node's own branch is listed with the `git branch -D` command for you to run. Never written to CHANGELOG |
 | `revert` | For an `[x]` node under a `[ ]` parent: the node and its descendants go back to `[ ]` with `next: redo after revert`. To undo the code too it prints the `git revert` steps for you |
 
 `ready`, `blocked` and `revert` act where the node's state lives: on the tree's branches for a claimed tree (it names the branch and stops if you are elsewhere), on the base for an unclaimed tree. On a `todo/` branch the change is committed (`chore(backlog): ready|block|drop|revert <ID>`); on the base it stays an uncommitted backlog edit, except the claim release.
@@ -141,7 +142,7 @@ The progress bars use 10 cells: `#` done, `!` blocked, `-` the rest. They are sh
 
 ## `/todo-report`
 
-Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs and the overall progress line (the same line as `todo-lint.sh --progress`, with a bar), lanes with their descriptions and progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan. Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
+Writes `docs/status.html` and nothing else, from the template inside the skill: a self-contained page with KPIs and the overall progress line (the same line as `todo-lint.sh --progress`, with a bar), lanes with their descriptions and progress (click to filter), the task tree with search and a status filter, `Done when`, links, state and blockers, release history, claims, open branches, the test command, lint result and the plan docs (`docs/plans/PROJECT.md`, then each plan doc a `Ref:` in `TODO.md` names). Text is inserted encoded (`&` → `&amp;`, then `<` → `&lt;`) so it cannot close the page's script blocks, and the page renders it with `textContent` only. It loads nothing from the network. It writes through `docs/status.html.tmp` and renames it, asks before creating `docs/`, reports a lint violation in the page rather than repairing it, and reminds you that the page is a snapshot. The optional `tools/todo-report.sh` does the same filling deterministically.
 
 ## `/todo-release [--version X.Y.Z]`
 

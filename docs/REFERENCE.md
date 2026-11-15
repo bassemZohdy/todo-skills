@@ -26,7 +26,7 @@ The formats and rules of the todo-skills. The model reads the rules in [`plugin/
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
-The file is the heading `# Active Backlog`, an optional section whose heading ends in `Lanes` and one section whose heading ends in `Task Tree`, in that order. The Lanes section holds one `- <name>: <what it covers>` line per lane (lowercase letters, digits and dashes, no repeats); `main` always exists, and a file without the section has only that lane. A root's `Lane:` that is not declared there gets the warning W9. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
+The file is the heading `# Active Backlog`, an optional section whose heading ends in `Lanes` and one section whose heading ends in `Task Tree`, in that order. The Lanes section holds one `- <name>: <what it covers>` line per lane (the name is a lowercase letter, then lowercase letters, digits or dashes; no repeats); `main` always exists, and a file without the section has only that lane. A root's `Lane:` that is not declared there gets the warning W9. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
 
 ### A task
 
@@ -85,13 +85,13 @@ Complexity says how hard the reasoning is, not how big the change is, so an agen
 
 | Complexity | Meaning | Examples |
 |---|---|---|
-| `low` | Mechanical: the cause and the change are already known | Rename, docs, config, a guard or small function whose fix the task line states |
+| `low` | Mechanical: the cause and the change are already known | Rename, docs, config, a guard or small function the task line fully states |
 | `mid` | Ordinary work that needs some investigation or design (the default) | A new endpoint, a bug whose cause must be found |
 | `high` | Hard reasoning or high risk | Concurrency, security, data migration, unclear spec, design across modules, tricky algorithms |
 
 A parent is rated by its integration step alone (usually `low` or `mid`). A one-file race condition is `high`; a five-file rename is `low`.
 
-**Model routing (optional).** A README line such as `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands) maps levels to models. With that line and a subagent tool, `/todo-continue --delegate` and lane runs give each node a subagent on the mapped model, the reviewer runs at the node's tier or higher, and after a failed attempt the next one runs one tier higher (`low` → `mid` → `high`, recorded as `tier:`). Without either, complexity is only a hint and the work runs in the current model.
+**Model routing (optional).** A README line such as `Models: low=haiku, mid=sonnet, high=opus` (any names the agent understands) maps levels to models. With that line and a subagent tool, `/todo-continue --delegate` and `--all-lanes` give each node a subagent on the mapped model, the reviewer runs at the node's tier or higher, and after a failed attempt the next one runs one tier higher (`low` → `mid` → `high`, recorded as `tier:`). Without either, complexity is only a hint and the work runs in the current model.
 
 ## IDs
 

@@ -60,7 +60,7 @@ For a `high` root, or one that touches security, data migration or concurrency, 
 
 - **Fresh-context reviewer:** a new subagent gets only the plan doc, the root and its children as written in `TODO.md`, and the `Ref` path. It reads and comments; it never edits files or runs tests. Without a subagent tool, the agent offers a review in a new session from the same files.
 - **External tool:** a design-review skill or tool the project already uses runs on the same inputs instead. This repository neither bundles nor requires one.
-- Accepted findings go through `--revise`; declined or open ones are recorded under Open questions.
+- Accepted findings go through `--revise`; declined or open ones are recorded under the plan doc's Open questions. A plan made inline has no plan doc: they stay in the reply and nothing is written.
 
 ## Root review (optional)
 
@@ -81,7 +81,7 @@ Without a subagent tool, `--all-lanes` says so and the coordinator works each la
 
 ### What the coordinator does
 
-0. **Unfinished lane work first.** Every root claimed on the base whose branch exists here is finished before anything new is claimed: a root at `next: drain` goes to step 4, anything else is resumed in its worktree.
+0. **Unfinished lane work first.** Every root claimed on the base whose branch exists here is finished before anything new is claimed: a root at `next: drain` goes to item 4, anything else is resumed in its worktree.
 1. Runs the ready check and baseline for the first workable node of every lane. A red baseline stops the run.
 2. For each lane root in turn, from the base: root branch, tree claim, fast-forward of the base, so each later claim starts from a base that already holds the earlier ones. Then one worktree per root at `../<repo>.todo/<ROOT-ID>`. The main checkout stays on the base for the whole run.
 3. Starts one subagent per lane (with a `Models:` line, on the model for the highest complexity in that lane's root). Each gets only its root ID and worktree, the baseline count, the `Ref` paths, the skill files to read, and the rules: stay inside the task lines; never edit another lane's nodes, a `Done when` or the base; never merge to the base, drain or push. It works its root depth-first, including the root's integration step, commits everything, and **stops before the drain**, leaving the root `[/]` with `next: drain`.

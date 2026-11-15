@@ -33,15 +33,17 @@ Create `.todo/` with `mkdir -p` and write each file with the native file tools (
    | Other CI (`Jenkinsfile`, `azure-pipelines.yml`, `.circleci/`, …) | Print the one step to add: `bash .todo/check.sh` |
    | No CI file, and no `origin` on `github.com` (no remote, or another host) | The local fallback below |
 
-   GitHub workflow (`on: push` with `branches: [<base>]` and `pull_request`; `permissions: contents: read`): `actions/checkout@v4`, then the setup step for the runtime, the install step if the README or the existing CI installs dependencies before testing (`npm ci` with a lockfile, `pip install -e .` or `-r requirements.txt`, or the README's own command; none for a project with no dependencies), then `bash .todo/check.sh`.
+   GitHub workflow (`on: push` with `branches: [<base>]` and `pull_request`; `permissions: contents: read`): `actions/checkout@v7`, then the setup step for the runtime, the install step if the README or the existing CI installs dependencies before testing (`npm ci` with a lockfile, `pip install -e .` or `-r requirements.txt`, or the README's own command; none for a project with no dependencies), then `bash .todo/check.sh`.
 
    | Runtime marker | Setup step |
    |---|---|
-   | `package.json` | `actions/setup-node@v4` with `node-version: lts/*` |
-   | `pyproject.toml`, `requirements.txt`, `setup.cfg`, `pytest.ini`, or a test command that starts with `python`/`pytest`/`uv` | `actions/setup-python@v5` with `python-version: "3.x"` |
-   | `pom.xml`, `build.gradle(.kts)` | `actions/setup-java@v4` with `distribution: temurin`, `java-version: "21"` |
-   | `go.mod` | `actions/setup-go@v5` with `go-version: stable` |
+   | `package.json` | `actions/setup-node@v7` with `node-version: lts/*` |
+   | `pyproject.toml`, `requirements.txt`, `setup.cfg`, `pytest.ini`, or a test command that starts with `python`/`pytest`/`uv` | `actions/setup-python@v7` with `python-version: "3.x"` |
+   | `pom.xml`, `build.gradle(.kts)` | `actions/setup-java@v6` with `distribution: temurin`, `java-version: "21"` |
+   | `go.mod` | `actions/setup-go@v7` with `go-version: stable` |
    | `Cargo.toml`, `Makefile` only, plain bash | none (the runner has them) |
+
+   The action versions are the majors current on 2026-11-15. When the repository's other workflows already use one of these actions, write the version they use.
 
 Whatever the CI, `/todo-continue` runs `bash .todo/check.sh` as the last gate before a root's drain (after the refresh from the base), when the file exists. Red blocks the root like a failed regression.
 

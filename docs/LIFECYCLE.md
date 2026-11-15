@@ -45,7 +45,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 | 15 | **Drain** (roots) | tree removed | One CHANGELOG entry with `Includes:`, the subtree deleted from `TODO.md`, commit `chore(backlog): drain <ID>` |
 | 16 | **Merge to base** | | Only with `--merge`. Otherwise the local `git merge --no-ff` commands and the push-and-pull-request alternative are printed for you |
 
-`/todo-continue` completes one node per invocation (lane runs excepted): a child stops after its merge into the parent, a root after its drain. Run it again, ideally with a cleared context, for the next node. A session that dies mid-way is recovered by the next `/todo-continue`, which finishes an unmerged `[x]` branch or resumes the `[/]` node first.
+`/todo-continue` completes one node per invocation (`--all-lanes` excepted): a child stops after its merge into the parent, a root after its drain. Run it again, ideally with a cleared context, for the next node. A session that dies mid-way is recovered by the next `/todo-continue`, which finishes an unmerged `[x]` branch or resumes the `[/]` node first.
 
 Any step that finds a red baseline stops before anything changes. A failure outside the task line, a missing Definition of Done item, review findings still valid after two rounds, or a third failed attempt ends in `[!]` ([VERIFICATION.md](VERIFICATION.md#test-failures-and-blocking)).
 

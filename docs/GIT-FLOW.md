@@ -87,7 +87,7 @@ Checked: make smoke
 | `Merge <ROOT-ID> into <base>` | A drained root, with `--merge` |
 
 - **Refresh before a root lands:** after the root's last verify and before the drain, `git merge <base>` into the root branch. If anything came in, `Done when` and the full regression run again on the merged result; red blocks the root.
-- **Into the base:** only with `--merge`, from the main checkout and only when it is clean (backlog files included). If the base moved since the refresh, the root is refreshed and verified again first. Without `--merge` the agent prints `git switch <base> && git merge --no-ff -m "Merge <ROOT-ID> into <base>" <root branch> && git branch -d <root branch>` (with `git worktree remove` first when there is one) and the push-and-pull-request alternative, and runs none of them.
+- **Into the base:** only with `--merge`, from the main checkout, which must be clean (backlog files included). If the base moved since the refresh, the root is refreshed and verified again first. Without `--merge` the agent prints `git switch <base> && git merge --no-ff -m "Merge <ROOT-ID> into <base>" <root branch> && git branch -d <root branch>` (with `git worktree remove` first when there is one) and the push-and-pull-request alternative, and runs none of them.
 - **Concluding a merge** after resolving conflicts: `git commit --no-edit`.
 - **Reverting a bad merge:** `/todo-update <ID> --status revert` resets the backlog and prints `git revert --no-commit -m 1 <merge commit>`, `git checkout HEAD -- TODO.md CHANGELOG.md`, `git commit -m "Revert <ID>"` for you.
 

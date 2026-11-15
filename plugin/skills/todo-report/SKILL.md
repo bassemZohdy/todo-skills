@@ -1,6 +1,6 @@
 ---
 name: todo-report
-description: Generate an interactive HTML status page for the project at docs/status.html from TODO.md, CHANGELOG.md, git and the plan doc. Use for /todo-report. Shows KPIs, lanes with progress, the filterable task tree with Done when, links, state and blockers, release history, claims, test command and the plan. Self-contained single file, no network. Writes only docs/status.html.
+description: Generate an interactive HTML status page for the project at docs/status.html from TODO.md, CHANGELOG.md, git and the plan docs. Use for /todo-report. Shows KPIs, lanes with progress, the filterable task tree with Done when, links, state and blockers, release history, claims, test command and the plan. Self-contained single file, no network. Writes only docs/status.html.
 ---
 
 # /todo-report
@@ -16,7 +16,7 @@ Writes only `docs/status.html` (through a temporary `docs/status.html.tmp` that 
 3. Write `docs/status.html.tmp` (then `mv docs/status.html.tmp docs/status.html`; on an error remove the `.tmp` file and report it) as the template with each placeholder replaced by the text below, **encoded**: first replace every `&` with `&amp;`, then every `<` with `&lt;` (nothing else; the page decodes it). This keeps hostile text from ever closing the script block. A committed `docs/status.html` that this rewrites is a change the user commits; say so. The optional `tools/todo-report.sh` in the todo-skills repository does the same encoding deterministically; the plugin does not ship it.
    - `__TODO__`: the full text of `TODO.md` (the page shows each lane's description from its `## 🛤️ Lanes` section).
    - `__CHANGELOG__`: the full text of `CHANGELOG.md`.
-   - `__PLAN__`: the text of `docs/plans/PROJECT.md`, or leave the placeholder `__PLAN__` when there is none.
+   - `__PLAN__`: the text of `docs/plans/PROJECT.md` if it exists, then of each `docs/plans/*.md` that a `Ref:` in `TODO.md` names, each of those under a line `----- <path> -----` (`PROJECT.md` gets none); leave the placeholder `__PLAN__` when there is none.
    - `__META__`: one `key: value` per line, only those you actually know (leave a key out rather than writing "none"): `project` (repo or folder name), `generated` (today's date), `base`, `branch` (checked out), `mode` (git or no-git), `tests` (the detected test command, see `/todo-init` step 4), `lint` (pass or the failures), `Definition of Done` (where `/todo-init` step 6 finds it), `claim` (one line per claimed root: `<ID> -> <branch>`, add `(stale)` if the branch is gone), `branches` (local `todo/*` branches), `version` (newest released CHANGELOG version).
 4. Report the path in one line, and that opening the file in a browser shows it. Mention that it is a snapshot: rerun `/todo-report` to refresh. Suggest committing it only if the team wants it versioned.
 

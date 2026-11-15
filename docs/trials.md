@@ -8,7 +8,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 |---|---|---|
 | Plan | `replan` | Python |
 | Execution and merges | `happy-path`, `ts-lifecycle`, `java-lifecycle` | Python; Node 22; Java 17 + Maven |
-| Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling` | Python |
+| Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling`, `drained-unmerged` (a drained root left unmerged: the run goes on) | Python |
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
 | Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
@@ -18,7 +18,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
-| Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop` | Python |
+| Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop`, `no-backlog` (no `TODO.md`: the command stops) | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |
 
 The expected end state of every scenario is in the table in [tests/trials/README.md](../tests/trials/README.md).
@@ -109,6 +109,10 @@ FEAT-125 (the optional `## 🛤️ Lanes` section of `TODO.md`) and TASK-126 (`/
 ### pi runs with a helper script for the bookkeeping (2026-11-15)
 
 FEAT-129 tested `tools/todo-flow.sh`, an optional script that makes a node's claim, start, completion and drain commits in one call each. Fresh pi agents (GLM 5.3) ran the 18 benchmark cells of the `todo-skills` arm with and without it: 18 of 18 passed both times, the median model calls fell from 29 to 26 and the uncached input plus output did not fall, against targets of 25% and 30%. Twelve lifecycle scenarios passed on the same text, one of them without the helper. The helper missed both targets; the owner merged it as an optional script all the same. Details and limits: [docs/evals/pi-glm-2026-11-15-flow-helper/summary.md](evals/pi-glm-2026-11-15-flow-helper/summary.md).
+
+### pi runs on the text after a review in rounds (2026-11-15)
+
+TASK-131 reviewed the text of all nine skills and their reference files in rounds, fixing contradictions, stale pointers and gaps and pinning each fix with a check. Fresh pi agents (GLM 5.3) then ran the changed text in three batches, 23 runs over 15 scenarios, among them the new `no-backlog` (a command stops without a `TODO.md`) and `drained-unmerged` (a root drained without `--merge` does not end the next run): all 23 passed on the first try. What the agents called unclear fed three more rounds, which changed fifteen sentences. Details, what was left as it is and the limits: [docs/evals/pi-glm-2026-11-15-skill-review/summary.md](evals/pi-glm-2026-11-15-skill-review/summary.md).
 
 ### Limits of the earlier by-hand runs
 

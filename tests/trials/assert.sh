@@ -252,6 +252,22 @@ update-drop)
 status-readonly)
   chk "nothing changed" 'unchanged && clean'
   ;;
+drained-unmerged)
+# shellcheck disable=SC2034
+  m0="$(grep "refs/heads/main " "$gd/trial-refs" | cut -d" " -f2)"
+# shellcheck disable=SC2034
+  b2="$(git branch --list "todo/FEAT-002-*" | tr -d "* ")"
+  chk "FEAT-001's drained branch is untouched and still unmerged" '[ "$(git rev-parse todo/FEAT-001-add-subtract-function-calc)" = "$start" ] && ! git merge-base --is-ancestor todo/FEAT-001-add-subtract-function-calc main'
+  chk "main did not receive FEAT-001 (no --merge)" '! at main calc.py | grep -q "def subtract"'
+  chk "the run went on: FEAT-002 has a branch, created from main" '[ -n "$b2" ] && git merge-base --is-ancestor "$m0" "$b2" && ! git merge-base --is-ancestor todo/FEAT-001-add-subtract-function-calc "$b2"'
+  chk "main gained exactly the claim commit of FEAT-002" '[ "$(git log --format=%s $m0..main)" = "chore(backlog): claim FEAT-002 on $b2" ]'
+  chk "FEAT-002 is drained on its branch in the core format" 'at "$b2" CHANGELOG.md | entry FEAT-002 && ! at "$b2" TODO.md | grep -q "FEAT-002"'
+  chk "FEAT-002's branch has multiply and its test" 'at "$b2" calc.py | grep -q "def multiply" && at "$b2" tests/test_calc.py | grep -q "multiply"'
+# shellcheck disable=SC2034
+  rep="${TRIAL_REPORT:-}"
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  chk "report names FEAT-001 with its merge commands" '[ -s "$rep" ] && grep -q "FEAT-001" "$rep" && grep -q "git merge" "$rep"'
+  ;;
 no-backlog)
   chk "no TODO.md was written and nothing else changed" '[ ! -e TODO.md ] && unchanged && clean'
 # shellcheck disable=SC2034

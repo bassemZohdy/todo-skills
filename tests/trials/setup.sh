@@ -5,7 +5,7 @@
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
-#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog
+#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -322,6 +322,30 @@ no-backlog)
   # A project that never ran /todo-init: a hand-written CHANGELOG and no TODO.md. Every command but /todo and /todo-init
   # says so, suggests /todo-init and stops (the core, TASK-131).
   g add -A && g commit -q -m "init without a backlog"
+  ;;
+drained-unmerged)
+  # FEAT-001 was finished and drained on its branch by an earlier /todo-continue without --merge, and that branch is still
+  # checked out. The next run names its merge commands in the report and goes on to FEAT-002 from main (step 2, TASK-131).
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
+  - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+  - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001
+- [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
+  - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  g add -A && g commit -q -m "init with one claimed root"
+  g switch -q -c todo/FEAT-001-add-subtract-function-calc
+  printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
+  python3 - <<'PY'
+p='tests/test_calc.py'
+s=open(p,encoding='utf-8').read().replace('if __name__','    def test_subtract(self):\n        """FEAT-001"""\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
+PY
+  g add calc.py tests/test_calc.py && g commit -q -m "feat(calc): add a subtract function to calc.py with a test" -m "Refs: FEAT-001
+Red: AttributeError: module 'calc' has no attribute 'subtract'
+Reviewed: self, 0 findings fixed"
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
+  - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  printf '\n### Added\n\n- **FEAT-001** (feat): Add a subtract function to calc.py with a test. Validated: `python3 -m unittest tests.test_calc.CalcTest.test_subtract`.\n' >> CHANGELOG.md
+  g add TODO.md CHANGELOG.md && g commit -q -m "chore(backlog): drain FEAT-001" -m "Refs: FEAT-001"
   ;;
 add-fix)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

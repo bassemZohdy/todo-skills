@@ -1175,6 +1175,27 @@ if bash "$root/tests/trials/setup.sh" "$n131/repo" no-backlog >/dev/null 2>&1; t
 else r131="$r131 [no-backlog: setup failed]"; fi
 rm -rf "$n131"
 if [ -z "$r131" ]; then ok "review round 5: the trial scenario no-backlog checks that a command stops without a TODO.md, and the lane prompts say item (TASK-131)"; else bad "review round 5 (TASK-131):$r131"; fi
+# Round 6, a scenario for the sentence round 3 settled: drained-unmerged starts on the branch of a root that was drained
+# without --merge. A lifecycle scripted with the helper (FEAT-002 from main, FEAT-001 left alone) passes its assertions with a
+# report that names FEAT-001's merge commands, and fails with a report that does not.
+r131=""
+d131="$(mktemp -d)"
+if bash "$root/tests/trials/setup.sh" "$d131/repo" drained-unmerged >/dev/null 2>&1; then
+  ( cd "$d131/repo" || exit 1
+    export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@example.invalid GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@example.invalid
+    git switch -q main && bash "$root/tools/todo-flow.sh" start FEAT-002 1 || exit 1
+    printf '\ndef multiply(a, b):\n    return a * b\n' >> calc.py
+    awk '/^if __name__/ { print "    def test_multiply(self):"; print "        # FEAT-002"; print "        self.assertEqual(calc.multiply(2, 3), 6)" } { print }' tests/test_calc.py > tests/test_calc.py.tmp && mv tests/test_calc.py.tmp tests/test_calc.py
+    bash "$root/tools/todo-flow.sh" complete FEAT-002 -m 'feat(calc): add a multiply function to calc.py with a test' -b "Red: AttributeError: module 'calc' has no attribute 'multiply'" -b 'Reviewed: self, 0 findings fixed' -- calc.py tests/test_calc.py || exit 1
+    bash "$root/tools/todo-flow.sh" drain FEAT-002 ) >/dev/null 2>&1 || r131="$r131 [drained-unmerged: the scripted FEAT-002 lifecycle failed]"
+  printf 'FEAT-001 is drained on its branch and not merged. To merge it: git switch main && git merge --no-ff -m "Merge FEAT-001 into main" todo/FEAT-001-add-subtract-function-calc\nFEAT-002: done and drained on its branch.\n' > "$d131/report.txt"
+  d131_res="$(PYTHONNOUSERSITE=1 TRIAL_REPORT="$d131/report.txt" bash "$root/tests/trials/assert.sh" "$d131/repo" drained-unmerged 2>&1)"
+  if printf '%s\n' "$d131_res" | grep -q '^FAIL' || ! printf '%s\n' "$d131_res" | grep -q '^PASS'; then r131="$r131 [drained-unmerged: the expected end state does not pass: $(printf '%s\n' "$d131_res" | grep '^FAIL' | tr '\n' ';')]"; fi
+  printf 'FEAT-002: done and drained on its branch.\n' > "$d131/report.txt"
+  if PYTHONNOUSERSITE=1 TRIAL_REPORT="$d131/report.txt" bash "$root/tests/trials/assert.sh" "$d131/repo" drained-unmerged >/dev/null 2>&1; then r131="$r131 [drained-unmerged: a report without FEAT-001's merge commands passes]"; fi
+else r131="$r131 [drained-unmerged: setup failed]"; fi
+rm -rf "$d131"
+if [ -z "$r131" ]; then ok "review round 6: the trial scenario drained-unmerged checks that a run names the unmerged root and goes on to the next one (TASK-131)"; else bad "review round 6 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

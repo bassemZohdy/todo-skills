@@ -73,6 +73,7 @@ The overall evaluation used while iterating on the skills is `0.15 x tests/run.s
 | `add-fix` | One root | `/todo-add` a crash report with `--priority P0` | `FIX-002 · P0 · S` first in the tree, Done when names a test id, nothing committed |
 | `update-block` / `update-drop` | Two roots and a plan doc | Block / drop FEAT-002 | `[!]` with a manual Blocked line / FEAT-002 gone and named in Revisions; nothing committed on main |
 | `status-readonly` | Two roots | Run `/todo-status` | Nothing changes |
+| `drained-unmerged` | Two roots: FEAT-001 finished and drained on its branch, which is checked out and not merged; FEAT-002 open | Run `/todo-continue` without `--merge` | The report names FEAT-001 with its merge commands and the run goes on: FEAT-002 is claimed from `main`, built and drained on its own branch; FEAT-001's branch and `main`'s code are untouched |
 | `no-backlog` | A project with a hand-written `CHANGELOG.md` and no `TODO.md` | Run `/todo-add` | No `TODO.md` is written and nothing else changes; the report says `TODO.md` is missing and suggests `/todo-init` |
 | `report` | Two roots, one with a hostile title | Run `/todo-report` | Only `docs/status.html` written, the title encoded |
 | `blocked-sibling` | FEAT-001.1 is `[!]` on its own branch only; HEAD on the root branch | Run `/todo-continue`; stop after the start commit | FEAT-001.1 is not restarted; FEAT-001.2 starts |

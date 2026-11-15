@@ -24,6 +24,7 @@ case "$scenario" in
   plan-inline)        task='Run `/todo-plan "add subtract, multiply and divide to calc.py, each with its own test"`. It is one track and the description is complete: do not ask questions. The user confirms the proposed plan: "yes, write it". Do not run `/todo-continue`.' ;;
   regress-block)      task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   no-git)             task='Run `/todo-continue`. Stop after one invocation.' ;;
+  drained-unmerged)   task='Run `/todo-continue` (no `--merge`). Stop after one invocation.' ;;
   no-backlog)         task='Run `/todo-add "add a subtract function to calc.py"`. Do not ask questions; the description is complete. Stop after one invocation, or earlier if the skill says to stop.' ;;
   add-fix)            task='Run `/todo-add "add() crashes with a TypeError traceback when given None; it should raise ValueError(\"add needs numbers\")" --priority P0`. Do not ask questions; the description is complete.' ;;
   add-lane)           task='Run `/todo-add "add a power function to calc.py that raises the first number to the second" --lane math`. Do not ask questions; the description is complete. The user confirms the lane line you propose: "yes".' ;;

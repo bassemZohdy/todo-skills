@@ -8,7 +8,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 |---|---|---|
 | Plan | `replan` | Python |
 | Execution and merges | `happy-path`, `ts-lifecycle`, `java-lifecycle` | Python; Node 22; Java 17 + Maven |
-| Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling` | Python |
+| Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling`, `drained-unmerged` (a drained root left unmerged: the run goes on) | Python |
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
 | Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |

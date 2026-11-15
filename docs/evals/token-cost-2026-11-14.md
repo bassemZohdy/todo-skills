@@ -1,6 +1,6 @@
 # Token cost of a todo-skills run (2026-11-14)
 
-What the published benchmark rows say about tokens, and where a todo-skills run spends them. The table below is generated: `python3 tests/benchmark/tokens.py docs/evals/benchmark/results/results.csv` prints it, and `tests/run.sh` fails when this page and that output differ. Everything after the table that is marked *measured locally* came from raw session logs that are not published (see [the rule](README.md)); those numbers cannot be recomputed from this repository.
+What the published benchmark rows say about tokens, and where a todo-skills run spends them. The table below has one row per batch of an arm and is generated: `python3 tests/benchmark/tokens.py docs/evals/benchmark/results/results.csv` prints it, and `tests/run.sh` fails when this page and that output differ. Everything after the table that is marked *measured locally* came from raw session logs that are not published (see [the rule](README.md)); those numbers cannot be recomputed from this repository.
 
 Scope: pi with GLM 5.3 on six small tasks, isolation `provisional`, 17 to 20 runs per row (three per scenario). No other agent has run the benchmark. No money figure is given: pricing for this model was not looked up, and no cost is computed here.
 
@@ -13,10 +13,12 @@ Scope: pi with GLM 5.3 on six small tasks, isolation `provisional`, 17 to 20 run
 | 2026-11-12 | no-methodology | 18 | 41,237 | 2,769 | 92% | 1,689 | 6 | 26 |
 | 2026-11-12 | todo-skills | 20 | 1,039,495 | 47,417 | 95% | 18,269 | 29 | 310 |
 | 2026-11-13 | todo-skills | 17 | 1,034,971 | 52,929 | 94% | 18,644 | 31 | 402 |
-| 2026-11-14 | todo-skills | 18 | 1,072,291 | 52,187 | 95% | 18,149 | 31 | 292 |
+| 2026-11-14 01h | todo-skills | 18 | 1,072,291 | 52,187 | 95% | 18,149 | 31 | 292 |
+| 2026-11-14 22h | todo-skills | 18 | 1,205,976 | 49,413 | 95% | 19,783 | 29 | 287 |
+| 2026-11-14 | todo-skills-flow | 18 | 1,010,855 | 53,415 | 94% | 19,332 | 26 | 278 |
 <!-- tokens:end -->
 
-Input tokens include the cached part, so the uncached input of a run is the difference. The three todo-skills rows are different versions of the skill text, and the 2026-11-13 and 2026-11-14 rows ran only that arm. The 2026-11-14 row is [the batched-steps test](pi-glm-2026-11-14-batched-steps/summary.md): the same median model calls as the row before it.
+Input tokens include the cached part, so the uncached input of a run is the difference. The todo-skills rows are different versions of the skill text, and the rows after 2026-11-12 ran only that arm. The `2026-11-14 01h` row is [the batched-steps test](pi-glm-2026-11-14-batched-steps/summary.md): the same median model calls as the row before it. The `2026-11-14 22h` row and the `todo-skills-flow` row are the baseline and the candidate of [the helper-script test](pi-glm-2026-11-15-flow-helper/summary.md).
 
 ## Reading it
 
@@ -44,7 +46,7 @@ Six runs of the todo-skills arm on 2026-11-13 (one per scenario, the text after 
 
 - **The ceremony is the largest part.** Git and the two backlog files are 74 of the 162 calls, about 53% of the input and about 41% of the output tokens.
 - **Setup.** The calls before the first branch (reading the init and add skills, writing the backlog) are a median 30% of a run's input (28% to 33% in five runs; the sixth stopped to ask a question after 9 calls).
-- **What a fix could save.** If the git and backlog-file calls shrank to four per node, the logs predict 37% to 50% fewer input tokens in five of the six runs. That is an upper estimate: some of those calls read state and cannot be removed. TASK-120 tested the cheapest fix, wording that allows chained commands, on 18 fresh runs: the median stayed at 31 calls, so wording alone did not capture it ([summary](pi-glm-2026-11-14-batched-steps/summary.md)).
+- **What a fix could save.** If the git and backlog-file calls shrank to four per node, the logs predict 37% to 50% fewer input tokens in five of the six runs. That is an upper estimate: some of those calls read state and cannot be removed. TASK-120 tested the cheapest fix, wording that allows chained commands, on 18 fresh runs: the median stayed at 31 calls, so wording alone did not capture it ([summary](pi-glm-2026-11-14-batched-steps/summary.md)). FEAT-129 then tested a helper script that makes those writes in one call each, on 18 more runs: the calls that only write git or backlog state fell from a median of 10 to 3 per run, but the model calls of a run fell only from 29 to 26 and the uncached input plus output did not fall, because setup is half of a small run and the agent reads the script before it uses it. The helper missed the targets set for it and was merged as an optional script all the same, by the owner's decision ([summary](pi-glm-2026-11-15-flow-helper/summary.md)).
 
 ## Limits
 

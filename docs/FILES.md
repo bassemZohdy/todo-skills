@@ -31,6 +31,7 @@ The backlog itself is two files, `TODO.md` (the active task tree) and `CHANGELOG
 | `docs/status.html` | The interactive status page | | `/todo-report`, through `docs/status.html.tmp`, which is renamed or removed |
 | `.todo/check.sh` | One entrypoint: the backlog lint and the project's tests | `/todo-init`, `/todo-continue` (last gate before a root lands) | `/todo-init --ci` on your yes |
 | `.todo/todo-lint.sh` | The lint the skills and CI run instead of checking by reading | Every command, when it exists | You: copy `tools/todo-lint.sh` from this repository. The skills never download it |
+| `.todo/todo-flow.sh` | Optional: makes a task's claim, start, completion and drain commits in one call each ([TOOLS.md](TOOLS.md#todo-flowsh-optional-feat-129)); the only script that writes | `/todo-continue`, when the file exists | You: copy `tools/todo-flow.sh` |
 | `.todo/todo-replay.sh` | Optional: re-runs the `Validated:` commands of newly drained entries in CI, refusing any the lint does not accept | `.todo/check.sh`, when you added its line | You: copy `tools/todo-replay.sh` next to `.todo/todo-lint.sh` |
 | `.github/workflows/todo-check.yml` | A GitHub Actions job running the lint (or the whole check) | | `/todo-init --ci` on your yes |
 | `.gitlab-ci.yml` | A `todo-check` job | `/todo-init` (test command detection) | `/todo-init --ci`, shown first and added on your yes |

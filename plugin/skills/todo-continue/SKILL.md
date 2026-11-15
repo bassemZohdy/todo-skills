@@ -17,7 +17,7 @@ Complete at most one node per invocation (lane runs excepted). Flags, all option
 
 ## Steps
 
-The order of every node is the core's "Lifecycle by status".
+The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow.sh` exists, read it first, then let it make the git and backlog writes of steps 4-5 (`start`) and 10 (`complete`, `drain`); where it refuses or stops, go on by hand.
 
 1. **Git mode and invariants.** Check git and run the invariant check (core). If it fails only on a `[/]` node's `State:` line, show the corrected line and ask; on I5, apply the core's repair; otherwise report and stop.
 2. **Select by status.**

@@ -1,8 +1,8 @@
 # Tools and CI
 
-The plugin is Markdown only and needs nothing installed. This repository also keeps optional helper scripts in [`tools/`](../tools/) (read-only, except that `todo-replay.sh --run` runs commands), and `/todo-init --ci` can wire a check into CI or a git hook. Nothing on this page is required: without any of it the agent checks the invariants by reading and runs the tests itself.
+The plugin is Markdown only and needs nothing installed. This repository also keeps optional helper scripts in [`tools/`](../tools/) (read-only, except that `todo-replay.sh --run` runs commands and `todo-flow.sh` makes commits), and `/todo-init --ci` can wire a check into CI or a git hook. Nothing on this page is required: without any of it the agent checks the invariants by reading and runs the tests itself.
 
-The skills never download these scripts. Copy the ones you want into your project yourself (most projects put the lint in `.todo/`), and copy them again when you upgrade: `tests/run.sh` in this repository checks that its own `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and your copy should stay in step the same way. Every script prints the release it comes from with `--version` (for example `bash tools/todo-lint.sh --version` prints `todo-lint.sh 0.5.0`); between releases a copy can carry later, unreleased changes. Every script needs only bash and standard tools (awk, grep, sed, tr), never touches the network and never edits files; `todo-replay.sh --run` also runs the Validated commands it accepts, which may do whatever your tests do.
+The skills never download these scripts. Copy the ones you want into your project yourself (most projects put the lint in `.todo/`), and copy them again when you upgrade: `tests/run.sh` in this repository checks that its own `.todo/todo-lint.sh` equals `tools/todo-lint.sh`, and your copy should stay in step the same way. Every script prints the release it comes from with `--version` (for example `bash tools/todo-lint.sh --version` prints `todo-lint.sh 0.5.0`); between releases a copy can carry later, unreleased changes. Every script needs only bash and standard tools (awk, grep, sed, tr), never touches the network and, except `todo-flow.sh`, never edits files; `todo-replay.sh --run` also runs the Validated commands it accepts, which may do whatever your tests do.
 
 ## `todo-lint.sh`
 
@@ -78,6 +78,30 @@ bash .todo/todo-replay.sh [--run] <rev> [CHANGELOG.md]       # from the reposito
 ```
 
 Replays the `Validated:` commands of the CHANGELOG entries added since `<rev>` (entries whose ID is not in `git show <rev>:CHANGELOG.md`), so CI re-proves what a newly landed root claimed. Without `--run` it only lists them. Each command first goes through the lint as a `Done when`: anything the lint fails (I3 vacuous or masked, I10 forbidden) or flags as an unfamiliar runner (W3), a piped runner (W4) or a command that may download and run remote code (W6) is printed as `REFUSED` and never run (W1, W2 and W5 do not refuse). Review those and run them yourself if they are safe. A command that runs a script (`bash <file>`, `make <target>`, `npm test`) runs whatever that file holds, which the lint does not read, so read those scripts as you read `check.sh`. No revision (an unset variable) or no new entry means nothing runs. Exit 0 when nothing was replayed or everything passed, 1 when a replayed command failed, 2 on a usage or git error, 3 when commands were refused.
+
+## `todo-flow.sh` (optional, FEAT-129)
+
+```bash
+bash .todo/todo-flow.sh start <ID> <n> | none | red: <ids>                                     # from the repository root
+bash .todo/todo-flow.sh complete <ID> -m '<type>(<scope>): <title>' [-b '<body line>']... [-- <path>...]
+bash .todo/todo-flow.sh drain <ROOT-ID> [-t <type>] [--merge]
+```
+
+The only script that writes. It makes the git and backlog writes of one lifecycle step in one call, the same branches, commits, messages and `TODO.md` and `CHANGELOG.md` lines that `/todo-continue` otherwise makes one by one ([GIT-FLOW.md](GIT-FLOW.md)). When `.todo/todo-flow.sh` exists, `/todo-continue` reads it and uses it; without it nothing changes. It decides nothing: the agent still selects the task, checks the tree, runs the baseline, the tests and the review, and writes the commit subject.
+
+| Command | What it does |
+|---|---|
+| `start` | The argument is the baseline. In an unclaimed tree, run on the base: the root branch, the tree claim commit and the fast-forward of the base. Then the missing branches down to the task, `[/]` with its `State:` and the start commit |
+| `complete` | The task's commit: the given paths plus the changed backlog files, with the body `Refs: <ID>` and the `-b` lines (`Red:`, `Reviewed:`, `Checked:`). A child is then set `[x]` and merged into its parent's branch with `--no-ff`; a root is refreshed from the base, and the output says whether the base brought changes |
+| `drain` | The CHANGELOG entry in the core's format (the type is `feat` or `fix` by prefix; give `-t` for a `TASK`), the subtree removed from `TODO.md` and the drain commit. With `--merge` it merges the root into the base when the base has not moved; without it, it prints the merge commands |
+
+| Exit | Meaning |
+|---|---|
+| 0 | Done. It prints the commits it made, the checked-out branch, whether the tree is clean and the `todo/` branches left (`drain` also prints the entry it wrote), so the agent need not check the result again |
+| 1 | A step failed after something was written (a failed fast-forward, a merge conflict, a failing lint): it stops there, in the state the skills' recovery rules expect, and names the rule |
+| 2 | Refused before anything changed, with the reason: go on by hand |
+
+It refuses whatever is not the plain case: a linked worktree, a folder that is not the repository root, a task with open children, a second active task, a root branch that already exists, a tree claimed by another branch, a failing lint. The base branch is `TODO_BASE`, else the README `Base:` line, else the first of `main`, `master`, `trunk`, `develop`. It runs `.todo/todo-lint.sh` before a commit when you copied that too, runs no project command, never pushes, tags or force-deletes, and merges into the base only with `--merge`. A CRLF `TODO.md` or `CHANGELOG.md` keeps its line endings. The script is kept at 200 lines or fewer, one read for an agent that reads it before use. `tests/flow.sh` checks all of this in scratch repositories.
 
 ## `todo-stop-hook.sh`
 

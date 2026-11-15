@@ -6,6 +6,7 @@
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
 #   plan-stop | decompose | regress-block | plan-inline | add-lane
+# Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
 dir="${1:?usage: setup.sh <new-dir> <scenario>}"
@@ -15,6 +16,8 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 mkdir -p "$dir/.claude/skills" "$dir/tests"
 dir="$(cd "$dir" && pwd)"
 cp -r "$root"/plugin/skills/* "$dir/.claude/skills/"
+# TRIAL_FLOW_HELPER=1 also installs the optional lifecycle helper, as a project has it whose owner copied tools/todo-flow.sh (FEAT-129).
+[ "${TRIAL_FLOW_HELPER:-0}" != 1 ] || { mkdir -p "$dir/.todo"; cp "$root/tools/todo-flow.sh" "$dir/.todo/todo-flow.sh"; }
 cd "$dir"
 g() { git -c user.email=t@t -c user.name=t "$@"; }
 printf '__pycache__/\n' > .gitignore

@@ -8,7 +8,7 @@ argument-hint: <ID> [--status in-progress|blocked|ready|drop|revert] [--note "<m
 
 First load the `todo` core skill (tree format, complexity, invariants, guardrails). For `--status in-progress` also read `../todo-continue/SKILL.md` (steps 3-5), and `reference/git-flow.md` and `reference/verification.md` from the core's folder; for `--status ready` on a claimed root, `reference/git-flow.md`. If you cannot load a skill by name, read them under `../todo/`.
 
-Check git (core, "Git mode"); in a non-git folder print the core's warning and continue. Run the invariant check first. With neither `--status` nor `--note`, show the node's lines and change nothing. If the ID is in CHANGELOG.md, refuse to reopen it and suggest `/todo-add "<description>" --type fix --from <ID>` on the base. Otherwise, if `<ID>` is not in TODO.md, list the IDs that are and change nothing.
+Check git (core, "Git mode"); in a non-git folder print the core's warning and continue. Then run the invariant check, before anything is changed. With neither `--status` nor `--note`, show the node's lines and change nothing. If the ID is in CHANGELOG.md, refuse to reopen it and suggest `/todo-add "<description>" --type fix --from <ID>` on the base. Otherwise, if `<ID>` is not in TODO.md, list the IDs that are and change nothing.
 
 ## Status changes
 

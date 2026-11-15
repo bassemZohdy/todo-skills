@@ -21,7 +21,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
 
 1. **Git mode and invariants.** Check git and run the invariant check (core). If it fails only on a `[/]` node's `State:` line, show the corrected line and ask; on I5, apply the core's repair; otherwise report and stop.
 2. **Select by status.**
-   - **Interrupted merge** (on a `todo/` branch, for that branch's tree; core "Interrupted work comes first"): do step 10 item 3 for the `[x]` node the core check found (merge it into its parent's branch, delete its branch; nothing else of step 10), lint the merged `TODO.md`, then report once (step 11) and stop. No tests here; the parent's integration step runs them.
+   - **Interrupted merge** (on a `todo/` branch, for that branch's tree; core "Interrupted work comes first"): do step 10 item 3 for the `[x]` node that core "Interrupted work comes first" found (merge it into its parent's branch, delete its branch; nothing else of step 10), lint the merged `TODO.md`, then report once (step 11) and stop. No tests here; the parent's integration step runs them.
    - **Interrupted drain** (a root branch whose uncommitted `CHANGELOG.md` holds its entry): make the drain commit (10.4.3 d), go on at 10.4.4, report and stop.
    - **Drained root branch not yet merged into the base:** with `--merge` go to 10.4.4, report and stop; without it, put the merge commands of 10.4.4 in the report and go on selecting.
    - **A `[/]` node:** resume it on its branch (or worktree); check `git status` and `git diff --stat`. Uncommitted changes that fit its task line are its earlier work, committed at step 10; anything else: stop and ask, never revert or commit it. Skip steps 3-5 and go on where `next:` says: `read docs` or `plan proposed` → 6, `build` → 7, `drain` → 10.4, other or missing → 6. Without a baseline in `State:`, the regression must be fully green with no test deleted, skipped or weakened.
@@ -40,7 +40,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
 7. **Build.**
    - **Resume:** code and tests already exist: skip red and go to review (its findings are fixed like any others).
    - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`). `TASK` refactors get characterization tests.
-   - **Green:** implement only the task line. Adjacent findings go to the report, not into the code or TODO.md. No new `TODO`/`FIXME`. No git: list touched files in `State: files:`.
+   - **Green:** implement only the task line. No new `TODO`/`FIXME`. No git: list touched files in `State: files:`.
    - **Refactor** with tests green. **Integration step** (a parent): `reference/verification.md`, protocol step 8; no feature code.
 8. **Review** the whole change (`git diff`; no git: each file in `State: files:`), spec compliance first, then quality:
    - **Spec:** every hunk traces to the task line and nothing it asks for is missing; the tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the ID: in a docstring or comment when `Done when` already names the test (a test id, class or file), otherwise in the test name.

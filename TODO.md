@@ -6,9 +6,9 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-129** · P1 · mid · Add an optional helper script `tools/todo-flow.sh` that makes a node's lifecycle commits in one call per step, and keep it only if fresh agents use fewer model calls with it
+- [/] **FEAT-129** · P1 · mid · Add an optional helper script `tools/todo-flow.sh` that makes a node's lifecycle commits in one call per step, and keep it only if fresh agents use fewer model calls with it
   - Done when: the pi batch is summarised under docs/evals with a keep-or-reject decision and every child is verified; `bash tests/run.sh`
-  - State: branch todo/FEAT-129-add-optional-helper-script from main; next: build children
+  - State: attempts 0/3; baseline 331 passing; branch todo/FEAT-129-add-optional-helper-script from main; next: read docs
   - [x] **FEAT-129.1** · mid · `todo-flow.sh start <ID> <baseline>` makes the tree claim, the fast-forward of the base, the branch chain and the start commit as git-flow prescribes, and refuses anything unusual before it changes a file
     - Done when: scratch-repository checks pass for a leaf root, a child of a claimed tree and each refusal; `bash tests/run.sh`
   - [x] **FEAT-129.2** · mid · `todo-flow.sh complete` commits a node and merges it into its parent (a root: refreshes from the base), and `todo-flow.sh drain` writes the CHANGELOG entry, removes the subtree and commits the drain, merging into the base only with `--merge`

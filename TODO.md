@@ -6,6 +6,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-131** · P1 · mid · Review the skill text in rounds and fix the contradictions, stale pointers and gaps each round finds
+- [/] **TASK-131** · P1 · mid · Review the skill text in rounds and fix the contradictions, stale pointers and gaps each round finds
   - Done when: each fix is pinned by a check in the suite and the last review round finds nothing left; `bash tests/run.sh`
-  - State: branch todo/TASK-131-review-skill-text-in from main; next: start TASK-131
+  - State: attempts 0/3; baseline 331 passing; branch todo/TASK-131-review-skill-text-in from main; next: read docs

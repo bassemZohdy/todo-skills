@@ -17,7 +17,7 @@ Complete at most one node per invocation (lane runs excepted). Flags, all option
 
 ## Steps
 
-The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow.sh` exists, read it first, then let it make the git and backlog writes of steps 4-5 (`start`) and 10 (`complete`, `drain`); where it refuses or stops, go on by hand.
+The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow.sh` exists (not with `--worktree` or `--all-lanes`), read it first, then let it make the git and backlog writes of steps 4-5 (`start`) and 10 (`complete`, `drain`); where it refuses or stops, go on by hand.
 
 1. **Git mode and invariants.** Check git and run the invariant check (core). If it fails only on a `[/]` node's `State:` line, show the corrected line and ask; on I5, apply the core's repair; otherwise report and stop.
 2. **Select by status.**
@@ -33,7 +33,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
      - Green: note the pass count. No tests (none run): `baseline none`.
      - Red: if the selected node is a `FIX` whose `Done when` runs at least one of the failing tests, it may start with `baseline red: <ids>`. Otherwise (do not select another node) change nothing more, report "baseline red" with the command and its failing tests, suggest `/todo-add "fix the failing baseline: <failing test ids>" --type fix --priority P0` (ids as `reference/verification.md` step 1 writes them), and stop.
 4. **Branch first** (git mode). Follow `reference/git-flow.md`: in an unclaimed tree, root branch → tree claim commit → fast-forward of the base (**do not go on until it succeeded**) → missing ancestor branches → the node's branch; otherwise only the missing branches. No git: skip.
-5. **Start** (a parent's integration step too). On the node's branch set `[/]` and write `State:` (replacing one that exists) as `attempts 0/3; baseline <n> passing; branch <name> from <branch it was created from>; next: read docs` (or `baseline none` / `red: …`). No git: `attempts 0/3; baseline …; no git; files: <a root's rolled-up files, or `-`>; docs: <rolled-up docs, if any>; next: read docs`. Commit `chore(backlog): start <ID>` with any pending backlog edits. Nothing but backlog files changes before this.
+5. **Start** (a parent's integration step too). On the node's branch set `[/]` and write `State:` (replacing one that exists) as `attempts 0/3; baseline <n> passing; branch <name> from <branch it was created from>; next: read docs` (or `baseline none` / `red: …`). No git: `attempts 0/3; baseline …; no git; files: <a root's rolled-up files, or ->; docs: <rolled-up docs, if any>; next: read docs`. Commit `chore(backlog): start <ID>` with any pending backlog edits. Nothing but backlog files changes before this.
 6. **Read before write.** Read the `Ref:` doc and the README/doc sections that govern the area, then only the code the node needs. A `Ref:` path that is missing or a doc that contradicts the task line: stop and ask.
    - **Plan** (`--plan`, or `next: plan proposed`): read `reference/plan-step.md`, "Plan", and follow it before any code is written; it ends in a stop, or in `next: build` once the user approved.
 7. **Build.**
@@ -59,7 +59,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
        2. **Last gate** (only when `.todo/check.sh` exists): read it. It may hold only the shebang, comments, `set -eu`, `cd`, the lint line, an optional `.todo/todo-replay.sh` line and test commands that pass command safety (`reference/verification.md`); read each `.todo/` script it calls the same way. Anything else: show it and ask. Otherwise run it (in a worktree without `.todo/`, run its lines there instead: the lint via the main checkout's `.todo/todo-lint.sh`, then the tests). Red blocks the root.
        3. Drain: (a) insert one entry as the core's "CHANGELOG entry" says; (b) delete the subtree from TODO.md; (c) lint; (d) commit both files as `chore(backlog): drain <ID>`, body `Refs: <ID>` (and `Includes: <IDs>` with descendants).
        4. With `--merge`, merge into the base as git-flow "Root" says; otherwise print those commands. Never push.
-       No git: items 2 and 3 (a)-(c).
+       No git: item 1's review offer, items 2 and 3 (a)-(c).
 11. **Report**, short (on an early stop: which step and why, and only the items that apply): ID and title, commands and results (regression against the baseline; after a red-baseline stop the failing run itself; "not run" when the path ran no tests), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"; after a red-baseline stop, none until the fix lands), and a suggestion to clear context. If the host has a goal command (Claude Code: `/goal`), also suggest it for the rest, only while a workable node remains, for example `/goal keep running /todo-continue until the backlog is empty`; never start it.
 
 ## Test failures

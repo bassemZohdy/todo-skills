@@ -11,8 +11,8 @@ A root **qualifies** when its complexity is `high`, it touches security, data mi
 ## Design review (before the first build node)
 
 - **When:** `/todo-plan` offers it once for a qualifying root, and must never block a plan on it.
-- **Inputs:** the plan doc, the root and its children as written in `TODO.md`, and the `Ref` path.
-- **Outcome:** findings the user accepts go through `/todo-plan --revise`, so they land in **Revisions** with the reason. Declined or unresolved findings become a bullet under **Open questions**. With no review, the plan simply proceeds.
+- **Inputs:** the root and its children as written in `TODO.md`, its lane lines, the `Ref` path, and the plan doc when one exists (a plan made inline has none).
+- **Outcome:** findings the user accepts go through `/todo-plan --revise` (with a plan doc they land in its **Revisions** with the reason). Declined or unresolved findings become a bullet under the plan doc's **Open questions** (no plan doc: the reply, and nothing is written). With no review, the plan simply proceeds.
 
 ## Root review (before the drain)
 

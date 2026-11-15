@@ -1,6 +1,6 @@
 ---
 name: todo-update
-description: Manually change a task node in the TODO.md tree. Use for /todo-update <ID> [--status in-progress|blocked|ready|drop|revert] [--note "<message>"], where ID may be dotted like FEAT-002.1. Changes markers, drops a node with its subtree after confirmation, and edits Title, Done when, Ref, Depends, From, State, Complexity, Priority or Lane in place using only text the user supplied.
+description: Manually change a task node in the TODO.md tree. Use for /todo-update <ID> [--status in-progress|blocked|ready|drop|revert] [--note "<message>"], where ID may be dotted like FEAT-002.1. Changes markers, drops a node with its subtree after confirmation, and edits Title, Done when, Ref, Depends, From, State, Complexity, Size, Priority or Lane in place using only text the user supplied.
 argument-hint: <ID> [--status in-progress|blocked|ready|drop|revert] [--note "<message>"]
 ---
 
@@ -27,7 +27,7 @@ Check git (core, "Git mode"); in a non-git folder print the core's warning and c
 `--note` with `ready`, `in-progress` or `revert` is refused. `--note` without a status: if the note starts with `Title:`, `Done when:`, `Ref:`, `Depends:`, `From:`, `State:`, `Complexity:`, `Size:`, `Priority:` or `Lane:`, replace that part with the user's text verbatim. Otherwise tell the user the note was not applied; notes have no field of their own.
 
 - `Done when:` must keep at least one backticked non-vacuous command and must not contain a forbidden command (I3, I10).
-- `Lane:` only on roots (name: lowercase letters, digits, dashes). A lane not declared in the `## 🛤️ Lanes` section of `TODO.md` gets its line `- <name>: <what it covers>` there in the same edit (ask the user once for the description; the section is created above the Task Tree when missing; `main` needs no line).
+- `Lane:` only on roots (name: a lowercase letter, then lowercase letters, digits or dashes). A lane not declared in the `## 🛤️ Lanes` section of `TODO.md` gets its line `- <name>: <what it covers>` there in the same edit (ask the user once for the description; the section is created above the Task Tree when missing; `main` needs no line).
 - `Complexity:` is `low`, `mid` or `high`. `Size:` (optional, `-` removes it) must match the tree (core). `Priority:` only on roots.
 - A new `Ref:` path must exist, and `Depends:` / `From:` IDs must exist, otherwise ask. A `Depends:` that would create a cycle is refused.
 - A user edit of `State:` is one way to reset the attempt counter (`--status ready` is the other).

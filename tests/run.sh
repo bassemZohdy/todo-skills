@@ -1083,6 +1083,30 @@ for w in start complete drain; do printf '%s\n' "$fh_t" | grep -q "todo-flow.sh 
 printf '%s\n' "$fh_t" | grep -q 'by hand' || fh_bad="$fh_bad [TOOLS.md: what a refusal means]"
 grep -q 'todo-flow.sh' "$root/README.md" || fh_bad="$fh_bad [README]"
 if [ -z "$fh_bad" ]; then ok "the skills, the tools page and the README describe the optional lifecycle helper and its fallback (FEAT-129.3)"; else bad "helper text (FEAT-129.3):$fh_bad"; fi
+# TASK-131: review rounds over the skill text. Each line pins one fix: a phrase a file under plugin/skills must hold (has131)
+# or must no longer hold (not131). One check per round, so a failure names the round and the phrase.
+r131=""
+has131() { tr -d '\r' < "$root/plugin/skills/$1" | grep -qF -- "$2" || r131="$r131 [$1 lacks: $2]"; }
+not131() { if tr -d '\r' < "$root/plugin/skills/$1" | grep -qF -- "$2"; then r131="$r131 [$1 still says: $2]"; fi; }
+# Round 1, pointers and names that disagreed between files: the coordinator's own items in lanes.md were called steps, which
+# the file reserves for /todo-continue; deliverables.md pointed "above" at rules that live in verification.md; the design
+# review assumed a plan doc, which an inline plan does not have; the no-git drain dropped the root review that review.md
+# describes for no git; the lane-name rule had three wordings; /todo-update's description left out Size; rtm.md let /todo-add
+# offer an RTM that /todo-add never offers; the helper sentence did not exclude the two modes that never switch the main checkout.
+has131 todo/reference/lanes.md 'goes to item 4'; not131 todo/reference/lanes.md 'goes to step 4'
+has131 todo/reference/lanes.md 'an "item" is one of the numbered items below'
+has131 todo/reference/deliverables.md '"Command safety" in `reference/verification.md`'; not131 todo/reference/deliverables.md 'rules above'
+has131 todo/reference/review.md 'a plan made inline has none'; has131 todo/reference/review.md 'no plan doc: the reply'
+has131 todo-continue/SKILL.md "No git: item 1's review offer, items 2 and 3 (a)-(c)."
+has131 todo-continue/SKILL.md '(not with `--worktree` or `--all-lanes`)'
+for f in todo/SKILL.md todo-add/SKILL.md todo-update/SKILL.md; do has131 "$f" 'a lowercase letter, then lowercase letters, digits or dashes'; done
+has131 todo-update/SKILL.md 'Complexity, Size, Priority or Lane in place'
+has131 todo/reference/rtm.md '`/todo-add` never offers it'
+has131 todo-add/SKILL.md 'the next claim or start commit carries the backlog edit'
+l131="$(mktemp -d)"; printf '# Active Backlog\n\n## Task Tree\n\n- [ ] **TASK-001** · P1 · low · Rename a flag\n  - Done when: the flag is renamed; `npm test`\n  - Links: Lane: 2fast\n' > "$l131/TODO.md"
+(cd "$l131" && bash "$lint" TODO.md 2>&1) | grep -q 'I3.*a lowercase letter, then lowercase letters, digits or dashes' || r131="$r131 [the lint does not say how a lane name starts]"
+rm -rf "$l131"
+if [ -z "$r131" ]; then ok "review round 1: pointers, names and the plan-doc assumptions agree across the skill files (TASK-131)"; else bad "review round 1 (TASK-131):$r131"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

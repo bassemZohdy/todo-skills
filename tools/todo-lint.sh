@@ -240,7 +240,7 @@ inlanes {
       else if (p ~ /^Lane:/) {
         sub(/^Lane: */, "", p)
         if (nlvl[cur] != 0) fail("I3", "line " NR ": " id ": Lane is allowed on root tasks only")
-        else if (p !~ /^[a-z][a-z0-9-]*$/) fail("I3", "line " NR ": " id ": lane name must be lowercase letters, digits and dashes (found: " p ")")
+        else if (p !~ /^[a-z][a-z0-9-]*$/) fail("I3", "line " NR ": " id ": lane name must be a lowercase letter, then lowercase letters, digits or dashes (found: " p ")")
         else if (p != "main" && !(p in declared)) warn("W9", "line " NR ": " id ": lane " p " is not declared in a Lanes section" (hl ? "" : " (the file has none; add one above the Task Tree)"))
       }
       else fail("I3", "line " NR ": " id ": Links accepts only Ref, Depends, From and Lane (found: " p ")")

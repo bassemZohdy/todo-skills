@@ -26,7 +26,7 @@ The formats and rules of the todo-skills. The model reads the rules in [`plugin/
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
-The file is the heading `# Active Backlog`, an optional section whose heading ends in `Lanes` and one section whose heading ends in `Task Tree`, in that order. The Lanes section holds one `- <name>: <what it covers>` line per lane (lowercase letters, digits and dashes, no repeats); `main` always exists, and a file without the section has only that lane. A root's `Lane:` that is not declared there gets the warning W9. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
+The file is the heading `# Active Backlog`, an optional section whose heading ends in `Lanes` and one section whose heading ends in `Task Tree`, in that order. The Lanes section holds one `- <name>: <what it covers>` line per lane (the name is a lowercase letter, then lowercase letters, digits or dashes; no repeats); `main` always exists, and a file without the section has only that lane. A root's `Lane:` that is not declared there gets the warning W9. There are no In Progress, Ready or Blocked sections: the marker on each task is its state. An empty tree has no tasks. The whole file stays within **120 lines** (about 30 tasks); longer plans go into `docs/` and are linked with `Ref:`.
 
 ### A task
 

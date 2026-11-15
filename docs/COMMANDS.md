@@ -67,7 +67,7 @@ Adds work to the tree. It never starts work.
 | `--ref <docs-path>` | The governing doc, linked as `Ref:` (anchors allowed). The path must exist. Without it, a doc in `docs/` that clearly governs the work is proposed |
 | `--from <ID>` | Provenance, written as `From:`. The ID must exist in `TODO.md` or `CHANGELOG.md` |
 | `--parent <ID>` | Adds a child under an open `[ ]` node with at most one dot in its ID, in a tree nobody else has claimed. Children inherit the root's prefix, priority and lane, so `--priority`, `--lane` and `--type` are refused |
-| `--lane <name>` | Puts a root in a lane (lowercase letters, digits, dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
+| `--lane <name>` | Puts a root in a lane (a lowercase letter, then lowercase letters, digits or dashes). A lane the `## 🛤️ Lanes` section of `TODO.md` does not declare gets its line there in the same change |
 | `--clarify` | Always asks one round of questions first |
 
 1. Resolves `--ref`, an RTM link (only when an RTM exists), `--from` and `--parent`.
@@ -77,7 +77,7 @@ Adds work to the tree. It never starts work.
 5. A request that needs more than 6 nodes or more detail than 4 lines: offers a plan file `docs/plans/<ROOT-ID>-<slug>.md` linked with `Ref:`.
 6. Keeps `TODO.md` within 120 lines: if the tree would not fit, it adds the root and first level, with `State: next: decompose` on nodes that still need children. If even that does not fit, it refuses.
 7. Shows a tree of more than one node and waits for your confirmation; a single new leaf needs none.
-8. Assigns IDs (one global sequence, never reused) and inserts roots in order (P0 → P1 → P2, then by ID); children go last under their parent. Nothing is committed: the next claim commit carries it.
+8. Assigns IDs (one global sequence, never reused) and inserts roots in order (P0 → P1 → P2, then by ID); children go last under their parent. Nothing is committed: the next claim or start commit carries it.
 
 New roots, including a `--from` follow-up without `--parent`, are added only on the base branch.
 

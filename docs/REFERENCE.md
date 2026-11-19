@@ -14,15 +14,15 @@ The formats and rules of the todo-skills. The model reads the rules in [`plugin/
 ## 🌳 Task Tree
 
 - [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
+  - Done when: old token rejected after refresh; `npm test tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
   - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
   - [ ] **FEAT-002.1** · mid · L · Refresh endpoint
-    - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
+    - Done when: endpoint covered by an integration test; `npm test tests/auth/refresh.test.ts`
     - [x] **FEAT-002.1.1** · low · S · Token store interface
-      - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
+      - Done when: store round-trips a token; `npm test tests/auth/store.test.ts`
     - [/] **FEAT-002.1.2** · high · M · Rotate refresh tokens
-      - Done when: reuse of a rotated token fails; `npx jest tests/auth/rotate.test.ts`
+      - Done when: reuse of a rotated token fails; `npm test tests/auth/rotate.test.ts`
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.2-rotate-refresh-tokens from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
@@ -130,7 +130,7 @@ The file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is
 One entry per finished root, inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first, with no blank lines between entries. A missing heading is created in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security):
 
 ```markdown
-- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Docs: updated docs/auth.md. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.1.2.
+- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test tests/auth`. Docs: updated docs/auth.md. Includes: FEAT-002.1, FEAT-002.1.1, FEAT-002.1.2.
 ```
 
 Parts in this order, each only when it applies: `Ref:` (the root's), `Validated:` (the root's `Done when` commands, without a `regression:` command), `From:`, `Docs: updated …` (README/`docs/` files the tree changed, backlog files excluded), and last `Includes:` with every descendant ID. Entries written by hand (without an ID) are kept as they are.

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **FIX-133** (fix): Replace the `npx jest` example commands in the core skill, which the directory scan flags as a download-and-run command (`RUNTIME_FETCH_EXEC` in `skills/todo/SKILL.md`). The example tree and the example CHANGELOG entry now use `npm test <path>`, and a suite check keeps npx commands that could fetch a package out of the plugin folder. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/REFERENCE.md.
+
 ## [0.6.0] - 2026-11-15
 
 ### Added

@@ -232,6 +232,11 @@ badtype="$(cd "$root/plugin" && find . -type f ! -name '*.md' ! -name '*.json' !
 badshebang="$(cd "$root/plugin" && find . -type f \( -name '*.md' -o -name '*.json' -o -name '*.yml' -o -name '*.yaml' -o -name '*.txt' \) -exec sh -c 'head -c2 "$1" | grep -q "^#!" && echo "$1"' _ {} \; | head -5)"
 if [ -z "$badtype" ] && [ -z "$badshebang" ]; then ok "plugin folder ships only allowed file types and no #! files"; else bad "plugin folder has disallowed files: $badtype $badshebang"; fi
 if [ -f "$root/plugin/.claude-plugin/plugin.json" ] && grep -q '"source": "./plugin"' "$root/.claude-plugin/marketplace.json" && grep -q '"path": "./plugin"' "$root/.agents/plugins/marketplace.json"; then ok "marketplaces point at the plugin folder"; else bad "a marketplace does not point at ./plugin"; fi
+# Directory policy (FIX-133): no plugin file names an npx command that could fetch a package, which the directory scan
+# flags as a download-and-run command (RUNTIME_FETCH_EXEC). A bare npx and npx --no-install stay allowed.
+npx_re='(^|[^A-Za-z])npx +[^- ]'
+npx_hit="$(grep -rnE --include='*.md' --include='*.json' -- "$npx_re" "$root/plugin" 2>/dev/null | head -3)"
+if [ -z "$npx_hit" ] && printf 'run npx jest a.test.js\n' | grep -Eq -- "$npx_re" && ! printf 'npx --no-install jest, npx/bunx\n' | grep -Eq -- "$npx_re"; then ok "no plugin file names an npx command that could fetch a package (FIX-133)"; else bad "a plugin file names an npx command that could fetch a package (FIX-133): $npx_hit"; fi
 # The plugin folder has a README of at least 40 words outside code blocks (directory requirement).
 words="$(sed '/^```/,/^```/d' "$root/plugin/README.md" 2>/dev/null | wc -w)"
 if [ "${words:-0}" -ge 40 ]; then ok "plugin README has $words words"; else bad "plugin/README.md is missing or has fewer than 40 words"; fi

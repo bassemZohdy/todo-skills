@@ -64,13 +64,13 @@ A task is **2 to 4 lines**: what to do, how it is validated, optional links and 
 
 ```markdown
 - [ ] **FEAT-002** · P1 · mid · XL · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
+  - Done when: old token rejected after refresh; `npm test tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Depends: TASK-001 · From: FIX-001
   - State: branch todo/FEAT-002-add-token-refresh-auth from main; next: build children
   - [ ] **FEAT-002.1** · mid · Refresh endpoint
-    - Done when: endpoint covered by an integration test; `npx jest tests/auth/refresh.test.ts`
+    - Done when: endpoint covered by an integration test; `npm test tests/auth/refresh.test.ts`
     - [/] **FEAT-002.1.1** · high · Token store interface
-      - Done when: store round-trips a token; `npx jest tests/auth/store.test.ts`
+      - Done when: store round-trips a token; `npm test tests/auth/store.test.ts`
       - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1.1-token-store-interface from todo/FEAT-002.1-refresh-endpoint; next: build
 ```
 
@@ -155,7 +155,7 @@ Order for every node: **ready check → branch (in an unclaimed tree: tree claim
 Inserted as the first `- ` item of the matching `###` list under `## [Unreleased]`, newest first; the entries of one list have no blank line between them. Create the heading if missing, in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security), with one blank line before it and one between it and its first entry:
 
 ```markdown
-- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npx jest tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.
+- **FEAT-002** (feat): Add token refresh to the auth service. Ref: docs/auth.md#refresh. Validated: `npm test tests/auth`. Includes: FEAT-002.1, FEAT-002.1.1.
 ```
 
 One entry per root. Parts in this order, each only when it applies: `Ref:` (the root's), `Validated:` (the root's `Done when` commands, each in backticks, without a `regression:` command), `From: FIX-001.` (the root's `From:`), `Docs: updated docs/x.md.` (README/`docs/` files the tree changed: `git diff --name-only <base>...<root branch>` without backlog files, or the `docs:` items in no-git mode), and last `Includes:` with every descendant ID (a leaf root has none).

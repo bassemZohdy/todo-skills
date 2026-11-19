@@ -12,10 +12,10 @@ Skills that let a coding agent run a software backlog inside the repository it w
 
 ```markdown
 - [ ] **FEAT-002** · P1 · mid · L · Add token refresh to the auth service
-  - Done when: old token rejected after refresh; `npx jest tests/auth`; regression: `npm test`
+  - Done when: old token rejected after refresh; `npm test tests/auth`; regression: `npm test`
   - Links: Ref: docs/auth.md#refresh · Lane: api
   - [/] **FEAT-002.1** · high · M · Rotate refresh tokens
-    - Done when: reuse of a rotated token fails; `npx jest tests/auth/rotate.test.ts`
+    - Done when: reuse of a rotated token fails; `npm test tests/auth/rotate.test.ts`
     - State: attempts 1/3; baseline 42 passing; branch todo/FEAT-002.1-rotate-refresh-tokens from todo/FEAT-002-add-token-refresh-auth; next: build
 ```
 

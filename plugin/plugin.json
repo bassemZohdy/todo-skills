@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "todo-skills",
+  "version": "0.6.2",
+  "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
+  "author": {
+    "name": "Bassem Zohdy"
+  },
+  "homepage": "https://github.com/bassemZohdy/todo-skills",
+  "repository": "https://github.com/bassemZohdy/todo-skills",
+  "license": "MIT",
+  "keywords": [
+    "backlog",
+    "todo",
+    "agent-skills",
+    "changelog"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "todo-skills",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
   "author": {
     "name": "Bassem Zohdy"
@@ -28,6 +28,7 @@
     ],
     "websiteURL": "https://github.com/bassemZohdy/todo-skills",
     "supportURL": "https://github.com/bassemZohdy/todo-skills/issues",
+    "privacyPolicyURL": "https://github.com/bassemZohdy/todo-skills/blob/main/PRIVACY.md",
     "defaultPrompt": [
       "Set up a TODO.md backlog for this repository",
       "Add a task to the backlog for this bug",

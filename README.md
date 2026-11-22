@@ -1,6 +1,6 @@
 # todo-skills
 
-[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.0 (early, see [Status](#status))
+[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.2 (early, see [Status](#status))
 
 Skills that let a coding agent run a software backlog inside the repository it works on. There is no tracker, database or framework: the repository is the state machine.
 
@@ -111,11 +111,11 @@ Tests: `bash tests/run.sh`
 
 ## Security and disclosure
 
-The plugin sends no data and has no network access, MCP server or shipped hook. It runs local `git` and your own test commands (the optional scripts are not part of the plugin). It reads project docs and the files the current task needs, and writes only the files listed [above](#what-the-skills-read-and-write). It never reads credentials. Details: [SECURITY.md](SECURITY.md).
+The plugin sends no data and has no network access, MCP server or shipped hook. It runs local `git` and your own test commands (the optional scripts are not part of the plugin). It reads project docs and the files the current task needs, and writes only the files listed [above](#what-the-skills-read-and-write). It never reads credentials. Details: [SECURITY.md](SECURITY.md); the privacy policy is [PRIVACY.md](PRIVACY.md).
 
 ## Status
 
-Version 0.6.0 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
+Version 0.6.2 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
 
 | Agent | Platform | What ran | Result | Evidence |
 |---|---|---|---|---|

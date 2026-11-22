@@ -8,6 +8,7 @@ How this repository is laid out, what its tests check, and how it is released. F
 plugin/                          The installable plugin: Markdown, JSON and the icon only
   .claude-plugin/plugin.json     Claude Code manifest (version) and icon.png
   .codex-plugin/plugin.json      Codex manifest (same version; "skills": "./skills/"; "interface": directory listing)
+  plugin.json                    Agent Plugins 1.0.0 manifest for GitHub Copilot (same version and identity fields; only keys the schema allows)
   assets/icon.png                Codex listing logo and composer icon (a copy of .claude-plugin/icon.png)
   README.md                      The plugin's own short README
   skills/
@@ -120,7 +121,7 @@ Shell scripts are LF in every checkout (`.gitattributes`: `*.sh text eol=lf`); `
 ## Releasing this repository
 
 1. `/todo-release` on `main` proposes the version from `[Unreleased]`; confirm it, and it commits `chore(release): X.Y.Z`.
-2. Run `bash tests/set-version.sh X.Y.Z`: it sets `"version"` in `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` (Codex caches an install by version), the version statements in README.md, the `todo_skills_version` stamp of each script in `tools/` and the vendored `.todo/todo-lint.sh`. Then run `bash tests/run.sh`, which fails while any of them, or the newest CHANGELOG heading, names another version.
+2. Run `bash tests/set-version.sh X.Y.Z`: it sets `"version"` in `plugin/.claude-plugin/plugin.json`, `plugin/.codex-plugin/plugin.json` and `plugin/plugin.json` (Codex caches an install by version), the version statements in README.md, the `todo_skills_version` stamp of each script in `tools/` and the vendored `.todo/todo-lint.sh`. Then run `bash tests/run.sh`, which fails while any of them, or the newest CHANGELOG heading, names another version.
 3. Tag and push by hand: `git tag -a vX.Y.Z -m "X.Y.Z"` and `git push --follow-tags`.
 4. For the Anthropic directory, follow the checklist in [distribution.md](distribution.md); its package-check record is dated and names the version it checked, so redo it when you submit.
 5. Review [agent-compatibility.md](agent-compatibility.md) against the release and update its "Last reviewed … against version" line, saying what was and was not re-run; `tests/run.sh` fails while that line names an older version than the manifests (TASK-074).

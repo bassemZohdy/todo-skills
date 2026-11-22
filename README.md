@@ -59,7 +59,7 @@ All nine skill folders go together: the command skills load the `todo` core skil
 | Area | Files | Read for | Written by |
 |---|---|---|---|
 | Backlog | `TODO.md`, `CHANGELOG.md` | Every command | `/todo-init` creates them. `/todo-add`, `/todo-plan`, `/todo-update` and `/todo-continue` edit `TODO.md`; only a root drain and `/todo-release` edit `CHANGELOG.md` |
-| Project instructions | `README.md`, `CONTRIBUTING.md`, `docs/*.md` | The test command (`Tests:` line), base branch (`Base:`), model map (`Models:`), a `Definition of Done` checklist, the docs a task's `Ref:` points to | `/todo-init` adds the `Tests:` line on your yes; any command may add `Base:` on your yes; `/todo-continue` updates README and `docs/` references a task's interface change made stale |
+| Project instructions | `README.md`, `CONTRIBUTING.md`, `docs/*.md` | The test command (`Tests:` line), base branch (`Base:`), model map (`Models:`), time budget (`Budget:`), a `Definition of Done` checklist, the docs a task's `Ref:` points to | `/todo-init` adds the `Tests:` line on your yes; any command may add `Base:` on your yes; `/todo-continue` updates README and `docs/` references a task's interface change made stale |
 | Plans | `docs/plans/PROJECT.md`, `docs/plans/<ROOT-ID>-<slug>.md` | Goal, scope, lanes, decisions, revisions | `/todo-plan` for a complex goal, `/todo-add` for a long request, `/todo-update --status drop` (a Revisions line), each on your yes |
 | Traceability (optional) | `docs/RTM.md`, else a `## RTM` section in README | Which requirement a task implements | Only when it exists: `/todo-plan` and `/todo-add` on your yes, `/todo-continue` fills Verification |
 | Status page | `docs/status.html` | | `/todo-report` |

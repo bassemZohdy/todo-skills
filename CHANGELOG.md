@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-22
+
 ### Changed
 
 - **TASK-135** (task): Add `plugin/plugin.json`, the Agent Plugins 1.0.0 manifest that GitHub Copilot's awesome-copilot marketplace reads for a public plugin submission, so a release can be submitted there. It holds only the keys the schema allows (`$schema`, `name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`); Copilot finds the nine skills under `skills/` by convention. `tests/set-version.sh` sets its version with the other two manifests, and `tests/run.sh` fails when it breaks the schema, names another version or differs from the Claude manifest in its identity fields. The Claude and Codex packages are unchanged: the ZIP builder lists its files, so `plugin.json` is not in either archive. Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md, docs/distribution.md.
@@ -266,7 +268,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.4.0...v0.5.0

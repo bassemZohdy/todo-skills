@@ -1,6 +1,6 @@
 # todo-skills
 
-[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.1 (early, see [Status](#status))
+[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.2 (early, see [Status](#status))
 
 Skills that let a coding agent run a software backlog inside the repository it works on. There is no tracker, database or framework: the repository is the state machine.
 
@@ -115,7 +115,7 @@ The plugin sends no data and has no network access, MCP server or shipped hook. 
 
 ## Status
 
-Version 0.6.1 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
+Version 0.6.2 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
 
 | Agent | Platform | What ran | Result | Evidence |
 |---|---|---|---|---|

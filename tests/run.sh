@@ -1245,6 +1245,20 @@ has131 todo-update/SKILL.md 'a node without `State:` gets it as its last field l
 has131 todo-continue/SKILL.md 'before its branch exists (no git: in the working folder)'
 has131 todo-plan/SKILL.md "(named by the root's \`Ref:\`, else \`PROJECT.md\`)"
 if [ -z "$r131" ]; then ok "review rounds 10 and 11: seven sentences that two or more agent reports named say what is meant (TASK-132)"; else bad "review round 10 (TASK-132):$r131"; fi
+# FEAT-134.1: the loop guard. Failed runs outside step 9 count as attempts at the 2nd, 4th and 8th run without progress, so
+# edit, run, fail cannot repeat without limit. The always-loaded /todo-continue text sends the agent to failures.md, which
+# holds the rule in one item (which runs count, when the count goes up, when it restarts, what a step 9 run is), and
+# docs/VERIFICATION.md states the same rule.
+lg_bad=""; lg_f="$root/plugin/skills/todo/reference/failures.md"
+lg="$(tr -d '\r' < "$lg_f" | grep -F -- '**Loop guard.**')"
+for s in 'outside step 9 count too, once implementing started' 'a rerun that only reproduces a failure is not counted' 'the same first failing test (or another that already failed in this session since implementing started)' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt: raise `attempts`' 'Fewer failing tests, or a first failing test that has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'failed, it is an attempt by the item above and is not added to this count' 'also a partial one while fixing a step 9 failure' 'a new session starts it at 1'; do printf '%s\n' "$lg" | grep -qF -- "$s" || lg_bad="$lg_bad [failures.md loop guard lacks: $s]"; done
+tr -d '\r' < "$lg_f" | grep -F -- 'or a failed run that the loop guard makes one' | grep -qF -- '(the new test failing before the implementation) is not one' || lg_bad="$lg_bad [failures.md: an attempt is also a run the loop guard counted, the red run is not]"
+for f in "$lg_f" "$root/plugin/skills/todo-continue/SKILL.md"; do tr -d '\r' < "$f" | grep -F -- 'a `Done when` cannot run' | grep -qF -- 'Green fails twice on one test' || lg_bad="$lg_bad [${f##*/skills/}: the Green trigger beside the other two]"; done
+tr -d '\r' < "$root/plugin/skills/todo-continue/SKILL.md" | grep -F -- 'Green fails twice on one test' | grep -qF -- 'read `reference/failures.md` before the next change' || lg_bad="$lg_bad [todo-continue: the Green trigger points to failures.md]"
+tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- 'or a failed run that the loop guard makes one' | grep -qF -- '(the new test failing before the implementation) is not one' || lg_bad="$lg_bad [VERIFICATION.md: an attempt is also a run the loop guard counted, the red run is not]"
+lg_d="$(tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- '**Loop guard:**')"
+for s in 'Once implementing started, every such run' 'a rerun that only reproduces a failure is not' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt' 'has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'failed, it is an attempt in its own right and is not added to the count' 'also a partial one while fixing a step 9 failure' 'a new session starts it at 1'; do printf '%s\n' "$lg_d" | grep -qF -- "$s" || lg_bad="$lg_bad [VERIFICATION.md loop guard lacks: $s]"; done
+if [ -z "$lg_bad" ]; then ok "failed runs outside step 9 count as attempts at the 2nd, 4th and 8th run without progress (FEAT-134.1)"; else bad "loop guard (FEAT-134.1):$lg_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -53,7 +53,7 @@ Items separated by `; `, each at most once, in this order:
 
 | Item | Meaning |
 |---|---|
-| `attempts n/3` | Failed attempts so far: failed verification runs, and the failed runs the loop guard turned into attempts |
+| `attempts n/3` | Failed attempts so far: failed verification runs, and the failed runs the loop guard turned into attempts; a worker that stopped without a verdict is not one |
 | `baseline <n> passing`, `baseline none` or `baseline red: <ids>` | The regression result before work started |
 | `tier: low\|mid\|high` | Only once escalated above the node's complexity |
 | `hyp: <one line>` | The current hypothesis while fixing a failure |

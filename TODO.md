@@ -21,6 +21,5 @@
       - Done when: verification.md names the limit and the helper with a fallback by hand, failures.md counts a timeout as a failed run, and docs/TOOLS.md and README describe the helper; `bash tests/run.sh`
   - [x] **FEAT-134.4** · mid · Run fresh agents on a new trial scenario whose task cannot turn green and publish the result summary
     - Done when: the scenario sets up and fails for an agent that does nothing, docs/evals holds one summary that says whether each run stopped at the loop limit, and docs/trials.md links it; `bash tests/trials/selftest.sh`
-  - [/] **FEAT-134.5** · high · Treat a worker that stopped without a verdict as resumable, and stop resuming a node that makes no progress
+  - [x] **FEAT-134.5** · high · Treat a worker that stopped without a verdict as resumable, and stop resuming a node that makes no progress
     - Done when: a node left active by a dead worker is not counted as a failed attempt and raises no tier, the lane coordinator reports it as resumable, and a node resumed twice with no new commit is broken down or blocked; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 361 passing; branch todo/FEAT-134.5-treat-worker-that-stopped from todo/FEAT-134-guard-todo-continue-workers; next: read docs

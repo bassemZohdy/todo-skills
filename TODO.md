@@ -9,8 +9,9 @@
 - [ ] **FEAT-134** · P1 · mid · Guard /todo-continue workers against getting stuck: loops in build, hung commands and dead workers
   - Done when: README describes the three guards and the load budget still holds; `bash tests/run.sh`
   - State: branch todo/FEAT-134-guard-todo-continue-workers from main; next: build children
-  - [ ] **FEAT-134.1** · high · Count failed runs of Done when during Green as attempts, at 2, 4 and 8 runs with the same failing test
+  - [/] **FEAT-134.1** · high · Count failed runs of Done when during Green as attempts, at 2, 4 and 8 runs with the same failing test
     - Done when: failures.md and todo-continue state the rule, fewer failing tests or a different failing test resets the count, and a run before implementing started is not counted; `bash tests/run.sh`
+    - State: attempts 0/3; baseline 341 passing; branch todo/FEAT-134.1-count-failed-runs-done from todo/FEAT-134-guard-todo-continue-workers; next: read docs
   - [ ] **FEAT-134.2** · mid · Report a stale claim in /todo-status from the age of the last commit on the claimed tree's branch, report only
     - Done when: todo-status flags a claim older than four times the time budget of its complexity (optional README Budget line), never releases or resumes it, and does not flag a fresh claim; `bash tests/run.sh`
   - [ ] **FEAT-134.3** · low · Limit the run time of the Done when and regression commands, a timeout counts as a failed run

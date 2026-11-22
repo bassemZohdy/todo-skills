@@ -1259,6 +1259,16 @@ tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- 'or a failed run that the
 lg_d="$(tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- '**Loop guard:**')"
 for s in 'Once implementing started, every such run' 'a rerun that only reproduces a failure is not' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt' 'has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'failed, it is an attempt in its own right and is not added to the count' 'also a partial one while fixing a step 9 failure' 'a new session starts it at 1'; do printf '%s\n' "$lg_d" | grep -qF -- "$s" || lg_bad="$lg_bad [VERIFICATION.md loop guard lacks: $s]"; done
 if [ -z "$lg_bad" ]; then ok "failed runs outside step 9 count as attempts at the 2nd, 4th and 8th run without progress (FEAT-134.1)"; else bad "loop guard (FEAT-134.1):$lg_bad"; fi
+# FEAT-134.2: a dead worker leaves its tree claimed. /todo-status marks a claim stale by the age of the newest commit on the
+# tree's branches (four times a time budget per complexity, which a README Budget line may set), names the commands that
+# act on it and runs neither; a newer claim is not marked. The pages that list what the README holds name the line.
+sc_bad=""; sc_s="$(tr -d '\r' < "$root/plugin/skills/todo-status/SKILL.md")"
+printf '%s\n' "$sc_s" | grep -F -- 'claimed by <branch>' | grep -qF -- 'or by "Stale claims" below' || sc_bad="$sc_bad [todo-status: the Tree step points to Stale claims]"
+sc_p="$(printf '%s\n' "$sc_s" | awk '/^## Stale claims/ { on = 1; next } /^## / { on = 0 } on')"
+for s in 'A claim whose branch exists is also stale when the newest commit' "older than four times the time budget of the tree's highest complexity" '15 minutes for `low`, 30 for `mid`, 60 for `high`' 'or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`' 'stale: no commit for <age>' '`git switch <branch>` to resume' '`/todo-update <ROOT-ID> --status ready` to release (it asks first)' 'Report only: run neither, and mark no claim with a newer commit'; do printf '%s\n' "$sc_p" | grep -qF -- "$s" || sc_bad="$sc_bad [todo-status Stale claims lacks: $s]"; done
+tr -d '\r' < "$root/docs/COMMANDS.md" | grep -F -- 'claimed by <branch>' | grep -F -- 'no commit for four times its time budget' | grep -qF -- 'runs neither, and since the branch still exists the release asks for a yes' || sc_bad="$sc_bad [COMMANDS.md: the Tree line names the age rule and that it is report only]"
+for f in docs/FILES.md README.md; do tr -d '\r' < "$root/$f" | grep -F -- '`Models:' | grep -qF -- '`Budget:' || sc_bad="$sc_bad [$f: the Budget line beside the Models line]"; done
+if [ -z "$sc_bad" ]; then ok "/todo-status marks a claim stale by the age of its newest commit and only reports it (FEAT-134.2)"; else bad "stale claims (FEAT-134.2):$sc_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

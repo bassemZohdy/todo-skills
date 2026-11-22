@@ -70,6 +70,7 @@ Checked: make smoke
 | `chore(backlog): claim <ROOT-ID> on <branch>` | The first node of a tree |
 | `chore(backlog): start <ID>` | Every node, on its branch |
 | `chore(backlog): plan <ID>` | `/todo-continue --plan` |
+| `chore(backlog): resume <ID>` | Each resume of a `[/]` node whose worker stopped, by path and empty if `TODO.md` is unchanged; two in a row with no commit after them stop the resuming |
 | `chore(backlog): pending edits <IDs>` | Leaving a `todo/` branch with backlog edits |
 | `chore(backlog): decompose <ID>` | Breaking down a `next: decompose` node on a tree branch |
 | `chore(backlog): block <ID>` | A blocked node (with its changed files) |

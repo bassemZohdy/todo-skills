@@ -1333,6 +1333,61 @@ sl_s="$root/docs/evals/pi-glm-2026-11-22-stuck-loop"
 [ "$(tr -d '\r' < "$sl_s/summary.md" | grep -cE '^\| S[0-9] \|.* \| (yes|no) \| ')" = 3 ] || sl_bad="$sl_bad [the stuck-loop summary table does not say for each of three runs whether it stopped at the loop limit]"
 [ "$(grep -cE '^S[0-9]-stuck-loop,.*,(yes|no),' "$sl_s/runs.csv")" = 3 ] || sl_bad="$sl_bad [runs.csv has not three stuck-loop rows with stopped_at_loop_limit]"
 if [ -z "$sl_bad" ]; then ok "the trial scenario stuck-loop: the regression is green, the acceptance test red, the blocked end state passes and three cheats fail (FEAT-134.4)"; else bad "stuck-loop scenario (FEAT-134.4):$sl_bad"; fi
+# FEAT-134.5: a worker that stops without a verdict must not cost an attempt or a tier, and a node that two resumes could not move
+# is broken down or blocked. failures.md has the rule (a resume commit per resume, counted in git, no State field), step 2 of
+# /todo-continue points to it, routing.md and lanes.md say what they do, and the docs name it. The two end states the rule
+# writes pass the lint, and the git commands it names behave as it says: the resume commit leaves staged work alone.
+wd_bad=""
+wd_sk="$root/plugin/skills"
+wd_f="$(tr -d '\r' < "$wd_sk/todo/reference/failures.md")"
+wd_sec="$(printf '%s\n' "$wd_f" | awk '/^## A worker that stopped$/ { on = 1; next } /^## / { on = 0 } on')"
+[ -n "$wd_sec" ] || wd_bad="$wd_bad [failures.md has no section A worker that stopped]"
+for s in 'A node still `[/]` whose worker is gone' 'or `next: drain` on a root' 'is **resumable**: not a failed attempt' 'the error text decides nothing' 'checked out in another worktree is not gone' 'Once the resume goes ahead (the `git status` check of step 2 passed)' '`git commit --allow-empty -m '"'"'chore(backlog): resume <ID>'"'"' -- TODO.md`' 'Any commit that is not a resume commit counts as progress, uncommitted work does not' '`git log -2 --format=%s`' 'resumed twice, nothing committed since' 'make no resume commit' 'a leaf that is `mid` or `high`: break it down' 'reference/plan-step.md`, "Decompose"' 'every later run offers the breakdown again' 'a `low` leaf, or a parent'"'"'s integration step: block it' 'resumed twice with no new commit →' 'nothing is reverted' 'Without git there is no commit to count'; do printf '%s\n' "$wd_sec" | grep -qF -- "$s" || wd_bad="$wd_bad [failures.md section lacks: $s]"; done
+printf '%s\n' "$wd_f" | grep -F 'Read on demand from' | grep -qF 'and from step 2 when it resumes a `[/]` node' || wd_bad="$wd_bad [failures.md intro does not name the resume trigger]"
+printf '%s\n' "$wd_f" | grep -F 'An attempt is a failed verification run' | grep -qF 'A worker that stopped without a verdict is not one' || wd_bad="$wd_bad [failures.md attempt definition does not exclude a worker that stopped]"
+tr -d '\r' < "$wd_sk/todo-continue/SKILL.md" | grep -F -- '**A `[/]` node:**' | grep -qF 'read `reference/failures.md`, "A worker that stopped" first' || wd_bad="$wd_bad [todo-continue step 2 does not point a resumed [/] node to failures.md]"
+tr -d '\r' < "$wd_sk/todo/reference/routing.md" | grep -F -- 'Escalation' | grep -qF 'returns with its node still `[/]`' || wd_bad="$wd_bad [routing.md: a worker that stopped raises no tier]"
+tr -d '\r' < "$wd_sk/todo/reference/lanes.md" | grep -F -- '  5. Report per lane' | grep -qF 'resumable if `[/]` without `next: drain`' || wd_bad="$wd_bad [lanes.md item 5 does not report a resumable node (a root with next: drain is finished, not resumable)]"
+tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -qF 'worker that stopped' || wd_bad="$wd_bad [docs/VERIFICATION.md]"
+tr -d '\r' < "$root/docs/COMMANDS.md" | grep -qF 'resumable' || wd_bad="$wd_bad [docs/COMMANDS.md]"
+tr -d '\r' < "$root/docs/GIT-FLOW.md" | grep -qF 'chore(backlog): resume <ID>' || wd_bad="$wd_bad [docs/GIT-FLOW.md names no resume commit]"
+tr -d '\r' < "$root/README.md" | grep -qF 'worker stopped without a verdict is resumable' || wd_bad="$wd_bad [README.md]"
+wd="$(mktemp -d)"
+printf '# Changelog\n\n## [Unreleased]\n' > "$wd/CHANGELOG.md"
+wd_head='# Active Backlog
+
+## 🛤️ Lanes
+
+- main: the default track
+
+## 🌳 Task Tree
+'
+# The State the breakdown writes once the user confirms the children is taken from failures.md itself, so the fixture cannot drift.
+wd_st="$(printf '%s\n' "$wd_sec" | grep -F 'a leaf that is `mid` or `high`' | sed -n 's/.*`State: \(branch [^`]*\)`.*/\1/p' | sed 's#<its own branch>#todo/FEAT-001-add-subtract-divide-calc#; s#<the branch it was created from>#main#')"
+[ -n "$wd_st" ] || wd_bad="$wd_bad [failures.md: no State line for the confirmed breakdown]"
+printf '%s\n%s\n' "$wd_head" "- [ ] **FEAT-001** · P1 · high · Add subtract and divide to calc.py
+  - Done when: both work and divide raises on zero; \`python3 -m unittest discover -s tests\`
+  - State: $wd_st
+  - [ ] **FEAT-001.1** · high · Add subtract to calc.py
+    - Done when: subtract works and rejects a string; \`python3 -m unittest discover -s tests\`
+  - [ ] **FEAT-001.2** · high · Add divide to calc.py
+    - Done when: divide works and raises on zero; \`python3 -m unittest discover -s tests\`" > "$wd/broken-down.md"
+printf '%s\n%s\n' "$wd_head" '- [!] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract works; `python3 -m unittest discover -s tests`
+  - Blocked: resumed twice with no new commit → `git log -2 --format=%s` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → decide whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready' > "$wd/blocked.md"
+for f in broken-down blocked; do bash "$root/tools/todo-lint.sh" "$wd/$f.md" "$wd/CHANGELOG.md" 2>&1 | grep -q '^OK: invariants' || wd_bad="$wd_bad [the lint rejects the $f end state]"; done
+mkdir "$wd/repo"
+( cd "$wd/repo" || exit 1
+  git init -q && git config user.email t@example.invalid && git config user.name t && git config core.autocrlf false && git config commit.gpgsign false || exit 1
+  printf 'a\n' > TODO.md && printf 'x\n' > code.py && git add TODO.md code.py && git commit -q -m 'chore(backlog): start FEAT-001' || exit 1
+  printf 'y\n' >> code.py && git add code.py
+  git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md || exit 1
+  [ "$(git log -1 --format=%s)" = 'chore(backlog): resume FEAT-001' ] && [ -z "$(git show --name-only --format= HEAD)" ] && [ "$(git diff --cached --name-only)" = code.py ] || exit 1
+  [ "$(git log -2 --format=%s | grep -cx 'chore(backlog): resume FEAT-001')" = 1 ] || exit 1
+  git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md || exit 1
+  [ "$(git log -2 --format=%s | grep -cx 'chore(backlog): resume FEAT-001')" = 2 ] ) >/dev/null 2>&1 || wd_bad="$wd_bad [the git commands of the rule: a path-limited empty resume commit must leave staged work alone, and two newest subjects must show two resumes]"
+rm -rf "$wd"
+if [ -z "$wd_bad" ]; then ok "a worker that stopped without a verdict is resumable, costs no attempt or tier, and a node resumed twice with no commit is broken down or blocked (FEAT-134.5)"; else bad "worker that stopped (FEAT-134.5):$wd_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

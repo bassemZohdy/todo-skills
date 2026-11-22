@@ -12,7 +12,7 @@
 # stop_hook_active is true, so it can never loop, when there is no TODO.md, or
 # when the lint passes. Otherwise it prints a block decision and exits 0.
 # --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
-todo_skills_version="0.6.0"
+todo_skills_version="0.6.2"
 if [ "${1:-}" = "--version" ]; then echo "todo-stop-hook.sh $todo_skills_version"; exit 0; fi
 input=$(cat)
 # Whitespace is not significant in JSON, so compare with all of it removed (spaces, tabs, a pretty-printed document).

@@ -9,10 +9,11 @@
 | ClawHub (OpenClaw) | Published 2026-11-13, nine skills under `@bassemzohdy`, MIT-0; the core skill's slug is `todo-core`. See below | `openclaw skills install @bassemzohdy/todo-core` |
 | agent-skills.md | Submitted 2026-11-13 with the `plugin/skills` folder URL; the site parsed and added all nine skills | https://agent-skills.md |
 | Skills Directory (skillsdirectory.com) | Submitted 2026-11-13, one skill per submission (repository URL plus each `SKILL.md` path), signed in with the maintainer's account; all nine graded A by its security scan (core `todo` 92/100, medium note: "installs packages at runtime" in `reference/ci.md`, the CI guidance) | `npx -y skills add bassemZohdy/todo-skills --skill <name> --agent claude-code`, pages `https://www.skillsdirectory.com/skills/bassemzohdy-<name>` |
-| OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0, upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
+| OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0 (the privacy policy it requires, `PRIVACY.md`, is linked from the Codex manifest since 0.6.2), upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
+| GitHub Copilot (awesome-copilot marketplace) | Submitted 2026-11-22 as github/awesome-copilot issue 6568 (ref `v0.6.2`); the automated intake passed every gate, including `vally lint`, and the issue waits for a maintainer. `plugin/plugin.json`, the Agent Plugins manifest it requires, is in the plugin folder since 0.6.1 | An owner-approved issue from the external plugin form at github.com/github/awesome-copilot, plugin path `plugin`, ref `v0.6.2` and the full commit SHA of that tag; its gates run `vally lint` and a Copilot CLI install test, then a maintainer approves. Listed plugins are re-reviewed every six months |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
-Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
+Keep `plugin/.claude-plugin/plugin.json`, `plugin/.codex-plugin/plugin.json` and `plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
 
 ## ClawHub (OpenClaw)
 
@@ -63,7 +64,7 @@ Prepared from the repository; the portal's own fields may differ, so check them 
 
 - [ ] Sign in at claude.ai/directory/manage and accept the directory terms.
 - [ ] Plugin: `todo-skills`, manifest `plugin/.claude-plugin/plugin.json`, license MIT, author Bassem Zohdy, homepage https://github.com/bassemZohdy/todo-skills.
-- [ ] Version: the newest release in CHANGELOG.md (0.6.0 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
+- [ ] Version: the newest release in CHANGELOG.md (0.6.2 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
 - [ ] `bash tests/run.sh` passes on the commit you submit.
 - [ ] Short description: "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md."
 - [ ] Install check from a clean client: `/plugin marketplace add bassemZohdy/todo-skills`, then confirm the nine skills (todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update) are listed.

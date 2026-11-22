@@ -45,7 +45,7 @@ readme_bad="$(python3 - "$root" <<'PY'
 import json, os, re, sys
 root = sys.argv[1]
 readme = open(os.path.join(root, 'README.md'), encoding='utf-8').read()
-want = {json.load(open(os.path.join(root, 'plugin', d, 'plugin.json'), encoding='utf-8'))['version'] for d in ('.claude-plugin', '.codex-plugin')}
+want = {json.load(open(f, encoding='utf-8'))['version'] for f in (os.path.join(root, 'plugin', d, 'plugin.json') for d in ('.claude-plugin', '.codex-plugin', '')) if os.path.isfile(f)}
 cl = re.search(r'^## \[(\d+\.\d+\.\d+)\]', open(os.path.join(root, 'CHANGELOG.md'), encoding='utf-8').read(), re.M)
 if cl: want.add(cl.group(1))
 said = set(re.findall(r'(?i)\bversion (\d+\.\d+\.\d+)', readme))
@@ -69,7 +69,7 @@ python3 - "$1" <<'PY'
 import json, os, re, sys
 root = sys.argv[1]
 def rd(*p): return open(os.path.join(root, *p), encoding='utf-8').read()
-want = {json.load(open(os.path.join(root, 'plugin', d, 'plugin.json'), encoding='utf-8'))['version'] for d in ('.claude-plugin', '.codex-plugin')}
+want = {json.load(open(f, encoding='utf-8'))['version'] for f in (os.path.join(root, 'plugin', d, 'plugin.json') for d in ('.claude-plugin', '.codex-plugin', '')) if os.path.isfile(f)}
 m = re.search(r'(?i)last reviewed [0-9-]+, against version (\d+\.\d+\.\d+)', rd('docs', 'agent-compatibility.md'))
 if not m: print('docs/agent-compatibility.md has no "Last reviewed <date>, against version X.Y.Z" line')
 elif {m.group(1)} != want: print(f'docs/agent-compatibility.md was reviewed against {m.group(1)}, the manifests say {sorted(want)}')
@@ -107,6 +107,25 @@ fi
 # The Codex manifest parses and carries the same version as the Claude plugin manifest.
 cxv="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$root/plugin/.codex-plugin/plugin.json" | head -1)"
 if [ -n "$cxv" ] && [ "$cxv" = "$pv" ] && python3 -m json.tool "$root/plugin/.codex-plugin/plugin.json" >/dev/null 2>&1 && python3 -m json.tool "$root/.agents/plugins/marketplace.json" >/dev/null 2>&1; then ok "codex manifests parse and match version $pv"; else bad "codex manifests missing, invalid, or version '$cxv' differs from '$pv'"; fi
+# TASK-135: plugin/plugin.json is the Agent Plugins 1.0.0 manifest that GitHub Copilot (the awesome-copilot gate) reads. The schema
+# allows only the keys below and a lowercase name of at most 64 characters; it repeats the Claude manifest's identity fields and version.
+apbad="$(python3 - "$root/plugin" <<'PY' 2>&1
+import json, os, re, sys
+d = sys.argv[1]; e = []
+try: a = json.load(open(os.path.join(d, 'plugin.json'), encoding='utf-8'))
+except Exception as x: print(f'plugin/plugin.json: {x}'); sys.exit()
+cl = json.load(open(os.path.join(d, '.claude-plugin', 'plugin.json'), encoding='utf-8'))
+allowed = {'$schema', 'name', 'version', 'description', 'author', 'homepage', 'repository', 'license', 'keywords', 'extensions'}
+if a.get('$schema') != 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json': e.append('$schema is not the 1.0.0 schema')
+if set(a) - allowed: e.append(f'keys the schema refuses: {sorted(set(a) - allowed)}')
+if not re.fullmatch(r'(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?', a.get('name', '')) or len(a.get('name', '')) > 64: e.append('name breaks the schema pattern')
+if set(a.get('author', {})) - {'name', 'email', 'url'}: e.append('author has keys the schema refuses')
+for k in ('name', 'version', 'description', 'author', 'homepage', 'repository', 'license', 'keywords'):
+    if a.get(k) != cl.get(k): e.append(f'{k} differs from the Claude manifest')
+print('; '.join(e))
+PY
+)"
+if [ -z "$apbad" ]; then ok "plugin/plugin.json follows the Agent Plugins 1.0.0 schema and repeats the Claude manifest"; else bad "plugin/plugin.json: $apbad"; fi
 # FEAT-048: the Codex manifest carries the public-directory listing metadata within the documented limits
 # (developers.openai.com/plugins/deploy/submission, read 2026-11-08) and declares no MCP servers, apps or hooks.
 cxbad="$(python3 - "$root/plugin/.codex-plugin/plugin.json" <<'PY' 2>&1
@@ -812,7 +831,8 @@ for f in "$root"/tools/todo-*.sh; do stamped_tools+=("$(basename "$f")"); done
 stampcheck() {   # <tools dir> <plugin dir> <changelog> <tool names...>: prints one STAMP line per disagreement
   local td="$1" pd="$2" cl="$3" want="" v n got s
   shift 3
-  for v in "$pd/.claude-plugin/plugin.json" "$pd/.codex-plugin/plugin.json"; do
+  for v in "$pd/.claude-plugin/plugin.json" "$pd/.codex-plugin/plugin.json" "$pd/plugin.json"; do
+    [ -f "$v" ] || continue
     n="$(sed -nE 's/.*"version" *: *"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$v" | head -1)"
     [ -n "$want" ] && [ "$n" != "$want" ] && echo "STAMP the manifests disagree: $want and $n"
     [ -n "$want" ] || want="$n"

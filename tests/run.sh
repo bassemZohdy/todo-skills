@@ -1275,6 +1275,24 @@ for s in 'A claim whose branch exists is also stale when the newest commit' "old
 tr -d '\r' < "$root/docs/COMMANDS.md" | grep -F -- 'claimed by <branch>' | grep -F -- 'no commit for four times its time budget' | grep -qF -- 'runs neither, and since the branch still exists the release asks for a yes' || sc_bad="$sc_bad [COMMANDS.md: the Tree line names the age rule and that it is report only]"
 for f in docs/FILES.md README.md; do tr -d '\r' < "$root/$f" | grep -F -- '`Models:' | grep -qF -- '`Budget:' || sc_bad="$sc_bad [$f: the Budget line beside the Models line]"; done
 if [ -z "$sc_bad" ]; then ok "/todo-status marks a claim stale by the age of its newest commit and only reports it (FEAT-134.2)"; else bad "stale claims (FEAT-134.2):$sc_bad"; fi
+# FEAT-134.3.2: a hung command must not hold a session. The always-loaded verification text says to run Done when and the
+# regression under a time limit (the optional helper, else by hand), what the limit is and that a stopped run is a failed
+# run; failures.md says how such a run counts; the core, docs/TOOLS.md, docs/VERIFICATION.md and README name the helper.
+# The words that paid for it in the /todo-continue load were repeated in verification.md, which step 9 now points to.
+tl_bad=""; tl_sk="$root/plugin/skills"
+tl_v="$(tr -d '\r' < "$tl_sk/todo/reference/verification.md" | grep -F -- '**Time limit.**')"
+for s in 'Run `Done when` and the regression (parts too) under one' "\`bash .todo/todo-limit.sh <seconds> '<command>'\` if it exists, else by hand with your tool's timeout" '15, 30 or 60 minutes for `low`, `mid` or `high`, or the README `Budget:` line' 'A run stopped at the limit (exit 124) is a failed run; report the limit'; do printf '%s\n' "$tl_v" | grep -qF -- "$s" || tl_bad="$tl_bad [verification.md Time limit lacks: $s]"; done
+tr -d '\r' < "$tl_sk/todo/reference/failures.md" | grep -F -- '**Time limit**' | grep -F -- 'a run stopped at its limit is a failed run' | grep -F -- 'at step 9 an attempt, elsewhere a run of the loop guard' | grep -F -- '("A Done when that cannot run") or the hang is outside the node' | grep -qF -- 'A stopped baseline run stops the node as a red baseline does' || tl_bad="$tl_bad [failures.md: how a stopped run counts, and when the older rules come first]"
+tr -d '\r' < "$tl_sk/todo-continue/SKILL.md" | grep -F -- 'ran tests' | grep -F -- 'breaks no "No cheating" rule (`reference/verification.md`, step 7)' | grep -qF -- 'Regression green against the baseline (step 6 there)' || tl_bad="$tl_bad [todo-continue: step 9 points to No cheating and to the regression step]"
+tr -d '\r' < "$tl_sk/todo/reference/verification.md" | grep -F -- '**Regression.**' | grep -qF -- 'No fewer passing tests than the baseline, none deleted or skipped' || tl_bad="$tl_bad [verification.md: Regression keeps the baseline rule step 9 points to]"
+tr -d '\r' < "$root/docs/FILES.md" | grep -F -- '`Budget:' | grep -qF -- '`/todo-continue` limits' || tl_bad="$tl_bad [FILES.md: both uses of the Budget line]"
+tr -d '\r' < "$tl_sk/todo/reference/verification.md" | grep -F -- '**No cheating.**' | grep -F -- '`; exit 0`, `set +e` or an unchecked pipe' | grep -qF -- 'must exist' || tl_bad="$tl_bad [verification.md: No cheating keeps the rules step 9 points to]"
+tr -d '\r' < "$tl_sk/todo/SKILL.md" | grep -F -- '`todo-flow.sh`' | grep -F -- '`todo-limit.sh`' | grep -qF -- 'which run commands' || tl_bad="$tl_bad [core: the helper among the optional scripts that run commands]"
+tl_t="$(tr -d '\r' < "$root/docs/TOOLS.md" | awk '/^## `todo-limit.sh`/ { on = 1; next } /^## / { on = 0 } on')"
+for s in "todo-limit.sh <seconds> '<command line>'" 'exits 124' 'taskkill' 'by hand' '`Budget:`'; do printf '%s\n' "$tl_t" | grep -qF -- "$s" || tl_bad="$tl_bad [TOOLS.md todo-limit.sh lacks: $s]"; done
+tr -d '\r' < "$root/README.md" | grep -F -- '`todo-limit.sh`' | grep -qF -- 'under a time limit' || tl_bad="$tl_bad [README: what the helper does]"
+tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- 'todo-limit.sh' | grep -qF -- 'exit status 124' || tl_bad="$tl_bad [VERIFICATION.md: the time limit]"
+if [ -z "$tl_bad" ]; then ok "Done when and the regression run under a time limit, and a run stopped at it is a failed run (FEAT-134.3.2)"; else bad "time limit (FEAT-134.3.2):$tl_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

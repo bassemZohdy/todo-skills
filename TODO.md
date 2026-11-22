@@ -18,7 +18,7 @@
     - State: branch todo/FEAT-134.3-limit-run-time-done from todo/FEAT-134-guard-todo-continue-workers; next: build children
     - [x] **FEAT-134.3.1** · high · Add an optional helper script that runs a command under a time limit without the timeout program
       - Done when: a command over its limit is stopped and fails with a non-zero exit status, and a command that ends in time keeps its exit status and output; `bash tests/limit.sh`
-    - [ ] **FEAT-134.3.2** · mid · Tell /todo-continue to run Done when and the regression under a time limit and to count a timeout as a failed run
+    - [x] **FEAT-134.3.2** · mid · Tell /todo-continue to run Done when and the regression under a time limit and to count a timeout as a failed run
       - Done when: verification.md names the limit and the helper with a fallback by hand, failures.md counts a timeout as a failed run, and docs/TOOLS.md and README describe the helper; `bash tests/run.sh`
   - [ ] **FEAT-134.4** · mid · Run fresh agents on a new trial scenario whose task cannot turn green and publish the result summary
     - Done when: the scenario sets up and fails for an agent that does nothing, docs/evals holds one summary that says whether each run stopped at the loop limit, and docs/trials.md links it; `bash tests/trials/selftest.sh`

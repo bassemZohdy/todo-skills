@@ -1,11 +1,13 @@
 # Test failures, blocking, and a Done when that cannot run
 
-Read on demand from `/todo-continue` ("Test failures"), only when a verification run fails or a `Done when` cannot run. Part of the `todo` core skill.
+Read on demand from `/todo-continue` ("Test failures"), only when a verification run fails, Green fails twice on one test, or a `Done when` cannot run. Part of the `todo` core skill.
 
 ## Test failures
 
 - Diagnose first: reproduce, read the first failing assertion, write one hypothesis in `State:` (`hyp:`), make the smallest change that tests it, rerun.
-- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started; the red run of step 7 (the new test failing before the implementation) is not one.
+- At most **3** attempts across sessions (`State:` counter). An attempt is a failed verification run after implementing started, or a failed run that the loop guard makes one (next item); the red run of step 7 (the new test failing before the implementation) is not one.
+- **Loop guard.** Failed runs outside step 9 count too, once implementing started: a run of `Done when` or of any part of it, made after a change (a rerun that only reproduces a failure is not counted). The first one starts a count at 1, and each later one without progress adds 1. No progress means the same first failing test (or another that already failed in this session since implementing started) and no fewer failing tests than the last run of the same command; a run that fails before any test reports is no progress too (unless "A Done when that cannot run" below applies). Each of the 2nd, the 4th and the 8th run of that count is an attempt: raise `attempts` in `State:` and write a new `hyp:`. Fewer failing tests, or a first failing test that has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay. A passing run ends the count. A step 9 run is a full run of `Done when` and the regression made to close the node: failed, it is an attempt by the item above and is not added to this count. Every other run is counted here, also a partial one while fixing a step 9 failure. The count is not written to `State:`; a new session starts it at 1.
+- **Time limit** (`reference/verification.md`): a run stopped at its limit is a failed run: at step 9 an attempt, elsewhere a run of the loop guard's count without progress. Not when the stop came before any test reported for a reason outside the task ("A Done when that cannot run") or the hang is outside the node (below): those rules apply. A stopped baseline run stops the node as a red baseline does.
 - **Escalation** (`reference/routing.md`): with a `Models:` line and work in a subagent (`--delegate`, lanes), each failed attempt raises the next one a tier (`low` → `mid` → `high`), recorded as `tier:`. Without routing, say in the report that a stronger model might help.
 - You may change code and the tests this node creates, within the task line.
 - Forbidden: editing `Done when`, deleting, skipping or weakening tests, `|| true`, loosened assertions, a narrower command.

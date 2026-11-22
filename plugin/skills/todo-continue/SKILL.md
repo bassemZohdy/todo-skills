@@ -47,7 +47,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
    - **Quality:** no debug output, commented-out code, new `TODO`/`FIXME`, unrelated reformatting, generated files, secrets or `.env` in the diff or in backlog text you wrote.
    - With a subagent tool, a fresh-context reviewer does both in one call (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff, and returns a verdict for each, `ok` or `fail`, with its findings; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself.
 9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression (one run counts for both when they are the same command); update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`; without git also `files:`); a run with no failed cycle need not advance `next:`, which only tells a later session where to resume. All gates must pass:
-   - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail), the command does not mask failures (`|| true`, `; exit 0`) and every test path it names exists; `todo-verify.sh` (core, optional) checks these. Regression green, no fewer passing tests than the baseline, none deleted or skipped.
+   - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail) and breaks no "No cheating" rule (`reference/verification.md`, step 7). Regression green against the baseline (step 6 there).
    - Each item of the project's Definition of Done, if any.
    - RTM (only if one exists; `reference/rtm.md`): when the node proves a requirement row, record its `Done when` test paths or ids in that row's Verification cell. It is committed with the node (step 10.2); no RTM, no step.
    - Documentation drift (below).
@@ -65,7 +65,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
 
 ## Test failures
 
-When a verification run (step 9) fails or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when`, delete, skip or weaken a test, add `|| true`, loosen an assertion or narrow a command.
+When a verification run (step 9) fails, Green fails twice on one test, or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when` or weaken, skip or delete a test.
 
 ## Documentation drift
 

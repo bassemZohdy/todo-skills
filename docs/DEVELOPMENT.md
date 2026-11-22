@@ -18,11 +18,12 @@ plugin/                          The installable plugin: Markdown, JSON and the 
     todo-report/SKILL.md         …and template.md, the status page inside a fenced block
 .claude-plugin/marketplace.json  Claude Code marketplace, source ./plugin
 .agents/plugins/marketplace.json Codex marketplace, path ./plugin
-tools/                           Optional scripts users copy into their projects, read-only except todo-replay.sh --run and todo-flow.sh (docs/TOOLS.md)
-  todo-lint.sh todo-verify.sh todo-rtm.sh todo-replay.sh todo-report.sh todo-stop-hook.sh todo-flow.sh template.html
+tools/                           Optional scripts users copy into their projects, read-only except todo-replay.sh --run, todo-flow.sh and todo-limit.sh (docs/TOOLS.md)
+  todo-lint.sh todo-verify.sh todo-rtm.sh todo-replay.sh todo-report.sh todo-stop-hook.sh todo-flow.sh todo-limit.sh template.html
 tests/
   run.sh                         Fixture, script and repository checks
   flow.sh                        Scratch-repository checks of tools/todo-flow.sh, run by run.sh
+  limit.sh                       Checks of tools/todo-limit.sh on commands that end in time and commands that do not, run by run.sh
   shellcheck.sh                  Static analysis of every shell script (shellcheck; .shellcheckrc lists the checks disabled on purpose)
   set-version.sh                 Sets the release version in the manifests, README and tool stamps (Releasing)
   build-codex-package.sh         Builds the OpenAI Plugins Directory archive from plugin/: --claude for the preferred Claude import, else the native Codex ZIP (docs/distribution.md)

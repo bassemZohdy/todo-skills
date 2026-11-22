@@ -13,11 +13,15 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 ## Default report
 
 1. Run the invariant check and give the result in one line, then the overall **progress** line (below).
-2. **Tree**: in git mode read claims from the base branch (`git show <base>:TODO.md`, core "Which node is next"), so a tree branch also shows other trees as claimed. Group roots by lane (core "Lanes", `main` when none), each lane heading with its bar and its description from the `## 🛤️ Lanes` section (a declared lane without roots is shown too), and show each root with marker, complexity, title, its bar, its priority and, when claimed, `claimed by <branch>` with that branch's last commit date (marked stale if the branch no longer exists in this clone); children indented beneath it as `marker ID complexity title`. Collapse fully `[x]` subtrees to the count.
+2. **Tree**: in git mode read claims from the base branch (`git show <base>:TODO.md`, core "Which node is next"), so a tree branch also shows other trees as claimed. Group roots by lane (core "Lanes", `main` when none), each lane heading with its bar and its description from the `## 🛤️ Lanes` section (a declared lane without roots is shown too), and show each root with marker, complexity, title, its bar, its priority and, when claimed, `claimed by <branch>` with that branch's last commit date (marked stale if the branch no longer exists in this clone, or by "Stale claims" below); children indented beneath it as `marker ID complexity title`. Collapse fully `[x]` subtrees to the count.
 3. **Active** ("none" without a `[/]` node): the `[/]` node and its ancestors (shown as in progress), its `State:` line, and in git mode whether `git status` shows changes and which branch is checked out. In no-git mode show its `State:` and `files:` only.
 4. **Next**: if a `[/]` node exists, `/todo-continue` resumes it: show "resume <ID>". Otherwise show the first workable `[ ]` node (ID, title, Done when command). If none, say what blocks the tree.
 5. **Blocked**: each `[!]` node with its `Blocked:` reason and action required.
 6. **Recently drained**: the newest `--last <N>` entries of CHANGELOG.md (default 5): `## [Unreleased]` first, then the latest version section when `[Unreleased]` has fewer than N.
+
+## Stale claims
+
+A claim whose branch exists is also stale when the newest commit on its tree's branches is older than four times the time budget of the tree's highest complexity: 15 minutes for `low`, 30 for `mid`, 60 for `high`, or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`. Show `stale: no commit for <age>`, `git switch <branch>` to resume and `/todo-update <ROOT-ID> --status ready` to release (it asks first). Report only: run neither, and mark no claim with a newer commit.
 
 ## Progress
 

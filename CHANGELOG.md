@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **TASK-135** (task): Add `plugin/plugin.json`, the Agent Plugins 1.0.0 manifest that GitHub Copilot's awesome-copilot marketplace reads for a public plugin submission, so a release can be submitted there. It holds only the keys the schema allows (`$schema`, `name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`); Copilot finds the nine skills under `skills/` by convention. `tests/set-version.sh` sets its version with the other two manifests, and `tests/run.sh` fails when it breaks the schema, names another version or differs from the Claude manifest in its identity fields. The Claude and Codex packages are unchanged: the ZIP builder lists its files, so `plugin.json` is not in either archive. Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md, docs/distribution.md.
+
 ### Fixed
 
 - **FIX-133** (fix): Replace the `npx jest` example commands in the core skill, which the directory scan flags as a download-and-run command (`RUNTIME_FETCH_EXEC` in `skills/todo/SKILL.md`). The example tree and the example CHANGELOG entry now use `npm test <path>`, and a suite check keeps npx commands that could fetch a package out of the plugin folder. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/REFERENCE.md.

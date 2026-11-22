@@ -10,9 +10,10 @@
 | agent-skills.md | Submitted 2026-11-13 with the `plugin/skills` folder URL; the site parsed and added all nine skills | https://agent-skills.md |
 | Skills Directory (skillsdirectory.com) | Submitted 2026-11-13, one skill per submission (repository URL plus each `SKILL.md` path), signed in with the maintainer's account; all nine graded A by its security scan (core `todo` 92/100, medium note: "installs packages at runtime" in `reference/ci.md`, the CI guidance) | `npx -y skills add bassemZohdy/todo-skills --skill <name> --agent claude-code`, pages `https://www.skillsdirectory.com/skills/bassemzohdy-<name>` |
 | OpenAI Plugins Directory (Codex) | Not submitted: package checked for 0.4.0, upload blocked on the owner (TASK-050); Claude skills-only import preferred | `bash tests/build-codex-package.sh --claude todo-skills-claude.zip`, then an owner upload at platform.openai.com/plugins that converts the manifest; the native Codex ZIP (without `--claude`) is the fallback. See below |
+| GitHub Copilot (awesome-copilot marketplace) | Not submitted: `plugin/plugin.json`, the Agent Plugins manifest it requires, is in the plugin folder since 0.6.1 | An owner-approved issue from the external plugin form at github.com/github/awesome-copilot, plugin path `plugin`, ref `v0.6.1` and the full commit SHA of that tag; its gates run `vally lint` and a Copilot CLI install test, then a maintainer approves. Listed plugins are re-reviewed every six months |
 | Anthropic plugin directory | Resubmitted 2026-11-07 from the `plugin` folder, awaiting the automatic check (0.3.1) | Owner action at claude.ai/directory/manage (login and terms) |
 
-Keep `plugin/.claude-plugin/plugin.json` and `plugin/.codex-plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
+Keep `plugin/.claude-plugin/plugin.json`, `plugin/.codex-plugin/plugin.json` and `plugin/plugin.json` on the same version as the newest CHANGELOG release; `tests/run.sh` checks it. Codex caches an install by that version, so bump it on every release.
 
 ## ClawHub (OpenClaw)
 

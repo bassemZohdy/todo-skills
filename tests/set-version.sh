@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # set-version.sh - set the release version everywhere it is stated (FEAT-088). A developer tool, not part of the plugin.
 # Usage: bash tests/set-version.sh X.Y.Z [repo-root]
-# Sets: "version" in plugin/.claude-plugin/plugin.json and plugin/.codex-plugin/plugin.json, every "version X.Y.Z" statement in
+# Sets: "version" in plugin/.claude-plugin/plugin.json, plugin/.codex-plugin/plugin.json and plugin/plugin.json (the Agent Plugins manifest
+# GitHub Copilot reads, when the file exists), every "version X.Y.Z" statement in
 # README.md, todo_skills_version in each tools/todo-*.sh, and the vendored .todo/todo-lint.sh (a copy of tools/todo-lint.sh).
 # Does not touch CHANGELOG.md (/todo-release writes the heading), tag, commit or push. Run bash tests/run.sh afterwards.
 set -eu
@@ -19,7 +20,8 @@ done
 subst() {   # <sed -E script> <file>
   sed -E "$1" "$2" > "$2.sedtmp" && cat "$2.sedtmp" > "$2" && rm -f "$2.sedtmp"
 }
-for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json; do
+for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json plugin/plugin.json; do
+  [ -f "$root/$f" ] || continue
   subst "s/(\"version\" *: *\")[0-9]+\.[0-9]+\.[0-9]+(\")/\1$v\2/" "$root/$f"
 done
 subst "s/([Vv]ersion )[0-9]+\.[0-9]+\.[0-9]+/\1$v/g" "$root/README.md"

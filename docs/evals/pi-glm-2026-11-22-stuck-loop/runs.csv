@@ -1,0 +1,4 @@
+run,text,scenario,outcome,agent_exit,assert_exit,tool_calls,pi,model,verifier,acceptance_test_runs,attempts_written,stopped_at_loop_limit,ended,prompt_sha256,session_sha256
+S1-stuck-loop,S,stuck-loop,PASS,0,0,27,1.6.0,glm-5.3,UNISOLATED,2,0,no,outside the node,c9df433f619ffcbda523e9cefb1e62e7de3f97273a014a598de439ab8820a5c2,241a85b39d52332342326e5872ec518500b3288f488fa618076e4fa92c1e41bd
+S2-stuck-loop,S,stuck-loop,PASS,0,0,25,1.6.0,glm-5.3,UNISOLATED,2,0,no,outside the node,82f01d5e5231dd618533c54258da1cbf91a4327c09b99e6a384afe3efe6beebb,1d767c98bd5a89cb4c033696b26bfbec2d5e848565253be6ca3f6bbb695bacb3
+S3-stuck-loop,S,stuck-loop,PASS,0,0,25,1.6.0,glm-5.3,UNISOLATED,2,0,no,outside the node,adc225de8cc0c376bca6a884998f881f0e3b5a2374f5ae5da48cfc0bf250af49,40e3e9e47396fbfec7b3f2230cc91d57de6eb856d94e0f833cd56201097a57d3

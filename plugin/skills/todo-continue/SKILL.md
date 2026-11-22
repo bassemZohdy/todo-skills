@@ -65,7 +65,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
 
 ## Test failures
 
-When a verification run (step 9) fails or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when`, delete, skip or weaken a test, add `|| true`, loosen an assertion or narrow a command.
+When a verification run (step 9) fails, Green fails twice on one test, or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when`, delete, skip or weaken a test, add `|| true` or narrow a command.
 
 ## Documentation drift
 

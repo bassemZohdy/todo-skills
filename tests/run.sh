@@ -1408,6 +1408,14 @@ mkdir "$wd/repo"
   [ "$(git log -2 --format=%s | grep -cx 'chore(backlog): resume FEAT-001')" = 2 ] ) >/dev/null 2>&1 || wd_bad="$wd_bad [the git commands of the rule: a path-limited empty resume commit must leave staged work alone, and two newest subjects must show two resumes]"
 rm -rf "$wd"
 if [ -z "$wd_bad" ]; then ok "a worker that stopped without a verdict is resumable, costs no attempt or tier, and a node resumed twice with no commit is broken down or blocked (FEAT-134.5)"; else bad "worker that stopped (FEAT-134.5):$wd_bad"; fi
+# FEAT-134: the README describes the three guards against a stuck worker, in one section
+gd_bad=""
+gd_sec=$(tr -d '\r' < "$root/README.md" | awk '/^## Guards against a stuck worker$/ {f=1; next} /^## / {f=0} f')
+[ -n "$gd_sec" ] || gd_bad="$gd_bad [README has no section \"Guards against a stuck worker\"]"
+for gd_p in 'loop guard' 'attempt' 'time limit' 'tools/todo-limit.sh' 'Budget:' 'stale claim' 'worker that stopped' 'docs/VERIFICATION.md'; do
+  printf '%s\n' "$gd_sec" | grep -qF -- "$gd_p" || gd_bad="$gd_bad [that README section lacks \"$gd_p\"]"
+done
+if [ -z "$gd_bad" ]; then ok "the README describes the loop guard, the time limit and the stale claim (FEAT-134)"; else bad "FEAT-134 README guards:$gd_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

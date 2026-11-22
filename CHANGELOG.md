@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FEAT-134** (feat): Guard `/todo-continue` workers against getting stuck, with three guards. The loop guard counts a failed run of `Done when` or of a part of it while implementing as an attempt at the 2nd, 4th and 8th run without progress (the same first failing test, no fewer failing tests); fewer failures or a different failing test start the count again, and the third attempt blocks the node. The time limit runs `Done when` and the regression under 15, 30 or 60 minutes for `low`, `mid` or `high` (or a README `Budget:` line), with the optional helper `tools/todo-limit.sh`, which needs no `timeout` program and exits 124 at the limit; a run stopped there is a failed run. `/todo-status` reports a claim with no commit for four times that budget as stale and never takes it over. A node still active after its worker stopped without a verdict (a usage limit, a crash, a closed session) is resumable, not a failed attempt, and raises no tier; each resume starts with a `chore(backlog): resume <ID>` commit, and a node resumed twice with no other commit is offered a breakdown or, when `low` or an integration step, blocked. A new trial scenario `stuck-loop` ran fresh pi + GLM 5.3 agents on a task that cannot turn green: none reached the loop limit, because each proved the contradiction after one run and blocked the node as outside it, so the counting, the time limit and the resume rule have not been run by an agent (`docs/evals/pi-glm-2026-11-22-stuck-loop/summary.md`). The README describes the guards in one section, and the load budget of every command holds. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/COMMANDS.md, docs/DEVELOPMENT.md, docs/FILES.md, docs/GIT-FLOW.md, docs/REFERENCE.md, docs/TOOLS.md, docs/VERIFICATION.md, docs/evals/pi-glm-2026-11-22-stuck-loop/summary.md, docs/trials.md. Includes: FEAT-134.1, FEAT-134.2, FEAT-134.3, FEAT-134.3.1, FEAT-134.3.2, FEAT-134.4, FEAT-134.5.
+
 ## [0.6.2] - 2026-11-22
 
 ### Changed

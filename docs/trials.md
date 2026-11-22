@@ -14,6 +14,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
 | Plan stop, breakdown, and a node blocked by a regression it cannot fix | `plan-stop`, `decompose`, `regress-block` | Python; pi runs only, below |
+| A task that cannot turn green (the loop guard) | `stuck-loop` | Python; pi runs only, below |
 | Planning inside `TODO.md` | `plan-inline` | Python; not run with an agent yet |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
@@ -113,6 +114,10 @@ FEAT-129 tested `tools/todo-flow.sh`, an optional script that makes a node's cla
 ### pi runs on the text after a review in rounds (2026-11-15)
 
 TASK-131 reviewed the text of all nine skills and their reference files in rounds, fixing contradictions, stale pointers and gaps and pinning each fix with a check. Fresh pi agents (GLM 5.3) then ran the changed text in three batches, 32 runs over 15 scenarios in five batches, among them the new `no-backlog` (a command stops without a `TODO.md`) and `drained-unmerged` (a root drained without `--merge` does not end the next run): all 32 passed on the first try. What the agents called unclear fed five more rounds, which changed twenty-two sentences, until a batch raised nothing that met the rule. Details, what was left as it is and the limits: [docs/evals/pi-glm-2026-11-15-skill-review/summary.md](evals/pi-glm-2026-11-15-skill-review/summary.md).
+
+### pi runs of a task that cannot turn green (2026-11-22)
+
+FEAT-134 added a loop guard (a failed run of `Done when` without progress counts as an attempt at the 2nd, 4th and 8th run), a stale-claim mark and a time limit. The new scenario `stuck-loop` gives `/todo-continue` a node whose acceptance test no code can pass. Fresh pi agents (GLM 5.3) ran it three times: all three passed the assertions, none stopped at the loop limit. Each saw after one run that the tests contradict each other and blocked the node at once as a failure outside the node, with `attempts` at 0 of 3, so the counting of runs was not exercised. What they found unclear and what the runs do not show: [docs/evals/pi-glm-2026-11-22-stuck-loop/summary.md](evals/pi-glm-2026-11-22-stuck-loop/summary.md).
 
 ### Limits of the earlier by-hand runs
 

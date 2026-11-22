@@ -44,13 +44,21 @@ The full walkthrough is in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). T
 | `/todo-init [--plan] [--ci]` | `plugin/skills/todo-init` | Creates a missing `TODO.md` / `CHANGELOG.md`, detects git, the base branch and the test command, migrates older formats, reports status. `--plan` only points to `/todo-plan`; `--ci` sets up `.todo/check.sh` and a CI job or pre-push hook |
 | `/todo-plan [<goal>] [--revise [<reason>]]` | `plugin/skills/todo-plan` | Proposes the lanes and a tree inside `TODO.md`, and offers a plan doc per root only for a complex goal. `--revise` re-plans at any time: only open `[ ]` nodes change, you confirm the diff, IDs are kept |
 | `/todo-add <description> [--priority P0\|P1\|P2] [--ref <docs-path>] [--type feat\|fix\|task] [--from <ID>] [--parent <ID>] [--lane <name>] [--clarify]` | `plugin/skills/todo-add` | Adds a task, or splits a request into a tree until every leaf fits one context window, rating each node's complexity. Asks up to 3 questions when unclear |
-| `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--delegate] [--merge]` | `plugin/skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root to `CHANGELOG.md`. `--all-lanes` runs one subagent per lane |
+| `/todo-continue [--plan] [--lane <name> \| --all-lanes [--seq]] [--worktree] [--delegate] [--merge]` | `plugin/skills/todo-continue` | Executes one node: branch, tests first, review, verify plus regression, merge into the parent, drain a finished root to `CHANGELOG.md`. `--all-lanes` runs one subagent per lane. A node whose worker stopped without a verdict is resumable, not a failed attempt; a node resumed twice with no commit is broken down or blocked |
 | `/todo-update <ID> [--status in-progress\|blocked\|ready\|drop\|revert] [--note "..."]` | `plugin/skills/todo-update` | Manual state changes (dotted IDs allowed), claim releases and in-place field edits |
 | `/todo-status [--search <text>] [--last <N>]` | `plugin/skills/todo-status` | Read-only tree by lane, active and next node, blockers, recent history and search |
 | `/todo-report` | `plugin/skills/todo-report` | Writes `docs/status.html`: a self-contained interactive page with KPIs, lanes, the filterable task tree, release history, claims, test command and the plan |
 | `/todo-release [--version X.Y.Z]` | `plugin/skills/todo-release` | Proposes a semantic version from the `[Unreleased]` entries and, after you confirm, writes the dated section and commits it. Prints the tag and push commands; never runs them |
 
 All nine skill folders go together: the command skills load the `todo` core skill and its `reference/` files. Every flag and step is described in [docs/COMMANDS.md](docs/COMMANDS.md).
+
+## Guards against a stuck worker
+
+A worker that loops, hangs or dies must not hold a node for ever. Three guards, the loop guard, the time limit and the stale claim, are described in [docs/VERIFICATION.md](docs/VERIFICATION.md):
+
+- **Loop guard.** Failed runs of `Done when` while implementing count as an attempt at the 2nd, 4th and 8th run that shows no progress (the same first failing test, no fewer failing tests); at 3 attempts the node is blocked. Fewer failures, or a different failing test, start the count again.
+- **Time limit.** `Done when` and the regression run under a limit of 15, 30 or 60 minutes for `low`, `mid` or `high` (or the README `Budget:` line), with the optional [`tools/todo-limit.sh`](tools/todo-limit.sh) so macOS needs no `timeout`. A run stopped at the limit is a failed run.
+- **Stale claim.** `/todo-status` flags a claimed tree with no commit for four times that budget, and only reports it: it never takes the claim over. A worker that stopped without a verdict (a usage limit, a crash, a closed session) is not a failed attempt; `/todo-continue` resumes the node, and a node resumed twice with no new commit is broken down or blocked.
 
 ## What the skills read and write
 

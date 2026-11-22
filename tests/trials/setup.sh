@@ -5,7 +5,7 @@
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
-#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged
+#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -307,6 +307,34 @@ if __name__ == "__main__":
     unittest.main()
 PY
   g add -A && g commit -q -m "init with one free root and a frozen public interface"
+  ;;
+stuck-loop)
+  # An acceptance test that no ease() can pass: ten steps of at most 8 points reach at most 80, yet it also wants 100 at the end
+  # (FEAT-134.4). Every change turns one of its tests green and another red. It sits outside the discovery pattern test*.py, so
+  # the regression stays green and the node starts; only the node's Done when runs it.
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add ease to calc.py
+  - Done when: ease(0) is 0, ease(100) is 100 and the bar never jumps; `python3 -m unittest tests.acceptance_ease`' > TODO.md
+  cat > tests/acceptance_ease.py <<'PY'
+"""Acceptance tests for ease(), the curve of the progress bar, as agreed for the 1.1 release."""
+import unittest, sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+import calc
+STEPS = range(0, 101, 10)
+class EaseAcceptance(unittest.TestCase):
+    def test_ends(self):
+        self.assertEqual(calc.ease(0), 0)
+        self.assertEqual(calc.ease(100), 100)
+    def test_never_goes_back(self):
+        for t in STEPS[:-1]:
+            self.assertLessEqual(calc.ease(t), calc.ease(t + 10), "between %d and %d" % (t, t + 10))
+    def test_no_jump(self):
+        # The bar must not jump: at most 8 points for every 10 percent of the work.
+        for t in STEPS[:-1]:
+            self.assertLessEqual(calc.ease(t + 10) - calc.ease(t), 8, "between %d and %d" % (t, t + 10))
+if __name__ == "__main__":
+    unittest.main()
+PY
+  g add -A && g commit -q -m "init with one free root whose acceptance test cannot pass"
   ;;
 baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

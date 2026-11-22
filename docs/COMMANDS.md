@@ -90,7 +90,7 @@ Executes the next workable node end to end. It completes at most one node per in
 |---|---|
 | `--plan` | Stops after reading, with a plan of at most 10 lines committed as `chore(backlog): plan <ID>`, and continues after you approve it. Not with a lane flag |
 | `--lane <name>` | Only roots of that lane, in order |
-| `--all-lanes [--seq]` | One subagent per lane, in parallel (`--seq`: one after another), each in its own worktree; the main thread coordinates and lands the roots. See [PLANNING.md](PLANNING.md#lanes) |
+| `--all-lanes [--seq]` | One subagent per lane, in parallel (`--seq`: one after another), each in its own worktree; the main thread coordinates and lands the roots. A node a lane agent left `[/]` without a verdict is reported as resumable (no attempt, no tier raised) and picked up by the next run. See [PLANNING.md](PLANNING.md#lanes) |
 | `--worktree` | Works in `../<repo>.todo/<ID>`; the main checkout is never switched. Not with a lane flag |
 | `--delegate` | Build, review and verify run in a subagent on the model the node's complexity maps to (README `Models:` line); the main thread reruns the verify commands itself |
 | `--merge` | When a root finishes, also merges it into the base. Without it the merge commands are printed |

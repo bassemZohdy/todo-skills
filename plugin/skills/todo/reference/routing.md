@@ -4,4 +4,4 @@ Read on demand from the core ("Model routing"), only when the README has a `Mode
 
 - `/todo-continue --delegate` and `--all-lanes` give each node (or lane root, at its highest complexity) a subagent on the mapped model.
 - The reviewer runs at the node's tier or higher.
-- **Escalation:** after a failed verification attempt the next attempt runs one tier higher (`low` → `mid` → `high`), recorded in `State:` as `tier:`. A wrong `low` label costs one cheap attempt, not a blocked node.
+- **Escalation:** after a failed verification attempt the next attempt runs one tier higher (`low` → `mid` → `high`), recorded in `State:` as `tier:`. A wrong `low` label costs one cheap attempt, not a blocked node. A subagent that returns with its node still `[/]` stopped without a verdict: that is no attempt, so no tier is raised and the same tier resumes it (`reference/failures.md`, "A worker that stopped").

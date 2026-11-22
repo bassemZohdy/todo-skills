@@ -13,9 +13,8 @@
     - Done when: failures.md and todo-continue state the rule, fewer failing tests or a different failing test resets the count, and a run before implementing started is not counted; `bash tests/run.sh`
   - [x] **FEAT-134.2** · mid · Report a stale claim in /todo-status from the age of the last commit on the claimed tree's branch, report only
     - Done when: todo-status flags a claim older than four times the time budget of its complexity (optional README Budget line), never releases or resumes it, and does not flag a fresh claim; `bash tests/run.sh`
-  - [/] **FEAT-134.3** · low · Limit the run time of the Done when and regression commands, a timeout counts as a failed run
+  - [x] **FEAT-134.3** · low · Limit the run time of the Done when and regression commands, a timeout counts as a failed run
     - Done when: the helper's tests run inside the full suite and the skill text names the helper; `bash tests/run.sh`
-    - State: attempts 0/3; baseline 360 passing; branch todo/FEAT-134.3-limit-run-time-done from todo/FEAT-134-guard-todo-continue-workers; next: read docs
     - [x] **FEAT-134.3.1** · high · Add an optional helper script that runs a command under a time limit without the timeout program
       - Done when: a command over its limit is stopped and fails with a non-zero exit status, and a command that ends in time keeps its exit status and output; `bash tests/limit.sh`
     - [x] **FEAT-134.3.2** · mid · Tell /todo-continue to run Done when and the regression under a time limit and to count a timeout as a failed run

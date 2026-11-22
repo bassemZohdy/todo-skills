@@ -28,6 +28,8 @@ A node closes only through these steps.
 
 The optional [`tools/todo-verify.sh`](TOOLS.md#todo-verifysh) classifies a finished run by these rules, and the lint rejects a `Done when` that masks failures (I3).
 
+**Time limit.** `Done when` and the regression run under a time limit, so a hung command cannot hold a session: through the optional [`tools/todo-limit.sh`](TOOLS.md#todo-limitsh-optional-feat-1343) when it is in `.todo/`, otherwise by hand with the timeout of the agent's own command tool. The limit is 15, 30 or 60 minutes for a `low`, `mid` or `high` node, or the values of the README `Budget:` line. The limit covers partial runs too. A run stopped at the limit (the helper ends with exit status 124) is a failed run, and the report names the limit: at the verify step it is an attempt, elsewhere it is a run of the loop guard's count without progress. Two older rules still come first: a stop before any test reported, for a reason outside the task, is a `Done when` that cannot run and not an attempt, and a hang outside the node blocks at once. A baseline run stopped at the limit stops the node as a red baseline does. A project whose suite is slower than the default sets the `Budget:` line.
+
 ## Writing a Done when
 
 - Criteria first, then `; ` and at least one **runnable shell command** in backticks. Write identifiers and calls bare in the criteria (calc.power(2, 3) returns 8); only the command goes in backticks. Never `manual` or `n/a`.

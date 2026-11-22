@@ -103,6 +103,20 @@ The only script that writes. It makes the git and backlog writes of one lifecycl
 
 It refuses whatever is not the plain case: a linked worktree, a folder that is not the repository root, a task with open children, a second active task, a root branch that already exists, a tree claimed by another branch, a failing lint. `/todo-continue` leaves it alone with `--worktree` and `--all-lanes`: it switches branches in the main checkout, which those two never do. The base branch is `TODO_BASE`, else the README `Base:` line, else the first of `main`, `master`, `trunk`, `develop`. It runs `.todo/todo-lint.sh` before a commit when you copied that too, runs no project command, never pushes, tags or force-deletes, and merges into the base only with `--merge`. A CRLF `TODO.md` or `CHANGELOG.md` keeps its line endings. The script is kept at 200 lines or fewer, one read for an agent that reads it before use. `tests/flow.sh` checks all of this in scratch repositories.
 
+## `todo-limit.sh` (optional, FEAT-134.3)
+
+```bash
+bash .todo/todo-limit.sh <seconds> '<command line>'      # from the directory the command expects
+```
+
+Runs one command line under a time limit, so a hung test cannot hold a session for ever. `/todo-continue` runs `Done when` and the regression this way when the script is in `.todo/`; without it the agent sets the limit by hand, with the timeout of its own command tool. The limit is the node's time budget: 15, 30 or 60 minutes for `low`, `mid` or `high`, or the values of a README line such as `Budget: low=15m, mid=30m, high=60m` (the same line `/todo-status` reads to mark a claim stale). A project whose suite runs longer than that sets the `Budget:` line; the budget is one number for both uses, so a higher value also delays the stale mark. An agent's command tool may stop a foreground command before the limit (Claude Code's Bash tool does after 10 minutes at most): the agent then runs the helper in the background, or takes the tool's own stop as the limit by hand. Either stop is a failed run.
+
+- **In time:** the command's output passes through unchanged and the script exits with the command's own exit status. The command gets no input, so one that waits for input reads end of file.
+- **Over the limit:** the command and the processes below it get TERM, then KILL after a grace (`TODO_LIMIT_GRACE` seconds, default 2); one line on stderr says so and the script exits 124, the status the `timeout` program uses. `/todo-continue` counts such a run as a failed run.
+- **No `timeout` program is needed** (stock macOS has none): bash, sleep, kill, ps and awk are enough. On Windows (Git Bash) a program that is not a Git Bash program cannot take TERM, so it and the Windows processes below it are ended at once with `taskkill`.
+- **Limits:** a process that left the command's tree (a daemon, or a child whose parent already ended) is not found. Where `ps` cannot list parents, only the command itself is stopped and the stop line says so. A signal sent to the script itself is not passed on to the command.
+- Exit 2 is wrong usage. The script runs the command line as given: judge its safety first, as for any `Done when` command ([VERIFICATION.md](VERIFICATION.md)).
+
 ## `todo-stop-hook.sh`
 
 A Claude Code Stop hook that keeps a session from ending on a corrupted backlog. Copy it next to `todo-lint.sh` (it calls the lint from its own folder) and add it to `.claude/settings.json`, using the path where you put it:

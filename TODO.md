@@ -16,9 +16,8 @@
   - [ ] **FEAT-134.3** · low · Limit the run time of the Done when and regression commands, a timeout counts as a failed run
     - Done when: the helper's tests run inside the full suite and the skill text names the helper; `bash tests/run.sh`
     - State: branch todo/FEAT-134.3-limit-run-time-done from todo/FEAT-134-guard-todo-continue-workers; next: build children
-    - [/] **FEAT-134.3.1** · high · Add an optional helper script that runs a command under a time limit without the timeout program
+    - [x] **FEAT-134.3.1** · high · Add an optional helper script that runs a command under a time limit without the timeout program
       - Done when: a command over its limit is stopped and fails with a non-zero exit status, and a command that ends in time keeps its exit status and output; `bash tests/limit.sh`
-      - State: attempts 0/3; baseline 343 passing; branch todo/FEAT-134.3.1-add-optional-helper-script from todo/FEAT-134.3-limit-run-time-done; next: read docs
     - [ ] **FEAT-134.3.2** · mid · Tell /todo-continue to run Done when and the regression under a time limit and to count a timeout as a failed run
       - Done when: verification.md names the limit and the helper with a fallback by hand, failures.md counts a timeout as a failed run, and docs/TOOLS.md and README describe the helper; `bash tests/run.sh`
   - [ ] **FEAT-134.4** · mid · Run fresh agents on a new trial scenario whose task cannot turn green and publish the result summary

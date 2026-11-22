@@ -28,6 +28,7 @@
     ],
     "websiteURL": "https://github.com/bassemZohdy/todo-skills",
     "supportURL": "https://github.com/bassemZohdy/todo-skills/issues",
+    "privacyPolicyURL": "https://github.com/bassemZohdy/todo-skills/blob/main/PRIVACY.md",
     "defaultPrompt": [
       "Set up a TODO.md backlog for this repository",
       "Add a task to the backlog for this bug",

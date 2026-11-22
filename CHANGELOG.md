@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **TASK-136** (task): Add `PRIVACY.md`, the published privacy policy that the OpenAI plugin directory requires for a listing, and link it from the Codex manifest as `privacyPolicyURL` and from the README. It states what the plugin collects (nothing: no network access, telemetry, account or server), where your data goes (your repository and git, the agent's own model provider, GitHub for an issue you open), what is retained and how to remove it, and how to ask a question. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/distribution.md.
+
 ## [0.6.1] - 2026-11-22
 
 ### Changed

@@ -111,7 +111,7 @@ Tests: `bash tests/run.sh`
 
 ## Security and disclosure
 
-The plugin sends no data and has no network access, MCP server or shipped hook. It runs local `git` and your own test commands (the optional scripts are not part of the plugin). It reads project docs and the files the current task needs, and writes only the files listed [above](#what-the-skills-read-and-write). It never reads credentials. Details: [SECURITY.md](SECURITY.md).
+The plugin sends no data and has no network access, MCP server or shipped hook. It runs local `git` and your own test commands (the optional scripts are not part of the plugin). It reads project docs and the files the current task needs, and writes only the files listed [above](#what-the-skills-read-and-write). It never reads credentials. Details: [SECURITY.md](SECURITY.md); the privacy policy is [PRIVACY.md](PRIVACY.md).
 
 ## Status
 

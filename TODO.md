@@ -6,6 +6,9 @@
 
 ## 🌳 Task Tree
 
+- [ ] **FIX-141** · P0 · low · Set displayName in the Claude manifest to Todo Skills, the name on the directory listing
+  - Done when: plugin/.claude-plugin/plugin.json carries the display name of the listing, the same as the Codex manifest, and the suite fails without it; `bash tests/run.sh`
+  - State: branch todo/FIX-141-set-displayname-in-claude from main; next: start FIX-141
 - [ ] **FEAT-138** · P1 · mid · Add trial scenarios that reach the stuck-worker guards and run fresh agents on them
   - Done when: the scenarios loop-limit, time-limit, resume-stopped, resumed-twice and stale-claim set up, fail when nothing is done and have a published agent batch; `bash tests/trials/selftest.sh`
   - Links: From: FEAT-134

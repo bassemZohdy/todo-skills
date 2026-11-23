@@ -344,6 +344,93 @@ update-drop)
 status-readonly)
   chk "nothing changed" 'unchanged && clean'
   ;;
+stale-claim)
+  # /todo-status on a project with two claims: FEAT-001's branch has had no commit for three days, FEAT-002's has one from
+  # the setup (setup.sh). The command only reports, so the repository alone proves nothing, as for baseline-red: the report
+  # must mark the first claim stale, leave the second alone and name the two ways out for the first.
+  #
+  # The report is the agent's whole reply: the status, and a second part on what it found unclear, which may quote the
+  # rule. Two heuristics read it, in lower case; a human reads a report that says it another way.
+  #
+  # FEAT-001 is marked stale (first_is_stale) when a "stale" that is neither denied nor a definition
+  #   1. is on a line that names FEAT-001 or its branch, or
+  #   2. is on one of the eight non-blank lines after such a line, with no line that names another root in between, or
+  #   3. is on a heading (a line that starts with #, is wholly bold or ends with a colon), and FEAT-001 is the first root
+  #      named in the six non-blank lines after it, or
+  #   4. heads a column of a table, and the cell of FEAT-001's row in that column says yes, true, stale or "no commit for".
+  # A line is cut into clauses at "; ", ", ", ". ", " (", " · ", " — ", " - ", " | " and at but, while, whereas. A clause
+  # is denied by not_stale, or by "stale: no" and "stale? no" unless "commit" follows; it is a definition when it reads
+  # "stale =", "stale means", "stale when", "stale if" or begins with "legend". A line that says the branch no longer
+  # exists is about another kind of stale claim and marks nothing.
+  #   marks it: "... claimed by todo/FEAT-001-add-subtract-calc-py, last commit 2026-11-20, stale: no commit for 3 days";
+  #     "stale: no commit for 3 days" five lines under the root's line; "## Stale claims", a blank line, "- FEAT-001
+  #     (todo/FEAT-001-add-subtract-calc-py): no commit for 3 days"; the same under "**Stale claims**"; the table row
+  #     "| FEAT-001 | ... | yes: no commit for 3 days |" under a header with a Stale column; "Summary: 2 claims, 1 stale
+  #     (FEAT-001), 1 fresh (FEAT-002)."; "FEAT-001 ... is claimed by ..., and that claim is stale: its branch has had ..."
+  #   does not: "FEAT-001 ... last commit 2026-11-20, not stale"; "... · stale? no"; "... · stale: the branch no longer
+  #     exists in this clone"; "Legend: stale = no commit for 4x the budget" above the tree; the rule quoted, "A claim
+  #     whose branch exists is also stale when ..."; "stale: no commit for 5 hours" on the line of FEAT-002
+  #
+  # FEAT-002 is treated as stale (second_is_stale) only by what the skill prints for a stale claim: the release command
+  # for it, or the marker "stale: no commit for" (also "stale (no commit for", "stale - no commit for") on a line that
+  # names FEAT-002 or its branch and not FEAT-001. This is narrow on purpose: every wider reading of "stale" near FEAT-002
+  # failed honest reports, which say why that claim is fresh and quote the rule in their second part. A report that calls
+  # both claims stale in free prose, without the marker or the command, passes this check and needs a human read.
+  #   treated as stale: "- [ ] FEAT-002 ... last commit 2026-11-23, stale: no commit for 5 hours"; "release:
+  #     `/todo-update FEAT-002 --status ready`"
+  #   not: "... last commit 2026-11-23 — fresh; stale threshold 4 h"; "FEAT-002 would become stale four hours after its
+  #     last commit"; "| FEAT-002 | ... | no |"; "FEAT-002 is neither blocked nor stale"; "Legend: stale = ... (FEAT-001
+  #     low: 1 h; FEAT-002 high: 4 h)"; "`git switch todo/FEAT-002-add-command-line-interface`" alone, a resume hint
+  chk "nothing changed: main checked out, no commit, no claim released, HEAD never moved, no worktree added" '[ "$(git branch --show-current)" = main ] && unchanged && clean && [ "$(git reflog show HEAD | wc -l | tr -d " ")" = "$(cat "$gd/trial-reflog")" ] && [ "$(git worktree list | wc -l | tr -d " ")" = 1 ]'
+  # FEAT-002's claim turns stale too, four hours after the setup. The check reads the clock when it runs, so a finished
+  # run is scored within three and a half hours of its setup.
+  chk "the start state has not aged (if it has: the scratch project is older than FEAT-002's limit; set up and score a run within three and a half hours)" '(t="$(git log -1 --format=%ct todo/FEAT-002-add-command-line-interface 2>/dev/null)"; [ -n "$t" ] && [ $(( $(date +%s) - t )) -lt 12600 ])'
+  rep="${TRIAL_REPORT:-}"
+  not_stale='not ([a-z]+ )?([a-z]+ )?([a-z]+ )?stale|(is|are|was|does|do)n[^a-z ]*t ([a-z]+ )?([a-z]+ )?stale|never stale|no longer stale|non-stale|no stale|nor stale|(nothing|none|no claims?|no branch(es)?) (is |are )?stale'
+  not_stale="$not_stale|fresh[^a-z]+stale|stale (limit|threshold|window|check|mark withheld)|stale after [0-9]+ ?(h|hours?|m|min|minutes?)([^a-z]|\$)"
+  not_stale="$not_stale|(below|within|under|inside) [a-z0-9 ]*stale|would (be|become|turn) stale|stale[:?] *(✗|✘|×)"
+  # shellcheck disable=SC2034
+  switch_cmd='git switch todo/FEAT-001-add-subtract-calc-py($|[^A-Za-z0-9_/-])'   # the branch name ends there
+  first_is_stale() {
+    tr -d '\r' < "$rep" | awk -v no="$not_stale" '
+      function says(s,   c, n, i) {   # a clause of the line has a "stale" that is neither denied nor a definition
+        if (s ~ /no longer exists|does not exist|missing branch|branch is (gone|missing)/) return 0
+        gsub(/; |, |\. | \(| · | — | - | \| | but | while | whereas /, "\n", s); n = split(s, c, "\n")
+        for (i = 1; i <= n; i++) {
+          if (c[i] !~ /stale/ || c[i] ~ no) continue
+          if (c[i] ~ /stale[a-z ]*[:=?] *(no|none|not|false|0)([^a-z]|$)/ && c[i] !~ /stale[a-z ]*[:=?] *no commit/) continue
+          if (c[i] ~ /stale"? *(=|means|when|if)([^a-z]|$)/ || c[i] ~ /^[^a-z]*legend/) continue
+          return 1
+        }
+        return 0
+      }
+      function heading(s) { return s ~ /^ *#/ || s ~ /^ *(\*\*|__).*(\*\*|__):? *$/ || s ~ /: *$/ }
+      { line = tolower($0) }
+      line ~ /^[ \t]*$/ { next }
+      { one = (line ~ /feat-001/); rest = line; gsub(/feat-001/, "", rest); other = (rest ~ /feat-[0-9]/); s = says(line)
+        if (line ~ /^ *\|/) {   # a table: the header row names the column, the row of FEAT-001 has the cell
+          n = split(line, cell, "|")
+          if (!one && !other) { s = 0; for (i = 1; i <= n; i++) if (cell[i] ~ /stale/) col = i }
+          else if (one && col && (cell[col] ~ /^ *(yes|true|stale|✓|✔)/ || cell[col] ~ /no commit for/)) found = 1
+        } else col = 0
+        if (s && one) found = 1
+        else if (s && !other && near > 0) found = 1
+        else if (s && !other && heading(line)) wait = 6
+        else if (wait > 0 && (one || other)) { if (match(line, /feat-[0-9]+/) && substr(line, RSTART, RLENGTH) == "feat-001") found = 1; wait = 0 }
+        else if (wait > 0) wait--
+        if (one) near = 8; else if (other) near = 0; else if (near > 0) near--
+      }
+      END { exit !found }'
+  }
+  second_is_stale() {
+    grep -qF "/todo-update FEAT-002 --status ready" "$rep" && return 0
+    tr -d '\r' < "$rep" | tr '[:upper:]' '[:lower:]' | grep 'feat-002' | grep -v 'feat-001' | grep -Eq 'stale[^a-z0-9]*no commit for'
+  }
+  chk "an agent report was provided and is not empty" '[ -n "$rep" ] && [ -s "$rep" ] && [ -n "$(tr -d "[:space:]" < "$rep")" ]'
+  chk "the report marks FEAT-001's claim as stale" '[ -s "$rep" ] && first_is_stale'
+  chk "the report does not mark FEAT-002's claim as stale: no stale marker on its line, no release command for it" '[ -s "$rep" ] && ! second_is_stale'
+  chk "the report names the two ways out for FEAT-001: git switch to its branch and /todo-update FEAT-001 --status ready" '[ -s "$rep" ] && grep -Eq "$switch_cmd" "$rep" && grep -qF "/todo-update FEAT-001 --status ready" "$rep"'
+  ;;
 drained-unmerged)
 # shellcheck disable=SC2034
   m0="$(grep "refs/heads/main " "$gd/trial-refs" | cut -d" " -f2)"

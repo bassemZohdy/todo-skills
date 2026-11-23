@@ -22,36 +22,46 @@ def num(row, key):
     return int(v) if v.isdigit() else None
 
 
-by_arm = defaultdict(list)
-with open(sys.argv[1], encoding="utf-8", newline="") as f:
-    for row in csv.DictReader(f):
-        if None in (num(row, "input_tokens"), num(row, "output_tokens"), num(row, "cached_tokens"), num(row, "llm_calls")):
-            continue
-        by_arm[row["arm"]].append((datetime.strptime(row["date_utc"], "%Y-%m-%dT%H:%M:%SZ"), row))
+def batches(path, keep=lambda row: True):
+    """Returns the batches of a results table, each as (date label, arm, rows), sorted by date, arm and first run.
 
-batches = []   # (first run, arm, rows)
-for arm, runs in by_arm.items():
-    runs.sort(key=lambda r: r[0])
-    last = None
-    for when, row in runs:
-        if last is None or when - last > GAP:
-            batches.append((when, arm, []))
-        batches[-1][2].append(row)
-        last = when
-same_day = Counter((first.date(), arm) for first, arm, _ in batches)
+    keep drops rows before they are grouped. cost.py (TASK-137) calls this too, so both tables cut the same batches
+    as long as every row reports its counts: this script drops a row without them before grouping, cost.py keeps it.
+    """
+    by_arm = defaultdict(list)
+    with open(path, encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            if keep(row):
+                by_arm[row["arm"]].append((datetime.strptime(row["date_utc"], "%Y-%m-%dT%H:%M:%SZ"), row))
+    found = []   # (first run, arm, rows)
+    for arm, runs in by_arm.items():
+        runs.sort(key=lambda r: r[0])
+        last = None
+        for when, row in runs:
+            if last is None or when - last > GAP:
+                found.append((when, arm, []))
+            found[-1][2].append(row)
+            last = when
+    same_day = Counter((first.date(), arm) for first, arm, _ in found)
+    return [(f"{first:%Y-%m-%d}" + (f" {first:%H}h" if same_day[(first.date(), arm)] > 1 else ""), arm, rows)
+            for first, arm, rows in sorted(found, key=lambda b: (b[0].date(), b[1], b[0]))]
+
+
+def reported(row):
+    return None not in (num(row, "input_tokens"), num(row, "output_tokens"), num(row, "cached_tokens"), num(row, "llm_calls"))
 
 
 def med(rows, key):
     return int(statistics.median(num(r, key) for r in rows))
 
 
-print("| Date | Arm | Runs | Input tokens (median) | Uncached input (median) | Cached share of input | Output tokens (median) | Model calls (median) | Seconds (median) |")
-print("|---|---|---|---|---|---|---|---|---|")
-for first, arm, rows in sorted(batches, key=lambda b: (b[0].date(), b[1], b[0])):
-    date = f"{first:%Y-%m-%d}" + (f" {first:%H}h" if same_day[(first.date(), arm)] > 1 else "")
-    total = sum(num(r, "input_tokens") for r in rows)
-    cached = sum(num(r, "cached_tokens") for r in rows)
-    uncached = int(statistics.median(num(r, "input_tokens") - num(r, "cached_tokens") for r in rows))
-    secs = int(statistics.median(int(r["duration_s"]) for r in rows))
-    print(f"| {date} | {arm} | {len(rows)} | {med(rows, 'input_tokens'):,} | {uncached:,} | {100 * cached // total}% | "
-          f"{med(rows, 'output_tokens'):,} | {med(rows, 'llm_calls')} | {secs} |")
+if __name__ == "__main__":
+    print("| Date | Arm | Runs | Input tokens (median) | Uncached input (median) | Cached share of input | Output tokens (median) | Model calls (median) | Seconds (median) |")
+    print("|---|---|---|---|---|---|---|---|---|")
+    for date, arm, rows in batches(sys.argv[1], reported):
+        total = sum(num(r, "input_tokens") for r in rows)
+        cached = sum(num(r, "cached_tokens") for r in rows)
+        uncached = int(statistics.median(num(r, "input_tokens") - num(r, "cached_tokens") for r in rows))
+        secs = int(statistics.median(int(r["duration_s"]) for r in rows))
+        print(f"| {date} | {arm} | {len(rows)} | {med(rows, 'input_tokens'):,} | {uncached:,} | {100 * cached // total}% | "
+              f"{med(rows, 'output_tokens'):,} | {med(rows, 'llm_calls')} | {secs} |")

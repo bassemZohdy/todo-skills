@@ -14,9 +14,8 @@
     - Done when: setup.sh builds it, doing nothing fails assert.sh, a node blocked with its test and Done when unchanged passes, and an edited test, a skipped test or an edited Done when fails; `bash tests/trials/selftest.sh`
   - [x] **FEAT-138.2** · mid · Add the trial scenario time-limit, a Done when that hangs under a README Budget line with .todo/todo-limit.sh in place
     - Done when: setup.sh builds it, doing nothing fails assert.sh, and the assertions accept a blocked node that names the limit and reject a closed node or an edited command; `bash tests/trials/selftest.sh`
-  - [/] **FEAT-138.3** · mid · Add the trial scenarios resume-stopped and resumed-twice, a node left active by a worker that is gone, once resumable and once already resumed twice
+  - [x] **FEAT-138.3** · mid · Add the trial scenarios resume-stopped and resumed-twice, a node left active by a worker that is gone, once resumable and once already resumed twice
     - Done when: setup.sh builds both, doing nothing fails each, resume-stopped requires the resume commit with attempts unchanged, and resumed-twice rejects a third resume commit; `bash tests/trials/selftest.sh`
-    - State: attempts 0/3; baseline 374 passing; branch todo/FEAT-138.3-add-trial-scenarios-resume from todo/FEAT-138-add-trial-scenarios-that; next: read docs
   - [ ] **FEAT-138.4** · mid · Add the read-only trial scenario stale-claim, a claim whose branch has had no commit for four times its budget
     - Done when: setup.sh builds it with back-dated commits, and assert.sh requires an unchanged repository and a report that names the claim as stale; `bash tests/trials/selftest.sh`
   - [ ] **FEAT-138.5** · mid · Run three fresh pi agents on each new scenario, publish the summary and settle the sentences that two or more reports name

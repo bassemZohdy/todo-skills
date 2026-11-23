@@ -33,8 +33,9 @@ if [ -e .git ]; then
   chk "node commits carry Refs: and Reviewed: trailers" '(for c in $(git log --format=%H --all --not $old --grep="^\(feat\|fix\|refactor\|test\|perf\)"); do git log -1 --format=%B $c | grep -q "^Refs: " && git log -1 --format=%B $c | grep -q "^Reviewed: " || exit 1; done)'
   chk "merge commits use the skill message" '[ -z "$(git log --merges --format=%s --all --not $old | grep -Ev "^Merge [A-Z]+-[0-9.]+ into ([A-Z]+-[0-9.]+|main)$|^Merge main into [A-Z]+-[0-9]+$|^Merge branch .main. of ")" ]'
 fi
-# regress-block, stuck-loop, loop-limit and time-limit end on a branch that is red by design: the node is blocked, not finished.
-case "$scenario" in baseline-red|ts-baseline-red|java-baseline-red|regress-block|stuck-loop|loop-limit|time-limit) red_baseline=1 ;; *) red_baseline=0 ;; esac
+# regress-block, stuck-loop, loop-limit, time-limit and resumed-twice end on a branch that is red by design: the node is
+# blocked, not finished (resumed-twice: the unfinished work and its failing test are committed with the block).
+case "$scenario" in baseline-red|ts-baseline-red|java-baseline-red|regress-block|stuck-loop|loop-limit|time-limit|resumed-twice) red_baseline=1 ;; *) red_baseline=0 ;; esac
 if [ "$red_baseline" = 0 ]; then
   if [ -f Makefile ]; then chk "tests pass on the checked-out branch" 'make test'
   elif [ -f package.json ]; then chk "tests pass on the checked-out branch" 'npm test'
@@ -262,6 +263,44 @@ time-limit)
   chk "Done when is unchanged" 'grep -qxF "  - Done when: count_twin_primes(n) returns the number of twin prime pairs (p, p + 2) up to n, exact up to 4 * 10**13; \`python3 -m unittest tests.acceptance_twins\`" TODO.md'
   chk "the limit helper and the README Budget line are unchanged" 'git diff --quiet $start HEAD -- .todo/todo-limit.sh && grep -qxF "Budget: low=1m, mid=1m, high=1m" README.md'
   chk "the node is not finished: no [x], no drain, no merge into main" '! grep -q "\[x\] \*\*FEAT-001\*\*" TODO.md && [ "$(git log --format=%s $start..main | grep -vc "^chore(backlog): claim FEAT-001 on ")" = 0 ] && ! at main CHANGELOG.md | grep -q FEAT-001'
+  ;;
+resume-stopped)
+  # The node was left [/] by a worker that is gone, with unfinished work in the tree (setup.sh). It is resumable: the run
+  # makes one resume commit, which does not count the stop as an attempt, then finishes the node as happy-path does. The
+  # root branch is deleted after the merge, so its history is read through the merge commit on main. Whether the resume
+  # commit is empty or carries a TODO.md change is not asserted; what its TODO.md says about the attempts is, and that it
+  # takes no other file along: the rule commits by path, so the earlier code stays uncommitted until the node commit.
+  chk "subtract and its test on main" 'at main calc.py | grep -q "def subtract" && at main tests/test_calc.py | grep -q "def test_subtract"'
+  chk "FEAT-001 drained on main with the core format" 'at main CHANGELOG.md | entry FEAT-001 && ! at main TODO.md | grep -q FEAT-001'
+  chk "main history: the claim from the start state, then the root merge" '[ "$(git log --first-parent --format=%s $start..main)" = "Merge FEAT-001 into main" ]'
+  chk "the root branch holds start, one resume commit, the node commit and the drain" 'git log --format=%s main^2 | head -4 | tr "\n" "|" | grep -Eq "^chore\(backlog\): drain FEAT-001\|feat\([a-z0-9._-]+\): [^|]*\|chore\(backlog\): resume FEAT-001\|chore\(backlog\): start FEAT-001\|$"'
+  chk "the resume commit leaves FEAT-001 [/] with attempts 1/3" '(r="$(git log --format=%H --grep="^chore(backlog): resume FEAT-001$" $start..main)"; [ -n "$r" ] || exit 1; for c in $r; do git show $c:TODO.md | grep -A3 "^- \[/\] \*\*FEAT-001\*\*" | grep -q "State: attempts 1/3; " || exit 1; done)'
+  chk "the resume commit changes no file but TODO.md" '(r="$(git log --format=%H --grep="^chore(backlog): resume FEAT-001$" $start..main)"; [ -n "$r" ] || exit 1; for c in $r; do [ -z "$(git show --name-only --format= $c | grep -vx TODO.md)" ] || exit 1; done)'
+  chk "no block commit, no todo branches left, on main, clean" '! git log --format=%s $start..main | grep -q "block FEAT-001" && [ -z "$(git branch --list "todo/*")" ] && [ "$(git branch --show-current)" = main ] && clean'
+  ;;
+resumed-twice)
+  # The node was resumed twice with no commit since (setup.sh): by the rule it is not resumed a third time and no resume
+  # commit is made; a low leaf is blocked, the earlier work is committed with the block and nothing is reverted. The block
+  # sits on top of the two resume commits (history rewritten to lose them does not pass), and calc.py and the test are
+  # committed as the earlier session left them (setup.sh recorded them in trial-work): work that went on is a resume.
+  #
+  # That the Blocked line says why is a heuristic: said_twice holds the ways to say it, matched in lower case against the
+  # reason and the evidence, the parts before the last arrow; the action part says what to do next, not why.
+  #   accepted: "resumed twice with no new commit", "two resumes and no commit since", "two earlier resume commits and
+  #     no work committed since", "resumed in two sessions with no commit", "second resume without a commit", "already
+  #     resumed 2x", "git log -2 shows `chore(backlog): resume FEAT-001` twice", the subject quoted twice from git log -2
+  #   rejected: "the resume failed", "resumed once and stopped again", "... resume FEAT-001 / ... start FEAT-001",
+  #     "two attempts failed", "test_subtract fails", and "resume FEAT-001 (resume FEAT-001 by hand)" in the action part
+  # shellcheck disable=SC2034
+  { said_twice='resumed (twice|two times|2 times|2x|in (two|2) sessions)|twice resumed|second resume'
+    said_twice="$said_twice|(^|[^0-9a-z])(two|2) (earlier |previous |prior |empty )*resumes?"
+    said_twice="$said_twice|resume feat-001.*resume feat-001|resume feat-001[^a-z0-9]*(twice|two times|2 times|both times)"; }
+  before_action() { awk -F " → " '{ s = $1; for (i = 2; i < NF; i++) s = s " / " $i; print s }'; }   # a Blocked line without its last part
+  chk "no third resume commit" '[ "$(git log --format=%s --all --not $old | grep -c "^chore(backlog): resume ")" = 0 ]'
+  chk "the node's branch is checked out and FEAT-001 is [!] with a Blocked line that says it was resumed twice" '[ "$(git branch --show-current)" = todo/FEAT-001-add-subtract-calc-py ] && grep -A3 "^- \[!\] \*\*FEAT-001\*\*" TODO.md | grep -E "Blocked: .+ → .+ → .+" | before_action | tr "[:upper:]" "[:lower:]" | grep -Eq "$said_twice"'
+  chk "the block is committed as chore(backlog): block FEAT-001 on top of the two resume commits, with the earlier work as it was left, and the tree is clean" 'git merge-base --is-ancestor $start HEAD && git log --format=%s $start..HEAD | grep -qx "chore(backlog): block FEAT-001" && clean && [ "$(git rev-parse HEAD:calc.py HEAD:tests/test_calc.py)" = "$(cat "$gd/trial-work")" ]'
+  chk "Done when is unchanged" 'grep -qxF "  - Done when: subtract(5, 3) returns 2; \`python3 -m unittest tests.test_calc.CalcTest.test_subtract\`" TODO.md'
+  chk "the node is not finished and not broken down: no [x], no children, no drain, no merge into main" '! grep -q "\[x\] \*\*FEAT-001\*\*" TODO.md && ! grep -q "\*\*FEAT-001\.[0-9]" TODO.md && [ -z "$(git log --format=%s $start..main)" ] && ! at main CHANGELOG.md | grep -q FEAT-001'
   ;;
 baseline-red)
   chk "nothing changed: no branch, no commit, no edit" 'unchanged && clean'

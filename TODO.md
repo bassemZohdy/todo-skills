@@ -10,8 +10,9 @@
   - Done when: the scenarios loop-limit, time-limit, resume-stopped, resumed-twice and stale-claim set up, fail when nothing is done and have a published agent batch; `bash tests/trials/selftest.sh`
   - Links: From: FEAT-134
   - State: branch todo/FEAT-138-add-trial-scenarios-that from main; next: build children
-  - [ ] **FEAT-138.1** · high · Add the trial scenario loop-limit, a task whose failing test cannot be proved impossible after one run, so the loop guard's count decides
+  - [/] **FEAT-138.1** · high · Add the trial scenario loop-limit, a task whose failing test cannot be proved impossible after one run, so the loop guard's count decides
     - Done when: setup.sh builds it, doing nothing fails assert.sh, a node blocked with its test and Done when unchanged passes, and an edited test, a skipped test or an edited Done when fails; `bash tests/trials/selftest.sh`
+    - State: attempts 0/3; baseline 368 passing; branch todo/FEAT-138.1-add-trial-scenario-loop from todo/FEAT-138-add-trial-scenarios-that; next: read docs
   - [ ] **FEAT-138.2** · mid · Add the trial scenario time-limit, a Done when that hangs under a README Budget line with .todo/todo-limit.sh in place
     - Done when: setup.sh builds it, doing nothing fails assert.sh, and the assertions accept a blocked node that names the limit and reject a closed node or an edited command; `bash tests/trials/selftest.sh`
   - [ ] **FEAT-138.3** · mid · Add the trial scenarios resume-stopped and resumed-twice, a node left active by a worker that is gone, once resumable and once already resumed twice

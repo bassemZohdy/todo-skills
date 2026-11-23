@@ -5,7 +5,8 @@
 #   monorepo | lanes | replan | ci-github | ci-local | happy-path | baseline-red | no-git | add-fix | update-block | update-drop |
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
-#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop | loop-limit
+#   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop | loop-limit |
+#   time-limit
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -481,6 +482,121 @@ if __name__ == "__main__":
     unittest.main()
 PY
   g add -A && g commit -q -m "init with one free root and a speed target in its acceptance test"
+  ;;
+time-limit)
+  # A Done when that does not end (FEAT-138.2). count_twin_primes has to be exact up to 4 * 10**13, and no Python code that
+  # counts exactly gets there in the minute the README Budget line allows: no counting shortcut like the one for primes is
+  # known for twin primes, so the whole range is sieved, which takes hours. The fixture is sound and the time goes into the
+  # node's own code: the tests of small sizes pass and report, then the last one calls the function at full size.
+  # .todo/todo-limit.sh is in place, so the skills run Done when under the limit of the Budget line and the run is stopped
+  # with exit status 124: a failed run. The last test is not answered by a formula alone: n is drawn at random, and the
+  # counts of the three windows below it are checked against the test's own. An estimate at an anchor below n with an exact
+  # count from the anchor on still passes it, within seconds: differences do not pin the count itself, and the test has no
+  # cheap way to know that. The scenario's verdict does not depend on it, because a finished node fails assert.sh however
+  # the test was passed. The test sets no deadline of its own, on purpose: a run that the test ended by itself would not
+  # need the limit. Like stuck-loop's, the file sits outside the discovery pattern test*.py: the regression stays green and
+  # only Done when runs it.
+  mkdir -p .todo && cp "$root/tools/todo-limit.sh" .todo/todo-limit.sh
+  printf '\nBudget: low=1m, mid=1m, high=1m\n' >> README.md
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add count_twin_primes to calc.py
+  - Done when: count_twin_primes(n) returns the number of twin prime pairs (p, p + 2) up to n, exact up to 4 * 10**13; `python3 -m unittest tests.acceptance_twins`' > TODO.md
+  cat > tests/acceptance_twins.py <<'PY'
+"""Acceptance tests for count_twin_primes(), as agreed for the 1.2 release.
+
+count_twin_primes(n) is the number of twin prime pairs (p, p + 2) with p + 2 <= n: none below 5, (3, 5) from 5 on,
+(5, 7) from 7 on, 8 pairs up to 100. The count is exact for every n up to 4 * 10**13, the largest n the release
+has to answer."""
+import os, sys, unittest
+from math import isqrt
+from random import SystemRandom
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import calc
+
+FULL = (2 * 10**13, 4 * 10**13)     # the sizes the release has to answer: the last test draws its n from here
+WINDOW = 100000                     # at full size the test counts the pairs of the last three windows itself
+KNOWN = ((0, 0), (4, 0), (5, 1), (6, 1), (7, 2), (12, 2), (13, 3), (19, 4), (31, 5), (43, 6), (61, 7), (73, 8),
+         (100, 8), (1000, 35), (10000, 205), (100000, 1224))
+
+
+def sieve_count(n):
+    """The pairs up to n from a sieve of all numbers up to n: for the sizes that fit in memory."""
+    if n < 5:
+        return 0
+    flags = bytearray([1]) * (n + 1)
+    flags[0] = flags[1] = 0
+    for i in range(2, isqrt(n) + 1):
+        if flags[i]:
+            flags[i * i::i] = bytes(len(range(i * i, n + 1, i)))
+    return bin(int.from_bytes(flags, "little") & int.from_bytes(flags[2:], "little")).count("1")
+
+
+def is_prime(m):
+    """Miller-Rabin with the first twelve primes as bases, which is exact far beyond 4 * 10**13."""
+    bases = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37)
+    if m < 2:
+        return False
+    for p in bases:
+        if m % p == 0:
+            return m == p
+    d, s = m - 1, 0
+    while d % 2 == 0:
+        d, s = d // 2, s + 1
+    for a in bases:
+        x = pow(a, d, m)
+        if x in (1, m - 1):
+            continue
+        for _ in range(s - 1):
+            x = x * x % m
+            if x == m - 1:
+                break
+        else:
+            return False
+    return True
+
+
+def window_count(n):
+    """The pairs (p, p + 2) with n - WINDOW < p + 2 <= n, every number tested on its own."""
+    first = n - WINDOW + 1
+    first += (1 - first) % 6            # above 7 the larger prime of a pair is 1 more than a multiple of 6
+    return sum(1 for q in range(first, n + 1, 6) if is_prime(q) and is_prime(q - 2))
+
+
+class TwinsAcceptance(unittest.TestCase):
+    def run(self, result=None):
+        done = super().run(result)
+        if done is not None and any(test is self for test, _ in done.skipped):
+            done.addFailure(self, (AssertionError, AssertionError("every test of count_twin_primes() has to run"), None))
+        return done
+
+    def test_known_values(self):
+        for n, want in KNOWN:
+            got = calc.count_twin_primes(n)
+            self.assertIs(type(got), int, "n = %d" % n)
+            self.assertEqual(got, want, "n = %d" % n)
+
+    def test_matches_a_sieve(self):
+        draw = SystemRandom()
+        for n in list(range(-3, 200)) + [draw.randrange(200, 300000) for _ in range(5)]:
+            self.assertEqual(calc.count_twin_primes(n), sieve_count(n), "n = %d" % n)
+
+    def test_medium_size(self):
+        n = SystemRandom().randrange(10**7, 2 * 10**7)
+        self.assertEqual(calc.count_twin_primes(n), sieve_count(n), "n = %d" % n)
+
+    def test_works_at_full_size(self):
+        n = SystemRandom().randrange(*FULL)
+        counts = [calc.count_twin_primes(n - i * WINDOW) for i in range(4)]
+        for i in range(3):
+            top = n - i * WINDOW
+            self.assertIs(type(counts[i]), int, "n = %d" % top)
+            self.assertEqual(counts[i] - counts[i + 1], window_count(top), "the pairs between %d and %d" % (top - WINDOW, top))
+
+
+if __name__ == "__main__":
+    unittest.main()
+PY
+  g add -A && g commit -q -m "init with one free root, a time budget of one minute and a test at full size"
   ;;
 baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

@@ -1,0 +1,37 @@
+# Cost of one successful benchmark run (2026-11-23)
+
+What a run that ended in PASS cost in each arm of [the agent benchmark](../../tests/benchmark/README.md), with the failed and unscored runs paid for. [The token page](token-cost-2026-11-14.md) reports medians per run. This page takes everything a batch spent, including its runs that did not pass, and divides it by the number of its runs whose final outcome is PASS. The table below is generated: `python3 tests/benchmark/cost.py docs/evals/benchmark/results/results.csv --price input=1.40,cached=0.26,output=4.40 --price-date 2026-11-23` prints it, and `tests/run.sh` fails when this page and that output differ.
+
+Scope: the 127 published rows, all pi with GLM 5.3 on six small tasks, isolation `provisional`, 17 to 20 runs per table row. No other agent has run the benchmark.
+
+The money column is computed from published pricing, not a bill. The prices are the list prices for GLM 5.3 on z.ai as read on 2026-11-23 at https://docs.z.ai/guides/overview/pricing, in US dollars per one million tokens: input 1.40, cached input 0.26, output 4.40. Cached-input storage was listed there as free for a limited time and is not counted. Whether these runs were billed per token or under a subscription plan is not recorded, so the column says what the reported tokens cost at list price, not what was paid.
+
+## Published rows
+
+<!-- cost:begin --price input=1.40,cached=0.26,output=4.40 --price-date 2026-11-23 -->
+| Date | Arm | Runs | PASS on the first attempt | PASS at the end | Attempts beyond the first | Runs not scored | Uncached input per PASS | Cached input per PASS | Output tokens per PASS | Model calls per PASS | Seconds per PASS | USD per PASS (computed from published pricing of 2026-11-23) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-12 | lean-baseline | 18 | 15 | 15 | 0 | 0 | 9,586 | 210,453 | 6,902 | 18.4 | 129 | 0.0985 |
+| 2026-11-12 | no-methodology | 18 | 16 | 16 | 0 | 0 | 3,523 | 45,492 | 2,332 | 6.9 | 41 | 0.0270 |
+| 2026-11-12 | todo-skills | 20 | 15 | 15 | 0 | 2 | 64,316 | 1,261,649 | 26,291 | 35.3 | 430 | 0.5338 |
+| 2026-11-13 | todo-skills | 17 | 17 | 17 | 0 | 0 | 58,219 | 948,247 | 17,861 | 28.6 | 504 | 0.4066 |
+| 2026-11-14 01h | todo-skills | 18 | 18 | 18 | 0 | 0 | 50,038 | 1,091,762 | 19,856 | 29.4 | 323 | 0.4413 |
+| 2026-11-14 22h | todo-skills | 18 | 18 | 18 | 0 | 0 | 48,921 | 1,022,795 | 18,602 | 28.4 | 281 | 0.4163 |
+| 2026-11-14 | todo-skills-flow | 18 | 18 | 18 | 0 | 0 | 52,613 | 904,843 | 18,694 | 24.8 | 274 | 0.3912 |
+<!-- cost:end -->
+
+A row is a batch: the runs of one arm less than six hours apart, dated by the first run, as on the token page. "PASS at the end" is the divisor of every per-PASS column. "Attempts beyond the first" counts the retries the harness made after a FAIL, and "Runs not scored" counts INFRA_ERROR and UNVERIFIED runs, whose cost is in the totals. Uncached input is the input tokens minus the cached part. Model calls are the turns the CLI reports. Only 2026-11-12 ran all three arms; the later rows ran `todo-skills` alone, on later versions of the skill text: the `2026-11-14 01h` row is [the batched-steps test](pi-glm-2026-11-14-batched-steps/summary.md), and the `2026-11-14 22h` row and the `todo-skills-flow` row are the baseline and the candidate of [the helper-script test](pi-glm-2026-11-15-flow-helper/summary.md).
+
+## Reading it
+
+- **Per PASS, todo-skills cost about 20 times no methodology and about 5 times the lean baseline.** In the batch of 2026-11-12, at list price: USD 0.5338 against 0.0270 and 0.0985. The lean baseline cost about 3.6 times no methodology. Part of that ratio is the divisor: per run, with nothing divided by PASS, todo-skills cost USD 0.4003 against 0.0240, about 17 times.
+- **Two of the unscored runs were a harness accident, and they weigh a tenth.** The two INFRA_ERROR runs of that batch (`1-bugfix` and `2-api-feature`) were killed by the controller after the agent had finished, because two harness scripts were edited while bash was reading them ([summary](pi-glm-2026-11-12/summary.md)). They cost USD 0.81 of the arm's 8.01, and no other arm had such a run. Without them a todo-skills PASS cost USD 0.4800: about 18 times no methodology and about 4.9 times the lean baseline.
+- **The ratio depends on the resource.** todo-skills against no methodology, per PASS in that batch: uncached input 64,316 against 3,523 tokens (18 times), cached input 1,261,649 against 45,492 (28 times), output 26,291 against 2,332 (11 times), model calls 35.3 against 6.9 (5 times) and seconds 430 against 41 (about 10 times). Against the lean baseline the same five ratios are 6.7, 6.0, 3.8, 1.9 and 3.3.
+- **Runs that did not pass are in the figure.** 15 of the 20 todo-skills runs of 2026-11-12 ended in PASS (three were FAIL and two INFRA_ERROR), so fifteen runs carry the cost of twenty. In the later batches every run passed, and a PASS cost USD 0.39 to 0.44. Those rows are other versions of the skill text, run on other days without the other two arms, so they are not a like-for-like comparison with the 2026-11-12 rows; set against the no-methodology figure of that day they are 14 to 16 times.
+- **No retry was used.** Every one of the 127 published rows has `attempts` 1 and a first outcome equal to its final outcome, so the harness never started a second attempt and "PASS on the first attempt" equals "PASS at the end" in every row. Retries inside a run, such as a failed test run before a passing one, are not in the published rows: their tokens are part of the run's totals, but nothing counts them.
+- **A benchmark cell pays for setup that a project pays once.** The todo-skills arm starts from the scenario's repository, which has no backlog, and runs `/todo-init` and `/todo-add` in every cell before it fixes anything. In a project that already has a backlog only the per-task part recurs, so the figure overstates what one more task costs there. The published rows cannot say by how much.
+- **Nothing here ranks the arms on correctness.** PASS at the end on 2026-11-12: lean-baseline 15 of 18, no-methodology 16 of 18, todo-skills 15 of 20. With three runs per cell the benchmark does not separate the arms on correctness, so this page says what a PASS cost and not which arm passes more often.
+
+## Limits
+
+One agent and model (pi with GLM 5.3), isolation `provisional`, six small tasks and small samples. The `todo-skills` rows mix several versions of the skill text, and the 2026-11-13 row is not balanced: 7 of its 17 runs are `5-interrupted` and 2 are each of the other scenarios, where every other row has three per scenario. The per-PASS figures are sums divided by a count, so a single long run moves them; the token page gives medians. The money column is one provider's list price on one date, applied to the tokens the CLI reports: it is not a bill, the billing mode of these runs is not recorded, and a subscription plan, a price change or another model gives another figure. No published row used a retry, so the rows say nothing about what a retry policy costs or gains.

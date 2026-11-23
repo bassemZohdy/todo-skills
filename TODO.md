@@ -6,9 +6,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-137** · P1 · mid · Publish the cost of one successful benchmark run per arm, generated from the published rows
-  - Done when: tests/benchmark/cost.py prints, per batch and arm, the PASS counts, the attempts and the tokens, model calls and seconds spent per PASS, a price option adds a labelled money column, and a dated page in docs/evals holds that output; `bash tests/run.sh`
-  - State: branch todo/TASK-137-publish-cost-one-successful from main; next: start TASK-137
 - [ ] **FEAT-138** · P1 · mid · Add trial scenarios that reach the stuck-worker guards and run fresh agents on them
   - Done when: the scenarios loop-limit, time-limit, resume-stopped, resumed-twice and stale-claim set up, fail when nothing is done and have a published agent batch; `bash tests/trials/selftest.sh`
   - Links: From: FEAT-134

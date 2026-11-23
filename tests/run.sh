@@ -1088,6 +1088,72 @@ tkb="$(mktemp -d)"
   echo "r6,2026-01-01T03:00:00Z,arm-b,s,pi,1,m,provisional,PASS,PASS,1,0,0,10,100,10,50,5,unavailable,x"; } > "$tkb/r.csv"
 tkb_out="$(python3 "$root/tests/benchmark/tokens.py" "$tkb/r.csv" 2>&1 | sed 1,2d | cut -d'|' -f2-4 | tr -d ' ' | tr '\n' ';')"; rm -rf "$tkb"
 if [ "$tkb_out" = "2026-01-0101h|arm-a|2;2026-01-0120h|arm-a|3;2026-01-01|arm-b|1;" ]; then ok "the token table groups runs by batch: one row across midnight, two rows for two batches of an arm on one date (FEAT-129.5)"; else bad "token table batches (FEAT-129.5): $tkb_out"; fi
+# TASK-137: the benchmark README links a dated page with the cost of one successful run per arm. Its table is the output of
+# tests/benchmark/cost.py on the published results with the price options the page records in its begin marker, so a reader
+# can recompute it; it holds no mail address, and a money figure says that it is computed from published pricing.
+costcheck() {   # <repo root>: prints one COST line per problem
+python3 - "$1" <<'PY'
+import os, re, subprocess, sys
+root = sys.argv[1]
+readme = open(os.path.join(root, 'tests', 'benchmark', 'README.md'), encoding='utf-8').read()
+m = re.search(r'\]\((\.\./\.\./docs/evals/cost-per-success-\d{4}-\d{2}-\d{2}\.md)\)', readme)
+if not m:
+    print('COST tests/benchmark/README.md links no dated cost-per-success page'); sys.exit()
+doc = os.path.normpath(os.path.join(root, 'tests', 'benchmark', m.group(1)))
+if not os.path.exists(doc):
+    print('COST the linked page does not exist'); sys.exit()
+t = open(doc, encoding='utf-8').read().replace('\r\n', '\n')
+if re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', t): print('COST the page holds a mail address')
+if re.search(r'[$€£]\s?\d|\bUSD\b', t) and 'computed from published pricing' not in t: print('COST a money figure is not labelled as computed from published pricing')
+b = re.search(r'<!-- cost:begin((?: --price(?:-date)? [A-Za-z0-9=.,-]+)*) -->\n(.*?)\n<!-- cost:end -->', t, re.S)
+if not b: print('COST the page has no generated table'); sys.exit()
+run = subprocess.run([sys.executable, os.path.join(root, 'tests', 'benchmark', 'cost.py'),
+                      os.path.join(root, 'docs', 'evals', 'benchmark', 'results', 'results.csv')] + b.group(1).split(),
+                     capture_output=True, text=True)
+if run.returncode != 0 or run.stdout.strip() != b.group(2).strip(): print('COST the table is not the output of tests/benchmark/cost.py on results.csv with the price options of the page')
+PY
+}
+co_out="$(costcheck "$root")"
+if [ -z "$co_out" ]; then ok "the cost-per-success page is linked, recomputable from results.csv with its own price options and free of mail addresses (TASK-137)"; else bad "cost-per-success page (TASK-137):$(printf '%s' "$co_out" | tr '\n' ';')"; fi
+# TASK-137: cost.py on a fixed table. arm-a has two PASS runs (one of them after a retry) and one FAIL run, and the cost of the
+# failed run is in the totals that are divided by the two PASS runs; arm-b has no PASS, so its per-PASS cells are a dash;
+# one run of arm-c reports no token counts, so those cells say unavailable instead of dividing a partial total.
+cof="$(mktemp -d)"; co_py="$root/tests/benchmark/cost.py"
+{ echo "run_id,date_utc,arm,scenario,agent,agent_version,model,isolation,first_outcome,final_outcome,attempts,agent_exit,verifier_exit,duration_s,input_tokens,output_tokens,cached_tokens,llm_calls,subagent_calls,evidence_sha256"
+  echo "a1,2026-01-01T01:00:00Z,arm-a,s,pi,1,m,provisional,PASS,PASS,1,0,0,10,1000000,100000,600000,5,unavailable,x"
+  echo "a2,2026-01-01T02:00:00Z,arm-a,s,pi,1,m,provisional,FAIL,PASS,2,0,0,30,3000000,300000,2000000,9,unavailable,x"
+  echo "a3,2026-01-01T03:00:00Z,arm-a,s,pi,1,m,provisional,FAIL,FAIL,2,0,1,20,2000000,200000,1400000,6,unavailable,x"
+  echo "b1,2026-01-01T01:00:00Z,arm-b,s,pi,1,m,provisional,FAIL,FAIL,1,0,1,10,1000,100,600,5,unavailable,x"
+  echo "b2,2026-01-01T02:00:00Z,arm-b,s,pi,1,m,provisional,INFRA_ERROR,INFRA_ERROR,1,1,0,10,1000,100,600,5,unavailable,x"
+  echo "b3,2026-01-01T03:00:00Z,arm-b,s,pi,1,m,provisional,UNVERIFIED,UNVERIFIED,1,0,0,10,1000,100,600,5,unavailable,x"
+  echo "c1,2026-01-01T01:00:00Z,arm-c,s,pi,1,m,provisional,PASS,PASS,1,0,0,10,unavailable,unavailable,unavailable,unavailable,unavailable,x"
+  echo "c2,2026-01-01T02:00:00Z,arm-c,s,pi,1,m,provisional,PASS,PASS,1,0,0,20,1000,100,600,5,unavailable,x"; } > "$cof/r.csv"
+co_plain="$(python3 "$co_py" "$cof/r.csv" 2>&1 | tr -d '\r')"
+co_money="$(python3 "$co_py" "$cof/r.csv" --price input=1,cached=0.5,output=2 --price-date 2026-01-01 2>&1 | tr -d '\r')"
+co_rows="$(printf '%s\n' "$co_plain" | sed 1,2d | tr -d ' ' | tr '\n' ';')"
+if [ "$co_rows" = "|2026-01-01|arm-a|3|1|2|2|0|1,000,000|2,000,000|300,000|10.0|30|;|2026-01-01|arm-b|3|0|0|0|2|-|-|-|-|-|;|2026-01-01|arm-c|2|2|2|0|0|unavailable|unavailable|unavailable|unavailable|15|;" ]; then ok "cost.py divides what a batch spent, failed runs included, by its PASS runs, prints a dash without a PASS and unavailable for a missing count (TASK-137)"; else bad "cost.py per-PASS rows (TASK-137): $co_rows"; fi
+co_bad=""
+[ "$(printf '%s\n' "$co_plain" | awk -F'|' 'NR == 1 { print NF - 2 }')" = 12 ] || co_bad="$co_bad [12 columns without a price]"
+if printf '%s\n' "$co_plain" | grep -qiE 'pric|USD|[$]'; then co_bad="$co_bad [money without the price option]"; fi
+printf '%s\n' "$co_money" | sed -n 1p | grep -qF '| USD per PASS (computed from published pricing of 2026-01-01) |' || co_bad="$co_bad [a labelled, dated money column with the price option]"
+[ "$(printf '%s\n' "$co_money" | sed 1,2d | awk -F'|' '{ print $(NF - 1) }' | tr -d ' ' | tr '\n' ';')" = "2.6000;-;unavailable;" ] || co_bad="$co_bad [money per PASS]"
+[ "$(printf '%s\n' "$co_money" | cut -d'|' -f1-13)" = "$(printf '%s\n' "$co_plain" | cut -d'|' -f1-13)" ] || co_bad="$co_bad [the other columns unchanged by the price option]"
+if python3 "$co_py" "$cof/r.csv" --price input=1,cached=0.5,output=2 >/dev/null 2>&1; then co_bad="$co_bad [a price without its date is refused]"; fi
+if [ -z "$co_bad" ]; then ok "cost.py prints no money without the price option, and with it one column labelled as computed from published pricing, with the date (TASK-137)"; else bad "cost.py money column (TASK-137):$co_bad"; fi
+# TASK-137: the page check on temporary copies. A fresh table passes; a mail address, a stale table and a money figure
+# without the label are each reported.
+cot="$(mktemp -d)"; mkdir -p "$cot/tests/benchmark" "$cot/docs/evals/benchmark/results"
+cp "$co_py" "$root/tests/benchmark/tokens.py" "$cot/tests/benchmark/"
+printf '[c](../../docs/evals/cost-per-success-2026-01-01.md)\n' > "$cot/tests/benchmark/README.md"
+cp "$cof/r.csv" "$cot/docs/evals/benchmark/results/results.csv"; co_page="$cot/docs/evals/cost-per-success-2026-01-01.md"
+co_mark='<!-- cost:begin --price input=1,cached=0.5,output=2 --price-date 2026-01-01 -->'
+printf '%s\n%s\n<!-- cost:end -->\n' "$co_mark" "$co_money" > "$co_page"
+co_fresh="$(costcheck "$cot")"
+printf 'mail me at someone@example.com.\n%s\n%s\n<!-- cost:end -->\n' "$co_mark" "$(printf '%s\n' "$co_money" | sed 's/2\.6000/2.5000/')" > "$co_page"
+co_stale="$(costcheck "$cot" | tr -d '\r')"
+printf 'Costs $5.\n<!-- cost:begin -->\n%s\n<!-- cost:end -->\n' "$co_plain" > "$co_page"
+co_unl="$(costcheck "$cot" | tr -d '\r')"; rm -rf "$cot" "$cof"
+if [ -z "$co_fresh" ] && [ "$(printf '%s\n' "$co_stale" | grep -c '^COST')" -eq 2 ] && printf '%s\n' "$co_stale" | grep -q 'mail address' && printf '%s\n' "$co_stale" | grep -q 'not the output' && [ "$co_unl" = 'COST a money figure is not labelled as computed from published pricing' ]; then ok "the cost page check passes a fresh copy and fails a mail address, a stale table and an unlabelled figure (TASK-137)"; else bad "the cost page check missed a gap (TASK-137): fresh [$co_fresh] stale [$co_stale] unlabelled [$co_unl]"; fi
 # TASK-124: three trial assertions accept what Codex agents did while following the skill (2026-11-14): a Done when run from tests/, a test named with its ID, a report that says "working tree".
 ta="$root/tests/trials/assert.sh"
 if grep -qF '(cd tests && )?python3 -m unittest (tests\.)?test_calc' "$ta" && grep -qF 'def test_[a-z0-9_]*power' "$ta" && grep -qF 'clean|uncommitted|working.tree' "$ta"; then ok "assert.sh accepts a Done when run from tests/, a test named with its ID and a report that says working tree (TASK-124)"; else bad "assert.sh still rejects one of the three forms Codex used (TASK-124)"; fi

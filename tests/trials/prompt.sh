@@ -18,7 +18,7 @@ case "$scenario" in
   happy-path)         task='Run `/todo-continue --merge`. Stop after one invocation.' ;;
   leftover-work)      task='A previous session was interrupted: the uncommitted change in calc.py is unfinished work on FEAT-001. Keep it and finish it. Run `/todo-continue --merge`. Stop after one invocation.' ;;
   dirty-tree)         task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
-  stuck-loop)         task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
+  stuck-loop|loop-limit) task='Run `/todo-continue --merge`. Stop after one invocation, or earlier if the skill says to stop.' ;;
   baseline-red)       task='Run `/todo-continue`. Stop after one invocation.' ;;
   plan-stop)          task='Run `/todo-continue --plan`. Stop after one invocation.' ;;
   decompose)          task='Run `/todo-continue`. The user confirms the children you propose: "yes". Stop after one invocation.' ;;

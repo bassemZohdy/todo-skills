@@ -6,7 +6,7 @@
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
 #   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop | loop-limit |
-#   time-limit
+#   time-limit | resume-stopped | resumed-twice
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -597,6 +597,38 @@ if __name__ == "__main__":
     unittest.main()
 PY
   g add -A && g commit -q -m "init with one free root, a time budget of one minute and a test at full size"
+  ;;
+resume-stopped|resumed-twice)
+  # A node left [/] by a worker that is gone (FEAT-138.3). The tree is claimed on main, the node's branch is checked out with
+  # the start commit, the State says that one attempt failed, and the earlier session's unfinished work is uncommitted:
+  # subtract returns the sum and its test fails. resume-stopped stops there: the node is resumable, so the run begins with
+  # one resume commit and does not count the stop as an attempt. resumed-twice adds two empty resume commits with nothing
+  # after them: by the rule the node is not resumed a third time, and a low leaf is blocked. The State with attempts 1/3 is
+  # in the start commit, so that a resume commit shows it whether it is empty or not; in a real project the start commit
+  # says attempts 0/3 and the later edit of the State is uncommitted with the code.
+  b=todo/FEAT-001-add-subtract-calc-py
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
+  g add -A && g commit -q -m "init with one free root"
+  printf '  - State: branch %s from main; next: start FEAT-001\n' "$b" >> TODO.md
+  g add TODO.md && g commit -q -m "chore(backlog): claim FEAT-001 on $b"
+  g switch -q -c "$b"
+  printf '%s\n%s\n%s\n' "$head" '- [/] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' "  - State: attempts 1/3; baseline 1 passing; hyp: subtract(5, 3) gives 8, the operator in subtract is wrong; branch $b from main; next: build" > TODO.md
+  g add TODO.md && g commit -q -m "chore(backlog): start FEAT-001"
+  if [ "$scenario" = resumed-twice ]; then
+    g commit -q --allow-empty -m "chore(backlog): resume FEAT-001" -- TODO.md
+    g commit -q --allow-empty -m "chore(backlog): resume FEAT-001" -- TODO.md
+  fi
+  # The work the earlier session left behind, uncommitted: the function with the wrong operator, and its test.
+  printf '\ndef subtract(a, b):\n    return a + b\n' >> calc.py
+  python3 - <<'PY'
+p='tests/test_calc.py'
+s=open(p,encoding='utf-8').read().replace('if __name__','    def test_subtract(self):\n        self.assertEqual(calc.subtract(5, 3), 2)\nif __name__')
+open(p,'w',encoding='utf-8',newline='\n').write(s)
+PY
+  # That work as it was left, for assert.sh (inside .git, never tracked): resumed-twice must commit it unchanged.
+  git hash-object calc.py tests/test_calc.py > .git/trial-work
   ;;
 baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

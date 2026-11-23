@@ -1711,6 +1711,119 @@ tr -d '\r' < "$root/docs/trials.md" | grep -F '`time-limit`' | grep -F 'time lim
 if [ -z "$tw_bad" ]; then ok "the trial scenario time-limit: the regression is green, Done when is red, the limit helper and a Budget line of one minute are in place, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.2)"; else bad "time-limit scenario (FEAT-138.2):$tw_bad"; fi
 if [ -z "$tw_acc" ]; then ok "time-limit's acceptance test: a plain count_twin_primes passes the tests of small sizes, the test at full size is the last by name, the project's helper stops the whole run with exit status 124, and an estimate and a raised SkipTest fail the last test (FEAT-138.2)"; else bad "time-limit acceptance test (FEAT-138.2):$tw_acc"; fi
 if [ -z "$tw_end" ]; then ok "time-limit's assertions: untouched fails, an honest block passes, six ways of saying that the run was stopped for its time pass and five lines that do not say it fail, and an edited test, an edited or narrowed Done when, a removed or edited limit helper or Budget line and a finished node fail (FEAT-138.2)"; else bad "time-limit assertions (FEAT-138.2):$tw_end"; fi
+# FEAT-138.3: the trial scenarios resume-stopped and resumed-twice, a node left [/] by a worker that is gone, with its
+# unfinished work uncommitted. In the first the node is resumable: the run makes one resume commit that leaves attempts as
+# they were, then finishes the node. In the second the node was resumed twice with no commit since: no third resume commit,
+# the low leaf is blocked and the Blocked line says why. Three checks: the two start states and what they tell the agent,
+# then assert.sh against each ending of either scenario, scripted by hand in a copy of the start state.
+rs_bad=""; rs_one=""; rs_two=""
+rs="$(mktemp -d)"
+rs_br=todo/FEAT-001-add-subtract-calc-py
+rs_tail="chore(backlog): start FEAT-001|chore(backlog): claim FEAT-001 on $rs_br|init with one free root|"
+rs_twice="resumed twice with no new commit → \`git log -2 --format=%s\` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → decide whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready"
+rs_assert() { PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$rs/$1" "$2" 2>&1; }   # <folder> <scenario>
+rs_copy() { cp -R "$rs/$1" "$rs/$2"; }   # <scenario> <folder>: a fresh copy of the start state
+rs_resume() { ( cd "$rs/$1" && git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md ) >/dev/null 2>&1; }   # <folder>: the commit the rule names
+rs_finish() {   # <folder> <resume commits to make first> [raised]: fix the earlier work, complete, drain and merge
+  ( cd "$rs/$1" || exit 1
+    [ "${3:-}" != raised ] || { sed 's/attempts 1\/3/attempts 2\/3/' TODO.md > TODO.md.tmp && mv TODO.md.tmp TODO.md; }
+    i=0; while [ "$i" -lt "$2" ]; do git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md || exit 1; i=$((i + 1)); done
+    rs_fix "$1" || exit 1
+    PYTHONNOUSERSITE=1 python3 -m unittest discover -s tests || exit 1
+    bash "$root/tools/todo-flow.sh" complete FEAT-001 -m 'feat(calc): add subtract to calc.py' -b 'Red: AssertionError: 8 != 2' -b 'Reviewed: self, 0 findings fixed' -- calc.py tests/test_calc.py || exit 1
+    bash "$root/tools/todo-flow.sh" drain FEAT-001 --merge || exit 1
+    [ "$(git log -1 --format=%s main)" = "Merge FEAT-001 into main" ] ) >/dev/null 2>&1
+}
+rs_block() {   # <folder> <the text after "Blocked: "> [amend]: FEAT-001 [!] with that line, committed with the node's changed files
+  ( cd "$rs/$1" || exit 1
+    awk -v line="  - Blocked: $2" '/^- \[\/\] \*\*FEAT-001\*\*/ { sub(/\[\/\]/, "[!]") } /^  - State:/ { print line; next } { print }' TODO.md > TODO.md.tmp && mv TODO.md.tmp TODO.md
+    git add TODO.md calc.py tests/test_calc.py || exit 1
+    if [ "${3:-}" = amend ]; then git commit -q --amend -m 'chore(backlog): block FEAT-001'; else git commit -q -m 'chore(backlog): block FEAT-001'; fi ) >/dev/null 2>&1
+}
+rs_fix() { ( cd "$rs/$1" && awk '/^def subtract/ { f = 1 } f && /return a \+ b/ { sub(/a \+ b/, "a - b"); f = 0 } { print }' calc.py > calc.py.tmp && mv calc.py.tmp calc.py ); }   # <folder>: the right operator in subtract
+rs_expect() {   # <folder> <scenario> <pass, or the assertion that must fail> <the ending in words>: prints what is wrong, if anything
+  rs_res="$(rs_assert "$1" "$2")"
+  if [ "$3" = pass ]; then
+    if printf '%s\n' "$rs_res" | grep -q '^FAIL' || ! printf '%s\n' "$rs_res" | grep -q '^PASS'; then printf ' [%s does not pass: %s]' "$4" "$(printf '%s\n' "$rs_res" | grep '^FAIL' | tr '\n' ';')"; fi
+  else printf '%s\n' "$rs_res" | grep -q "^FAIL  $3" || printf ' [%s does not fail: %s]' "$4" "$3"; fi
+}
+for rs_s in resume-stopped resumed-twice; do
+  if bash "$root/tests/trials/setup.sh" "$rs/$rs_s" "$rs_s" >/dev/null 2>&1; then
+    [ "$rs_s" = resume-stopped ] && rs_log="$rs_tail" || rs_log="chore(backlog): resume FEAT-001|chore(backlog): resume FEAT-001|$rs_tail"
+    [ "$(git -C "$rs/$rs_s" branch --show-current)" = "$rs_br" ] && [ "$(git -C "$rs/$rs_s" log --format=%s | tr '\n' '|')" = "$rs_log" ] || rs_bad="$rs_bad [$rs_s: the node's branch must be checked out with this history: $rs_log]"
+    [ "$(git -C "$rs/$rs_s" log -1 --format=%s main)" = "chore(backlog): claim FEAT-001 on $rs_br" ] || rs_bad="$rs_bad [$rs_s: main must hold the claim and nothing after it]"
+    [ "$(git -C "$rs/$rs_s" status --porcelain | tr '\n' '|')" = " M calc.py| M tests/test_calc.py|" ] || rs_bad="$rs_bad [$rs_s: the earlier work must be uncommitted in calc.py and tests/test_calc.py, and nothing else]"
+    grep -q '^- \[/\] \*\*FEAT-001\*\* · P1 · low · Add subtract to calc\.py$' "$rs/$rs_s/TODO.md" || rs_bad="$rs_bad [$rs_s: the task line]"
+    grep -qxF '  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' "$rs/$rs_s/TODO.md" || rs_bad="$rs_bad [$rs_s: Done when]"
+    grep -qx "  - State: attempts 1/3; baseline 1 passing; hyp: [^;]*; branch $rs_br from main; next: build" "$rs/$rs_s/TODO.md" || rs_bad="$rs_bad [$rs_s: the State line with attempts 1/3]"
+    ( cd "$rs/$rs_s" && bash "$lint" TODO.md CHANGELOG.md >/dev/null 2>&1 ) || rs_bad="$rs_bad [$rs_s: the lint fails on the start state]"
+    ( cd "$rs/$rs_s" && PYTHONNOUSERSITE=1 python3 -m unittest tests.test_calc.CalcTest.test_subtract 2>&1 ) | grep -q 'AssertionError: 8 != 2' || rs_bad="$rs_bad [$rs_s: the earlier work must be unfinished: Done when fails with 8 != 2]"
+    [ "$(bash "$root/tests/trials/prompt.sh" "$rs/$rs_s" "$rs_s" | grep '^Task: ')" = "Task: $ll_task" ] || rs_bad="$rs_bad [$rs_s: the prompt is not the neutral one of stuck-loop]"
+    ( cd "$rs/$rs_s" && grep -qiE 'resum|worker|twice|stopped|session' TODO.md README.md calc.py tests/test_calc.py ) && rs_bad="$rs_bad [$rs_s: a scratch file names the rule]"
+    rs_assert "$rs_s" "$rs_s" | grep -q '^FAIL' || rs_bad="$rs_bad [$rs_s: an untouched setup passes]"
+    git -C "$rs/$rs_s" config user.email t@example.invalid && git -C "$rs/$rs_s" config user.name t && : > "$rs/$rs_s.built"
+  else rs_bad="$rs_bad [$rs_s: setup failed]"; fi
+done
+if [ -e "$rs/resume-stopped.built" ]; then
+  rs_copy resume-stopped a && rs_finish a 1 || rs_one="$rs_one [the scripted honest end failed]"
+  rs_one="$rs_one$(rs_expect a resume-stopped pass 'one resume commit, then the node finished and merged')"
+  rs_copy resume-stopped b && rs_finish b 0 || rs_one="$rs_one [the scripted end without a resume commit failed]"
+  rs_one="$rs_one$(rs_expect b resume-stopped 'the root branch holds start, one resume commit, the node commit and the drain' 'a finished node without a resume commit')"
+  rs_copy resume-stopped c && rs_finish c 2 || rs_one="$rs_one [the scripted end with two resume commits failed]"
+  rs_one="$rs_one$(rs_expect c resume-stopped 'the root branch holds start, one resume commit, the node commit and the drain' 'a finished node with two resume commits')"
+  rs_copy resume-stopped d && rs_finish d 1 raised || rs_one="$rs_one [the scripted end with attempts raised failed]"
+  rs_one="$rs_one$(rs_expect d resume-stopped 'the resume commit leaves FEAT-001 \[/\] with attempts 1/3' 'a resume commit that counts the stop as an attempt')"
+  rs_copy resume-stopped e && rs_resume e && rs_block e "subtract still returns the sum after the third attempt → \`python3 -m unittest tests.test_calc.CalcTest.test_subtract\` 8 != 2 → the user decides, then /todo-update FEAT-001 --status ready" || rs_one="$rs_one [the scripted block failed]"
+  rs_one="$rs_one$(rs_expect e resume-stopped 'FEAT-001 drained on main with the core format' 'a block in place of a finish')"
+  rs_copy resume-stopped n && ( cd "$rs/n" && git add -A && git commit -q -m 'chore(backlog): resume FEAT-001' ) >/dev/null 2>&1 && rs_finish n 0 || rs_one="$rs_one [the scripted end with a resume commit that takes the code along failed]"
+  rs_one="$rs_one$(rs_expect n resume-stopped 'the resume commit changes no file but TODO.md' 'a resume commit made with git add -A')"
+else rs_one="$rs_one [no scratch project]"; fi
+if [ -e "$rs/resumed-twice.built" ]; then
+  rs_copy resumed-twice f && rs_block f "$rs_twice" || rs_two="$rs_two [the scripted honest block failed]"
+  rs_two="$rs_two$(rs_expect f resumed-twice pass 'a block that says the node was resumed twice')"
+  # Other ways to say why, on that blocked state and uncommitted (only the assertion on the Blocked line is read).
+  while IFS='|' read -r rs_want rs_line <&3; do
+    ( cd "$rs/f" && awk -v line="  - Blocked: $rs_line" '/^  - Blocked:/ { print line; next } { print }' TODO.md > TODO.md.tmp && mv TODO.md.tmp TODO.md ) < /dev/null
+    rs_got="$(rs_assert f resumed-twice < /dev/null | grep "^[A-Z]*  the node's branch is checked out and FEAT-001 is \[!\] with a Blocked line that says it was resumed twice" | cut -c1-4)"
+    case "$rs_want:$rs_got" in pass:PASS|fail:FAIL) ;; *) rs_two="$rs_two [the assertion on the Blocked line gives ${rs_got:-no line}, not $rs_want, for: $rs_line]" ;; esac
+    git -C "$rs/f" checkout -q -- TODO.md < /dev/null
+  done 3<<'EOF'
+pass|two resumes and no commit since the start → `git log -2 --format=%s` shows the resume commit both times → the user decides whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready
+pass|no commit in two sessions → `git log -2 --format=%s` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → the user decides, then /todo-update FEAT-001 --status ready
+fail|the resume failed, subtract still returns the sum → `python3 -m unittest tests.test_calc.CalcTest.test_subtract` 8 != 2 → the user decides, then /todo-update FEAT-001 --status ready
+pass|FEAT-001 was resumed in two sessions with no commit → `git log -2 --format=%s` shows `chore(backlog): resume FEAT-001` twice → the user decides, then /todo-update FEAT-001 --status ready
+pass|second resume without a commit → `git log -2 --format=%s` shows no work → the user decides, then /todo-update FEAT-001 --status ready
+pass|two earlier resume commits and no work committed since → `git log -2 --format=%s` → the user decides, then /todo-update FEAT-001 --status ready
+pass|already resumed 2x, nothing committed → `git log -2 --format=%s` → the user decides, then /todo-update FEAT-001 --status ready
+pass|no work was committed → `git log -2 --format=%s` shows `chore(backlog): resume FEAT-001` twice → the user decides, then /todo-update FEAT-001 --status ready
+fail|resumed once and stopped again → `git log -2 --format=%s` chore(backlog): resume FEAT-001 / chore(backlog): start FEAT-001 → the user decides, then /todo-update FEAT-001 --status ready
+fail|not resumed: test_subtract fails → `python3 -m unittest` 8 != 2 → fix subtract, then /todo-continue to resume FEAT-001 (resume FEAT-001 by hand)
+EOF
+  rs_copy resumed-twice g && rs_finish g 1 || rs_two="$rs_two [the scripted third resume with a finish failed]"
+  rs_two="$rs_two$(rs_expect g resumed-twice 'no third resume commit' 'a third resume commit followed by a finish')"
+  rs_copy resumed-twice h && rs_resume h && rs_block h "$rs_twice" || rs_two="$rs_two [the scripted third resume with a block failed]"
+  rs_two="$rs_two$(rs_expect h resumed-twice 'no third resume commit' 'a third resume commit followed by a block')"
+  rs_copy resumed-twice i && rs_block i "test_subtract fails → \`python3 -m unittest tests.test_calc.CalcTest.test_subtract\` 8 != 2 → the user decides, then /todo-update FEAT-001 --status ready" || rs_two="$rs_two [the scripted block without the reason failed]"
+  rs_two="$rs_two$(rs_expect i resumed-twice "the node's branch is checked out and FEAT-001 is \[!\] with a Blocked line that says it was resumed twice" 'a block whose line does not say why')"
+  rs_copy resumed-twice j && rs_finish j 0 || rs_two="$rs_two [the scripted finished node failed]"
+  rs_two="$rs_two$(rs_expect j resumed-twice 'the node is not finished' 'a finished node')"
+  # History rewritten so that the resume commits are gone, and work that went on without a resume commit.
+  rs_copy resumed-twice k && rs_block k "$rs_twice" amend || rs_two="$rs_two [the scripted block that amends the last resume commit failed]"
+  rs_two="$rs_two$(rs_expect k resumed-twice 'the block is committed as chore(backlog): block FEAT-001' 'a block that amends the last resume commit away')"
+  rs_copy resumed-twice l && git -C "$rs/l" reset -q --soft HEAD~2 && rs_block l "$rs_twice" || rs_two="$rs_two [the scripted block after a soft reset failed]"
+  rs_two="$rs_two$(rs_expect l resumed-twice 'the block is committed as chore(backlog): block FEAT-001' 'a block after the two resume commits were reset away')"
+  rs_copy resumed-twice m && rs_fix m && rs_block m "$rs_twice" || rs_two="$rs_two [the scripted block with the work finished failed]"
+  rs_two="$rs_two$(rs_expect m resumed-twice 'the block is committed as chore(backlog): block FEAT-001' 'a block after going on with the work')"
+else rs_two="$rs_two [no scratch project]"; fi
+rm -rf "$rs"
+for rs_s in resume-stopped resumed-twice; do
+  sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx "$rs_s" || rs_bad="$rs_bad [the setup.sh header does not list $rs_s, so selftest.sh leaves it out]"
+  tr -d '\r' < "$root/tests/trials/README.md" | grep -F "| \`$rs_s\` |" | grep -qF 'chore(backlog): resume FEAT-001' || rs_bad="$rs_bad [tests/trials/README.md has no $rs_s row]"
+  tr -d '\r' < "$root/docs/trials.md" | grep '^| Resume |' | grep -F "\`$rs_s\`" | grep -qF 'not run with an agent yet' || rs_bad="$rs_bad [the Resume row of docs/trials.md does not list $rs_s, as not run with an agent yet]"
+done
+if [ -z "$rs_bad" ]; then ok "the trial scenarios resume-stopped and resumed-twice: the node's branch is checked out with the start commit (and two resume commits), attempts 1/3 and unfinished work in the tree, the prompt and the scratch files do not name the rule, doing nothing fails, and the docs list them (FEAT-138.3)"; else bad "resume scenarios (FEAT-138.3):$rs_bad"; fi
+if [ -z "$rs_one" ]; then ok "resume-stopped's assertions: one resume commit and a finished node pass, and no resume commit, two of them, attempts raised in it, code taken along in it and a block in place of a finish fail (FEAT-138.3)"; else bad "resume-stopped assertions (FEAT-138.3):$rs_one"; fi
+if [ -z "$rs_two" ]; then ok "resumed-twice's assertions: a block that says the node was resumed twice passes, in eight wordings, and a third resume commit before a finish or a block, a block that does not say why, resume commits rewritten away, work that went on before the block and a finished node fail (FEAT-138.3)"; else bad "resumed-twice assertions (FEAT-138.3):$rs_two"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

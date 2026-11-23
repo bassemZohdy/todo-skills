@@ -17,7 +17,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | A task that cannot turn green (the loop guard) | `stuck-loop`, `loop-limit` (a speed target out of reach that no single run rules out) | Python; `stuck-loop` has pi runs only, below; `loop-limit` is not run with an agent yet |
 | A `Done when` that does not end (the time limit) | `time-limit` | Python; not run with an agent yet |
 | Planning inside `TODO.md` | `plan-inline` | Python; not run with an agent yet |
-| Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign` | Python |
+| Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign`, `stale-claim` (a claim with no commit for four times its budget, which `/todo-status` marks stale) | Python; `stale-claim` is not run with an agent yet |
 | Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
 | Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop`, `no-backlog` (no `TODO.md`: the command stops) | Python |

@@ -31,7 +31,7 @@ case "$scenario" in
   add-lane)           task='Run `/todo-add "add a power function to calc.py that raises the first number to the second" --lane math`. Do not ask questions; the description is complete. The user confirms the lane line you propose: "yes".' ;;
   update-block)       task='Run `/todo-update FEAT-002 --status blocked --note "waiting for the product decision on rounding"`.' ;;
   update-drop)        task='Run `/todo-update FEAT-002 --status drop --note "duplicate of FEAT-001"`. The user confirms the drop: "yes".' ;;
-  status-readonly)    task='Run `/todo-status`.' ;;
+  status-readonly|stale-claim) task='Run `/todo-status`.' ;;
   blocked-sibling)    task='Run `/todo-continue`; stop right after the start commit (`chore(backlog): start <ID>`), or earlier if the skill says to stop. Do not build.' ;;
   report)             task='Run `/todo-report`. The user says yes if asked to create `docs/`.' ;;
   ts-lifecycle|java-lifecycle)

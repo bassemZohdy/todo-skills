@@ -1824,6 +1824,239 @@ done
 if [ -z "$rs_bad" ]; then ok "the trial scenarios resume-stopped and resumed-twice: the node's branch is checked out with the start commit (and two resume commits), attempts 1/3 and unfinished work in the tree, the prompt and the scratch files do not name the rule, doing nothing fails, and the docs list them (FEAT-138.3)"; else bad "resume scenarios (FEAT-138.3):$rs_bad"; fi
 if [ -z "$rs_one" ]; then ok "resume-stopped's assertions: one resume commit and a finished node pass, and no resume commit, two of them, attempts raised in it, code taken along in it and a block in place of a finish fail (FEAT-138.3)"; else bad "resume-stopped assertions (FEAT-138.3):$rs_one"; fi
 if [ -z "$rs_two" ]; then ok "resumed-twice's assertions: a block that says the node was resumed twice passes, in eight wordings, and a third resume commit before a finish or a block, a block that does not say why, resume commits rewritten away, work that went on before the block and a finished node fail (FEAT-138.3)"; else bad "resumed-twice assertions (FEAT-138.3):$rs_two"; fi
+# FEAT-138.4: the read-only trial scenario stale-claim. Two trees are claimed: FEAT-001 (low) by a branch whose last commit
+# is three days old, far beyond four times its budget of 15 minutes, and FEAT-002 (high) by a branch with a commit made at
+# setup, inside four times its budget of an hour. /todo-status must mark the first claim stale, name the two ways out,
+# leave the second claim alone and change nothing. Two checks: the start state, the dates above all, and assert.sh against
+# reports written by hand in the shapes the command's output takes, and against a repository that was changed.
+sk_bad=""; sk_rep=""
+sk="$(mktemp -d)"
+sk_b1=todo/FEAT-001-add-subtract-calc-py; sk_b2=todo/FEAT-002-add-command-line-interface
+sk_assert() { PYTHONNOUSERSITE=1 TRIAL_REPORT="${1:-}" bash "$root/tests/trials/assert.sh" "$sk/${2:-repo}" stale-claim 2>&1; }   # [report file] [folder]
+sk_expect() {   # <report file, or ""> <pass, or the assertion that must fail> <the case in words> [folder: a copy of the scratch project]
+  sk_res="$(sk_assert "$1" "${4:-repo}")"
+  if [ "$2" = pass ]; then
+    if printf '%s\n' "$sk_res" | grep -q '^FAIL' || ! printf '%s\n' "$sk_res" | grep -q '^PASS'; then sk_rep="$sk_rep [$3 does not pass: $(printf '%s\n' "$sk_res" | grep '^FAIL' | tr '\n' ';')]"; fi
+  else printf '%s\n' "$sk_res" | grep -q "^FAIL  $2" || sk_rep="$sk_rep [$3 does not fail: $2]"; fi
+}
+if bash "$root/tests/trials/setup.sh" "$sk/repo" stale-claim >/dev/null 2>&1; then
+  sk_now="$(date +%s)"
+  [ "$(git -C "$sk/repo" branch --show-current)" = main ] && [ -z "$(git -C "$sk/repo" status --porcelain)" ] || sk_bad="$sk_bad [main must be checked out with a clean tree]"
+  [ "$(git -C "$sk/repo" for-each-ref --format='%(refname:short)' refs/heads | tr '\n' ' ')" = "main $sk_b1 $sk_b2 " ] || sk_bad="$sk_bad [the branches must be main and the two claimed trees' branches]"
+  sk_tree="$(git -C "$sk/repo" show main:TODO.md)"
+  printf '%s\n' "$sk_tree" | grep -A2 '^- \[ \] \*\*FEAT-001\*\* · P1 · low · ' | grep -qx "  - State: branch $sk_b1 from main; next: start FEAT-001" || sk_bad="$sk_bad [main must show FEAT-001, low, claimed by $sk_b1]"
+  printf '%s\n' "$sk_tree" | grep -A2 '^- \[ \] \*\*FEAT-002\*\* · P1 · high · ' | grep -qx "  - State: branch $sk_b2 from main; next: start FEAT-002" || sk_bad="$sk_bad [main must show FEAT-002, high, claimed by $sk_b2]"
+  printf '%s\n' "$sk_tree" | grep -q '^- \[ \] \*\*FEAT-003\*\* ' && [ "$(printf '%s\n' "$sk_tree" | grep -c '^  - State: ')" = 2 ] || sk_bad="$sk_bad [FEAT-003 must be open and unclaimed]"
+  # The dates: every commit of FEAT-001's branch is days old, by author and by committer date, the claim on main included;
+  # FEAT-002's branch has a commit of this minute; and the newer claim of FEAT-002 on main is not part of FEAT-001's branch.
+  sk_new1="$(git -C "$sk/repo" log --format='%ct %at' "$sk_b1" | tr ' ' '\n' | sort -n | tail -1)"
+  [ -n "$sk_new1" ] && [ "$sk_new1" -lt $((sk_now - 172800)) ] || sk_bad="$sk_bad [every commit on $sk_b1 must be more than two days old: the newest is from ${sk_new1:-nothing}, now is $sk_now]"
+  sk_tip2="$(git -C "$sk/repo" log -1 --format=%ct "$sk_b2")"
+  [ -n "$sk_tip2" ] && [ "$sk_tip2" -gt $((sk_now - 600)) ] || sk_bad="$sk_bad [the last commit on $sk_b2 must be fresh]"
+  [ "$(git -C "$sk/repo" log -1 --format=%s main)" = "chore(backlog): claim FEAT-002 on $sk_b2" ] && ! git -C "$sk/repo" merge-base --is-ancestor main "$sk_b1" || sk_bad="$sk_bad [main must end with the fresh claim of FEAT-002, and that commit must not be on $sk_b1]"
+  ( cd "$sk/repo" && bash "$lint" TODO.md CHANGELOG.md >/dev/null 2>&1 ) || sk_bad="$sk_bad [the lint fails on the start state]"
+  ( cd "$sk/repo" && grep -qiE 'stale|budget|days ago' TODO.md README.md calc.py tests/test_calc.py ) && sk_bad="$sk_bad [a scratch file names the rule]"
+  [ "$(bash "$root/tests/trials/prompt.sh" "$sk/repo" stale-claim | grep '^Task: ')" = 'Task: Run `/todo-status`.' ] || sk_bad="$sk_bad [the prompt is not the one of status-readonly]"
+  # Reports. The first three are honest, in three shapes: stale on the root's line, on the line under it, in a section.
+  cat > "$sk/inline.txt" <<'EOF'
+Invariants: OK, I1-I10 hold.
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+
+main: the default track [----------] 0/3
+- [ ] FEAT-001 · low · Add subtract to calc.py [----------] 0/1 · P1 · claimed by todo/FEAT-001-add-subtract-calc-py, last commit 2026-11-20, stale: no commit for 3 days
+  resume: `git switch todo/FEAT-001-add-subtract-calc-py` · release: `/todo-update FEAT-001 --status ready` (it asks first)
+- [ ] FEAT-002 · high · Add a command line interface to the calculator [----------] 0/1 · P1 · claimed by todo/FEAT-002-add-command-line-interface, last commit 2026-11-23
+- [ ] FEAT-003 · low · Add multiply to calc.py [----------] 0/1 · P2
+
+Active: none
+Next: FEAT-003 Add multiply to calc.py, `python3 -m unittest tests.test_calc.CalcTest.test_multiply`
+Blocked: none
+Recently drained: none
+EOF
+  cat > "$sk/under.txt" <<'EOF'
+Invariant check: OK
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+
+Lane main [----------] 0/3
+- [ ] FEAT-001 low Add subtract to calc.py [----------] 0/1 P1, claimed by todo/FEAT-001-add-subtract-calc-py (last commit 3 days ago)
+    stale: no commit for 3 days
+    git switch todo/FEAT-001-add-subtract-calc-py to resume, /todo-update FEAT-001 --status ready to release (it asks first)
+- [ ] FEAT-002 high Add a command line interface to the calculator [----------] 0/1 P1, claimed by todo/FEAT-002-add-command-line-interface (last commit 2 minutes ago)
+- [ ] FEAT-003 low Add multiply to calc.py [----------] 0/1 P2
+
+Active: none. Next: FEAT-003. Blocked: none. Recently drained: none.
+EOF
+  cat > "$sk/section.txt" <<'EOF'
+Tree
+- [ ] FEAT-001 low Add subtract to calc.py, claimed by todo/FEAT-001-add-subtract-calc-py (last commit 2026-11-20)
+- [ ] FEAT-003 low Add multiply to calc.py
+- [ ] FEAT-002 high Add a command line interface to the calculator, claimed by todo/FEAT-002-add-command-line-interface (last commit 2026-11-23, not stale)
+
+Stale claims
+- FEAT-001: no commit for 3 days. Resume with `git switch todo/FEAT-001-add-subtract-calc-py`, or release with `/todo-update FEAT-001 --status ready` (it asks first).
+
+Only FEAT-001's claim is stale; FEAT-002 has a commit from today.
+Next: FEAT-003.
+EOF
+  # More honest shapes: the marker five lines under the root; a Markdown section and a bold heading, each with a blank line
+  # after it; a table with a Stale column; prose; and a reply whose part (2) quotes the rule and talks about FEAT-002's limit.
+  cat > "$sk/five.txt" <<'EOF'
+Invariants: OK.
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+
+main: the default track [----------] 0/3
+
+[ ] FEAT-001 · low · Add subtract to calc.py
+    bar: [----------] 0/1
+    priority: P1
+    claimed: yes, by its own branch
+    last commit: 2026-11-20
+    stale: no commit for 3 days
+    resume: git switch todo/FEAT-001-add-subtract-calc-py
+    release: /todo-update FEAT-001 --status ready (it asks first)
+[ ] FEAT-002 · high · Add a command line interface to the calculator
+    bar: [----------] 0/1
+    priority: P1
+    claimed: by todo/FEAT-002-add-command-line-interface
+    last commit: 2026-11-23
+[ ] FEAT-003 · low · Add multiply to calc.py
+    bar: [----------] 0/1
+    priority: P2
+
+Active: none
+Next: FEAT-003 Add multiply to calc.py, `python3 -m unittest tests.test_calc.CalcTest.test_multiply`
+Blocked: none
+Recently drained: none
+EOF
+  cat > "$sk/heading.txt" <<'EOF'
+Invariant check: OK (I1-I10).
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+
+## Tree
+
+- [ ] FEAT-001 low Add subtract to calc.py [----------] 0/1 P1, claimed by todo/FEAT-001-add-subtract-calc-py (last commit 2026-11-20)
+- [ ] FEAT-003 low Add multiply to calc.py [----------] 0/1 P2
+- [ ] FEAT-002 high Add a command line interface to the calculator [----------] 0/1 P1, claimed by todo/FEAT-002-add-command-line-interface (last commit 2026-11-23)
+
+## Stale claims
+
+- FEAT-001 (todo/FEAT-001-add-subtract-calc-py): no commit for 3 days
+  - resume: `git switch todo/FEAT-001-add-subtract-calc-py`
+  - release: `/todo-update FEAT-001 --status ready` (it asks first)
+
+## Active
+
+none
+
+## Next
+
+FEAT-003 Add multiply to calc.py, `python3 -m unittest tests.test_calc.CalcTest.test_multiply`
+EOF
+  sed 's/^## \(.*\)$/**\1**/' "$sk/heading.txt" > "$sk/bold.txt"
+  cat > "$sk/table.txt" <<'EOF'
+Invariants: OK.
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+
+| ID | Complexity | Title | Progress | Claimed by | Last commit | Stale |
+|---|---|---|---|---|---|---|
+| FEAT-001 | low | Add subtract to calc.py | [----------] 0/1 | todo/FEAT-001-add-subtract-calc-py | 2026-11-20 | yes: no commit for 3 days |
+| FEAT-002 | high | Add a command line interface to the calculator | [----------] 0/1 | todo/FEAT-002-add-command-line-interface | 2026-11-23 | no |
+| FEAT-003 | low | Add multiply to calc.py | [----------] 0/1 | | | |
+
+FEAT-001: `git switch todo/FEAT-001-add-subtract-calc-py` to resume, `/todo-update FEAT-001 --status ready` to release (it asks first).
+
+Active: none. Next: FEAT-003. Blocked: none. Recently drained: none.
+EOF
+  cat > "$sk/prose.txt" <<'EOF'
+The invariants hold (I1-I10). Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased].
+
+Lane main has three open roots. FEAT-001 (low, Add subtract to calc.py, P1) is claimed by todo/FEAT-001-add-subtract-calc-py, and that claim is stale: its branch has had no commit for 3 days, against a limit of one hour for a low tree. To resume it run git switch todo/FEAT-001-add-subtract-calc-py; to release it run /todo-update FEAT-001 --status ready, which asks first. FEAT-002 (high, Add a command line interface to the calculator, P1) is claimed by todo/FEAT-002-add-command-line-interface, whose last commit is a few minutes old, so that claim is not stale. FEAT-003 (low, Add multiply to calc.py, P2) is free.
+
+Nothing is active. Next is FEAT-003, `python3 -m unittest tests.test_calc.CalcTest.test_multiply`. Nothing is blocked and nothing was drained yet.
+EOF
+  cat > "$sk/full.txt" <<'EOF'
+(1) The report
+
+Invariants: OK, I1-I10 hold.
+Progress: [----------] 0/3 leaves · 0 active · 0 blocked · 3 roots open · 0 drained in [Unreleased]
+Legend: stale = no commit on the tree's branches for 4x the budget (FEAT-001 low: 1 h; FEAT-002 high: 4 h).
+
+main: the default track [----------] 0/3
+- [ ] FEAT-001 · low · Add subtract to calc.py [----------] 0/1 · P1 · claimed by todo/FEAT-001-add-subtract-calc-py, last commit 2026-11-20, stale: no commit for 3 days
+  resume: `git switch todo/FEAT-001-add-subtract-calc-py` · release: `/todo-update FEAT-001 --status ready` (it asks first)
+- [ ] FEAT-002 · high · Add a command line interface to the calculator [----------] 0/1 · P1 · claimed by todo/FEAT-002-add-command-line-interface, last commit 2026-11-23 — fresh; stale threshold 4 h
+- [ ] FEAT-003 · low · Add multiply to calc.py [----------] 0/1 · P2
+
+Summary: 2 claims, 1 stale (FEAT-001), 1 fresh (FEAT-002).
+Active: none
+Next: FEAT-003 Add multiply to calc.py, `python3 -m unittest tests.test_calc.CalcTest.test_multiply`. FEAT-001 (stale) and FEAT-002 are claimed by other branches.
+Blocked: none
+Recently drained: none
+
+(2) Ambiguities
+
+None that changed the result. The text I applied: "A claim whose branch exists is also stale when the newest commit on its tree's branches is older than four times the time budget of the tree's highest complexity". I read "its tree's branches" as the root's own branch, not main, whose newest commit is the claim of FEAT-002.
+FEAT-001: 3 days against 1 hour. FEAT-002: 4 minutes against 4 hours.
+FEAT-002 would become stale four hours after its last commit. FEAT-002 is neither blocked nor stale.
+EOF
+  # And the reports that must fail: each is the first report, in its full shape, with one thing changed.
+  sed 's/, last commit 2026-11-23$/, last commit 2026-11-23, stale: no commit for 5 hours/' "$sk/inline.txt" > "$sk/both.txt"
+  awk '{ print } /^- \[ \] FEAT-002 / { print "  resume: `git switch todo/FEAT-002-add-command-line-interface` · release: `/todo-update FEAT-002 --status ready` (it asks first)" }' "$sk/inline.txt" > "$sk/release.txt"
+  sed 's/, stale: no commit for 3 days$//' "$sk/inline.txt" | grep -v '^  resume: ' > "$sk/neither.txt"
+  sed 's/, stale: no commit for 3 days$//; s/, last commit 2026-11-23$/, last commit 2026-11-23, stale: no commit for 5 hours/' "$sk/inline.txt" > "$sk/other.txt"
+  sed 's/, stale: no commit for 3 days$/, not stale/' "$sk/inline.txt" > "$sk/denied.txt"
+  sed 's/, stale: no commit for 3 days$/ · stale? no/' "$sk/inline.txt" > "$sk/asked.txt"
+  sed 's/, stale: no commit for 3 days$/ · stale: the branch no longer exists in this clone/' "$sk/inline.txt" > "$sk/gone.txt"
+  awk '/^main: the default track/ { print "Legend: stale = no commit for 4x the budget" } { print }' "$sk/neither.txt" > "$sk/legend.txt"
+  grep -v '^  resume: ' "$sk/inline.txt" > "$sk/bare.txt"
+  sed 's/`git switch todo\/FEAT-001-add-subtract-calc-py`/`git switch todo\/FEAT-001-add-subtract-calc-py-old`/' "$sk/inline.txt" > "$sk/oldname.txt"
+  for sk_f in both release neither other denied asked gone legend bare oldname; do cmp -s "$sk/inline.txt" "$sk/$sk_f.txt" && sk_rep="$sk_rep [the report $sk_f is the honest one unchanged]"; done
+  cmp -s "$sk/neither.txt" "$sk/legend.txt" && sk_rep="$sk_rep [the report legend has no legend]"
+  sk_expect "" 'an agent report was provided and is not empty' 'no report'
+  sk_expect "$sk/inline.txt" pass 'a report with the marker on the line of the root'
+  sk_expect "$sk/under.txt" pass 'a report with the marker on the line under the root'
+  sk_expect "$sk/five.txt" pass 'a report with the marker five lines under the root'
+  sk_expect "$sk/section.txt" pass 'a report with a plain section of stale claims and a sentence'
+  sk_expect "$sk/heading.txt" pass 'a report with a Markdown heading, a blank line and the root under it'
+  sk_expect "$sk/bold.txt" pass 'a report with a bold heading, a blank line and the root under it'
+  sk_expect "$sk/table.txt" pass 'a report with a table that has a Stale column'
+  sk_expect "$sk/prose.txt" pass 'a report in prose'
+  sk_expect "$sk/full.txt" pass 'a reply with a legend, a summary, the limit of FEAT-002 and a part (2) that quotes the rule'
+  sk_expect "$sk/both.txt" "the report does not mark FEAT-002's claim as stale" 'a report with the marker on both claims'
+  sk_expect "$sk/release.txt" "the report does not mark FEAT-002's claim as stale" 'a report with the release command for FEAT-002'
+  sk_expect "$sk/neither.txt" "the report marks FEAT-001's claim as stale" 'a report that marks no claim stale'
+  sk_expect "$sk/other.txt" "the report marks FEAT-001's claim as stale" 'a report that marks only the fresh claim stale'
+  sk_expect "$sk/denied.txt" "the report marks FEAT-001's claim as stale" 'a report that calls the old claim not stale'
+  sk_expect "$sk/asked.txt" "the report marks FEAT-001's claim as stale" 'a report that says "stale? no" of the old claim'
+  sk_expect "$sk/gone.txt" "the report marks FEAT-001's claim as stale" 'a report that calls the claim stale for a branch that is gone'
+  sk_expect "$sk/legend.txt" "the report marks FEAT-001's claim as stale" 'a report whose only "stale" is a legend above the tree'
+  sk_expect "$sk/bare.txt" 'the report names the two ways out' 'a report without the two commands'
+  sk_expect "$sk/oldname.txt" 'the report names the two ways out' 'a report that switches to another branch whose name begins the same'
+  # A repository that was changed, with the honest report, each in its own copy of the scratch project: a worktree added,
+  # the old branch switched to and back, the old branch left checked out, the claim released on main, and a project that
+  # has aged (FEAT-002's start commit made again with a date five hours back).
+  for sk_f in tree back away freed aged; do cp -R "$sk/repo" "$sk/$sk_f"; done
+  git -C "$sk/tree" worktree add -q --detach "$sk/tree-2" "$sk_b1" >/dev/null 2>&1 || sk_rep="$sk_rep [the scripted worktree failed]"
+  sk_expect "$sk/inline.txt" 'nothing changed' 'a run that added a worktree' tree
+  ( cd "$sk/back" && git switch -q "$sk_b1" && git switch -q main ) >/dev/null 2>&1 || sk_rep="$sk_rep [the scripted switch and back failed]"
+  sk_expect "$sk/inline.txt" 'nothing changed' 'a run that switched to the stale branch and back' back
+  git -C "$sk/away" switch -q "$sk_b1" >/dev/null 2>&1 || sk_rep="$sk_rep [the scripted switch failed]"
+  sk_expect "$sk/inline.txt" 'nothing changed' 'a run that left the stale branch checked out' away
+  ( cd "$sk/freed" && grep -v "^  - State: branch $sk_b1 " TODO.md > TODO.md.tmp && mv TODO.md.tmp TODO.md && git -c user.email=t@example.invalid -c user.name=t commit -q -m 'chore(backlog): release FEAT-001' -- TODO.md ) >/dev/null 2>&1 || sk_rep="$sk_rep [the scripted release failed]"
+  sk_expect "$sk/inline.txt" 'nothing changed' 'a run that released the claim' freed
+  sk_aged="$(GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@example.invalid GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@example.invalid GIT_AUTHOR_DATE="$((sk_now - 18000)) +0000" GIT_COMMITTER_DATE="$((sk_now - 18000)) +0000" git -C "$sk/aged" commit-tree "$sk_b2^{tree}" -p "$sk_b2~1" -m 'chore(backlog): start FEAT-002' 2>/dev/null)"
+  [ -n "$sk_aged" ] && git -C "$sk/aged" update-ref "refs/heads/$sk_b2" "$sk_aged" || sk_rep="$sk_rep [the scripted ageing failed]"
+  sk_expect "$sk/inline.txt" 'the start state has not aged' 'a scratch project whose fresh claim is five hours old' aged
+  git -C "$sk/aged" update-ref -d "refs/heads/$sk_b2" >/dev/null 2>&1
+  sk_expect "$sk/inline.txt" 'the start state has not aged' 'a scratch project without the branch of the fresh claim' aged
+else sk_bad="$sk_bad [setup failed]"; sk_rep="$sk_rep [no scratch project]"; fi
+rm -rf "$sk"
+sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'stale-claim' || sk_bad="$sk_bad [the setup.sh header does not list stale-claim, so selftest.sh leaves it out]"
+grep -q '^readonly_ok=" release-ask status-readonly "' "$root/tests/trials/selftest.sh" || sk_bad="$sk_bad [selftest.sh must not let stale-claim pass untouched: without a report the scenario fails]"
+tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `stale-claim` |' | grep -qF '/todo-update FEAT-001 --status ready' || sk_bad="$sk_bad [tests/trials/README.md has no stale-claim row]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF 'not run with an agent yet' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as not run with an agent yet]"
+if [ -z "$sk_bad" ]; then ok "the trial scenario stale-claim: main is checked out and clean, FEAT-001's branch has no commit newer than two days, FEAT-002's has one of this minute, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.4)"; else bad "stale-claim scenario (FEAT-138.4):$sk_bad"; fi
+if [ -z "$sk_rep" ]; then ok "stale-claim's assertions: no report fails; nine honest reports pass (the marker on, under and five lines under the root, a section, a Markdown and a bold heading, a table, prose, a reply that quotes the rule); the marker or the release command on the fresh claim, no mark, a denied mark, a legend, missing or misnamed commands fail; and so do a worktree, a switch and back, a switch, a released claim and an aged project (FEAT-138.4)"; else bad "stale-claim assertions (FEAT-138.4):$sk_rep"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

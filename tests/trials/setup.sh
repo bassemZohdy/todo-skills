@@ -6,7 +6,7 @@
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
 #   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop | loop-limit |
-#   time-limit | resume-stopped | resumed-twice
+#   time-limit | resume-stopped | resumed-twice | stale-claim
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -629,6 +629,32 @@ open(p,'w',encoding='utf-8',newline='\n').write(s)
 PY
   # That work as it was left, for assert.sh (inside .git, never tracked): resumed-twice must commit it unchanged.
   git hash-object calc.py tests/test_calc.py > .git/trial-work
+  ;;
+stale-claim)
+  # A claim that nobody works on, for /todo-status (FEAT-138.4). Two trees are claimed and started, each on its own branch:
+  # FEAT-001, low, three days ago (its claim on main and its start commit carry that date as author and as committer
+  # date, counted back from now), and FEAT-002, high, at setup time. Four times the budget is one hour for low and four
+  # hours for high: the first claim is stale, the second is not, for four hours from the setup. The claim of FEAT-002 is the
+  # newest commit on main, but main is not a branch of FEAT-001's tree: the rule reads the tree's own branches, and
+  # FEAT-001's branch ends three days ago. FEAT-003 is open and unclaimed, so the status has a next node. No README Budget
+  # line: the defaults apply. The claims and starts are made by tools/todo-flow.sh, as the skills prescribe them.
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
+  - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
+- [ ] **FEAT-002** · P1 · high · Add a command line interface to the calculator
+  - Done when: the command line prints the sum of two numbers; `python3 -m unittest tests.test_cli`
+- [ ] **FEAT-003** · P2 · low · Add multiply to calc.py
+  - Done when: multiply(2, 3) returns 6; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
+  now="$(date +%s)"
+  g add -A
+  GIT_AUTHOR_DATE="$((now - 345600)) +0000" GIT_COMMITTER_DATE="$((now - 345600)) +0000" g commit -q -m "init with three free roots"
+  flow() { GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t bash "$root/tools/todo-flow.sh" "$@" >/dev/null; }
+  GIT_AUTHOR_DATE="$((now - 259200)) +0000" GIT_COMMITTER_DATE="$((now - 259200)) +0000" flow start FEAT-001 1
+  g switch -q main
+  flow start FEAT-002 1
+  g switch -q main
+  # How often HEAD has moved so far, for assert.sh (inside .git, never tracked): a status run must not move it, not even
+  # to another branch and back.
+  git reflog show HEAD | wc -l | tr -d ' ' > .git/trial-reflog
   ;;
 baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py

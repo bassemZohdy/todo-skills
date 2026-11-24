@@ -1337,27 +1337,30 @@ tl_out="$(bash "$root/tests/limit.sh" 2>&1)"
 printf '%s\n' "$tl_out" | grep -E '^(PASS|FAIL)  '
 pass=$((pass + $(printf '%s\n' "$tl_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$tl_out" | grep -c '^FAIL  ')))
 printf '%s\n' "$tl_out" | grep -q '^PASS  ' || bad "tests/limit.sh ran no check: $(printf '%s' "$tl_out" | tail -3 | tr '\n' ' ')"
-# FEAT-134.1: the loop guard. Failed runs outside step 9 count as attempts at the 2nd, 4th and 8th run without progress, so
-# edit, run, fail cannot repeat without limit. The always-loaded /todo-continue text sends the agent to failures.md, which
-# holds the rule in one item (which runs count, when the count goes up, when it restarts, what a step 9 run is), and
-# docs/VERIFICATION.md states the same rule.
+# FEAT-134.1: the loop guard. Failed partial runs (a part of Done when, or the regression alone) count as attempts at the
+# 2nd, 4th and 8th run without progress, so edit, run, fail cannot repeat without limit. The always-loaded /todo-continue text
+# sends the agent to failures.md, which holds the rule in one item (which runs count, when the count goes up, when it
+# restarts, that a failed verification run is an attempt of its own), and docs/VERIFICATION.md states the same rule.
+# FEAT-138.7 (below) settled which runs these are: before it the text said "outside step 9", which agents read two ways.
 lg_bad=""; lg_f="$root/plugin/skills/todo/reference/failures.md"
 lg="$(tr -d '\r' < "$lg_f" | grep -F -- '**Loop guard.**')"
-for s in 'outside step 9 count too, once implementing started' 'a rerun that only reproduces a failure is not counted' 'the same first failing test (or another that already failed in this session since implementing started)' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt: raise `attempts`' 'Fewer failing tests, or a first failing test that has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'failed, it is an attempt by the item above and is not added to this count' 'also a partial one while fixing a step 9 failure' 'a new session starts it at 1'; do printf '%s\n' "$lg" | grep -qF -- "$s" || lg_bad="$lg_bad [failures.md loop guard lacks: $s]"; done
+for s in 'Failed partial runs count too, once implementing started' 'made after a change. The first one starts a count at 1, and each later one without progress adds 1' 'the same first failing test (or another that already failed in this session since implementing started)' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt: raise `attempts`' 'Fewer failing tests, or a first failing test that has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'A failed verification run is an attempt of its own and is not added to this count' 'a new session starts it at 1'; do printf '%s\n' "$lg" | grep -qF -- "$s" || lg_bad="$lg_bad [failures.md loop guard lacks: $s]"; done
+tr -d '\r' < "$lg_f" | grep -qF -- 'A rerun that only reproduces a failure is not counted' || lg_bad="$lg_bad [failures.md: a rerun that only reproduces a failure is not counted]"
 tr -d '\r' < "$lg_f" | grep -F -- 'or a failed run that the loop guard makes one' | grep -qF -- '(the new test failing before the implementation) is not one' || lg_bad="$lg_bad [failures.md: an attempt is also a run the loop guard counted, the red run is not]"
 for f in "$lg_f" "$root/plugin/skills/todo-continue/SKILL.md"; do tr -d '\r' < "$f" | grep -F -- 'a `Done when` cannot run' | grep -qF -- 'Green fails twice on one test' || lg_bad="$lg_bad [${f##*/skills/}: the Green trigger beside the other two]"; done
 tr -d '\r' < "$root/plugin/skills/todo-continue/SKILL.md" | grep -F -- 'Green fails twice on one test' | grep -qF -- 'read `reference/failures.md` before the next change' || lg_bad="$lg_bad [todo-continue: the Green trigger points to failures.md]"
 tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- 'or a failed run that the loop guard makes one' | grep -qF -- '(the new test failing before the implementation) is not one' || lg_bad="$lg_bad [VERIFICATION.md: an attempt is also a run the loop guard counted, the red run is not]"
 lg_d="$(tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -F -- '**Loop guard:**')"
-for s in 'Once implementing started, every such run' 'a rerun that only reproduces a failure is not' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt' 'has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'failed, it is an attempt in its own right and is not added to the count' 'also a partial one while fixing a step 9 failure' 'a new session starts it at 1'; do printf '%s\n' "$lg_d" | grep -qF -- "$s" || lg_bad="$lg_bad [VERIFICATION.md loop guard lacks: $s]"; done
-if [ -z "$lg_bad" ]; then ok "failed runs outside step 9 count as attempts at the 2nd, 4th and 8th run without progress (FEAT-134.1)"; else bad "loop guard (FEAT-134.1):$lg_bad"; fi
+for s in 'Once implementing started, every run of one of the commands of `Done when`, of one test id, of a subset of its tests or of the regression alone that follows a change is counted' 'no fewer failing tests than the last run of the same command' 'Each of the 2nd, the 4th and the 8th run of that count is an attempt' 'has not failed in this session since implementing started, is progress: that run is run 1 of a new count and the attempts stay' 'is an attempt in its own right and is not added to the count' 'a new session starts it at 1'; do printf '%s\n' "$lg_d" | grep -qF -- "$s" || lg_bad="$lg_bad [VERIFICATION.md loop guard lacks: $s]"; done
+tr -d '\r' < "$root/docs/VERIFICATION.md" | grep -qF -- 'A rerun that only reproduces a failure is not counted' || lg_bad="$lg_bad [VERIFICATION.md: a rerun that only reproduces a failure is not counted]"
+if [ -z "$lg_bad" ]; then ok "failed partial runs count as attempts at the 2nd, 4th and 8th run without progress (FEAT-134.1)"; else bad "loop guard (FEAT-134.1):$lg_bad"; fi
 # FEAT-134.2: a dead worker leaves its tree claimed. /todo-status marks a claim stale by the age of the newest commit on the
 # tree's branches (four times a time budget per complexity, which a README Budget line may set), names the commands that
 # act on it and runs neither; a newer claim is not marked. The pages that list what the README holds name the line.
 sc_bad=""; sc_s="$(tr -d '\r' < "$root/plugin/skills/todo-status/SKILL.md")"
 printf '%s\n' "$sc_s" | grep -F -- 'claimed by <branch>' | grep -qF -- 'or by "Stale claims" below' || sc_bad="$sc_bad [todo-status: the Tree step points to Stale claims]"
 sc_p="$(printf '%s\n' "$sc_s" | awk '/^## Stale claims/ { on = 1; next } /^## / { on = 0 } on')"
-for s in 'A claim whose branch exists is also stale when the newest commit' "older than four times the time budget of the tree's highest complexity" '15 minutes for `low`, 30 for `mid`, 60 for `high`' 'or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`' 'stale: no commit for <age>' '`git switch <branch>` to resume' '`/todo-update <ROOT-ID> --status ready` to release (it asks first)' 'Report only: run neither, and mark no claim with a newer commit'; do printf '%s\n' "$sc_p" | grep -qF -- "$s" || sc_bad="$sc_bad [todo-status Stale claims lacks: $s]"; done
+for s in 'A claim whose branch exists is also stale when the newest commit' "older than four times the time budget of the tree's highest complexity" '15 minutes for `low`, 30 for `mid`, 60 for `high`' 'or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`' 'stale: no commit for <age>' '`git switch <branch>` to resume' '`/todo-update <ROOT-ID> --status ready` to release (it asks first)' 'Report only: run neither command. A claim with a commit newer than that limit is not marked'; do printf '%s\n' "$sc_p" | grep -qF -- "$s" || sc_bad="$sc_bad [todo-status Stale claims lacks: $s]"; done
 tr -d '\r' < "$root/docs/COMMANDS.md" | grep -F -- 'claimed by <branch>' | grep -F -- 'no commit for four times its time budget' | grep -qF -- 'runs neither, and since the branch still exists the release asks for a yes' || sc_bad="$sc_bad [COMMANDS.md: the Tree line names the age rule and that it is report only]"
 for f in docs/FILES.md README.md; do tr -d '\r' < "$root/$f" | grep -F -- '`Models:' | grep -qF -- '`Budget:' || sc_bad="$sc_bad [$f: the Budget line beside the Models line]"; done
 if [ -z "$sc_bad" ]; then ok "/todo-status marks a claim stale by the age of its newest commit and only reports it (FEAT-134.2)"; else bad "stale claims (FEAT-134.2):$sc_bad"; fi
@@ -1367,8 +1370,8 @@ if [ -z "$sc_bad" ]; then ok "/todo-status marks a claim stale by the age of its
 # The words that paid for it in the /todo-continue load were repeated in verification.md, which step 9 now points to.
 tl_bad=""; tl_sk="$root/plugin/skills"
 tl_v="$(tr -d '\r' < "$tl_sk/todo/reference/verification.md" | grep -F -- '**Time limit.**')"
-for s in 'Run `Done when` and the regression (parts too) under one' "\`bash .todo/todo-limit.sh <seconds> '<command>'\` if it exists, else by hand with your tool's timeout" '15, 30 or 60 minutes for `low`, `mid` or `high`, or the README `Budget:` line' 'A run stopped at the limit (exit 124) is a failed run; report the limit'; do printf '%s\n' "$tl_v" | grep -qF -- "$s" || tl_bad="$tl_bad [verification.md Time limit lacks: $s]"; done
-tr -d '\r' < "$tl_sk/todo/reference/failures.md" | grep -F -- '**Time limit**' | grep -F -- 'a run stopped at its limit is a failed run' | grep -F -- 'at step 9 an attempt, elsewhere a run of the loop guard' | grep -F -- '("A Done when that cannot run") or the hang is outside the node' | grep -qF -- 'A stopped baseline run stops the node as a red baseline does' || tl_bad="$tl_bad [failures.md: how a stopped run counts, and when the older rules come first]"
+for s in 'Run `Done when` and the regression (the baseline and parts too) under one' "\`bash .todo/todo-limit.sh <seconds> '<command>'\` if it exists, else set your tool's timeout to the limit" '15, 30 or 60 minutes for `low`, `mid` or `high`, or the README `Budget:` line' 'A run stopped at the limit (exit 124) is a failed run; report the limit'; do printf '%s\n' "$tl_v" | grep -qF -- "$s" || tl_bad="$tl_bad [verification.md Time limit lacks: $s]"; done
+tr -d '\r' < "$tl_sk/todo/reference/failures.md" | grep -F -- '**Time limit**' | grep -F -- 'a run stopped at its limit is a failed run' | grep -F -- 'a verification run is an attempt, a partial run is a run of the loop guard' | grep -F -- '("A Done when that cannot run") or the hang is outside the node' | grep -qF -- 'A stopped baseline run stops the node as a red baseline does' || tl_bad="$tl_bad [failures.md: how a stopped run counts, and when the older rules come first]"
 tr -d '\r' < "$tl_sk/todo-continue/SKILL.md" | grep -F -- 'ran tests' | grep -F -- 'breaks no "No cheating" rule (`reference/verification.md`, step 7)' | grep -qF -- 'Regression green against the baseline (step 6 there)' || tl_bad="$tl_bad [todo-continue: step 9 points to No cheating and to the regression step]"
 tr -d '\r' < "$tl_sk/todo/reference/verification.md" | grep -F -- '**Regression.**' | grep -qF -- 'No fewer passing tests than the baseline, none deleted or skipped' || tl_bad="$tl_bad [verification.md: Regression keeps the baseline rule step 9 points to]"
 tr -d '\r' < "$root/docs/FILES.md" | grep -F -- '`Budget:' | grep -qF -- '`/todo-continue` limits' || tl_bad="$tl_bad [FILES.md: both uses of the Budget line]"
@@ -1428,7 +1431,7 @@ wd_sk="$root/plugin/skills"
 wd_f="$(tr -d '\r' < "$wd_sk/todo/reference/failures.md")"
 wd_sec="$(printf '%s\n' "$wd_f" | awk '/^## A worker that stopped$/ { on = 1; next } /^## / { on = 0 } on')"
 [ -n "$wd_sec" ] || wd_bad="$wd_bad [failures.md has no section A worker that stopped]"
-for s in 'A node still `[/]` whose worker is gone' 'or `next: drain` on a root' 'is **resumable**: not a failed attempt' 'the error text decides nothing' 'checked out in another worktree is not gone' 'Once the resume goes ahead (the `git status` check of step 2 passed)' '`git commit --allow-empty -m '"'"'chore(backlog): resume <ID>'"'"' -- TODO.md`' 'Any commit that is not a resume commit counts as progress, uncommitted work does not' '`git log -2 --format=%s`' 'resumed twice, nothing committed since' 'make no resume commit' 'a leaf that is `mid` or `high`: break it down' 'reference/plan-step.md`, "Decompose"' 'every later run offers the breakdown again' 'a `low` leaf, or a parent'"'"'s integration step: block it' 'resumed twice with no new commit →' 'nothing is reverted' 'Without git there is no commit to count'; do printf '%s\n' "$wd_sec" | grep -qF -- "$s" || wd_bad="$wd_bad [failures.md section lacks: $s]"; done
+for s in 'A node still `[/]` whose worker is gone' 'or `next: drain` on a root' 'is **resumable**: not a failed attempt' 'the error text decides nothing' 'checked out in another worktree is not gone' 'The order of a resume: first the `git status` check of step 2' 'Unless that log shows `chore(backlog): resume <ID>` twice, the resume goes ahead' '`git commit --allow-empty -m '"'"'chore(backlog): resume <ID>'"'"' -- TODO.md`' 'Any commit that is not a resume commit counts as progress, uncommitted work does not' '`git log -2 --format=%s`' 'resumed twice, nothing committed since' 'make no resume commit' 'a leaf that is `mid` or `high`: break it down' 'reference/plan-step.md`, "Decompose"' 'every later run offers the breakdown again' 'a `low` leaf, or a parent'"'"'s integration step: block it' 'resumed twice with no new commit →' 'It is a block like any other: the three sub-items of the block item in "Test failures" apply' 'Without git there is no commit to count'; do printf '%s\n' "$wd_sec" | grep -qF -- "$s" || wd_bad="$wd_bad [failures.md section lacks: $s]"; done
 printf '%s\n' "$wd_f" | grep -F 'Read on demand from' | grep -qF 'and from step 2 when it resumes a `[/]` node' || wd_bad="$wd_bad [failures.md intro does not name the resume trigger]"
 printf '%s\n' "$wd_f" | grep -F 'An attempt is a failed verification run' | grep -qF 'A worker that stopped without a verdict is not one' || wd_bad="$wd_bad [failures.md attempt definition does not exclude a worker that stopped]"
 tr -d '\r' < "$wd_sk/todo-continue/SKILL.md" | grep -F -- '**A `[/]` node:**' | grep -qF 'read `reference/failures.md`, "A worker that stopped" first' || wd_bad="$wd_bad [todo-continue step 2 does not point a resumed [/] node to failures.md]"
@@ -2204,6 +2207,157 @@ done; done
 grep -q 'LC_ALL=C awk' "$root/tests/trials/assert.sh" || kn_old="$kn_old [stale-claim: the awk that reads the report does not run under LC_ALL=C]"
 rm -rf "$kn"
 if [ -z "$kn_old" ]; then ok "race-claim-conflict, race-claim-benign and team-claim: a correct ending passes every assertion with the new names of the simulated history and with the names that the batches made before hold, and stale-claim's report is read under LC_ALL=C (FEAT-138.6)"; else bad "renamed history of three scenarios (FEAT-138.6):$kn_old"; fi
+# FEAT-138.7: the sentences of the stuck-worker rules that two or more of 14 agent reports called unclear say one thing each.
+# Two change what an agent does. A failed run of the whole Done when after a change is an attempt, at any step and whatever it
+# was meant for (a red regression run after it too), and the loop guard counts partial runs only (a part of Done when, or the
+# regression alone); a rerun without a change and a script of the agent's own are neither. "Outside the node" needs a reason that follows from the task line, the tests and the project, not
+# from the node's own tries. The others say what agents had to guess: the Blocked line, the block commit and the report of a
+# block, the regression after a failed Done when, the order of a resume and its Red line, hyp, the slug, a test that exists
+# before the node, the time limit, step 2 against the reference, and the stale claim. The docs state the same rules.
+s7_bad=""; s7_f="plugin/skills/todo/reference/failures.md"; s7_c="plugin/skills/todo-continue/SKILL.md"
+s7_sel() {   # <file> <text that selects the lines, "" for all>: those lines (no grep on an empty pattern, which not every grep matches)
+  if [ -n "$2" ]; then tr -d '\r' < "$root/$1" | grep -F -- "$2"; else tr -d '\r' < "$root/$1"; fi
+}
+s7_has() {   # <file> <text that selects the lines, "" for all> <phrase>: one of those lines holds the phrase
+  s7_sel "$1" "$2" | grep -qF -- "$3" || s7_bad="$s7_bad [$1 lacks: $3]"
+}
+s7_not() {   # <file> <text that selects the lines, "" for all> <phrase>: none of those lines holds the phrase
+  if s7_sel "$1" "$2" | grep -qF -- "$3"; then s7_bad="$s7_bad [$1 still says: $3]"; fi
+}
+# Which failed runs are attempts: the whole Done when (with the regression run after it) on one line, a partial run (the
+# regression alone too) on another, and neither line says the other. The always-loaded trigger that opens failures.md names
+# what an agent can see, a failed run of the whole Done when or of the regression after a change, in the same words in both files.
+s7_has "$s7_f" 'An attempt is a failed verification run' '(the next items define both)'
+s7_has "$s7_f" '**Verification run:**' 'a run of the whole `Done when` (every command of it, as written) made after a change, once implementing started, together with the regression when the regression is run after it'
+s7_has "$s7_f" '**Verification run:**' 'It is one whether or not the regression is run and whether or not you meant it to close the node; when `Done when` or that regression fails, it is an attempt'
+s7_has "$s7_f" '**Verification run:**' 'After a failed `Done when` the regression need not run'
+s7_not "$s7_f" '**Verification run:**' 'part of'
+s7_not "$s7_f" '**Verification run:**' 'partial'
+s7_has "$s7_f" '**Loop guard.**' 'Failed partial runs count too, once implementing started: a run of one of the commands of `Done when`, of one test id, of a subset of its tests or of the regression alone, made after a change'
+s7_has "$s7_f" '**Loop guard.**' 'is an attempt: raise `attempts` in `State:` and write a new `hyp:`, unless it is the third attempt (then block, below)'
+s7_has "$s7_f" '**Loop guard.**' 'A failed verification run is an attempt of its own and is not added to this count'
+s7_not "$s7_f" '**Loop guard.**' 'a run of the whole'
+s7_has "$s7_f" '**Runs that do not count.**' 'A rerun that only reproduces a failure is not counted, as neither kind of run: nothing changed since the failed run'
+s7_has "$s7_f" '**Runs that do not count.**' "The first run of a new session that fails on the earlier session's change is such a rerun"
+s7_has "$s7_f" '**Runs that do not count.**' 'A script of your own is never a run of `Done when`, even when it repeats one of its tests: it is not counted and it does not replace a run'
+s7_has "$s7_f" '**Time limit**' 'a verification run is an attempt, a partial run is a run of the loop guard'
+s7_has "$s7_f" '**Time limit**' 'A tool whose longest timeout is below the limit runs at that timeout, and its stop counts as the limit'
+for s7_s in 'outside step 9' 'or of any part of it' 'made to close the node' 'Every other run is counted' 'a step 9 failure' 'at step 9 an attempt' 'at the verify step it is an attempt'; do
+  s7_not "$s7_f" '' "$s7_s"; s7_not docs/VERIFICATION.md '' "$s7_s"
+done
+for s7_s in "$s7_f" "$s7_c"; do
+  s7_has "$s7_s" 'Green fails twice on one test' 'the whole `Done when` or the regression fails after a change, Green fails twice on one test, or a `Done when` cannot run'
+  s7_not "$s7_s" '' 'a verification run fails'; s7_not "$s7_s" '' 'verification run (step 9)'
+done
+s7_has docs/VERIFICATION.md 'An attempt is a failed verification run' 'A verification run is a run of the whole `Done when` (every command of it, as written) made after a change, once implementing started, together with the regression when the regression is run after it'
+s7_has docs/VERIFICATION.md 'An attempt is a failed verification run' 'when `Done when` or that regression fails, it is an attempt'
+s7_has docs/VERIFICATION.md 'An attempt is a failed verification run' "a script of the agent's own is never a run of \`Done when\`"
+s7_has docs/VERIFICATION.md '**Loop guard:**' 'failed partial runs count too'
+s7_has docs/VERIFICATION.md '**Loop guard:**' 'of a subset of its tests or of the regression alone that follows a change is counted'
+s7_has docs/VERIFICATION.md '**Loop guard:**' 'the agent raises `attempts` and writes a new hypothesis, unless it is the third attempt, which blocks the node'
+s7_has docs/VERIFICATION.md '**Loop guard:**' 'A failed verification run is an attempt in its own right and is not added to the count'
+s7_has docs/VERIFICATION.md '**Time limit.**' 'a run of the whole `Done when`, or of the regression after it, is an attempt; a run of a part of it, or of the regression alone, is a run of the loop guard'
+s7_has docs/VERIFICATION.md '**Time limit.**' 'A tool whose longest timeout is below the limit runs at that timeout, and its stop counts as the limit'
+s7_has README.md '**Loop guard.**' 'A failed run of the whole `Done when` after a change, or of the regression run after it, is an attempt'
+s7_has README.md '**Loop guard.**' 'Failed runs of a part of it, or of the regression alone, count as an attempt at the 2nd, 4th and 8th run that shows no progress'
+s7_has plugin/skills/todo/reference/routing.md '**Escalation:**' 'after a failed attempt the next attempt runs one tier higher'
+s7_not plugin/skills/todo/reference/routing.md '' 'failed verification attempt'
+s7_has tests/trials/README.md '| `loop-limit` |' 'every failed run of the whole `Done when` after a change is an attempt'
+s7_has tests/trials/README.md '| `loop-limit` |' 'the 2nd, 4th and 8th run without progress an attempt only for runs of a part of it'
+s7_not tests/trials/README.md '' 'makes the 2nd, 4th and 8th failed run without progress an attempt'
+s7_has docs/trials.md '`loop-limit`' 'A task that cannot turn green (the limit of three attempts, and the loop guard for partial runs)'
+# Outside the node: the kinds are examples, and the reason comes from the task and the tests, not from the node's own tries.
+s7_has "$s7_f" '**Outside the node**' 'can turn green. Examples, not a full list: a flaky test'
+s7_has "$s7_f" '**Outside the node**' 'tests or criteria that contradict each other'
+s7_has "$s7_f" '**Outside the node**' "The reason must follow from the task line, the tests and the project as they are (a contradiction, an arithmetic bound, a test the node may not touch), not from the node's own tries"
+s7_has "$s7_f" '**Outside the node**' "a target that the node's code has only missed so far (too slow, not found yet), judged from measurements of that code, is not outside the node and uses the attempts"
+s7_has "$s7_f" '**Outside the node**' "a time limit that no implementation can meet, by an arithmetic bound, is outside the node, and one that the node's code merely exceeded is a failed run"
+s7_has "$s7_f" '**Outside the node**' 'A failure outside the node blocks at once'
+s7_not "$s7_f" '' 'can turn green: a flaky test'
+s7_has docs/VERIFICATION.md 'A failure outside the node' 'tests or criteria that contradict each other'
+s7_has docs/VERIFICATION.md 'A failure outside the node' "not from the node's own tries"
+s7_has docs/VERIFICATION.md 'A failure outside the node' 'uses the attempts'
+# A block: the Blocked line, the commit, the report.
+s7_has "$s7_f" 'The `Blocked:` line is one line' 'its two arrows are literal. Only the command is in backticks; its error follows outside them'
+s7_has "$s7_f" 'The `Blocked:` line is one line' 'Do not write a raised `attempts` to `State:` first: `Blocked:` replaces `State:`, so the count and the `hyp:` are gone from the file'
+s7_has "$s7_f" 'The `Blocked:` line is one line' 'lists each hypothesis in the reason part of the line'
+s7_not "$s7_f" '' '(list each hypothesis)'
+s7_has "$s7_f" 'block the node: `[!]`' 'committed as `chore(backlog): block <ID>` (the sub-items below); stop'
+s7_not "$s7_f" 'block the node: `[!]`' 'changed files'
+s7_has "$s7_f" 'The block commit has no body' 'It holds `TODO.md` and every file the node changed or created, as they are, also uncommitted earlier work of a resumed node; nothing is reverted'
+s7_has "$s7_f" 'The block commit has no body' "It does not hold the generated files of git-flow's clean-tree list, nor scratch files of your own that are no part of the task"
+s7_has "$s7_f" 'a blocked root is not finished' 'nothing is drained or merged, also with `--merge`, and no merge commands are printed'
+s7_has "$s7_f" 'a blocked root is not finished' 'Give the step, the `Blocked:` line and the items of step 11 that apply'
+s7_has "$s7_f" 'resumed twice with no new commit →' 'The arrows are literal; `<ID>` and the text in angle brackets are placeholders'
+s7_has "$s7_f" 'resumed twice with no new commit →' 'It is a block like any other: the three sub-items of the block item in "Test failures" apply'
+s7_not "$s7_f" 'resumed twice with no new commit →' 'changed files'
+s7_has docs/VERIFICATION.md '**blocks the node**' 'one line with literal arrows, only the command in backticks'
+s7_has docs/VERIFICATION.md '**blocks the node**' 'without a body, with `TODO.md` and every file the node changed or created, as they are (not generated files, nor scratch files of the agent'"'"'s own that are no part of the task)'
+s7_has docs/VERIFICATION.md '**blocks the node**' 'a blocked root is not drained or merged, also with `--merge`'
+s7_has docs/GIT-FLOW.md '| `chore(backlog): block <ID>` |' 'with `TODO.md` and every file the node changed or created, as they are'
+s7_has docs/LIFECYCLE.md '3 failed attempts' 'failure outside the node'
+s7_has docs/LIFECYCLE.md 'ends in `[!]`' 'A failure outside the node, a missing Definition of Done item'
+s7_not docs/LIFECYCLE.md '' 'failure outside scope'; s7_not docs/LIFECYCLE.md '' 'A failure outside the task line'
+# A resume: its order, its commit, the Red line of the node commit; and hyp, which the lint reads up to the next "; ".
+s7_has "$s7_f" 'The order of a resume:' 'first the `git status` check of step 2, which must pass (if it stops the run, make no resume commit), then `git log -2 --format=%s` on the node'"'"'s branch, read as the log stands before any commit of this run'
+s7_has "$s7_f" 'The order of a resume:' 'starts with the resume commit, made at once, before going on at the step `next:` names'
+s7_has "$s7_f" 'The order of a resume:' 'the command as written needs no `git add`'
+s7_has "$s7_f" 'The node commit of a resumed leaf' 'quotes as `Red:` the failure this session reproduced before its fix, and leaves the line out when it reproduced none'
+s7_n1="$(tr -d '\r' < "$root/$s7_f" | grep -n -F 'Without git there is no commit to count, so this stop does not apply' | cut -d: -f1)"
+s7_n2="$(tr -d '\r' < "$root/$s7_f" | grep -n -F 'The node commit of a resumed leaf' | cut -d: -f1)"
+s7_n3="$(tr -d '\r' < "$root/$s7_f" | grep -n -F 'resumed twice with no new commit →' | cut -d: -f1)"
+[ -n "$s7_n1" ] && [ -n "$s7_n2" ] && [ -n "$s7_n3" ] && [ "$s7_n3" -lt "$s7_n1" ] && [ "$s7_n1" -lt "$s7_n2" ] || s7_bad="$s7_bad [$s7_f: \"this stop does not apply\" must follow the two cases of the stop directly, before the Red line of a resumed leaf]"
+s7_has docs/VERIFICATION.md '**A worker that stopped**' 'A resume checks `git status` first, and a check that stops the run makes no resume commit'
+s7_has docs/VERIFICATION.md '**A worker that stopped**' 'as the log stands before any commit of that run'
+s7_has docs/VERIFICATION.md '**A worker that stopped**' 'quotes as `Red:` the failure that session reproduced'
+s7_has docs/GIT-FLOW.md '| `chore(backlog): resume <ID>` |' 'made before the work goes on; two in a row with no commit after them stop the resuming, and no third one is made'
+s7_has docs/COMMANDS.md '**Select by status.**' 'unless it was resumed twice with no commit since: then it is broken down or blocked'
+s7_has docs/VERIFICATION.md 'Diagnose first' 'one line with no `; ` inside (the lint reads what follows it as an unknown item) and stands before `branch`'
+s7_has docs/REFERENCE.md '| `hyp: <one line>` |' 'with no `; ` inside'
+s7_has "$s7_f" 'Diagnose first' '`hyp:` is one line with no `; ` inside (the lint reads what follows it as an unknown item) and stands before `branch`, as the core orders the items'
+s7_d="$(mktemp -d)"; printf '# Changelog\n\n## [Unreleased]\n' > "$s7_d/CHANGELOG.md"
+printf '%s\n' '# Active Backlog' '' '## Task Tree' '' '- [/] **FEAT-001** · P1 · mid · Add primes_up_to to calc.py' '  - Done when: primes_up_to(10) returns the primes up to 10; `python3 -m unittest tests.acceptance_primes`' '  - State: attempts 1/3; baseline 1 passing; hyp: the sieve is slow; the read-out too; branch todo/FEAT-001-add-primes-up-calc from main; next: build' > "$s7_d/TODO.md"
+bash "$lint" "$s7_d/TODO.md" "$s7_d/CHANGELOG.md" 2>&1 | grep -q 'FAIL I3:.*unknown State item' || s7_bad="$s7_bad [the lint accepts a hyp with \"; \" inside, which failures.md says it rejects]"
+sed 's/slow; the read-out too/slow, the read-out too/' "$s7_d/TODO.md" > "$s7_d/one.md"
+bash "$lint" "$s7_d/one.md" "$s7_d/CHANGELOG.md" 2>&1 | grep -q '^OK: invariants' || s7_bad="$s7_bad [the lint rejects a hyp of one line before branch]"
+rm -rf "$s7_d"
+# The slug, the tests a node finds in place, the time limit, step 2 and the stale claim (always-loaded text, paid for by cuts).
+s7_has plugin/skills/todo/reference/git-flow.md 'Slug:' 'turn every character that is not a letter or a digit into a space (`calc.py` becomes the two words `calc` and `py`)'
+s7_not plugin/skills/todo/reference/git-flow.md '' 'turn punctuation into spaces'
+s7_has docs/GIT-FLOW.md 'The slug is' 'every character that is not a letter or a digit turned into a space (`calc.py` gives `calc` and `py`, `primes_up_to` gives `primes`, `up` and `to`)'
+s7_not tools/todo-flow.sh '' 'punctuation to spaces'
+s7_has "$s7_c" '**Red**' 'If the test `Done when` names exists already, write none for it: its first run is the red run'
+s7_has docs/VERIFICATION.md '**Red.**' 'A test that `Done when` names may exist already: its first run is then the red run and no test is written for it'
+s7_has docs/COMMANDS.md '**Build.**' 'when the test that `Done when` names exists already, its first run is the red run and none is written for it'
+s7_has "$s7_c" '**Spec:**' 'otherwise in the test name. Never add it to a test the node did not write.'
+s7_has docs/VERIFICATION.md '**Spec:**' 'the ID is never added to a test the node did not write'
+s7_has docs/VERIFICATION.md 'names an exact test id' 'This holds for a test the node writes: a test that exists already is not edited for it'
+s7_has plugin/skills/todo/reference/verification.md '**Time limit.**' 'Run `Done when` and the regression (the baseline and parts too) under one'
+s7_has plugin/skills/todo/reference/verification.md '**Time limit.**' "if it exists, else set your tool's timeout to the limit"
+s7_has plugin/skills/todo/reference/verification.md '**Time limit.**' 'or the README `Budget:` line (`1m` is one minute)'
+s7_not plugin/skills/todo/reference/verification.md '' "by hand with your tool's timeout"
+s7_has docs/VERIFICATION.md '**Time limit.**' 'the baseline run too'
+s7_has docs/VERIFICATION.md '**Time limit.**' 'where `1m` is one minute'
+s7_has docs/VERIFICATION.md '**Time limit.**' "otherwise by hand, with the timeout of the agent's own command tool set to the limit"
+s7_has docs/TOOLS.md 'Runs one command line under a time limit' '`Done when` and the regression (the baseline run too) this way'
+s7_has docs/TOOLS.md 'Runs one command line under a time limit' 'by setting the timeout of its own command tool to the limit'
+s7_has docs/TOOLS.md 'Runs one command line under a time limit' 'a tool whose longest timeout is below the limit runs at that timeout, and its stop counts as the limit'
+s7_has "$s7_c" '**A `[/]` node:**' '"A worker that stopped" first; unless it says not to, resume it on its branch'
+s7_not "$s7_c" '' 'first, then resume it'
+s7_has plugin/skills/todo-status/SKILL.md 'A claim whose branch exists is also stale' 'the newest commit on the branches `todo/<ROOT-ID>-*` and `todo/<ROOT-ID>.*` is older than four times'
+s7_has plugin/skills/todo-status/SKILL.md 'A claim whose branch exists is also stale' 'Report only: run neither command. A claim with a commit newer than that limit is not marked.'
+s7_not plugin/skills/todo-status/SKILL.md '' 'mark no claim with a newer commit'
+# What paid for the additions in the /todo-continue and /todo-status loads: each cut sentence only repeated a rule that
+# another always-loaded file of the same row states, and that file must keep it.
+s7_has plugin/skills/todo/reference/verification.md '**Red.**' '`TASK` refactors get characterization tests that pass before and after'
+s7_has plugin/skills/todo/reference/verification.md '**Parents**' 'No feature code.'
+s7_has plugin/skills/todo/reference/git-flow.md '**Refresh before a root lands.**' 'If it brought changes, rerun `Done when` and the full regression; block the root if red'
+s7_has plugin/skills/todo/reference/git-flow.md '**Root.**' 'Without `--merge`, print `git switch <base>'
+s7_has "$s7_c" '       4. With `--merge`' 'otherwise print those commands'
+s7_has plugin/skills/todo/SKILL.md 'Markers:' '`[x]` verified and merged (or being merged) into its parent, waiting for its root to drain'
+s7_has plugin/skills/todo/SKILL.md '| `[x]` |' '| never touches |'
+s7_has plugin/skills/todo/SKILL.md 'Without a `TODO.md`' 'every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops'
+if [ -z "$s7_bad" ]; then ok "the stuck-worker rules say one thing each: a failed run of the whole Done when is an attempt and the loop guard counts partial runs, outside the node needs a reason that is not the node's own tries, and the block, the resume, the slug, a test in place, the time limit and the stale claim are spelled out (FEAT-138.7)"; else bad "settled sentences (FEAT-138.7):$s7_bad"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

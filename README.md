@@ -56,7 +56,7 @@ All nine skill folders go together: the command skills load the `todo` core skil
 
 A worker that loops, hangs or dies must not hold a node for ever. Three guards, the loop guard, the time limit and the stale claim, are described in [docs/VERIFICATION.md](docs/VERIFICATION.md):
 
-- **Loop guard.** Failed runs of `Done when` while implementing count as an attempt at the 2nd, 4th and 8th run that shows no progress (the same first failing test, no fewer failing tests); at 3 attempts the node is blocked. Fewer failures, or a different failing test, start the count again.
+- **Loop guard.** A failed run of the whole `Done when` after a change, or of the regression run after it, is an attempt. Failed runs of a part of it, or of the regression alone, count as an attempt at the 2nd, 4th and 8th run that shows no progress (the same first failing test, no fewer failing tests); at 3 attempts the node is blocked. Fewer failures, or a different failing test, start the count again.
 - **Time limit.** `Done when` and the regression run under a limit of 15, 30 or 60 minutes for `low`, `mid` or `high` (or the README `Budget:` line), with the optional [`tools/todo-limit.sh`](tools/todo-limit.sh) so macOS needs no `timeout`. A run stopped at the limit is a failed run.
 - **Stale claim.** `/todo-status` flags a claimed tree with no commit for four times that budget, and only reports it: it never takes the claim over. A worker that stopped without a verdict (a usage limit, a crash, a closed session) is not a failed attempt; `/todo-continue` resumes the node, and a node resumed twice with no new commit is broken down or blocked.
 

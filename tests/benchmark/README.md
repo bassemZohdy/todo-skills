@@ -40,7 +40,7 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../../doc
 
 | Arm | What it is |
 |---|---|
-| `todo-skills` | The skills of this repository, installed by `setup.sh`. The agent works through todo-init, todo-add and todo-continue. |
+| `todo-skills` | The skills of this repository, installed by `setup.sh`. The agent works through todo-init, todo-add and todo-continue. Since 2026-11-24 its `arm.md` also tells the agent that nobody answers a confirmation (a plan or tree the skills show, an optional file they offer): the first attempt at the multi-feature scenario ended with both todo-skills arms stopped at the confirmation of the proposed tree, and a stop is a FAIL here. Questions about the requirement still go to the final message. |
 | `lean-baseline` | A single-prompt method, rewritten from a summary of a third-party prompt ([its README](arms/lean-baseline/README.md)). |
 | `no-methodology` | The control: the requirement and nothing else. |
 

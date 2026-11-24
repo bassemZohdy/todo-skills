@@ -91,15 +91,16 @@ pid=$!
   exit 0
 ) > /dev/null 2>&1 &
 watch=$!
-wait "$pid" 2>/dev/null
+{ wait "$pid"; } 2>/dev/null   # a command that a signal ended is reported by bash 3.2 as well: discarded
 rc=$?
-# Ended in time, as far as this script knows: stop the watchdog. If the limit fell in this very moment, USR1 says so.
-if [ "$signalled" -eq 1 ] && [ "$fired" -eq 0 ]; then kill "$watch" 2>/dev/null; fi
-wait "$watch" 2>/dev/null
+# Ended in time, as far as this script knows: stop the watchdog. If the limit fell in this very moment, USR1 says so. The
+# shell of macOS (bash 3.2) reports a job that a signal ended ("Terminated: 15 ( trap ...") on its own stderr, when the job
+# is reaped, which no redirection of the wait alone catches: the kill and the waits are groups with their stderr discarded.
+{ if [ "$signalled" -eq 1 ] && [ "$fired" -eq 0 ]; then kill "$watch"; fi; wait "$watch"; } 2>/dev/null
 wrc=$?
-if [ "$fired" -eq 1 ] && [ "$wrc" -ne 0 ]; then wait "$watch" 2>/dev/null; wrc=$?; fi   # the first wait was cut short by USR1
+if [ "$fired" -eq 1 ] && [ "$wrc" -ne 0 ]; then { wait "$watch"; } 2>/dev/null; wrc=$?; fi   # the first wait was cut short by USR1
 if [ "$fired" -eq 1 ] || [ "$wrc" -eq 0 ]; then
-  wait "$pid" 2>/dev/null
+  { wait "$pid"; } 2>/dev/null
   note=""
   [ -n "$(pairs)" ] || note=" (ps lists no parents here: only the command itself was stopped, not what it started)"
   echo "todo-limit.sh: stopped after ${limit}s: $cmd$note" >&2

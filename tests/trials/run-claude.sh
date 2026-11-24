@@ -45,8 +45,9 @@ args=(-p "$prompt" --permission-mode acceptEdits --allowedTools "Bash,Read,Write
 tmo=(); tpre=""; tnote="   # no timeout program on this host: the limit of $limit seconds was not applied"
 if command -v timeout >/dev/null 2>&1; then tmo=(timeout "$limit"); tpre="timeout $limit "; tnote=""; fi
 printf 'cd %s && %sclaude -p <prompt.txt> --permission-mode acceptEdits --allowedTools "Bash,Read,Write,Edit,Glob,Grep" --add-dir %s%s%s\n' "$repo" "$tpre" "$repo" "${model:+ --model $model}" "$tnote" > "$ev/command.txt"
-# The agent's environment must not name the run either: no TRIAL_LABEL, and OLDPWD is the project (the second cd).
-( cd "$repo" && cd "$repo" && unset TRIAL_LABEL && ${tmo[@]+"${tmo[@]}"} claude "${args[@]}" ) >"$ev/agent.log" 2>&1
+# The agent's environment must not name the run either: no TRIAL_LABEL, and OLDPWD is the project, exported by hand: bash 3.2
+# (macOS) exports the OLDPWD that a cd sets only when it came in with the environment, so the agent would see none (FIX-142).
+( cd "$repo" && export OLDPWD="$repo" && unset TRIAL_LABEL && ${tmo[@]+"${tmo[@]}"} claude "${args[@]}" ) >"$ev/agent.log" 2>&1
 code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"
 cp "$ev/agent.log" "$ev/report.txt"

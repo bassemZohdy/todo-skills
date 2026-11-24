@@ -51,7 +51,7 @@ lintok() { bash .todo/todo-lint.sh >/dev/null 2>&1; }
 
 if [ ! -f "$flow" ]; then bad "tools/todo-flow.sh is missing"; printf '\n%d passed, %d failed\n' "$pass" "$fail"; exit 1; fi
 # One read: an agent that reads a script 200 lines at a time needs a single call for it (a pilot run needed two for 258 lines).
-[ "$(wc -l < "$flow")" -le 200 ] && ok "the helper is at most 200 lines, one read for an agent" || bad "the helper has $(wc -l < "$flow") lines, more than one 200-line read"
+[ "$(wc -l < "$flow" | tr -d ' ')" -le 200 ] && ok "the helper is at most 200 lines, one read for an agent" || bad "the helper has $(wc -l < "$flow" | tr -d ' ') lines, more than one 200-line read"
 
 # start, leaf root: a pending root on the base is claimed, published by a fast-forward and started, in the prescribed commits.
 mk "$tmp/a"; out="$(fl start FEAT-001 1)"; rc=$?

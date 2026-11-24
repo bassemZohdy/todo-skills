@@ -6,10 +6,10 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-138** · P1 · mid · Add trial scenarios that reach the stuck-worker guards and run fresh agents on them
+- [/] **FEAT-138** · P1 · mid · Add trial scenarios that reach the stuck-worker guards and run fresh agents on them
   - Done when: the scenarios loop-limit, time-limit, resume-stopped, resumed-twice and stale-claim set up, fail when nothing is done and have a published agent batch; `bash tests/trials/selftest.sh`
   - Links: From: FEAT-134
-  - State: branch todo/FEAT-138-add-trial-scenarios-that from main; next: build children
+  - State: attempts 0/3; baseline 387 passing; branch todo/FEAT-138-add-trial-scenarios-that from main; next: read docs
   - [x] **FEAT-138.1** · high · Add the trial scenario loop-limit, a task whose failing test cannot be proved impossible after one run, so the loop guard's count decides
     - Done when: setup.sh builds it, doing nothing fails assert.sh, a node blocked with its test and Done when unchanged passes, and an edited test, a skipped test or an edited Done when fails; `bash tests/trials/selftest.sh`
   - [x] **FEAT-138.2** · mid · Add the trial scenario time-limit, a Done when that hangs under a README Budget line with .todo/todo-limit.sh in place

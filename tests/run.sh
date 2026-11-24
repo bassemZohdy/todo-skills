@@ -2132,8 +2132,8 @@ if [ -z "$kn_names" ]; then ok "the scan that selftest.sh runs on every scratch 
 # arguments and what they see of TRIAL_LABEL and OLDPWD; the stub pi also writes a session log with one tool call where
 # --session-dir tells it to.
 mkdir -p "$kn/bin"
-printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
+printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
 printf '#!/usr/bin/env bash\necho "stub report: nothing changed" > "$KN_CODEX_OUT"\n' > "$kn/bin/codex"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1" >> "$KN_TIMEOUT_LOG"\nshift\nexec "$@"\n' > "$kn/bin/timeout"
 chmod +x "$kn/bin/pi" "$kn/bin/claude" "$kn/bin/codex" "$kn/bin/timeout"
@@ -2145,7 +2145,7 @@ for kn_a in pi claude; do
   kn_r TRIAL_LABEL=knlabel bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
   kn_e1="$(kn_ev "$kn_runs" 1)"; kn_w1="$(kn_wd "${kn_e1:-/nonexistent}")"; kn_abs="$(cd "$kn_runs" 2>/dev/null && pwd)"
   [ -s "$kn/args.log" ] && ! grep -qE 'status-readonly|knlabel' "$kn/args.log" || kn_path="$kn_path [run-$kn_a.sh: the agent's arguments name the scenario or the label, or the stub agent did not run]"
-  [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -1 "$kn/env.log" 2>/dev/null)]"
+  [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -5 "$kn/env.log" 2>/dev/null | tr "\n" " ")]"
   # bash 3.2 (macOS) left out an OLDPWD that the runner exported by hand, so the runner puts it into the agent's environment with env; bash 4 and later export it
   # always, so only the text of the runner can fail here on Windows and Linux (FIX-142).
   grep -qF '( cd "$repo" && env -u TRIAL_LABEL OLDPWD="$repo" ' "$root/tests/trials/run-$kn_a.sh" || kn_path="$kn_path [run-$kn_a.sh: the agent's OLDPWD is not set by env in the runner: bash 3.2 would leave it out]"

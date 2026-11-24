@@ -929,6 +929,25 @@ printf '{"name":"x","repository":"r","homepage":"h","license":"MIT","keywords":[
 li_t="$(listcheck "$lit")"
 if [ "$(printf '%s\n' "$li_t" | grep -c '^LIST')" -eq 5 ]; then ok "the listing check fails a missing install line and a manifest without repository or keywords"; else bad "the listing check missed a gap: $li_t"; fi
 rm -rf "$lit"
+# FIX-141: the Claude manifest names the display name of the directory listing, the one the Codex manifest already carries. The
+# directory's automatic check of 2026-11-23 refused a version without it ("set displayName to the name on the listing").
+dncheck() {   # <plugin dir>: prints one DN line per problem; a manifest that cannot be read prints its error, which fails too
+python3 - "$1" <<'PY' 2>&1
+import json, os, sys
+d = sys.argv[1]
+cl = json.load(open(os.path.join(d, '.claude-plugin', 'plugin.json'), encoding='utf-8'))
+cx = json.load(open(os.path.join(d, '.codex-plugin', 'plugin.json'), encoding='utf-8'))
+want = (cx.get('interface') or {}).get('displayName')
+if not want: print('DN the Codex manifest has no interface.displayName')
+elif cl.get('displayName') != want: print('DN the Claude manifest has displayName %r, the Codex manifest %r' % (cl.get('displayName'), want))
+PY
+}
+dn_out="$(dncheck "$root/plugin")"
+if [ -z "$dn_out" ]; then ok "the Claude manifest carries the display name of the listing, the same as the Codex manifest (FIX-141)"; else bad "display name: $(printf '%s' "$dn_out" | tr '\n' ';')"; fi
+dnt="$(mktemp -d)"; mkdir -p "$dnt/.claude-plugin" "$dnt/.codex-plugin"
+printf '{"name":"x"}\n' > "$dnt/.claude-plugin/plugin.json"; printf '{"interface":{"displayName":"X Y"}}\n' > "$dnt/.codex-plugin/plugin.json"
+if [ "$(dncheck "$dnt" | grep -c '^DN')" -eq 1 ]; then ok "the display name check fails a Claude manifest without displayName (FIX-141)"; else bad "the display name check passed a manifest without displayName"; fi
+rm -rf "$dnt"
 # CHANGELOG links (FIX-082): a tag a link names (vX.Y.Z) must be in `git tag --list`, a commit it names must resolve. A clone
 # without tags cannot tell, so that is reported as a skip, never as a pass.
 linkcheck() {   # <changelog> <git dir>: prints MISSING lines, or NOTAGS when the clone has no tags

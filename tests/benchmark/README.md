@@ -15,6 +15,7 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../../doc
 | `hidden/<id>/accept.sh`, `hidden/<id>/test_accept.py`, `hidden/lib.sh` | Hidden acceptance tests. The verifier runs them; they never enter the agent's repository. |
 | `arms/<name>/arm.md`, `arms/<name>/setup.sh` | A methodology: instructions placed before the requirement, plus an optional setup script run before the start commit. |
 | `variants/todo-skills-flow/` | Not a methodology of its own: the `todo-skills` arm with the optional helper `tools/todo-flow.sh` copied to `.todo/` (FEAT-129). Pass the folder to `run.sh` as the arm; it is outside `arms/`, so the coverage check does not ask for its rows |
+| `variants/todo-skills-existing/` | Also outside `arms/`: the `todo-skills` arm in a project whose backlog is already set up (TASK-139.1). Its `setup.sh` leaves what `/todo-init` writes, `TODO.md` and `CHANGELOG.md`, in the start commit, so the agent starts at `todo-add`. It measures what a cell costs without the part that sets the backlog up |
 | `agents/codex.sh`, `agents/claude.sh`, `agents/pi.sh` | Adapters. Each starts one fresh agent process with `<repo> <prompt-file> <report-file>`. |
 | `run.sh` | Runner: one run of one arm on one scenario. |
 | `verify.sh` | Trusted verifier. |

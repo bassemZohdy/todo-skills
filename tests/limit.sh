@@ -23,6 +23,15 @@ run 30 'echo to-out; echo to-err >&2; exit 3'
 [ "$rc" -eq 3 ] && [ "$took" -lt 15 ] && ok "the helper returns when the command ends, not when the limit ends (the watchdog does not hold the output open)" || bad "a finished command under a 30 second limit: rc=$rc after ${took}s"
 run 30 'true'
 [ "$rc" -eq 0 ] && [ -z "$out" ] && [ -z "$err" ] && ok "a passing command passes, and the helper adds no output of its own" || bad "true: rc=$rc out='$out' err='$err'"
+# FIX-142: bash 3.2 (macOS) tells on its stderr that the watchdog it stopped was "Terminated", when it reaps the job, so
+# the helper's reaping is a group with its stderr discarded. Linux and Windows print nothing either way: the loop can fail
+# only on macOS, and the text check below fails everywhere without the group.
+t_bad=""; t_i=0
+while [ "$t_i" -lt 3 ]; do run 30 'true'; { [ "$rc" -eq 0 ] && [ -z "$out" ] && [ -z "$err" ]; } || t_bad="$t_bad [run $t_i: rc=$rc out='$out' err='$err']"; t_i=$((t_i + 1)); done
+grep -qxF '{ if [ "$signalled" -eq 1 ] && [ "$fired" -eq 0 ]; then kill "$watch"; fi; wait "$watch"; } 2>/dev/null' "$lim" || t_bad="$t_bad [the kill and the wait of the watchdog are not one group with 2>/dev/null]"
+grep -qxF 'if [ "$fired" -eq 1 ] && [ "$wrc" -ne 0 ]; then { wait "$watch"; } 2>/dev/null; wrc=$?; fi   # the first wait was cut short by USR1' "$lim" || t_bad="$t_bad [the second wait of the watchdog is not a group with 2>/dev/null]"
+grep -qxF '{ wait "$pid"; } 2>/dev/null   # a command that a signal ended is reported by bash 3.2 as well: discarded' "$lim" && [ "$(grep -cxF '  { wait "$pid"; } 2>/dev/null' "$lim")" = 1 ] || t_bad="$t_bad [the waits for the command are not groups with 2>/dev/null]"
+[ -z "$t_bad" ] && ok "a command that ends in time leaves nothing on stderr, three times over, and the watchdog is reaped inside a group that discards a job message (FIX-142)" || bad "stderr of a passing command:$t_bad"
 mkdir "$tmp/pkg" && echo inside > "$tmp/pkg/f"
 run 30 'cd pkg && cat f'
 [ "$rc" -eq 0 ] && [ "$out" = "inside" ] && ok "a command line with cd and && runs as one line" || bad "cd pkg && cat f: rc=$rc out='$out' err='$err'"

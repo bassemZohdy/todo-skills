@@ -4,6 +4,8 @@
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
+# No check reads bytecode, and a stale cache (same size, same second) makes a fixed .py run its old code (FIX-142).
+export PYTHONDONTWRITEBYTECODE=1
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/tools/todo-lint.sh"
 hook="$root/tools/todo-stop-hook.sh"
@@ -772,6 +774,9 @@ wfcheck() {   # <workflow file> [need-windows]: prints one WF line per missing p
 }
 wf_out="$(wfcheck "$root/.github/workflows/test.yml" windows; for w in "$root"/.github/workflows/*.yml; do [ "$(basename "$w")" = test.yml ] || wfcheck "$w"; done)"
 if [ -z "$wf_out" ]; then ok "test.yml runs on Windows and every workflow has a concurrency group and a timeout on each job"; else bad "workflows: $(printf '%s' "$wf_out" | tr '\n' ';')"; fi
+# The Windows leg of the test job took 16 of its 20 minutes after FEAT-138 and the next batch adds more (FIX-142).
+wf_min="$(tr -d '\r' < "$root/.github/workflows/test.yml" | sed -n 's/^    timeout-minutes: \([0-9][0-9]*\)$/\1/p' | head -1)"
+if [ "${wf_min:-0}" -ge 30 ]; then ok "the test job may run 30 minutes, the slowest system took 16 of the 20 it had before (FIX-142)"; else bad "test.yml timeout-minutes is '${wf_min:-none}', not 30 or more (FIX-142)"; fi
 wft="$(mktemp -d)"
 printf 'name: t\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps: []\n' > "$wft/bare.yml"
 wf_t="$(wfcheck "$wft/bare.yml" windows)"
@@ -1744,7 +1749,10 @@ rs_br=todo/FEAT-001-add-subtract-calc-py
 rs_tail="chore(backlog): start FEAT-001|chore(backlog): claim FEAT-001 on $rs_br|init|"
 rs_twice="resumed twice with no new commit → \`git log -2 --format=%s\` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → decide whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready"
 rs_assert() { PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$rs/$1" "$2" 2>&1; }   # <folder> <scenario>
-rs_copy() { cp -R "$rs/$1" "$rs/$2"; }   # <scenario> <folder>: a fresh copy of the start state
+# <scenario> <folder>: a fresh copy of the start state, without the bytecode that the checks of the source left in it. Python
+# takes a cached calc.pyc as current when the source has the cache's size and whole second of modification, and rs_fix
+# makes calc.py of the same size: a copy fixed in the second after the cache was written ran the old code and failed (FIX-142).
+rs_copy() { cp -R "$rs/$1" "$rs/$2" && find "$rs/$2" -name __pycache__ -prune -exec rm -rf {} +; }
 rs_resume() { ( cd "$rs/$1" && git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md ) >/dev/null 2>&1; }   # <folder>: the commit the rule names
 rs_finish() {   # <folder> <resume commits to make first> [raised]: fix the earlier work, complete, drain and merge
   ( cd "$rs/$1" || exit 1
@@ -1787,6 +1795,13 @@ for rs_s in resume-stopped resumed-twice; do
   else rs_bad="$rs_bad [$rs_s: setup failed]"; fi
 done
 if [ -e "$rs/resume-stopped.built" ]; then
+  # The start state as the first copy meets it on a fast machine: its calc.py and the cache of the test that just ran on it
+  # are from this second. A copy that kept the cache fails to finish when its fix falls in the same second (FIX-142). The empty
+  # PYTHONDONTWRITEBYTECODE lets the cache be written on a host that sets it.
+  ( cd "$rs/resume-stopped" && touch calc.py && PYTHONDONTWRITEBYTECODE='' PYTHONNOUSERSITE=1 python3 -m unittest tests.test_calc.CalcTest.test_subtract ) >/dev/null 2>&1
+  [ -n "$(find "$rs/resume-stopped" -name __pycache__)" ] || rs_one="$rs_one [the start state has no bytecode cache to leave out of a copy]"
+  rs_copy resume-stopped p && [ -z "$(find "$rs/p" -name __pycache__)" ] || rs_one="$rs_one [a copy of the start state holds a __pycache__]"
+  grep -qx 'export PYTHONDONTWRITEBYTECODE=1' "$root/tests/run.sh" || rs_one="$rs_one [run.sh does not export PYTHONDONTWRITEBYTECODE=1 at the top]"
   rs_copy resume-stopped a && rs_finish a 1 || rs_one="$rs_one [the scripted honest end failed]"
   rs_one="$rs_one$(rs_expect a resume-stopped pass 'one resume commit, then the node finished and merged')"
   rs_copy resume-stopped b && rs_finish b 0 || rs_one="$rs_one [the scripted end without a resume commit failed]"
@@ -2117,8 +2132,8 @@ if [ -z "$kn_names" ]; then ok "the scan that selftest.sh runs on every scratch 
 # arguments and what they see of TRIAL_LABEL and OLDPWD; the stub pi also writes a session log with one tool call where
 # --session-dir tells it to.
 mkdir -p "$kn/bin"
-printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
+printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
 printf '#!/usr/bin/env bash\necho "stub report: nothing changed" > "$KN_CODEX_OUT"\n' > "$kn/bin/codex"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1" >> "$KN_TIMEOUT_LOG"\nshift\nexec "$@"\n' > "$kn/bin/timeout"
 chmod +x "$kn/bin/pi" "$kn/bin/claude" "$kn/bin/codex" "$kn/bin/timeout"
@@ -2130,7 +2145,11 @@ for kn_a in pi claude; do
   kn_r TRIAL_LABEL=knlabel bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
   kn_e1="$(kn_ev "$kn_runs" 1)"; kn_w1="$(kn_wd "${kn_e1:-/nonexistent}")"; kn_abs="$(cd "$kn_runs" 2>/dev/null && pwd)"
   [ -s "$kn/args.log" ] && ! grep -qE 'status-readonly|knlabel' "$kn/args.log" || kn_path="$kn_path [run-$kn_a.sh: the agent's arguments name the scenario or the label, or the stub agent did not run]"
-  [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -1 "$kn/env.log" 2>/dev/null)]"
+  { [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|unset" ]; } || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is neither unset nor its working folder: $(tail -5 "$kn/env.log" 2>/dev/null | tr "\n" " ")]"
+  # The agent must not see the folder the runner was started from. bash 4 and later pass on the OLDPWD that the runner hands it with env (the
+  # working folder); bash 3.2 (macOS) drops it before the stub starts (the CI log showed no OLDPWD in its environment), so the agent sees none:
+  # both are accepted, a caller's folder is not (FIX-142).
+  grep -qF '( cd "$repo" && env -u TRIAL_LABEL OLDPWD="$repo" ' "$root/tests/trials/run-$kn_a.sh" || kn_path="$kn_path [run-$kn_a.sh: the agent's OLDPWD is not set by env in the runner: bash 3.2 would leave it out]"
   if [ "$kn_a" = pi ]; then   # pi's session log is in a folder next to the project while pi runs, and in the evidence afterwards
     [ -n "$kn_e1" ] && [ -f "$kn_e1/session/s.jsonl" ] && [ "$(tr -d ' \r\n' < "$kn_e1/tool-calls.txt")" = 1 ] && ! ls -d "$(dirname "${kn_w1:-/nonexistent/x}")"/session-* >/dev/null 2>&1 || kn_path="$kn_path [run-pi.sh: the session log is not moved to <evidence>/session before its tool calls are counted]"
   fi
@@ -2203,6 +2222,9 @@ if [ -z "$kn_score" ]; then ok "score.sh follows the evidence to the project in 
 # batches made before (TRIAL_OLD_NAMES=1), and ended as a correct agent ends it: the rival's claim wins and the own branch
 # is deleted; the other session's commit is kept and the claim is made on top; the pull is merged, the local root is
 # renumbered and the next root is started. Every ending must pass every assertion. The six run side by side.
+# The assertions run with a wc that pads its count with spaces, as the wc of macOS does: a count compared as a plain number
+# (race-claim-benign's "claim is the only extra commit on main" did) fails there, and only there (FIX-142).
+mkdir -p "$kn/padwc" && printf '#!/bin/sh\n"%s" "$@" | sed "s/^ */       /"\n' "$(command -v wc)" > "$kn/padwc/wc" && chmod +x "$kn/padwc/wc"
 kn_end() {   # <0|1> <scenario>: builds, ends and scores one project, and leaves what failed in old-<0|1>-<scenario>.txt
   local d="$kn/old$1/$2"
   { TRIAL_OLD_NAMES="$1" bash "$root/tests/trials/setup.sh" "$d" "$2" >/dev/null 2>&1 || { echo "setup failed"; return; }
@@ -2215,7 +2237,7 @@ kn_end() {   # <0|1> <scenario>: builds, ends and scores one project, and leaves
           git show origin/main:TODO.md > TODO.md && git show HEAD:TODO.md | awk '/\*\*FEAT-003\*\*/ { f = 1 } f' | sed 's/FEAT-003/FEAT-004/' >> TODO.md \
             && git add TODO.md && git commit -q --no-edit && bash "$root/tools/todo-flow.sh" start FEAT-002 1 ;;
       esac ) >/dev/null 2>&1 || { echo "the scripted ending failed"; return; }
-    PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$d" "$2" 2>&1 | awk '/^FAIL/ { print; bad = 1 } /^PASS/ { good = 1 } END { if (!good && !bad) print "no assertion ran" }'
+    PATH="$kn/padwc:$PATH" PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$d" "$2" 2>&1 | awk '/^FAIL/ { print; bad = 1 } /^PASS/ { good = 1 } END { if (!good && !bad) print "no assertion ran" }'
   } > "$kn/old-$1-$2.txt" 2>&1
 }
 for kn_o in 0 1; do for kn_s in race-claim-conflict race-claim-benign team-claim; do kn_end "$kn_o" "$kn_s" & done; done
@@ -2226,6 +2248,11 @@ done; done
 grep -q 'LC_ALL=C awk' "$root/tests/trials/assert.sh" || kn_old="$kn_old [stale-claim: the awk that reads the report does not run under LC_ALL=C]"
 rm -rf "$kn"
 if [ -z "$kn_old" ]; then ok "race-claim-conflict, race-claim-benign and team-claim: a correct ending passes every assertion with the new names of the simulated history and with the names that the batches made before hold, and stale-claim's report is read under LC_ALL=C (FEAT-138.6)"; else bad "renamed history of three scenarios (FEAT-138.6):$kn_old"; fi
+# The wc of macOS pads its count with spaces, so a count in a command substitution that is compared as a string (= 1) must pass
+# through tr -d ' ' first. No script of the tests (run.sh holds the samples below) may close a substitution right after wc -l, with or without a file (FIX-142).
+wc_bad="$(grep -nE 'wc -l[^|)]*\)"' "$root"/tests/*.sh "$root"/tests/trials/*.sh "$root"/tools/*.sh | grep -v '/tests/run\.sh:' | cut -c1-120 | tr '\n' ';')"
+wc_t="$(printf '%s\n' 'x="$(git worktree list | wc -l)"' 'x="$(wc -l < f)"' 'x="$(git worktree list | wc -l | tr -d " ")"' 'n=$(($(wc -l < f) - 1))' | grep -cE 'wc -l[^|)]*\)"')"
+if [ -z "$wc_bad" ] && [ "$wc_t" = 2 ]; then ok "no script of the tests, the trial harness or tools compares an unpadded wc -l count: the wc of macOS pads it (FIX-142)"; else bad "an unpadded wc -l in a comparison, or the check missed its samples ($wc_t of 2): $wc_bad"; fi
 # FEAT-138.7: the sentences of the stuck-worker rules that two or more of 14 agent reports called unclear say one thing each.
 # Two change what an agent does. A failed run of the whole Done when after a change is an attempt, at any step and whatever it
 # was meant for (a red regression run after it too), and the loop guard counts partial runs only (a part of Done when, or the

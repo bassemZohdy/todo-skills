@@ -168,12 +168,12 @@ sed '2s/^\([^,]*\),/\1,extra,/' "$pub" > "$pub.new" && mv "$pub.new" "$pub"
 out="$(BENCH_RESULTS="$pub" bash "$pubsh" check 2>&1)"; rc=$?
 [ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q "$oneid.*columns" && ok "a row with the wrong number of columns fails the check" || bad "a wrong column count passed the check: rc=$rc $out"
 cp "$tmp/pub-good.csv" "$pub"
-before="$(wc -l < "$pub")"
+before="$(wc -l < "$pub" | tr -d ' ')"
 BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" > "$tmp/pub-dup.txt" 2>&1; rc=$?
-[ "$rc" -ne 0 ] && grep -q "refused: run .* is already published" "$tmp/pub-dup.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run that is already published is refused and nothing is written" || bad "duplicate publish: rc=$rc $(cat "$tmp/pub-dup.txt")"
+[ "$rc" -ne 0 ] && grep -q "refused: run .* is already published" "$tmp/pub-dup.txt" && [ "$(wc -l < "$pub" | tr -d ' ')" = "$before" ] && ok "a run that is already published is refused and nothing is written" || bad "duplicate publish: rc=$rc $(cat "$tmp/pub-dup.txt")"
 { head -1 "$csv"; sed -n 2p "$csv" | sed 's/^[^,]*,/no-such-run,/; s/,[^,]*,[^,]*$/,,x/'; } > "$tmp/ghost.csv"
 BENCH_RESULTS="$pub" bash "$pubsh" add "$tmp/ghost.csv" > "$tmp/pub-ghost.txt" 2>&1; rc=$?
-[ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no recorded evidence hash" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run without a recorded evidence hash is refused and nothing is written" || bad "ghost publish: rc=$rc $(cat "$tmp/pub-ghost.txt")"
+[ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no recorded evidence hash" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub" | tr -d ' ')" = "$before" ] && ok "a run without a recorded evidence hash is refused and nothing is written" || bad "ghost publish: rc=$rc $(cat "$tmp/pub-ghost.txt")"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

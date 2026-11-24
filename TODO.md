@@ -6,9 +6,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FIX-142** · P0 · mid · Make the checks that FEAT-138 added pass on Linux and macOS, where the CI test job of main failed
-  - Done when: the four failures of the CI run of 2026-11-24 (the resume-stopped end on Linux; the todo-limit true check, the TRIAL_LABEL and OLDPWD check and the race-claim-benign end on macOS) are fixed and pinned, the Windows job has room under its time limit, and the CI test job passes on all three systems; `bash tests/run.sh`
-  - State: branch todo/FIX-142-make-checks-that-feat from main; next: start FIX-142
 - [ ] **TASK-139** · P1 · mid · Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task
   - Done when: the published rows cover the variant and the scenario, and a dated summary states the setup cost, the cost per task and the cost per node with their limits; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Depends: TASK-137

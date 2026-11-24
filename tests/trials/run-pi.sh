@@ -66,8 +66,9 @@ node %s
 case "$(uname -s 2>/dev/null)" in MINGW*|MSYS*|CYGWIN*) [ "${TRIAL_WINDOWS_ISOLATION:-1}" = 1 ] && v=isolated || v="UNISOLATED (TRIAL_WINDOWS_ISOLATION=0): not equal to the isolated Windows batches" ;; *) [ "${TRIAL_LINUX_ISOLATION:-0}" = 1 ] && v=isolated || v="unisolated (controller permissions)" ;; esac
 printf 'verifier: %s
 ' "$v" > "$ev/verifier.txt"
-# The agent's environment must not name the run either: no TRIAL_LABEL, and OLDPWD is the project (the second cd).
-( cd "$repo" && cd "$repo" && unset TRIAL_LABEL && ${tmo[@]+"${tmo[@]}"} pi "${args[@]}" -- "$prompt" ) >"$ev/agent.log" 2>&1
+# The agent's environment must not name the run either: no TRIAL_LABEL, and OLDPWD is the project, put into the environment of the
+# agent by env itself: bash 3.2 (macOS) did not pass on an OLDPWD that the runner exported by hand, so the agent saw none (FIX-142).
+( cd "$repo" && env -u TRIAL_LABEL OLDPWD="$repo" ${tmo[@]+"${tmo[@]}"} pi "${args[@]}" -- "$prompt" ) >"$ev/agent.log" 2>&1
 code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"
 [ ! -d "$sess" ] || mv "$sess" "$ev/session"

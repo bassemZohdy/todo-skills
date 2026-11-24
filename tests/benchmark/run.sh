@@ -3,7 +3,7 @@
 # verifier against hidden acceptance tests. Appends one row to <runs-dir>/results.csv and prints the outcome.
 # Usage: BENCH_AGENT=<adapter> bash tests/benchmark/run.sh <arm-dir> <scenario-id> <runs-dir>
 #   <arm-dir>       any folder with arm.md (instructions put before the requirement; may be empty) and an optional setup.sh
-#   <scenario-id>   a folder name under scenarios/ (1-bugfix ... 6-ambiguous)
+#   <scenario-id>   a folder name under scenarios/ (1-bugfix ... 7-text-helpers)
 #   <runs-dir>      where evidence goes; keep it outside every folder the agent may write
 # Environment:
 #   BENCH_AGENT     adapter: `<adapter> <repo> <prompt-file> <report-file>` runs one fresh agent process, `<adapter> --version`

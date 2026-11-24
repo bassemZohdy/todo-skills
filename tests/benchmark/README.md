@@ -1,6 +1,6 @@
 # Agent benchmark
 
-The benchmark measures whether a methodology pays for itself. It runs the same six requirements under each of three
+The benchmark measures whether a methodology pays for itself. It runs the same seven requirements under each of three
 methodology "arms" and compares verified outcomes, tokens, turns and time. The harness doesn't depend on any arm, and
 it has been run with one real agent so far (pi with GLM 5.3, [results](../../docs/evals/pi-glm-2026-11-12/summary.md#benchmark-first-real-run-of-docsevalsbenchmark)); [`results/results.csv`](../../docs/evals/benchmark/results/results.csv) holds those runs
 (see "Published results" and "Status").
@@ -34,6 +34,7 @@ it has been run with one real agent so far (pi with GLM 5.3, [results](../../doc
 | 4 | `4-multi-module`: `inventory` + `orders` | All-or-nothing reservation through both packages, and the agent's tests pass and grew. |
 | 5 | `5-interrupted`: an unfinished `slugify` | A WIP commit plus an uncommitted change; the function is finished and the WIP commit is still on a branch. |
 | 6 | `6-ambiguous`: "give loyal customers a discount" | Nothing under `billing/` changed on any branch or in the tree, and the final report asks what "loyal" means. The report check (a question mark plus the word "loyal") is a heuristic. |
+| 7 | `7-text-helpers`: four `textkit` functions | One check line per function (`slugify`, `wrap`, `top_words`, `parse_row`) that the hidden tests of that function pass (each is imported from its module and from the package), and one line for the agent's tests: they pass, and they fail when any one of the four modules is replaced by a stub whose function raises `NotImplementedError`, so one test of each function is enough and five tests of one function are not. The requirement is a single text; no function uses another, and a complete delivery has six files (four modules, `textkit/__init__.py` and at least one test file). It is the scenario for work that a methodology can split into several tasks, which the single-task scenarios 1 to 6 cannot show. It has no published rows yet and is pending (see "Published results"). |
 
 ### Arms
 
@@ -56,7 +57,7 @@ export BENCH_AGENT=tests/benchmark/agents/codex.sh BENCH_MODEL=<model>    # or a
 export BENCH_HIDDEN=/path/outside/the/agents/reach/hidden                    # a copy of tests/benchmark/hidden
 for rep in 1 2 3; do
   for arm in todo-skills lean-baseline no-methodology; do
-    for s in 1-bugfix 2-api-feature 3-security-token 4-multi-module 5-interrupted 6-ambiguous; do
+    for s in 1-bugfix 2-api-feature 3-security-token 4-multi-module 5-interrupted 6-ambiguous 7-text-helpers; do
       bash tests/benchmark/run.sh tests/benchmark/arms/$arm $s ~/bench-runs
     done
   done
@@ -113,7 +114,7 @@ whole harness repository.
 
 ## Published results
 
-`results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row has the wrong columns or no valid evidence hash, when a run id is published twice, or when an arm and a scenario have no scored row.
+`results/results.csv` holds real runs only, and `tests/trials/test-benchmark-harness.sh` fails when a row has the wrong columns or no valid evidence hash, when a run id is published twice, or when an arm and a scenario have no scored row (a scenario listed in `coverage-pending.txt` excepted, see below).
 
 ```bash
 bash tests/benchmark/publish.sh add <runs>/results.csv   # every run of the table, or none
@@ -122,6 +123,7 @@ bash tests/benchmark/publish.sh check --coverage
 
 - **Token cost.** [A dated breakdown](../../docs/evals/token-cost-2026-11-14.md) splits the published rows into uncached input, cached input and output and says where a todo-skills run spends them. Its table is the output of `python3 tests/benchmark/tokens.py docs/evals/benchmark/results/results.csv`, one row per batch of an arm (runs less than six hours apart).
 - **Cost per PASS.** [A dated page](../../docs/evals/cost-per-success-2026-11-23.md) gives what one run that ended in PASS cost per batch and arm: everything the batch spent, its failed and unscored runs included, divided by its PASS runs, in tokens, model calls and seconds, next to the PASS counts and the attempts. Its table is the output of `python3 tests/benchmark/cost.py docs/evals/benchmark/results/results.csv` with the price options the page records. With `--price` and `--price-date` the script adds a money column labelled as computed from published pricing; without them it prints no money.
+- **Pending scenarios.** [`coverage-pending.txt`](coverage-pending.txt) lists, one scenario id per line (lines starting with `#` are comments), the scenarios that exist but have no published rows yet. `publish.sh check --coverage` prints `PENDING  scenario <id>: no scored row yet for <arms>` for each of them instead of failing on its missing rows. It is never a silent pass: a listed scenario that every arm already covers fails with "complete: remove it from coverage-pending.txt", a listed id that is not a folder under `scenarios/` fails, and a scenario that is not listed fails on every missing row. Today it lists `7-text-helpers`, whose rows come with the first batch of it; publishing them empties the list.
 - **Results only.** The evidence of a run (the agent's session, a bundle of its repository, prompts, verifier logs) can name the host and the user, and it is not published. It stays on the machine that ran the batch.
 - **Hashes.** A published row is the run's own row without its last field, `evidence_dir`, which is a folder on that machine. Its `evidence_sha256` is the hash `run.sh` recorded over the complete evidence of the run, so whoever holds that evidence can show that it is the one behind the row. Nobody else can check it, and the summaries say so.
 - **What is in it now** (127 rows, all pi with GLM 5.3, isolation `provisional`): the 56 rows of 2026-11-12 (three arms, three runs per cell, two of them INFRA_ERROR), the 17 rows of 2026-11-13 (`todo-skills` arm only, on the revised skill text), the 18 rows of the batched-steps test of 2026-11-14 (a text that was not merged) and the 36 rows of the helper-script test (FEAT-129): 18 `todo-skills` rows on the text of `main` and 18 rows of the variant `todo-skills-flow`. The `todo-skills` rows therefore mix several versions of the skills: `5-interrupted` is 0 of 3 on the first and 6 of 6 on the second. Summarize a source table, not the published one, when comparing arms.
@@ -131,5 +133,5 @@ bash tests/benchmark/publish.sh check --coverage
 The harness is tested with a stub agent: `bash tests/trials/test-benchmark-harness.sh` (CI runs it). The first real run
 was made on 2026-11-12 with pi and GLM 5.3 (`agents/pi.sh`, 3 runs per cell, isolation `provisional`; every cell is in
 `docs/evals/pi-glm-2026-11-12/benchmark/results.csv`). On 2026-11-13 only the `todo-skills` arm was rerun, on the text with the leftover-work rule (FEAT-100): `5-interrupted`, which it had failed 3 of 3, passed 6 of 6; the decision record asked for above is in `docs/evals/pi-glm-2026-11-13/summary.md`. The arm was run once more on the text with the cut load (TASK-110), one run per scenario: 6 of 6 passed, and the input tokens did not fall measurably (`docs/evals/pi-glm-2026-11-13-load-cut/summary.md`). No Claude Code or Codex run has been made. In this repository's Windows environment, Codex's unelevated sandbox blocks the `.git` writes the
-todo-skills arm needs (TASK-045: 6 of 8 lifecycle runs INFRA_ERROR), and a full protocol is 54 or more agent runs, which is
+todo-skills arm needs (TASK-045: 6 of 8 lifecycle runs INFRA_ERROR), and a full protocol is 63 or more agent runs, which is
 the maintainer's cost to choose. See [the update review](../../docs/evals/update-review.md), Ruling 3.

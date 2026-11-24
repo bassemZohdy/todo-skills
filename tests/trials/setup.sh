@@ -72,7 +72,7 @@ interrupted-merge)
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
-  g add -A && g commit -q -m "init with claimed tree"
+  g add -A && g commit -q -m "init"
   g switch -q -c todo/FEAT-001-add-subtract-multiply-calc
   g switch -q -c todo/FEAT-001.1-add-subtract-test
   printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
@@ -92,7 +92,7 @@ refresh-from-base)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001' > TODO.md
-  g add -A && g commit -q -m "init with claimed root"
+  g add -A && g commit -q -m "init"
   g switch -q -c todo/FEAT-001-add-subtract-function-calc
   python3 - <<'PY'
 p='TODO.md'
@@ -124,15 +124,18 @@ team-claim)
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
 - [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
-  g add -A && g commit -q -m "init with two free roots"
+  g add -A && g commit -q -m "init"
   mkdir -p .team && printf '.team/\n' >> .git/info/exclude
   git init -q --bare -b main .team/origin.git
   g remote add origin "$dir/.team/origin.git"
   g push -q -u origin main
   git clone -q -c core.autocrlf=false .team/origin.git .team/peer
+  # The peer's branch has the name the slug rule gives this root. TRIAL_OLD_NAMES=1 is for tests/run.sh only: the name that
+  # the batches made before FEAT-138.6 hold, which assert.sh still accepts.
+  other=todo/FEAT-001-add-subtract-function-calc; [ "${TRIAL_OLD_NAMES:-0}" != 1 ] || other=todo/FEAT-001-peer-work
   ( cd .team/peer
-    awk '{print} /Done when: subtract works/ {print "  - State: branch todo/FEAT-001-peer-work from main; next: build children"}' TODO.md > TODO.new && mv TODO.new TODO.md
-    git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-peer-work"
+    awk -v b="$other" '{print} /Done when: subtract works/ {print "  - State: branch " b " from main; next: build children"}' TODO.md > TODO.new && mv TODO.new TODO.md
+    git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): claim FEAT-001 on $other"
     printf '%s\n' '- [ ] **FEAT-003** · P1 · low · Add a divide function to calc.py with a test' '  - Done when: divide works; `python3 -m unittest tests.test_calc.CalcTest.test_divide`' >> TODO.md
     git -c user.email=p@p -c user.name=peer add TODO.md && git -c user.email=p@p -c user.name=peer commit -q -m "chore(backlog): add FEAT-003"
     git -c user.email=p@p -c user.name=peer push -q origin main )
@@ -146,36 +149,47 @@ claimed-elsewhere)
   - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001
 - [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
-  g add -A && g commit -q -m "init with one claimed root"
+  g add -A && g commit -q -m "init"
   g branch todo/FEAT-001-add-subtract-function-calc
   ;;
 race-claim-conflict|race-claim-benign)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add a subtract function to calc.py with a test
   - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one free root"
+  g add -A && g commit -q -m "init"
   # A hook plays the second session: the first time a todo/FEAT-001* branch is checked out, it moves main
-  # underneath the agent, exactly between "branch created" and "base fast-forwarded".
+  # underneath the agent, exactly between "branch created" and "base fast-forwarded". The prompt tells the agent to leave
+  # the hooks alone, so it may read this one: only the half this scenario needs is written into it, and neither the hook
+  # nor its marker file nor the names it uses say which scenario this is (FEAT-138.6). The other session's branch is the
+  # slug of a title worded differently, one the slug rule cannot make from this root's title.
+  other=todo/FEAT-001-subtraction-support; who=dev; note="docs: add a note to the readme"; line="Questions go to the issue tracker."
+  # TRIAL_OLD_NAMES=1 is for tests/run.sh only: the names that the batches made before FEAT-138.6 hold, which assert.sh
+  # still accepts.
+  [ "${TRIAL_OLD_NAMES:-0}" != 1 ] || { other=todo/FEAT-001-rival; who=rival; note="docs: touch readme (race)"; line="Race note."; }
   hook=.git/hooks/post-checkout
   cat > "$hook" <<HOOK
 #!/bin/sh
 gd=\$(git rev-parse --git-dir)
-[ -e "\$gd/race-done" ] && exit 0
+[ -e "\$gd/trial-hook-ran" ] && exit 0
 case "\$(git symbolic-ref -q --short HEAD)" in todo/FEAT-001*) ;; *) exit 0 ;; esac
-: > "\$gd/race-done"
-export GIT_INDEX_FILE="\$gd/race-index" GIT_AUTHOR_NAME=rival GIT_AUTHOR_EMAIL=r@r GIT_COMMITTER_NAME=rival GIT_COMMITTER_EMAIL=r@r
+: > "\$gd/trial-hook-ran"
+export GIT_INDEX_FILE="\$gd/trial-hook-index" GIT_AUTHOR_NAME=$who GIT_AUTHOR_EMAIL=$who@example.invalid GIT_COMMITTER_NAME=$who GIT_COMMITTER_EMAIL=$who@example.invalid
 git read-tree main
-if [ "$scenario" = race-claim-conflict ]; then
-  blob=\$(git show main:TODO.md | awk '{print} /Done when:/ && !d {print "  - State: branch todo/FEAT-001-rival from main; next: start FEAT-001"; d=1}' | git hash-object -w --stdin)
-  git update-index --cacheinfo 100644,\$blob,TODO.md
-  c=\$(git commit-tree \$(git write-tree) -p main -m "chore(backlog): claim FEAT-001 on todo/FEAT-001-rival")
-  git update-ref refs/heads/todo/FEAT-001-rival "\$c"
-else
-  blob=\$( (git show main:README.md; echo "Race note.") | git hash-object -w --stdin)
-  git update-index --cacheinfo 100644,\$blob,README.md
-  c=\$(git commit-tree \$(git write-tree) -p main -m "docs: touch readme (race)")
-fi
+HOOK
+  if [ "$scenario" = race-claim-conflict ]; then cat >> "$hook" <<HOOK
+blob=\$(git show main:TODO.md | awk '{print} /Done when:/ && !d {print "  - State: branch $other from main; next: start FEAT-001"; d=1}' | git hash-object -w --stdin)
+git update-index --cacheinfo 100644,\$blob,TODO.md
+c=\$(git commit-tree \$(git write-tree) -p main -m "chore(backlog): claim FEAT-001 on $other")
+git update-ref refs/heads/$other "\$c"
+HOOK
+  else cat >> "$hook" <<HOOK
+blob=\$( (git show main:README.md; echo "$line") | git hash-object -w --stdin)
+git update-index --cacheinfo 100644,\$blob,README.md
+c=\$(git commit-tree \$(git write-tree) -p main -m "$note")
+HOOK
+  fi
+  cat >> "$hook" <<HOOK
 git update-ref refs/heads/main "\$c"
-rm -f "\$gd/race-index"
+rm -f "\$gd/trial-hook-index"
 HOOK
   chmod +x "$hook"
   ;;
@@ -205,7 +219,7 @@ All notable changes to this project will be documented in this file.
 [Unreleased]: https://github.com/example/minical/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/example/minical/releases/tag/v0.1.0
 CL
-  g add -A && g commit -q -m "init with a released 0.1.0 and unreleased work"
+  g add -A && g commit -q -m "init"
   g tag v0.1.0
   ;;
 monorepo)
@@ -230,7 +244,7 @@ monorepo)
 ### Added
 - Calculator add function.
 CL
-  g add -A && g commit -q -m "initial monorepo"
+  g add -A && g commit -q -m "init"
   ;;
 lanes)
   printf '%s\n%s\n' "$head_lanes" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
@@ -239,7 +253,7 @@ lanes)
 - [ ] **FEAT-002** · P1 · low · Add shout to text.py
   - Done when: shout("hi") returns HI!; `python3 -m unittest tests.test_text.TextTest.test_shout`
   - Links: Lane: text' > TODO.md
-  g add -A && g commit -q -m "init with two lanes"
+  g add -A && g commit -q -m "init"
   ;;
 replan)
   mkdir -p docs/plans
@@ -253,7 +267,7 @@ replan)
 - [ ] **FEAT-003** · P2 · low · Add a web dashboard for the calculator
   - Done when: dashboard renders; `python3 -m unittest tests.test_web`
   - Links: Ref: docs/plans/PROJECT.md' > TODO.md
-  g add -A && g commit -q -m "init with a plan"
+  g add -A && g commit -q -m "init"
   ;;
 ci-github|ci-local)
   printf '%s\n' "$head" > TODO.md
@@ -263,12 +277,12 @@ ci-github|ci-local)
 happy-path)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one free root"
+  g add -A && g commit -q -m "init"
   ;;
 leftover-work|dirty-tree)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one free root"
+  g add -A && g commit -q -m "init"
   # An uncommitted change on the base: unfinished work on FEAT-001 (leftover-work), or an edit nobody explained (dirty-tree).
   if [ "$scenario" = leftover-work ]; then printf '\ndef subtract(a, b):\n    raise NotImplementedError\n' >> calc.py
   else printf '\n# scratch: maybe cache results here\n' >> calc.py; fi
@@ -277,19 +291,19 @@ plan-stop)
   # The same free root as happy-path; the prompt asks for the plan stop (TASK-113).
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one free root"
+  g add -A && g commit -q -m "init"
   ;;
 decompose)
   # A root that was too big to split when it was added: /todo-continue breaks it down instead of building it.
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract, multiply and divide to calc.py, each with its own test
   - Done when: the three functions work; `python3 -m unittest discover -s tests`
   - State: next: decompose' > TODO.md
-  g add -A && g commit -q -m "init with a root to break down"
+  g add -A && g commit -q -m "init"
   ;;
 plan-inline)
   # An empty backlog and a three-task goal: /todo-plan plans it inside TODO.md, with no plan doc (TASK-126.4).
   printf '%s\n' "$head" > TODO.md
-  g add -A && g commit -q -m "init with an empty backlog"
+  g add -A && g commit -q -m "init"
   ;;
 regress-block)
   # A second test freezes the module's public names, so the node's own change turns the regression red in a test
@@ -307,7 +321,7 @@ class ContractTest(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 PY
-  g add -A && g commit -q -m "init with one free root and a frozen public interface"
+  g add -A && g commit -q -m "init"
   ;;
 stuck-loop)
   # An acceptance test that no ease() can pass: ten steps of at most 8 points reach at most 80, yet it also wants 100 at the end
@@ -335,7 +349,7 @@ class EaseAcceptance(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 PY
-  g add -A && g commit -q -m "init with one free root whose acceptance test cannot pass"
+  g add -A && g commit -q -m "init"
   ;;
 loop-limit)
   # A speed target that looks reachable and is not (FEAT-138.1): primes_up_to must be 5 times as fast as the reference in the
@@ -481,7 +495,7 @@ class PrimesAcceptance(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 PY
-  g add -A && g commit -q -m "init with one free root and a speed target in its acceptance test"
+  g add -A && g commit -q -m "init"
   ;;
 time-limit)
   # A Done when that does not end (FEAT-138.2). count_twin_primes has to be exact up to 4 * 10**13, and no Python code that
@@ -596,7 +610,7 @@ class TwinsAcceptance(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 PY
-  g add -A && g commit -q -m "init with one free root, a time budget of one minute and a test at full size"
+  g add -A && g commit -q -m "init"
   ;;
 resume-stopped|resumed-twice)
   # A node left [/] by a worker that is gone (FEAT-138.3). The tree is claimed on main, the node's branch is checked out with
@@ -609,7 +623,7 @@ resume-stopped|resumed-twice)
   b=todo/FEAT-001-add-subtract-calc-py
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one free root"
+  g add -A && g commit -q -m "init"
   printf '  - State: branch %s from main; next: start FEAT-001\n' "$b" >> TODO.md
   g add TODO.md && g commit -q -m "chore(backlog): claim FEAT-001 on $b"
   g switch -q -c "$b"
@@ -646,7 +660,7 @@ stale-claim)
   - Done when: multiply(2, 3) returns 6; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
   now="$(date +%s)"
   g add -A
-  GIT_AUTHOR_DATE="$((now - 345600)) +0000" GIT_COMMITTER_DATE="$((now - 345600)) +0000" g commit -q -m "init with three free roots"
+  GIT_AUTHOR_DATE="$((now - 345600)) +0000" GIT_COMMITTER_DATE="$((now - 345600)) +0000" g commit -q -m "init"
   flow() { GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t bash "$root/tools/todo-flow.sh" "$@" >/dev/null; }
   GIT_AUTHOR_DATE="$((now - 259200)) +0000" GIT_COMMITTER_DATE="$((now - 259200)) +0000" flow start FEAT-001 1
   g switch -q main
@@ -660,7 +674,7 @@ baseline-red)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
   printf 'def add(a, b):\n    return a - b\n' > calc.py   # a bug already on main: the baseline is red
-  g add -A && g commit -q -m "init with a red baseline"
+  g add -A && g commit -q -m "init"
   ;;
 no-git)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
@@ -669,7 +683,7 @@ no-git)
 no-backlog)
   # A project that never ran /todo-init: a hand-written CHANGELOG and no TODO.md. Every command but /todo and /todo-init
   # says so, suggests /todo-init and stops (the core, TASK-131).
-  g add -A && g commit -q -m "init without a backlog"
+  g add -A && g commit -q -m "init"
   ;;
 drained-unmerged)
   # FEAT-001 was finished and drained on its branch by an earlier /todo-continue without --merge, and that branch is still
@@ -679,7 +693,7 @@ drained-unmerged)
   - State: branch todo/FEAT-001-add-subtract-function-calc from main; next: start FEAT-001
 - [ ] **FEAT-002** · P1 · low · Add a multiply function to calc.py with a test
   - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
-  g add -A && g commit -q -m "init with one claimed root"
+  g add -A && g commit -q -m "init"
   g switch -q -c todo/FEAT-001-add-subtract-function-calc
   printf '\ndef subtract(a, b):\n    return a - b\n' >> calc.py
   python3 - <<'PY'
@@ -698,13 +712,13 @@ Reviewed: self, 0 findings fixed"
 add-fix)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one root"
+  g add -A && g commit -q -m "init"
   ;;
 add-lane)
   # One root in the default lane; /todo-add --lane math must declare the new lane in the Lanes section (FEAT-125.4).
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · low · Add subtract to calc.py
   - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`' > TODO.md
-  g add -A && g commit -q -m "init with one root"
+  g add -A && g commit -q -m "init"
   ;;
 update-block|update-drop|status-readonly|report)
   mkdir -p docs/plans
@@ -715,7 +729,7 @@ update-block|update-drop|status-readonly|report)
   - Done when: round_to(2.345, 2) returns 2.35; `python3 -m unittest tests.test_calc.CalcTest.test_round_to`
   - Links: From: FEAT-000' > TODO.md
   printf '# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [Unreleased]\n\n### Added\n\n- **FEAT-000** (feat): Add add() to calc.py. Validated: `python3 -m unittest tests.test_calc`.\n' > CHANGELOG.md
-  g add -A && g commit -q -m "init with two roots"
+  g add -A && g commit -q -m "init"
   ;;
 blocked-sibling)
   printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
@@ -725,7 +739,7 @@ blocked-sibling)
     - Done when: subtract works; `python3 -m unittest tests.test_calc.CalcTest.test_subtract`
   - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `python3 -m unittest tests.test_calc.CalcTest.test_multiply`' > TODO.md
-  g add -A && g commit -q -m "init with claimed tree"
+  g add -A && g commit -q -m "init"
   g switch -q -c todo/FEAT-001-add-subtract-multiply-calc
   g switch -q -c todo/FEAT-001.1-add-subtract-test
   python3 - <<'PY2'
@@ -752,7 +766,7 @@ ts-lifecycle)
     - Done when: subtract works; `node --experimental-strip-types --test tests/subtract.test.ts`
   - [ ] **FEAT-001.2** · low · Add multiply with a test
     - Done when: multiply works; `node --experimental-strip-types --test tests/multiply.test.ts`' > TODO.md
-  g add -A && g commit -q -m "init typescript project"
+  g add -A && g commit -q -m "init"
   ;;
 java-lifecycle)
   # Java 17 + Maven + JUnit 5 (needs Maven Central the first time). One root with two children.
@@ -777,7 +791,7 @@ XML
     - Done when: subtract works; `mvn -B test -Dtest=SubtractTest -Dsurefire.failIfNoSpecifiedTests=true`
   - [ ] **FEAT-001.2** · low · Add multiply with a test class MultiplyTest
     - Done when: multiply works; `mvn -B test -Dtest=MultiplyTest -Dsurefire.failIfNoSpecifiedTests=true`' > TODO.md
-  g add -A && g commit -q -m "init java project"
+  g add -A && g commit -q -m "init"
   ;;
 multi-module)
   # Maven multi-module build, two independent modules = two lanes, one reactor build as the regression suite.
@@ -808,7 +822,7 @@ XML
 - [ ] **FEAT-002** · P1 · low · Add shout to the text module (Text.java)
   - Done when: shout("hi") returns HI!; `mvn -B test -pl text -Dtest=ShoutTest -Dsurefire.failIfNoSpecifiedTests=true`; regression: `mvn -B test`
   - Links: Lane: text' > TODO.md
-  g add -A && g commit -q -m "init multi-module project"
+  g add -A && g commit -q -m "init"
   ;;
 *) echo "unknown scenario: $scenario"; exit 1 ;;
 esac
@@ -817,12 +831,13 @@ esac
 # Variants of the lifecycle projects (TASK-086): a red baseline on main, or a session that died before a child's merge.
 case "$scenario" in
 ts-baseline-red)
+  # The bug is part of the one init commit: a second commit would show it as a diff (FEAT-138.6).
   printf 'export function add(a: number, b: number): number {\n  return a - b;\n}\n' > src/calc.ts   # a bug already on main: the baseline is red
-  g add -A && g commit -q -m "init with a red baseline"
+  g add -A && g commit -q --amend -m "init" && g reflog expire --expire=now --all   # the reflog would keep the commit without the bug
   ;;
 java-baseline-red)
   printf 'package mini;\n\npublic class Calc {\n    public static int add(int a, int b) {\n        return a - b;\n    }\n}\n' > src/main/java/mini/Calc.java
-  g add -A && g commit -q -m "init with a red baseline"
+  g add -A && g commit -q --amend -m "init" && g reflog expire --expire=now --all   # the reflog would keep the commit without the bug
   ;;
 ts-interrupted|java-interrupted)
   if [ "$scenario" = ts-interrupted ]; then rslug=add-subtract-multiply-src; cslug=add-subtract-test; else rslug=add-subtract-multiply-calc; cslug=add-subtract-test-class; fi

@@ -2,7 +2,7 @@
 # Runs ONE fresh Codex process on a scratch repository with writes confined to it. Used by run-codex.sh and test-codex-isolation.sh.
 # Usage: bash tests/trials/codex-exec.sh <repo> <prompt-file> <report-file>
 #   writes the agent's last message to <report-file>; the full session log goes to stdout and stderr; exits with codex's status
-#   (124 after 1500 s). Needs the codex CLI, logged in (`codex login status`).
+#   (124 after TRIAL_TIMEOUT seconds, 1500 by default). Needs the codex CLI, logged in (`codex login status`).
 # Isolation, as verified on codex-cli 0.167.0 (Windows 11, unelevated sandbox):
 #   -s workspace-write          writes only inside the repo, plus the extra roots below
 #   exclude_tmpdir_env_var/exclude_slash_tmp=true
@@ -24,6 +24,9 @@
 # The user's Codex config is kept on purpose (--ignore-user-config removes the rules that allow ordinary git commands).
 set -u
 repo="${1:?usage: codex-exec.sh <repo> <prompt-file> <report-file>}"; pf="${2:?prompt file}"; out="${3:?report file}"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/trial-lib.sh"
+limit="$(trial_limit)" || exit 2   # the agent's time limit in seconds
 nat() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s\n' "$1"; fi; }
 repo="$(cd "$repo" && pwd)"
 if [ "${TRIAL_LINUX_ISOLATION:-0}" = 1 ]; then
@@ -42,5 +45,5 @@ else
     -C "$(nat "$repo")" -o "$out")
   [ -d "$repo.todo" ] && args+=(--add-dir "$(nat "$repo.todo")")
 fi
-tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
+tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout "$limit")
 ${tmo[@]+"${tmo[@]}"} codex "${args[@]}" "$(cat "$pf")" < /dev/null

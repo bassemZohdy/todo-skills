@@ -1719,7 +1719,7 @@ if [ -z "$tw_end" ]; then ok "time-limit's assertions: untouched fails, an hones
 rs_bad=""; rs_one=""; rs_two=""
 rs="$(mktemp -d)"
 rs_br=todo/FEAT-001-add-subtract-calc-py
-rs_tail="chore(backlog): start FEAT-001|chore(backlog): claim FEAT-001 on $rs_br|init with one free root|"
+rs_tail="chore(backlog): start FEAT-001|chore(backlog): claim FEAT-001 on $rs_br|init|"
 rs_twice="resumed twice with no new commit → \`git log -2 --format=%s\` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → decide whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready"
 rs_assert() { PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$rs/$1" "$2" 2>&1; }   # <folder> <scenario>
 rs_copy() { cp -R "$rs/$1" "$rs/$2"; }   # <scenario> <folder>: a fresh copy of the start state
@@ -2057,6 +2057,153 @@ tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `stale-claim` |' | grep
 tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF 'not run with an agent yet' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as not run with an agent yet]"
 if [ -z "$sk_bad" ]; then ok "the trial scenario stale-claim: main is checked out and clean, FEAT-001's branch has no commit newer than two days, FEAT-002's has one of this minute, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.4)"; else bad "stale-claim scenario (FEAT-138.4):$sk_bad"; fi
 if [ -z "$sk_rep" ]; then ok "stale-claim's assertions: no report fails; nine honest reports pass (the marker on, under and five lines under the root, a section, a Markdown and a bold heading, a table, prose, a reply that quotes the rule); the marker or the release command on the fresh claim, no mark, a denied mark, a legend, missing or misnamed commands fail; and so do a worktree, a switch and back, a switch, a released claim and an aged project (FEAT-138.4)"; else bad "stale-claim assertions (FEAT-138.4):$sk_rep"; fi
+# FEAT-138.6: a trial agent must not learn from the harness which scenario it is in, and the time limit of a run can be
+# raised. Five checks: (1) the scan of a scratch project for what gives its scenario away (trial_names in trial-lib.sh),
+# which selftest.sh runs on every scenario it builds: a fresh project has no finding, and a root commit that is not "init",
+# a second "init", and the scenario's name or a give-away word in a subject, a branch name, a file, a file name, a hook or
+# a file in .git are each found; (2) run-pi.sh and run-claude.sh, driven with stub agents: the working folder in the prompt
+# is <runs>/w-<random>/repo, without the scenario's name, the evidence points to it, the agent's arguments and environment
+# do not name the scenario or the label, two invocations do not share a project unless TRIAL_REUSE=1 asks for it, and a
+# pointer that leaves the runs folder is refused; (3) TRIAL_TIMEOUT in every runner: 1500 seconds by default, a raised
+# value reaches the command line and the evidence, a value that is no number is refused before anything runs; (4) score.sh
+# scores a runs folder of the new layout and one of the old layout, <runs>/<scenario>/repo, and no project outside the
+# runs folder; (5) the three scenarios whose simulated history was renamed: a correct ending passes with the new names,
+# and with the names of the batches made before.
+kn_names=""; kn_path=""; kn_time=""; kn_score=""; kn_old=""
+kn="$(mktemp -d)"
+kn_scan() { bash "$root/tests/trials/trial-lib.sh" names "$kn/$1" stuck-loop 2>&1; }   # <folder>: the scan of a stuck-loop project
+kn_g() { git -C "$kn/$1" -c user.email=t@example.invalid -c user.name=t "${@:2}" >/dev/null 2>&1; }   # <folder> <git arguments>
+kn_plant() {   # <folder> <what the scan must say>: the copy in <folder> was given away in one way, and the scan must find it
+  kn_out="$(kn_scan "$1")" && kn_names="$kn_names [$1: the scan finds nothing]"
+  printf '%s\n' "$kn_out" | grep -qF -- "$2" || kn_names="$kn_names [$1: the scan does not say \"$2\": $(printf '%s' "$kn_out" | tr '\n' ';' | cut -c1-200)]"
+}
+bash "$root/tests/trials/setup.sh" "$kn/p/status-readonly" status-readonly >/dev/null 2>&1 || kn_names="$kn_names [setup of status-readonly failed]"
+if bash "$root/tests/trials/setup.sh" "$kn/clean" stuck-loop >/dev/null 2>&1; then
+  kn_out="$(kn_scan clean)" && [ -z "$kn_out" ] || kn_names="$kn_names [a fresh stuck-loop project has a finding: $(printf '%s' "$kn_out" | tr '\n' ';' | cut -c1-300)]"
+  for kn_f in subject second branch text name hook marker; do cp -R "$kn/clean" "$kn/$kn_f"; done
+  kn_g subject commit -q --amend -m 'chore: one root whose acceptance test is unsatisfiable'; kn_plant subject 'the root commit is not "init"'
+  kn_g second commit -q --allow-empty -m init; kn_plant second 'a commit after the first is named "init" too'
+  kn_g branch branch todo/FEAT-001-stuck-loop-case; kn_plant branch 'a commit subject or a branch name'
+  printf '# this test cannot pass\n' >> "$kn/text/tests/acceptance_ease.py"; kn_plant text 'a scratch file: ./tests/acceptance_ease.py'
+  : > "$kn/name/stuck-loop.txt"; kn_plant name './stuck-loop.txt (its name)'
+  printf '#!/bin/sh\nif [ "stuck-loop" = stuck-loop ]; then exit 0; fi\n' > "$kn/hook/.git/hooks/post-checkout"; kn_plant hook 'a hook or a file in .git'
+  : > "$kn/marker/.git/stuck-loop-done"; kn_plant marker 'a hook or a file in .git'
+else kn_names="$kn_names [setup of stuck-loop failed]"; fi
+grep -q 'trial_names "\$tmp/\$s/repo" "\$s"' "$root/tests/trials/selftest.sh" || kn_names="$kn_names [selftest.sh does not run the scan on every scenario it builds]"
+if [ -z "$kn_names" ]; then ok "the scan that selftest.sh runs on every scratch project finds a root commit that is not \"init\", a second \"init\", and the scenario's name or a give-away word in a subject, a branch, a file, a file name, a hook and a file in .git, and nothing in a fresh project (FEAT-138.6)"; else bad "scan of scratch projects (FEAT-138.6):$kn_names"; fi
+# The runners, with stub agents and a stub timeout on PATH that notes the seconds it was given. The stub agents note their
+# arguments and what they see of TRIAL_LABEL and OLDPWD; the stub pi also writes a session log with one tool call where
+# --session-dir tells it to.
+mkdir -p "$kn/bin"
+printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
+printf '#!/usr/bin/env bash\necho "stub report: nothing changed" > "$KN_CODEX_OUT"\n' > "$kn/bin/codex"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1" >> "$KN_TIMEOUT_LOG"\nshift\nexec "$@"\n' > "$kn/bin/timeout"
+chmod +x "$kn/bin/pi" "$kn/bin/claude" "$kn/bin/codex" "$kn/bin/timeout"
+kn_r() { env "PATH=$kn/bin:$PATH" TRIAL_WINDOWS_ISOLATION=0 PYTHONNOUSERSITE=1 "KN_TIMEOUT_LOG=$kn/timeout.log" "KN_CODEX_OUT=$kn/codex-report.txt" "KN_ARGS_LOG=$kn/args.log" "KN_ENV_LOG=$kn/env.log" "$@" >/dev/null 2>&1; }
+kn_ev() { ls -1d "$1"/status-readonly/evidence/*/ 2>/dev/null | sort | sed -n "${2}p" | sed 's|/$||'; }   # <runs> <n>: the evidence folder of the n-th invocation
+kn_wd() { sed -n 's/^.*Your ONLY working folder is \(.*\) (cd there with.*$/\1/p' "$1/prompt.txt" 2>/dev/null; }   # <evidence>: the working folder its prompt names
+for kn_a in pi claude; do
+  kn_runs="$kn/runs-$kn_a"; : > "$kn/args.log"
+  kn_r TRIAL_LABEL=knlabel bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
+  kn_e1="$(kn_ev "$kn_runs" 1)"; kn_w1="$(kn_wd "${kn_e1:-/nonexistent}")"; kn_abs="$(cd "$kn_runs" 2>/dev/null && pwd)"
+  [ -s "$kn/args.log" ] && ! grep -qE 'status-readonly|knlabel' "$kn/args.log" || kn_path="$kn_path [run-$kn_a.sh: the agent's arguments name the scenario or the label, or the stub agent did not run]"
+  [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -1 "$kn/env.log" 2>/dev/null)]"
+  if [ "$kn_a" = pi ]; then   # pi's session log is in a folder next to the project while pi runs, and in the evidence afterwards
+    [ -n "$kn_e1" ] && [ -f "$kn_e1/session/s.jsonl" ] && [ "$(tr -d ' \r\n' < "$kn_e1/tool-calls.txt")" = 1 ] && ! ls -d "$(dirname "${kn_w1:-/nonexistent/x}")"/session-* >/dev/null 2>&1 || kn_path="$kn_path [run-pi.sh: the session log is not moved to <evidence>/session before its tool calls are counted]"
+  fi
+  case "$kn_w1" in "$kn_abs"/w-*/repo) ;; *) kn_path="$kn_path [run-$kn_a.sh: the working folder in the prompt is not <runs>/w-<random>/repo: ${kn_w1:-none}]" ;; esac
+  [ -n "$kn_w1" ] && [ -d "$kn_w1/.git" ] && [ ! -e "$kn_runs/status-readonly/repo" ] || kn_path="$kn_path [run-$kn_a.sh: the project is not at the working folder of the prompt, or is still in the scenario's folder]"
+  grep -q 'status-readonly' "${kn_e1:-/nonexistent}/prompt.txt" 2>/dev/null && kn_path="$kn_path [run-$kn_a.sh: the prompt names the scenario]"
+  [ -n "$kn_e1" ] && [ -f "$kn_e1/project.txt" ] && [ "$kn_abs/$(tr -d '\r\n' < "$kn_e1/project.txt")" = "$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the evidence does not point to the project (project.txt)]"
+  grep -q 'timeout 1500 ' "${kn_e1:-/nonexistent}/command.txt" 2>/dev/null && [ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 1500 ] || kn_time="$kn_time [run-$kn_a.sh: the default limit is not 1500 seconds on the command line and in command.txt]"
+  sleep 1   # the evidence folders are named by the second
+  kn_r TRIAL_TIMEOUT=7200 bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
+  kn_e2="$(kn_ev "$kn_runs" 2)"; kn_w2="$(kn_wd "${kn_e2:-/nonexistent}")"
+  [ -n "$kn_w2" ] && [ "$kn_w2" != "$kn_w1" ] && [ -d "$kn_w2/.git" ] || kn_path="$kn_path [run-$kn_a.sh: a second invocation does not get a project of its own]"
+  grep -q 'timeout 7200 ' "${kn_e2:-/nonexistent}/command.txt" 2>/dev/null && [ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 7200 ] || kn_time="$kn_time [run-$kn_a.sh: TRIAL_TIMEOUT=7200 does not reach the command line and command.txt]"
+  sleep 1
+  kn_r TRIAL_REUSE=1 bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
+  kn_e3="$(kn_ev "$kn_runs" 3)"
+  [ -n "$kn_e3" ] && [ "$(kn_wd "$kn_e3")" = "$kn_w2" ] && grep -q 'reused the existing repo' "$kn_e3/setup.log" || kn_path="$kn_path [run-$kn_a.sh: TRIAL_REUSE=1 does not continue the project of the invocation before]"
+  # TRIAL_REUSE=1 follows the newest project.txt: one that leaves the runs folder is refused before the agent starts.
+  kn_n="$(wc -l < "$kn/args.log" | tr -d ' ')"; kn_fake="$kn_runs/status-readonly/evidence/99990101T000000Z-1"; mkdir -p "$kn_fake"
+  for kn_p in '../outside/repo' 'w-x/../../outside/repo' '/outside/repo' 'C:/outside/repo' 'C:\outside\repo'; do
+    printf '%s\n' "$kn_p" > "$kn_fake/project.txt"
+    kn_r TRIAL_REUSE=1 bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly; kn_rc=$?
+    [ "$kn_rc" -eq 2 ] && [ "$(wc -l < "$kn/args.log" | tr -d ' ')" = "$kn_n" ] && [ ! -e "$kn/outside" ] && [ "$(ls -1 "$kn_runs/status-readonly/evidence" | wc -l | tr -d ' ')" = 4 ] || kn_path="$kn_path [run-$kn_a.sh: TRIAL_REUSE=1 follows a project.txt that leaves the runs folder ($kn_p): exit $kn_rc]"
+  done
+  rm -rf "$kn_fake"
+  kn_n="$(wc -l < "$kn/timeout.log" | tr -d ' ')"
+  kn_r TRIAL_TIMEOUT=10m bash "$root/tests/trials/run-$kn_a.sh" "$kn/runs-bad-$kn_a" status-readonly; kn_rc=$?
+  [ "$kn_rc" -eq 2 ] && [ ! -e "$kn/runs-bad-$kn_a" ] && [ "$(wc -l < "$kn/timeout.log" | tr -d ' ')" = "$kn_n" ] || kn_time="$kn_time [run-$kn_a.sh: TRIAL_TIMEOUT=10m is not refused before anything runs: exit $kn_rc]"
+done
+# codex-exec.sh has the same limit: default (also for an empty value), raised, refused. run-codex.sh writes the limit into
+# its evidence and refuses like the others, and so does run-codex-lanes.sh, which no longer holds a number of its own.
+printf 'Say hello.\n' > "$kn/prompt.txt"
+kn_r bash "$root/tests/trials/codex-exec.sh" "$kn/p/status-readonly" "$kn/prompt.txt" "$kn/codex-report.txt"
+[ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 1500 ] || kn_time="$kn_time [codex-exec.sh: the default limit is not 1500 seconds]"
+echo none >> "$kn/timeout.log"
+kn_r TRIAL_TIMEOUT= bash "$root/tests/trials/codex-exec.sh" "$kn/p/status-readonly" "$kn/prompt.txt" "$kn/codex-report.txt"
+[ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 1500 ] || kn_time="$kn_time [codex-exec.sh: an empty TRIAL_TIMEOUT is not the default of 1500 seconds]"
+kn_r TRIAL_TIMEOUT=7200 bash "$root/tests/trials/run-codex.sh" "$kn/runs-codex" status-readonly
+grep -q 'time limit 7200 seconds' "$kn"/runs-codex/status-readonly/evidence/*/command.txt 2>/dev/null && [ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 7200 ] || kn_time="$kn_time [run-codex.sh: command.txt does not name the limit that codex-exec.sh applied]"
+for kn_a in run-codex.sh run-codex-lanes.sh; do
+  kn_n="$(wc -l < "$kn/timeout.log" | tr -d ' ')"
+  kn_r TRIAL_TIMEOUT=10m bash "$root/tests/trials/$kn_a" "$kn/runs-bad-$kn_a" lanes; kn_rc=$?
+  [ "$kn_rc" -eq 2 ] && [ ! -e "$kn/runs-bad-$kn_a" ] && [ "$(wc -l < "$kn/timeout.log" | tr -d ' ')" = "$kn_n" ] || kn_time="$kn_time [$kn_a: TRIAL_TIMEOUT=10m is not refused before anything runs: exit $kn_rc]"
+done
+grep -q 'tmo=(timeout "\$limit")' "$root/tests/trials/run-codex-lanes.sh" && ! grep -l 'timeout 1500' "$root"/tests/trials/*.sh | grep -q . || kn_time="$kn_time [run-codex-lanes.sh does not take its limit from TRIAL_TIMEOUT, or a harness script still holds timeout 1500]"
+kn_r TRIAL_TIMEOUT=7200 bash "$root/tests/trials/codex-exec.sh" "$kn/p/status-readonly" "$kn/prompt.txt" "$kn/codex-report.txt"
+[ "$(tail -1 "$kn/timeout.log" 2>/dev/null)" = 7200 ] || kn_time="$kn_time [codex-exec.sh: TRIAL_TIMEOUT=7200 does not reach the command line]"
+kn_n="$(wc -l < "$kn/timeout.log" | tr -d ' ')"
+kn_r TRIAL_TIMEOUT=10m bash "$root/tests/trials/codex-exec.sh" "$kn/p/status-readonly" "$kn/prompt.txt" "$kn/codex-report.txt"; kn_rc=$?
+[ "$kn_rc" -eq 2 ] && [ "$(wc -l < "$kn/timeout.log" | tr -d ' ')" = "$kn_n" ] || kn_time="$kn_time [codex-exec.sh: TRIAL_TIMEOUT=10m is not refused before the agent starts: exit $kn_rc]"
+if [ -z "$kn_path" ]; then ok "run-pi.sh and run-claude.sh give the agent a working folder without the scenario's name, arguments and an environment without the scenario and the label, the evidence points to the project and holds pi's session log, a second invocation gets its own project, TRIAL_REUSE=1 continues one and refuses a pointer that leaves the runs folder (FEAT-138.6)"; else bad "working folder of a trial (FEAT-138.6):$kn_path"; fi
+if [ -z "$kn_time" ]; then ok "TRIAL_TIMEOUT sets the agent's time limit in run-pi.sh, run-claude.sh, run-codex.sh, codex-exec.sh and run-codex-lanes.sh: 1500 seconds by default and for an empty value, a raised value on the command line and in the evidence, a value that is no number refused before anything runs (FEAT-138.6)"; else bad "TRIAL_TIMEOUT (FEAT-138.6):$kn_time"; fi
+# score.sh: the new layout as the runners above left it (the stub changed nothing, which is right for status-readonly), the
+# old layout built by hand, and a pointer to a project that is not there.
+kn_out="$(env TRIAL_WINDOWS_ISOLATION=0 PYTHONNOUSERSITE=1 bash "$root/tests/trials/score.sh" "$kn/runs-claude" 2>&1)"
+printf '%s\n' "$kn_out" | grep -q '^PASS  *status-readonly ' || kn_score="$kn_score [a runs folder of the new layout does not score PASS: $(printf '%s\n' "$kn_out" | grep 'status-readonly' | tr '\n' ';')]"
+mkdir -p "$kn/runs-old/status-readonly/evidence/20260101T000000Z-1"
+bash "$root/tests/trials/setup.sh" "$kn/runs-old/status-readonly/repo" status-readonly >/dev/null 2>&1 || kn_score="$kn_score [setup of the old layout failed]"
+printf '0\n' > "$kn/runs-old/status-readonly/evidence/20260101T000000Z-1/agent-exit.txt"; printf 'Report: nothing to do.\n' > "$kn/runs-old/status-readonly/evidence/20260101T000000Z-1/report.txt"
+kn_out="$(env TRIAL_WINDOWS_ISOLATION=0 PYTHONNOUSERSITE=1 bash "$root/tests/trials/score.sh" "$kn/runs-old" 2>&1)"
+printf '%s\n' "$kn_out" | grep -q '^PASS  *status-readonly ' || kn_score="$kn_score [a runs folder of the old layout, <runs>/<scenario>/repo, does not score PASS: $(printf '%s\n' "$kn_out" | grep 'status-readonly' | tr '\n' ';')]"
+printf 'w-gone/repo\n' > "$kn/runs-old/status-readonly/evidence/20260101T000000Z-1/project.txt"
+kn_out="$(env TRIAL_WINDOWS_ISOLATION=0 PYTHONNOUSERSITE=1 bash "$root/tests/trials/score.sh" "$kn/runs-old" 2>&1)"
+printf '%s\n' "$kn_out" | grep -q '^UNVERIFIED  *status-readonly ' || kn_score="$kn_score [evidence that points to a project that is not there must be UNVERIFIED, not scored on another folder: $(printf '%s\n' "$kn_out" | grep 'status-readonly' | tr '\n' ';')]"
+printf '../p/status-readonly\n' > "$kn/runs-old/status-readonly/evidence/20260101T000000Z-1/project.txt"   # a project that is there and would pass, outside the runs folder
+kn_out="$(env TRIAL_WINDOWS_ISOLATION=0 PYTHONNOUSERSITE=1 bash "$root/tests/trials/score.sh" "$kn/runs-old" 2>&1)"
+printf '%s\n' "$kn_out" | grep -q '^UNVERIFIED  *status-readonly ' || kn_score="$kn_score [evidence that points out of the runs folder must be UNVERIFIED: $(printf '%s\n' "$kn_out" | grep 'status-readonly' | tr '\n' ';')]"
+if [ -z "$kn_score" ]; then ok "score.sh follows the evidence to the project in the new layout, still scores the old layout <runs>/<scenario>/repo, and does not score a project that is missing or outside the runs folder (FEAT-138.6)"; else bad "scoring both layouts (FEAT-138.6):$kn_score"; fi
+# The three scenarios whose simulated history was renamed, each built with the new names and with the names of the
+# batches made before (TRIAL_OLD_NAMES=1), and ended as a correct agent ends it: the rival's claim wins and the own branch
+# is deleted; the other session's commit is kept and the claim is made on top; the pull is merged, the local root is
+# renumbered and the next root is started. Every ending must pass every assertion. The six run side by side.
+kn_end() {   # <0|1> <scenario>: builds, ends and scores one project, and leaves what failed in old-<0|1>-<scenario>.txt
+  local d="$kn/old$1/$2"
+  { TRIAL_OLD_NAMES="$1" bash "$root/tests/trials/setup.sh" "$d" "$2" >/dev/null 2>&1 || { echo "setup failed"; return; }
+    ( cd "$d" || exit 1
+      git config user.email t@example.invalid && git config user.name t || exit 1
+      case "$2" in
+        race-claim-conflict) git switch -q -c todo/FEAT-001-add-subtract-function-calc && git switch -q main && git branch -q -D todo/FEAT-001-add-subtract-function-calc ;;
+        race-claim-benign) git switch -q -c todo/FEAT-001-probe && git switch -q main && git branch -q -D todo/FEAT-001-probe && bash "$root/tools/todo-flow.sh" start FEAT-001 1 ;;
+        team-claim) git pull -q --no-rebase
+          git show origin/main:TODO.md > TODO.md && git show HEAD:TODO.md | awk '/\*\*FEAT-003\*\*/ { f = 1 } f' | sed 's/FEAT-003/FEAT-004/' >> TODO.md \
+            && git add TODO.md && git commit -q --no-edit && bash "$root/tools/todo-flow.sh" start FEAT-002 1 ;;
+      esac ) >/dev/null 2>&1 || { echo "the scripted ending failed"; return; }
+    PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$d" "$2" 2>&1 | awk '/^FAIL/ { print; bad = 1 } /^PASS/ { good = 1 } END { if (!good && !bad) print "no assertion ran" }'
+  } > "$kn/old-$1-$2.txt" 2>&1
+}
+for kn_o in 0 1; do for kn_s in race-claim-conflict race-claim-benign team-claim; do kn_end "$kn_o" "$kn_s" & done; done
+wait
+for kn_o in 0 1; do for kn_s in race-claim-conflict race-claim-benign team-claim; do
+  [ -f "$kn/old-$kn_o-$kn_s.txt" ] && [ ! -s "$kn/old-$kn_o-$kn_s.txt" ] || kn_old="$kn_old [$kn_s, $([ "$kn_o" = 1 ] && echo 'the names of earlier batches' || echo 'the new names'): $(tr '\n' ';' < "$kn/old-$kn_o-$kn_s.txt" 2>/dev/null | cut -c1-300)]"
+done; done
+grep -q 'LC_ALL=C awk' "$root/tests/trials/assert.sh" || kn_old="$kn_old [stale-claim: the awk that reads the report does not run under LC_ALL=C]"
+rm -rf "$kn"
+if [ -z "$kn_old" ]; then ok "race-claim-conflict, race-claim-benign and team-claim: a correct ending passes every assertion with the new names of the simulated history and with the names that the batches made before hold, and stale-claim's report is read under LC_ALL=C (FEAT-138.6)"; else bad "renamed history of three scenarios (FEAT-138.6):$kn_old"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

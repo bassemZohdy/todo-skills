@@ -44,5 +44,16 @@ line happy-path | grep -q '^UNVERIFIED' && ok "scenario folder without a repo is
 printf '%s\n' "$out" | grep -q 'TRIAL SCORE 16.7% (1/6 scenarios pass)' && ok "every scenario stays in the totals (1/6)" || bad "totals line: $(printf '%s\n' "$out" | grep 'TRIAL SCORE')"
 printf '%s\n' "$out" | grep -q 'UNVERIFIED 2' && printf '%s\n' "$out" | grep -q 'INFRA_ERROR 2' && ok "totals break out UNVERIFIED and INFRA_ERROR" || bad "breakdown missing: $(printf '%s\n' "$out" | tail -3)"
 
+# The layout of run-pi.sh and run-claude.sh (FEAT-138.6): the project is outside the scenario's folder, and project.txt in
+# the newest evidence folder points to it. A folder w-<id> is no scenario; a pointer to nothing is not scored.
+runs="$tmp/runs2"; mkdir -p "$runs/release-ask" "$runs/status-readonly"
+bash "$here/setup.sh" "$runs/w-0a1b2c3d4e5f/repo" release-ask >/dev/null 2>&1 || bad "setup release-ask in the new layout"
+ev release-ask 20260101T000000Z-1 0; printf 'w-0a1b2c3d4e5f/repo\n' > "$runs/release-ask/evidence/20260101T000000Z-1/project.txt"
+ev status-readonly 20260101T000000Z-1 0; printf 'w-ffffffffffff/repo\n' > "$runs/status-readonly/evidence/20260101T000000Z-1/project.txt"
+out="$(bash "$here/score.sh" "$runs" 2>&1)"
+line release-ask | grep -q '^PASS' && ok "a project outside the scenario folder is found through project.txt: PASS" || bad "new layout: $(line release-ask)"
+line status-readonly | grep -q '^UNVERIFIED' && ok "project.txt that points to no folder: UNVERIFIED" || bad "missing project: $(line status-readonly)"
+printf '%s\n' "$out" | grep -q '(1/2 scenarios pass)' && ! printf '%s\n' "$out" | grep -q 'w-0a1b2c3d4e5f' && ok "the project folders are not counted as scenarios (1/2)" || bad "totals of the new layout: $(printf '%s\n' "$out" | grep 'TRIAL SCORE')"
+
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

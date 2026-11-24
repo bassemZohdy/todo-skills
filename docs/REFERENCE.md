@@ -56,7 +56,7 @@ Items separated by `; `, each at most once, in this order:
 | `attempts n/3` | Failed attempts so far: failed verification runs, and the failed runs the loop guard turned into attempts; a worker that stopped without a verdict is not one |
 | `baseline <n> passing`, `baseline none` or `baseline red: <ids>` | The regression result before work started |
 | `tier: low\|mid\|high` | Only once escalated above the node's complexity |
-| `hyp: <one line>` | The current hypothesis while fixing a failure |
+| `hyp: <one line>` | The current hypothesis while fixing a failure, with no `; ` inside (the lint reads what follows it as an unknown item) |
 | `branch todo/<ID>-<slug> from <branch>` | The node's branch and the branch it was created from |
 | `no git` | No-git mode |
 | `files: <paths>`, `docs: <paths>` | Touched files, in no-git mode (a root keeps its finished children's until the drain) |

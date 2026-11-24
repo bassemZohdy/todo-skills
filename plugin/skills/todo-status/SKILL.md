@@ -8,7 +8,7 @@ argument-hint: "[--search <text>] [--last <N>]"
 
 First load the `todo` core skill (tree format, IDs, invariants). If you cannot load a skill by name, read `../todo/SKILL.md`.
 
-This command changes nothing: no edits, no bootstrapping, no git writes. If `TODO.md` does not exist, say so and suggest `/todo-init`. In a non-git folder print the core's no-git warning. An invariant violation is reported, never repaired.
+This command changes nothing: no edits, no bootstrapping, no git writes. In a non-git folder print the core's no-git warning. An invariant violation is reported, never repaired.
 
 ## Default report
 
@@ -21,7 +21,7 @@ This command changes nothing: no edits, no bootstrapping, no git writes. If `TOD
 
 ## Stale claims
 
-A claim whose branch exists is also stale when the newest commit on its tree's branches is older than four times the time budget of the tree's highest complexity: 15 minutes for `low`, 30 for `mid`, 60 for `high`, or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`. Show `stale: no commit for <age>`, `git switch <branch>` to resume and `/todo-update <ROOT-ID> --status ready` to release (it asks first). Report only: run neither, and mark no claim with a newer commit.
+A claim whose branch exists is also stale when the newest commit on the branches `todo/<ROOT-ID>-*` and `todo/<ROOT-ID>.*` is older than four times the time budget of the tree's highest complexity: 15 minutes for `low`, 30 for `mid`, 60 for `high`, or, per level, a README line such as `Budget: low=15m, mid=30m, high=60m`. Show `stale: no commit for <age>`, `git switch <branch>` to resume and `/todo-update <ROOT-ID> --status ready` to release (it asks first). Report only: run neither command. A claim with a commit newer than that limit is not marked.
 
 ## Progress
 

@@ -14,7 +14,7 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
 | Plan stop, breakdown, and a node blocked by a regression it cannot fix | `plan-stop`, `decompose`, `regress-block` | Python; pi runs only, below |
-| A task that cannot turn green (the loop guard) | `stuck-loop`, `loop-limit` (a speed target out of reach that no single run rules out) | Python; `stuck-loop` has pi runs only, below; `loop-limit` is not run with an agent yet |
+| A task that cannot turn green (the limit of three attempts, and the loop guard for partial runs) | `stuck-loop`, `loop-limit` (a speed target out of reach that no single run rules out) | Python; `stuck-loop` has pi runs only, below; `loop-limit` is not run with an agent yet |
 | A `Done when` that does not end (the time limit) | `time-limit` | Python; not run with an agent yet |
 | Planning inside `TODO.md` | `plan-inline` | Python; not run with an agent yet |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign`, `stale-claim` (a claim with no commit for four times its budget, which `/todo-status` marks stale) | Python; `stale-claim` is not run with an agent yet |

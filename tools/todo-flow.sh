@@ -67,7 +67,7 @@ refile() {   # <file> <filter...>: rewrites the file through the filter; a CRLF 
   if [ "$cr" -gt 0 ]; then awk '{ printf "%s\r\n", $0 }' "$f.flow" > "$f" && rm -f "$f.flow"; else mv "$f.flow" "$f"; fi
 }
 edit() { refile TODO.md T "$@"; }
-slug() {   # git-flow: lowercase, punctuation to spaces, small words dropped, the first 4 words, "task" when none is left
+slug() {   # git-flow: lowercase, every character that is not a letter or a digit to a space, small words dropped, the first 4 words, "task" when none is left
   Q "$1" title | LC_ALL=C awk '{ s = tolower($0); gsub(/[^a-z0-9]+/, " ", s); k = split(s, a, " "); o = ""; c = 0
     for (i = 1; i <= k && c < 4; i++) if (a[i] !~ /^(a|an|the|to|of|and|for|with)$/) o = o (c++ ? "-" : "") a[i]
     print (o == "" ? "task" : o) }'

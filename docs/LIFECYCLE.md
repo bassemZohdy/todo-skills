@@ -8,7 +8,7 @@ The marker on each task in `TODO.md` is its status. Every command reads the mark
  Ready  workable?    tree claim on the base  In progress   red, green, refactor,    marker, commit,    (root: refreshed from base,
         baseline     (first node), branch,   (start        review, Done when +      merge --no-ff      last gate, drained to
         green        then set [/]            commit)       regression, gates        into parent        CHANGELOG, merged with --merge)
-                                                   │ 3 failed attempts / failure outside scope / review or DoD gate
+                                                   │ 3 failed attempts / failure outside the node / review or DoD gate
                                                    ▼
                                                   [!] Blocked ── /todo-update <ID> --status ready ──► [ ]
 ```
@@ -47,7 +47,7 @@ Ancestors of the active node keep `[ ]`. They count as in progress implicitly, a
 
 `/todo-continue` completes one node per invocation (`--all-lanes` excepted): a child stops after its merge into the parent, a root after its drain. Run it again, ideally with a cleared context, for the next node. A session that dies mid-way is recovered by the next `/todo-continue`, which finishes an unmerged `[x]` branch or resumes the `[/]` node first.
 
-Any step that finds a red baseline stops before anything changes. A failure outside the task line, a missing Definition of Done item, review findings still valid after two rounds, or a third failed attempt ends in `[!]` ([VERIFICATION.md](VERIFICATION.md#test-failures-and-blocking)).
+Any step that finds a red baseline stops before anything changes. A failure outside the node, a missing Definition of Done item, review findings still valid after two rounds, or a third failed attempt ends in `[!]` ([VERIFICATION.md](VERIFICATION.md#test-failures-and-blocking)).
 
 ## What each command does by status
 

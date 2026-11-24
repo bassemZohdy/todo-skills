@@ -2146,9 +2146,9 @@ for kn_a in pi claude; do
   kn_e1="$(kn_ev "$kn_runs" 1)"; kn_w1="$(kn_wd "${kn_e1:-/nonexistent}")"; kn_abs="$(cd "$kn_runs" 2>/dev/null && pwd)"
   [ -s "$kn/args.log" ] && ! grep -qE 'status-readonly|knlabel' "$kn/args.log" || kn_path="$kn_path [run-$kn_a.sh: the agent's arguments name the scenario or the label, or the stub agent did not run]"
   [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -1 "$kn/env.log" 2>/dev/null)]"
-  # bash 3.2 (macOS) does not export the OLDPWD that a cd sets, so the runner exports it itself; bash 4 and later export it
+  # bash 3.2 (macOS) left out an OLDPWD that the runner exported by hand, so the runner puts it into the agent's environment with env; bash 4 and later export it
   # always, so only the text of the runner can fail here on Windows and Linux (FIX-142).
-  grep -qF '( cd "$repo" && export OLDPWD="$repo" && unset TRIAL_LABEL && ' "$root/tests/trials/run-$kn_a.sh" || kn_path="$kn_path [run-$kn_a.sh: the agent's OLDPWD is not exported by the runner: bash 3.2 would leave it out]"
+  grep -qF '( cd "$repo" && env -u TRIAL_LABEL OLDPWD="$repo" ' "$root/tests/trials/run-$kn_a.sh" || kn_path="$kn_path [run-$kn_a.sh: the agent's OLDPWD is not set by env in the runner: bash 3.2 would leave it out]"
   if [ "$kn_a" = pi ]; then   # pi's session log is in a folder next to the project while pi runs, and in the evidence afterwards
     [ -n "$kn_e1" ] && [ -f "$kn_e1/session/s.jsonl" ] && [ "$(tr -d ' \r\n' < "$kn_e1/tool-calls.txt")" = 1 ] && ! ls -d "$(dirname "${kn_w1:-/nonexistent/x}")"/session-* >/dev/null 2>&1 || kn_path="$kn_path [run-pi.sh: the session log is not moved to <evidence>/session before its tool calls are counted]"
   fi

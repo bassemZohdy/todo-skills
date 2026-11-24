@@ -18,7 +18,7 @@
     - Done when: setup.sh builds both, doing nothing fails each, resume-stopped requires the resume commit with attempts unchanged, and resumed-twice rejects a third resume commit; `bash tests/trials/selftest.sh`
   - [x] **FEAT-138.4** · mid · Add the read-only trial scenario stale-claim, a claim whose branch has had no commit for four times its budget
     - Done when: setup.sh builds it with back-dated commits, and assert.sh requires an unchanged repository and a report that names the claim as stale; `bash tests/trials/selftest.sh`
-  - [ ] **FEAT-138.5** · mid · Run three fresh pi agents on each new scenario, publish the summary and settle the sentences that two or more reports name
+  - [x] **FEAT-138.5** · mid · Run three fresh pi agents on each new scenario, publish the summary and settle the sentences that two or more reports name
     - Done when: docs/evals holds the batch summary with one row per run and which guard each run reached, docs/trials.md links it, and the three sentences the stuck-loop batch left open are settled; `bash tests/run.sh`
     - Links: Depends: FEAT-138.6, FEAT-138.7
   - [x] **FEAT-138.6** · mid · Keep a scenario's name and design out of what a trial agent sees, and let the time limit of a run be raised

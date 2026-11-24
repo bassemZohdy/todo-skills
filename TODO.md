@@ -20,9 +20,12 @@
     - Done when: setup.sh builds it with back-dated commits, and assert.sh requires an unchanged repository and a report that names the claim as stale; `bash tests/trials/selftest.sh`
   - [ ] **FEAT-138.5** · mid · Run three fresh pi agents on each new scenario, publish the summary and settle the sentences that two or more reports name
     - Done when: docs/evals holds the batch summary with one row per run and which guard each run reached, docs/trials.md links it, and the three sentences the stuck-loop batch left open are settled; `bash tests/run.sh`
-    - Links: Depends: FEAT-138.6
+    - Links: Depends: FEAT-138.6, FEAT-138.7
   - [x] **FEAT-138.6** · mid · Keep a scenario's name and design out of what a trial agent sees, and let the time limit of a run be raised
     - Done when: no first commit of a scratch project describes its scenario, the pi and Claude Code runners give the agent a working path without the scenario name, TRIAL_TIMEOUT replaces the fixed 1500 seconds, and runs folders of the old layout still score; `bash tests/trials/selftest.sh`
+  - [/] **FEAT-138.7** · high · Settle the sentences of the stuck-worker rules that two or more agent reports call unclear
+    - Done when: a failed run of the whole Done when is an attempt and the loop guard counts partial runs only, outside the node needs a reason that does not rest on the node's own tries, each other named sentence is changed or left with a recorded reason, every change is pinned, and the load budgets hold; `bash tests/run.sh`
+    - State: attempts 0/3; baseline 384 passing; branch todo/FEAT-138.7-settle-sentences-stuck-worker from todo/FEAT-138-add-trial-scenarios-that; next: read docs
 - [ ] **TASK-139** · P1 · mid · Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task
   - Done when: the published rows cover the variant and the scenario, and a dated summary states the setup cost, the cost per task and the cost per node with their limits; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Depends: TASK-137

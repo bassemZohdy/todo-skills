@@ -8,6 +8,10 @@
 # the scenario's files, the skills and exactly what todo-init writes (TODO.md and CHANGELOG.md equal to the blocks of the todo-init
 # skill, one README Tests line, nothing else), the lint passes, the coverage check asks for no rows of it outside arms/, and a variant
 # that leaves extra files, a second Tests line or no Lanes section, or whose setup fails, is caught.
+# TASK-139.2: the scenario 7-text-helpers (one requirement, four functions): four mutants of its reference solution each fail with
+# exactly their function's check line and the line about the agent's tests failing, tests of one function only fail that line and one
+# data-driven test of all four passes it, and publish.sh check --coverage prints the scenarios of coverage-pending.txt as PENDING
+# and fails when a listed one is complete or does not exist.
 # Usage: bash tests/trials/test-benchmark-harness.sh
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -76,7 +80,7 @@ run() { bash "$bench/run.sh" "$@" > "$tmp/last.log" 2>&1; }
 
 # shellcheck disable=SC2035
 scenarios="$(cd "$bench/scenarios" && ls -d */ | tr -d / | tr '\n' ' ')"
-[ "$(echo "$scenarios" | wc -w | tr -d ' ')" = 6 ] && ok "six scenarios: $scenarios" || bad "expected six scenarios, found: $scenarios"
+[ "$(echo "$scenarios" | wc -w | tr -d ' ')" = 7 ] && ok "seven scenarios: $scenarios" || bad "expected seven scenarios, found: $scenarios"
 # shellcheck disable=SC2035
 arms="$(cd "$bench/arms" && ls -d */ | tr -d / | tr '\n' ' ')"
 for a in todo-skills lean-baseline no-methodology; do case " $arms " in *" $a "*) ;; *) bad "arm $a is missing";; esac; done
@@ -84,14 +88,17 @@ for a in todo-skills lean-baseline no-methodology; do case " $arms " in *" $a "*
 rows=0
 for a in $arms; do
   for s in $scenarios; do
-    STUB_MODE=solve run "$bench/arms/$a" "$s" "$tmp/runs"; rows=$((rows + 1))
+    STUB_MODE=solve run "$bench/arms/$a" "$s" "$tmp/runs"; rc=$?; rows=$((rows + 1))
     got="$(outcome final_outcome)"
+    # run.sh exits 2 and writes no row when it cannot start: the last row would be the previous run's, so a new row must exist.
+    { [ "$rc" = 0 ] && [ "$(($(wc -l < "$csv") - 1))" = "$rows" ]; } || got="no row (run.sh exited $rc)"
     [ "$got" = PASS ] && ok "$a/$s: a correct solution is PASS" || { bad "$a/$s: a correct solution is $got"; tail -15 "$tmp/last.log"; }
   done
 done
 for s in $scenarios; do
-  STUB_MODE=noop run "$bench/arms/no-methodology" "$s" "$tmp/runs"; rows=$((rows + 1))
+  STUB_MODE=noop run "$bench/arms/no-methodology" "$s" "$tmp/runs"; rc=$?; rows=$((rows + 1))
   got="$(outcome final_outcome)"
+  { [ "$rc" = 0 ] && [ "$(($(wc -l < "$csv") - 1))" = "$rows" ]; } || got="no row (run.sh exited $rc)"
   [ "$got" = FAIL ] && ok "$s: doing nothing is FAIL" || bad "$s: doing nothing is $got"
 done
 n="$(($(wc -l < "$csv") - 1))"
@@ -148,7 +155,7 @@ grep -q 'median' "$tmp/summary.txt" && grep -q 'mean' "$tmp/summary.txt" && grep
 # checked on its own: every row has the published columns and a recorded evidence hash (the identity of that evidence), the
 # repository's table scores every arm and scenario, and add refuses a run published before or one without a recorded hash.
 pubsh="$bench/publish.sh"; pub="$tmp/pub/results.csv"
-if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: every arm and scenario has a scored row and every row is well formed"
+if bash "$pubsh" check --coverage > "$tmp/pub-repo.txt" 2>&1; then ok "published results: the coverage check passes (every scenario that is not pending in coverage-pending.txt has a scored row for every arm) and every row is well formed"
 else bad "published results (TASK-075): $(tail -3 "$tmp/pub-repo.txt" | tr '\n' ' ')"; fi
 if [ "$(ls "$pubdir/results" | tr '\n' ' ')" = "results.csv " ]; then ok "the published results folder holds results.csv only"; else bad "the published results folder holds: $(ls "$pubdir/results" | tr '\n' ' ')"; fi
 if head -1 "$pubdir/results/results.csv" | grep -q 'evidence_dir'; then bad "the published table still has an evidence_dir column"; else ok "the published table has no evidence_dir column"; fi
@@ -177,6 +184,90 @@ BENCH_RESULTS="$pub" bash "$pubsh" add "$csv" > "$tmp/pub-dup.txt" 2>&1; rc=$?
 { head -1 "$csv"; sed -n 2p "$csv" | sed 's/^[^,]*,/no-such-run,/; s/,[^,]*,[^,]*$/,,x/'; } > "$tmp/ghost.csv"
 BENCH_RESULTS="$pub" bash "$pubsh" add "$tmp/ghost.csv" > "$tmp/pub-ghost.txt" 2>&1; rc=$?
 [ "$rc" -ne 0 ] && grep -q "refused: run no-such-run has no recorded evidence hash" "$tmp/pub-ghost.txt" && [ "$(wc -l < "$pub")" = "$before" ] && ok "a run without a recorded evidence hash is refused and nothing is written" || bad "ghost publish: rc=$rc $(cat "$tmp/pub-ghost.txt")"
+
+# TASK-139.2: scenario 7-text-helpers is one requirement for four functions that do not use each other (slugify, wrap, top_words,
+# parse_row), so a methodology that splits work has something to split. The hidden accept.sh scores each function on its own check
+# line, plus one line for the agent's tests: they pass and fail when any one module is replaced by a stub that raises
+# NotImplementedError. The reference is PASS and doing nothing is FAIL in the loops above, for every arm. Four mutants, each the
+# reference minus one function (its module, its test file and its import line in textkit/__init__.py, deleted from a scratch copy so no
+# second copy is stored), go through verify.sh, which runs the same accept.sh as run.sh (the verifier log is all that is read, so the
+# runs do not need an arm or a stub agent). Each must FAIL with exactly two check lines failing: that function's line and the line
+# about the agent's tests, which cannot cover a function whose tests were removed with it; the other three function lines pass.
+m7_repo() { local d="$tmp/m7-$1"; rm -rf "$d"; mkdir -p "$d"; cp -R "$bench/scenarios/7-text-helpers/repo/." "$d/"; cp -R "$sol/7-text-helpers/." "$d/"; printf '%s' "$d"; }
+# m7_verify <repo>: the verifier's output on a scratch repository (the start commit is not read by this scenario's accept.sh).
+m7_verify() { : > "$tmp/m7-report.txt"; bash "$bench/verify.sh" "$BENCH_HIDDEN" 7-text-helpers "$1" "$tmp/m7-report.txt" none 2>&1; }
+# m7_failed <log>: the failing check lines, feature lines reduced to the function name.
+m7_failed() { printf '%s\n' "$1" | grep '^FAIL  ' | sed 's/^FAIL  feature \([A-Za-z_]*\) .*/\1/; s/^FAIL  //' | tr '\n' ' '; }
+for m in slug:slugify wrap:wrap counts:top_words rows:parse_row; do
+  mod="${m%%:*}"; fn="${m#*:}"
+  d="$(m7_repo "$mod")"; rm -f "$d/textkit/$mod.py" "$d/tests/test_$mod.py"
+  grep -v "^from textkit\.$mod import " "$d/textkit/__init__.py" > "$d/init.new"; mv "$d/init.new" "$d/textkit/__init__.py"
+  vlog="$(m7_verify "$d")"; rc=$?
+  failed="$(m7_failed "$vlog")"; passed="$(printf '%s\n' "$vlog" | grep -c '^PASS  feature ')"
+  [ "$rc" = 1 ] && [ "$failed" = "$fn the agent's tests cover each function " ] && [ "$passed" = 3 ] \
+    && ok "7-text-helpers without $fn: FAIL, with the check line of $fn and the one about the agent's tests failing and the other three function lines passing" \
+    || bad "7-text-helpers without $fn: exit $rc, failing: ${failed:-none}, $passed function lines pass"
+done
+# The line about the agent's tests judges what "Add tests for each" means: five tests of one function are not enough, and one data-driven
+# test of all four is.
+d="$(m7_repo slugonly)"; rm -f "$d/tests/test_wrap.py" "$d/tests/test_counts.py" "$d/tests/test_rows.py"
+vlog="$(m7_verify "$d")"; rc=$?; failed="$(m7_failed "$vlog")"
+[ "$rc" = 1 ] && [ "$failed" = "the agent's tests cover each function " ] && ok "7-text-helpers with tests of slugify only: FAIL on the line about the agent's tests alone" || bad "7-text-helpers with tests of slugify only: exit $rc, failing: ${failed:-none}"
+d="$(m7_repo driven)"; rm -f "$d"/tests/test_slug.py "$d"/tests/test_wrap.py "$d"/tests/test_counts.py "$d"/tests/test_rows.py
+cat > "$d/tests/test_all.py" <<'DRIVEN'
+import unittest
+from textkit import slugify, wrap, top_words, parse_row
+
+
+class AllTest(unittest.TestCase):
+    def test_each_function(self):
+        cases = [(slugify, ("A b",), "a-b"), (wrap, ("a b", 5), ["a b"]), (top_words, ("a", 1), [("a", 1)]), (parse_row, ("a,b",), ["a", "b"])]
+        for fn, args, want in cases:
+            with self.subTest(fn=fn.__name__):
+                self.assertEqual(fn(*args), want)
+DRIVEN
+vlog="$(m7_verify "$d")"; rc=$?
+[ "$rc" = 0 ] && ok "7-text-helpers with one data-driven test of all four functions: PASS" || bad "7-text-helpers with one data-driven test: exit $rc, failing: $(m7_failed "$vlog")"
+# TASK-139.2: the coverage check and the list of pending scenarios (coverage-pending.txt, one scenario id per line). A scenario in the
+# list that lacks scored rows is printed as PENDING and does not fail the check; it is never a silent pass: a listed scenario that
+# every arm already covers fails (remove it from the list), a listed id with no folder under scenarios/ fails, and a scenario
+# that is not listed still fails on every missing row. A private tree with two arms and two scenarios, and its own table, so
+# the cases do not depend on the real published table (which gets rows of new arms and scenarios later).
+pl="$tmp/pl"; mkdir -p "$pl/arms/armx" "$pl/arms/army" "$pl/scenarios/s1" "$pl/scenarios/s2"; cp "$pubsh" "$pl/"
+plrows=0
+plrow() { plrows=$((plrows + 1)); printf 'run%d,2026-01-01T00:00:00Z,%s,%s,a,1,m,provisional,%s,%s,1,0,0,1,1,1,1,1,0,%s\n' "$plrows" "$1" "$2" "$3" "$3" "$(printf '%064d' 0)"; }
+pl_check() { BENCH_RESULTS="$pl/results.csv" bash "$pl/publish.sh" check --coverage 2>&1; }
+head -1 "$pubdir/results/results.csv" > "$pl/results.csv"
+{ plrow armx s2 PASS; plrow army s2 FAIL; } >> "$pl/results.csv"
+# CRLF, a comment line and a blank line, as a Windows checkout of the list has them.
+printf '# pending scenarios\r\n\r\ns1\r\n' > "$pl/coverage-pending.txt"
+out="$(pl_check)"; rc=$?
+[ "$rc" = 0 ] && printf '%s\n' "$out" | grep -qx 'PENDING  scenario s1: no scored row yet for armx, army' && ! printf '%s\n' "$out" | grep -q '^FAIL' \
+  && ok "a listed scenario without scored rows is PENDING, names every missing arm and does not fail the coverage check" || bad "pending scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+plrow armx s1 PASS >> "$pl/results.csv"
+out="$(pl_check)"; rc=$?
+[ "$rc" = 0 ] && printf '%s\n' "$out" | grep -qx 'PENDING  scenario s1: no scored row yet for army' \
+  && ok "a listed scenario with rows for some arms stays PENDING and names only the missing arms" || bad "partial scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+plrow army s1 FAIL >> "$pl/results.csv"
+out="$(pl_check)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -qx 'FAIL  scenario s1 is complete: remove it from coverage-pending.txt' && ! printf '%s\n' "$out" | grep -q '^PENDING' \
+  && ok "a listed scenario with a scored row for every arm fails the check and says to remove it from coverage-pending.txt" || bad "complete scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+head -1 "$pubdir/results/results.csv" > "$pl/results.csv"; { plrow armx s2 PASS; plrow army s2 FAIL; plrow armx s1 PASS; } >> "$pl/results.csv"
+printf '# pending scenarios\r\ns1\r\nno-such-scenario\r\n' > "$pl/coverage-pending.txt"
+out="$(pl_check)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -q '^FAIL.*no-such-scenario' && printf '%s\n' "$out" | grep -qx 'PENDING  scenario s1: no scored row yet for army' \
+  && ok "a listed id that is not a folder under scenarios/ fails the check" || bad "unknown listed scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+: > "$pl/coverage-pending.txt"
+out="$(pl_check)"; rc=$?
+[ "$rc" -ne 0 ] && [ "$(printf '%s\n' "$out" | grep -c '^FAIL  no scored row for arm army on scenario s1$')" = 1 ] && ! printf '%s\n' "$out" | grep -q '^PENDING' \
+  && ok "a scenario that is not listed still fails on a missing row" || bad "unlisted scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+# The repository's own list: every id in it is a scenario folder, and the real check prints each as PENDING. TASK-139.3 publishes the
+# rows of 7-text-helpers and empties the list; it then changes this pin to "the list is empty and no PENDING line is printed".
+pendfile="$bench/coverage-pending.txt"
+listed="$(tr -d '\r' < "$pendfile" 2>/dev/null | grep -v '^#' | grep -v '^$' | tr '\n' ' ')"
+seen="$(grep -c '^PENDING  scenario ' "$tmp/pub-repo.txt")"
+[ "$listed" = "7-text-helpers " ] && [ "$seen" = 1 ] && grep -q '^PENDING  scenario 7-text-helpers: no scored row yet for ' "$tmp/pub-repo.txt" \
+  && ok "the repository's coverage-pending.txt lists 7-text-helpers, and the real coverage check prints it as PENDING and passes" || bad "coverage-pending.txt: '$listed', PENDING lines: $seen"
 
 # TASK-139.1: the variant todo-skills-existing (outside arms/, like todo-skills-flow) is the todo-skills arm in a project whose backlog
 # is set up: its start commit holds what /todo-init leaves and nothing else, so the agent starts at todo-add. existing_problems runs a
@@ -220,7 +311,7 @@ mkdir -p "$tmp/bm"; cp "$pubsh" "$tmp/bm/"; cp -R "$bench/arms" "$bench/scenario
 # A table with only its header: the real one may hold scored rows of the variant once a batch of it is published.
 head -1 "$pubdir/results/results.csv" > "$tmp/bm/results.csv"
 out="$(BENCH_RESULTS="$tmp/bm/results.csv" bash "$tmp/bm/publish.sh" check --coverage 2>&1)"; rc=$?
-[ "$rc" -ne 0 ] && [ "$(printf '%s\n' "$out" | grep -c 'FAIL  no scored row for arm todo-skills-existing')" = 6 ] && ok "under arms/ the coverage check asks for rows of todo-skills-existing on all six scenarios" || bad "coverage check with the variant under arms/: rc=$rc $(printf '%s\n' "$out" | tail -2 | tr '\n' ' ')"
+[ "$rc" -ne 0 ] && ! printf '%s\n' "$out" | grep -q 'No such file' && [ "$(printf '%s\n' "$out" | grep -c 'FAIL  no scored row for arm todo-skills-existing')" = "$(echo "$scenarios" | wc -w | tr -d ' ')" ] && ok "under arms/ the coverage check asks for rows of todo-skills-existing on every scenario, and a copy of publish.sh with no coverage-pending.txt next to it prints no error" || bad "coverage check with the variant under arms/: rc=$rc $(printf '%s\n' "$out" | tail -2 | tr '\n' ' ')"
 # Variants that break the contract are caught. One copy leaves everything at once: a second Tests line, a TODO.md without the Lanes
 # section, and .todo/check.sh (plain init without --ci does not write it), .todo/todo-lint.sh and a plan doc, which init does not write.
 mkdir -p "$tmp/ex-bad"; cp "$ex/arm.md" "$ex/setup.sh" "$tmp/ex-bad/" 2>/dev/null

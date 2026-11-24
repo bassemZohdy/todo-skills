@@ -1,0 +1,3 @@
+# Scenarios that exist but have no published rows yet, one id per line. `publish.sh check --coverage` prints PENDING for them instead of failing on their missing rows.
+# It fails when a listed scenario is already covered by every arm: TASK-139.3 publishes the rows of 7-text-helpers and empties this list.
+7-text-helpers

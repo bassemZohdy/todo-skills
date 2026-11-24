@@ -9,7 +9,10 @@
 # add refuses the whole table, and writes nothing, when a run has no recorded evidence hash (a 64-character SHA-256), when a run
 # id is already published, or when the table's header is not the published header followed by evidence_dir.
 # check fails when a row does not have the published columns, has no valid evidence hash or repeats a run id. With --coverage it
-# also fails when an arm in arms/ and a scenario in scenarios/ have no scored row (PASS or FAIL) between them.
+# also fails when an arm in arms/ and a scenario in scenarios/ have no scored row (PASS or FAIL) between them, except for the
+# scenarios listed in coverage-pending.txt next to this script (one scenario id per line, # starts a comment): a listed scenario
+# that lacks rows is printed as PENDING and does not fail. It is never a silent pass: a listed scenario that every arm already
+# covers fails (remove it from the list), and so does a listed id that is not a folder under scenarios/.
 # Environment: BENCH_RESULTS, the published table (default: docs/evals/benchmark/results/results.csv).
 # Needs bash and awk. Runs no agent and no command from the tables.
 set -u
@@ -52,11 +55,23 @@ check)
   dups="$(rows "$pub" | cut -d, -f1 | sort | uniq -d | tr '\n' ' ')"
   [ -z "$dups" ] || { echo "FAIL  run id published twice: $dups"; fail=1; }
   if [ "$coverage" -eq 1 ]; then
-    for a in "$here"/arms/*/; do for s in "$here"/scenarios/*/; do
-      a1="$(basename "$a")"; s1="$(basename "$s")"
-      rows "$pub" | awk -F, -v a="$a1" -v s="$s1" '$3 == a && $4 == s && ($10 == "PASS" || $10 == "FAIL") { f = 1 } END { exit !f }' \
-        || { echo "FAIL  no scored row for arm $a1 on scenario $s1"; fail=1; }
-    done; done
+    pending=""; [ -f "$here/coverage-pending.txt" ] && pending="$(tr -d '\r' < "$here/coverage-pending.txt" | sed 's/[[:space:]]*$//' | grep -v '^#' | grep -v '^$')"
+    for s in "$here"/scenarios/*/; do
+      s1="$(basename "$s")"; miss=""
+      for a in "$here"/arms/*/; do
+        a1="$(basename "$a")"
+        rows "$pub" | awk -F, -v a="$a1" -v s="$s1" '$3 == a && $4 == s && ($10 == "PASS" || $10 == "FAIL") { f = 1 } END { exit !f }' || miss="$miss $a1"
+      done
+      if printf '%s\n' "$pending" | grep -Fxq "$s1"; then
+        if [ -z "$miss" ]; then echo "FAIL  scenario $s1 is complete: remove it from coverage-pending.txt"; fail=1
+        else echo "PENDING  scenario $s1: no scored row yet for $(printf '%s' "${miss# }" | sed 's/ /, /g')"; fi
+      else
+        for a1 in $miss; do echo "FAIL  no scored row for arm $a1 on scenario $s1"; fail=1; done
+      fi
+    done
+    while IFS= read -r id; do
+      [ -n "$id" ] && [ ! -d "$here/scenarios/$id" ] && { echo "FAIL  coverage-pending.txt lists $id, which is not a folder under scenarios/"; fail=1; }
+    done < <(printf '%s\n' "$pending")
   fi
   [ "$fail" -eq 0 ] || exit 1
   echo "OK: $n published row(s), each with the published columns and an evidence hash"

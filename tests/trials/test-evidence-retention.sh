@@ -24,7 +24,7 @@ TRIAL_LABEL=first  bash "$here/run-claude.sh" "$runs" status-readonly >"$tmp/o1"
 first="$(ls -1 "$runs/status-readonly/evidence" | head -1)"
 before="$(cat "$runs/status-readonly/evidence/$first/agent.log" "$runs/status-readonly/evidence/$first/prompt.txt" | cksum)"
 sleep 1
-TRIAL_LABEL=second STUB_EXIT=124 bash "$here/run-claude.sh" "$runs" status-readonly >"$tmp/o2" 2>&1; rc2=$?
+TRIAL_REUSE=1 TRIAL_LABEL=second STUB_EXIT=124 bash "$here/run-claude.sh" "$runs" status-readonly >"$tmp/o2" 2>&1; rc2=$?   # TRIAL_REUSE=1: continue the first one's project
 n="$(ls -1 "$runs/status-readonly/evidence" | wc -l | tr -d ' ')"
 [ "$n" = 2 ] && ok "two invocations leave two evidence folders" || bad "expected 2 evidence folders, found $n"
 after="$(cat "$runs/status-readonly/evidence/$first/agent.log" "$runs/status-readonly/evidence/$first/prompt.txt" | cksum)"
@@ -39,6 +39,18 @@ done
 ok "every evidence folder has prompt, command, log, assert output and verifying SHA256SUMS"
 grep -q 'reused the existing repo' "$runs/status-readonly/evidence/$second/setup.log" && ok "the second invocation reused the repo and says so" || bad "second setup.log"
 [ "$(ls -1 "$runs/status-readonly/evidence" | sort -u | wc -l | tr -d ' ')" = 2 ] && ok "evidence folder names are unique" || bad "duplicate evidence folder names"
+
+# Where the project is (FEAT-138.6): not in the scenario's folder, so the working folder of the prompt does not name the
+# scenario; each evidence folder points to it; and an invocation without TRIAL_REUSE gets a project of its own.
+p1="$(tr -d '\r\n' < "$runs/status-readonly/evidence/$first/project.txt" 2>/dev/null)"
+p2="$(tr -d '\r\n' < "$runs/status-readonly/evidence/$second/project.txt" 2>/dev/null)"
+case "$p1" in w-*/repo) [ -d "$runs/$p1/.git" ] && [ ! -e "$runs/status-readonly/repo" ] && ! grep -q 'status-readonly' "$runs/status-readonly/evidence/$first/prompt.txt" && ok "the project is <runs>/w-<random>/repo, the evidence points to it, and the prompt does not name the scenario" || bad "project of the first invocation: $p1" ;; *) bad "project.txt of the first invocation: '$p1'" ;; esac
+[ -n "$p1" ] && [ "$p1" = "$p2" ] && ok "with TRIAL_REUSE=1 the second invocation's evidence points to the same project" || bad "reused project: '$p1' and '$p2'"
+sleep 1
+TRIAL_LABEL=third bash "$here/run-claude.sh" "$runs" status-readonly >"$tmp/o3" 2>&1
+third="$(ls -1 "$runs/status-readonly/evidence" | tail -1)"
+p3="$(tr -d '\r\n' < "$runs/status-readonly/evidence/$third/project.txt" 2>/dev/null)"
+[ -n "$p3" ] && [ "$p3" != "$p1" ] && [ -d "$runs/$p3/.git" ] && ! grep -q 'reused' "$runs/status-readonly/evidence/$third/setup.log" && ok "without TRIAL_REUSE a later invocation gets a project of its own" || bad "third invocation's project: '$p3' (first: '$p1')"
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

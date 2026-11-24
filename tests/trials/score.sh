@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Scores a batch of finished trials. Read-only.
-# Layout: <runs-dir>/<scenario>/repo/ as made by `setup.sh <runs-dir>/<scenario>/repo <scenario>`, and the agent's
-# evidence in <runs-dir>/<scenario>/evidence/<id>/ as written by run-claude.sh (the newest <id> counts). Older batches with
-# agent.log directly in the scenario folder are still read.
+# Layout: the agent's evidence in <runs-dir>/<scenario>/evidence/<id>/ as written by run-claude.sh (the newest <id> counts),
+# and the scratch project where that evidence points: project.txt holds its path below <runs-dir>, <runs-dir>/w-<random>/repo,
+# so that the folder an agent works in does not name the scenario. Without a project.txt the project is
+# <runs-dir>/<scenario>/repo/, as made by `setup.sh <runs-dir>/<scenario>/repo <scenario>`: batches of that older layout
+# still score, and so do older ones with agent.log directly in the scenario folder.
 # Only names listed by setup.sh are scenario folders; each is counted even if incomplete.
 #   PASS         the agent ran (exit 0, a report) and every check in assert.sh passes
 #   FAIL         the agent ran and at least one check fails
@@ -18,6 +20,8 @@
 set -u
 runs="${1:?usage: score.sh <runs-dir>}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$here/trial-lib.sh"
 skip="${TRIAL_SKIP:-}"
 # Use the setup script's scenario list, also used by selftest.sh, as the source
 # of truth so batch evidence and unrelated metadata never become scenarios.
@@ -29,14 +33,20 @@ for d in "$runs"/*/; do
   for scenario in $scenarios; do [ "$scenario" != "$s" ] || known=yes; done
   [ "$known" = yes ] || continue
   n=$((n + 1))
+  # the agent's record: newest evidence folder, else the old agent.log
+  evd=""; [ -d "$d/evidence" ] && evd="$(ls -1 "$d/evidence" 2>/dev/null | sort | tail -1)"
+  # The project: where the newest evidence points (project.txt, a path below <runs-dir>, written by run-pi.sh and
+  # run-claude.sh), else the old layout, <scenario>/repo or the one other folder in the scenario folder. A pointer to a
+  # folder that is not there is not replaced by a guess.
   repo=""
-  if [ -d "$d/repo" ]; then repo="$d/repo"
+  if [ -n "$evd" ] && [ -f "$d/evidence/$evd/project.txt" ]; then
+    p="$(tr -d '\r\n' < "$d/evidence/$evd/project.txt")"
+    if trial_inside "$p" && [ -d "$runs/$p" ]; then repo="$runs/$p"; fi
+  elif [ -d "$d/repo" ]; then repo="$d/repo"
   else repo="$(find "$d" -mindepth 1 -maxdepth 1 -type d ! -name '*.todo' ! -name evidence | head -1)"; fi
   if [ -z "$repo" ]; then
     printf '%-11s %-22s no repo in the scenario folder\n' UNVERIFIED "$s"; nunv=$((nunv + 1)); continue
   fi
-  # the agent's record: newest evidence folder, else the old agent.log
-  evd=""; [ -d "$d/evidence" ] && evd="$(ls -1 "$d/evidence" 2>/dev/null | sort | tail -1)"
   code=""; outcome=""; report=""; multi=""
   if [ -n "$evd" ]; then
     e="$d/evidence/$evd"

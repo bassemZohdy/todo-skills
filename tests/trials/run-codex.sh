@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs one trial scenario with a fresh Codex process (codex exec) and checks the result. Same layout and verdicts as run-claude.sh.
-# Usage: [TRIAL_LABEL=<word>] bash tests/trials/run-codex.sh <runs-dir> <scenario>
+# Usage: [TRIAL_LABEL=<word>] [TRIAL_TIMEOUT=<seconds>] bash tests/trials/run-codex.sh <runs-dir> <scenario>
 # Needs the codex CLI, logged in, git, and the scenario's toolchain. Put <runs-dir> OUTSIDE the temp folder (see codex-exec.sh).
 # <runs-dir>/<scenario>/repo.todo is created for the lane worktrees; codex-exec.sh makes it a writable root.
 # Every invocation writes <runs-dir>/<scenario>/evidence/<UTC time>-<pid>[-label]/ with setup.log, prompt.txt, command.txt,
@@ -10,6 +10,9 @@
 set -u
 runs="${1:?usage: run-codex.sh <runs-dir> <scenario>}"; scenario="${2:?scenario}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$here/trial-lib.sh"
+limit="$(trial_limit)" || exit 2   # the agent's time limit in seconds (codex-exec.sh applies it), refused before anything is made
 case "$(cd "$runs" 2>/dev/null && pwd)/" in */[Tt]emp/*|/tmp/*|*/AppData/Local/Temp/*) echo "WARNING: $runs is under a temp folder; the Windows sandbox may leave it writable. Use another folder." >&2 ;; esac
 sd="$runs/$scenario"; mkdir -p "$sd/evidence"; sd="$(cd "$sd" && pwd)"; repo="$sd/repo"
 id="$(date -u +%Y%m%dT%H%M%SZ)-$$${TRIAL_LABEL:+-$TRIAL_LABEL}"
@@ -23,7 +26,10 @@ else
 fi
 case "$scenario" in lanes|multi-module) mkdir -p "$repo.todo" ;; esac
 bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/prompt.txt" || { printf 'INFRA_ERROR\n' > "$ev/outcome.txt"; echo "no prompt"; exit 2; }
-printf 'bash tests/trials/codex-exec.sh %s %s/prompt.txt %s/report.txt   # see codex-exec.sh for the codex flags\n' "$repo" "$ev" "$ev" > "$ev/command.txt"
+# The time limit that codex-exec.sh applies (TRIAL_TIMEOUT, through the timeout program) is part of what ran.
+if command -v timeout >/dev/null 2>&1; then tsay="time limit $limit seconds"
+else tsay="no timeout program on this host: the limit of $limit seconds was not applied"; fi
+printf 'bash tests/trials/codex-exec.sh %s %s/prompt.txt %s/report.txt   # see codex-exec.sh for the codex flags; %s\n' "$repo" "$ev" "$ev" "$tsay" > "$ev/command.txt"
 bash "$here/codex-exec.sh" "$repo" "$ev/prompt.txt" "$ev/report.txt" >"$ev/session.log" 2>&1
 code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"

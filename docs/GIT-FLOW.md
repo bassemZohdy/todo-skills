@@ -11,7 +11,7 @@ The skills' own git commands never touch the network: no fetch, pull, push or ta
 
 ## Branches
 
-One branch per node: `todo/<ID>-<slug>`. The slug is the title lowercased, punctuation turned into spaces (`calc.py` gives `calc` and `py`), the words a, an, the, to, of, and, for, with dropped, and the first 4 remaining words joined by hyphens (`task` when nothing is left). Example: "Add token refresh to the auth service" gives `todo/FEAT-002-add-token-refresh-auth`.
+One branch per node: `todo/<ID>-<slug>`. The slug is the title lowercased, every character that is not a letter or a digit turned into a space (`calc.py` gives `calc` and `py`, `primes_up_to` gives `primes`, `up` and `to`), the words a, an, the, to, of, and, for, with dropped, and the first 4 remaining words joined by hyphens (`task` when nothing is left). Example: "Add token refresh to the auth service" gives `todo/FEAT-002-add-token-refresh-auth`.
 
 A root branches from the base, a child from its parent's branch, so a tree of 3 levels has at most 3 open branches. Ancestors carry `State: branch <name> from <parent branch>; next: build children` until they complete.
 
@@ -70,10 +70,10 @@ Checked: make smoke
 | `chore(backlog): claim <ROOT-ID> on <branch>` | The first node of a tree |
 | `chore(backlog): start <ID>` | Every node, on its branch |
 | `chore(backlog): plan <ID>` | `/todo-continue --plan` |
-| `chore(backlog): resume <ID>` | Each resume of a `[/]` node whose worker stopped, by path and empty if `TODO.md` is unchanged; two in a row with no commit after them stop the resuming |
+| `chore(backlog): resume <ID>` | Each resume of a `[/]` node whose worker stopped, by path and empty if `TODO.md` is unchanged, made before the work goes on; two in a row with no commit after them stop the resuming, and no third one is made |
 | `chore(backlog): pending edits <IDs>` | Leaving a `todo/` branch with backlog edits |
 | `chore(backlog): decompose <ID>` | Breaking down a `next: decompose` node on a tree branch |
-| `chore(backlog): block <ID>` | A blocked node (with its changed files) |
+| `chore(backlog): block <ID>` | A blocked node (with `TODO.md` and every file the node changed or created, as they are) |
 | `chore(backlog): ready <ID>`, `drop <ID> - <reason>`, `revert <ID>` | `/todo-update` on a `todo/` branch |
 | `chore(backlog): release <ID>` | `/todo-update --status ready` on a claimed root, on the base |
 | `chore(backlog): drain <ID>` | A finished root |

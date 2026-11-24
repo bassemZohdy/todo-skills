@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs `lanes` or `multi-module` with one fresh Codex process per lane, all started at the same time (TASK-044).
-# Usage: [TRIAL_LABEL=<word>] [TRIAL_LANE_WRITE="<abs path> ..."] bash tests/trials/run-codex-lanes.sh <runs-dir> <lanes|multi-module>
+# Usage: [TRIAL_LABEL=<word>] [TRIAL_TIMEOUT=<seconds>] [TRIAL_LANE_WRITE="<abs path> ..."] bash tests/trials/run-codex-lanes.sh <runs-dir> <lanes|multi-module>
 # Codex has no subagent tool, so the controller is the coordinator's subagent tool (reference/lanes.md, item 3):
 #   coordinate  a fresh `codex exec` runs /todo-continue --all-lanes --merge in the main checkout (items 0-2: claims and
 #               worktrees) and, at item 3, writes each lane's subagent instructions to <repo>.todo/<ROOT-ID>.brief.md
@@ -35,6 +35,9 @@ runs="${1:?usage: run-codex-lanes.sh <runs-dir> <lanes|multi-module>}"; scenario
 case "$scenario" in lanes|multi-module) ;; *) echo 'run-codex-lanes.sh runs only lanes or multi-module' >&2; exit 2 ;; esac
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ctl="$(cd "$here/../.." && pwd)"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$here/trial-lib.sh"
+limit="$(trial_limit)" || exit 2   # the time limit of each agent in seconds: TRIAL_TIMEOUT, 1500 by default
 mkdir -p "$runs/$scenario/evidence" || exit 2
 runs="$(cd "$runs" && pwd)"; sd="$runs/$scenario"; repo="$sd/repo"; todo="$repo.todo"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
@@ -55,7 +58,7 @@ else
   bash "$here/setup.sh" "$repo" "$scenario" > "$ev/setup.log" 2>&1 || infra "setup failed (see $ev/setup.log)"
 fi
 mkdir -p "$todo"
-tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
+tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout "$limit")
 # The controller clock: bash 5's EPOCHREALTIME, else Perl's Time::HiRes (macOS ships bash 3.2), else whole seconds.
 hires=; [ -n "${EPOCHREALTIME:-}" ] || ! perl -MTime::HiRes -e1 2>/dev/null || hires=perl
 now() {
@@ -78,7 +81,7 @@ agent() { # agent <dir> <cwd> <tmp> <writable root>...: one fresh `codex exec --
   local args=(exec --json --ephemeral --ignore-user-config -m "${TRIAL_CODEX_MODEL:-gpt-6.1-terra}"
     -c 'default_permissions="trial"' -c "permissions.trial.filesystem={$fs}" -c 'permissions.trial.network.enabled=false'
     -C "$cwd" -o "$d/report.txt" -)
-  { printf 'TMPDIR=%q JAVA_TOOL_OPTIONS=%q ' "$tmpd" "-Djava.io.tmpdir=$tmpd"; printf '%q ' codex "${args[@]}"
+  { printf 'TMPDIR=%q JAVA_TOOL_OPTIONS=%q ' "$tmpd" "-Djava.io.tmpdir=$tmpd"; printf '%q ' ${tmo[@]+"${tmo[@]}"} codex "${args[@]}"
     printf '< prompt.txt\nfilesystem: {%s}\n' "$fs"; } > "$d/command.txt"
   TMPDIR="$tmpd" JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Djava.io.tmpdir=$tmpd" \
     ${tmo[@]+"${tmo[@]}"} codex "${args[@]}" < "$d/prompt.txt" 2> "$d/stderr.log" | stamp > "$d/events.log"

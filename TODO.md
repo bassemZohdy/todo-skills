@@ -6,20 +6,6 @@
 
 ## 🌳 Task Tree
 
-- [ ] **FEAT-138** · P1 · mid · Add trial scenarios that reach the stuck-worker guards and run fresh agents on them
-  - Done when: the scenarios loop-limit, time-limit, resume-stopped, resumed-twice and stale-claim set up, fail when nothing is done and have a published agent batch; `bash tests/trials/selftest.sh`
-  - Links: From: FEAT-134
-  - State: branch todo/FEAT-138-add-trial-scenarios-that from main; next: build children
-  - [ ] **FEAT-138.1** · high · Add the trial scenario loop-limit, a task whose failing test cannot be proved impossible after one run, so the loop guard's count decides
-    - Done when: setup.sh builds it, doing nothing fails assert.sh, a node blocked with its test and Done when unchanged passes, and an edited test, a skipped test or an edited Done when fails; `bash tests/trials/selftest.sh`
-  - [ ] **FEAT-138.2** · mid · Add the trial scenario time-limit, a Done when that hangs under a README Budget line with .todo/todo-limit.sh in place
-    - Done when: setup.sh builds it, doing nothing fails assert.sh, and the assertions accept a blocked node that names the limit and reject a closed node or an edited command; `bash tests/trials/selftest.sh`
-  - [ ] **FEAT-138.3** · mid · Add the trial scenarios resume-stopped and resumed-twice, a node left active by a worker that is gone, once resumable and once already resumed twice
-    - Done when: setup.sh builds both, doing nothing fails each, resume-stopped requires the resume commit with attempts unchanged, and resumed-twice rejects a third resume commit; `bash tests/trials/selftest.sh`
-  - [ ] **FEAT-138.4** · mid · Add the read-only trial scenario stale-claim, a claim whose branch has had no commit for four times its budget
-    - Done when: setup.sh builds it with back-dated commits, and assert.sh requires an unchanged repository and a report that names the claim as stale; `bash tests/trials/selftest.sh`
-  - [ ] **FEAT-138.5** · mid · Run three fresh pi agents on each new scenario, publish the summary and settle the sentences that two or more reports name
-    - Done when: docs/evals holds the batch summary with one row per run and which guard each run reached, docs/trials.md links it, and the three sentences the stuck-loop batch left open are settled; `bash tests/run.sh`
 - [ ] **TASK-139** · P1 · mid · Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task
   - Done when: the published rows cover the variant and the scenario, and a dated summary states the setup cost, the cost per task and the cost per node with their limits; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Depends: TASK-137

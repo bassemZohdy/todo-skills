@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Runs one trial scenario with a fresh pi agent (https://github.com/badlogic/pi-mono, a minimal coding harness) in
 # print mode and checks the result. The twin of run-claude.sh: same layout, same verdicts, same evidence files.
-# Usage: [TRIAL_LABEL=<word>] [TRIAL_PI_PROVIDER=zai] bash tests/trials/run-pi.sh <runs-dir> <scenario> [model]
+# Usage: [TRIAL_LABEL=<word>] [TRIAL_PI_PROVIDER=zai] [TRIAL_TIMEOUT=<seconds>] [TRIAL_REUSE=1] bash tests/trials/run-pi.sh <runs-dir> <scenario> [model]
+# TRIAL_TIMEOUT is the agent's time limit (default 1500); a value that is no whole number is refused before anything runs.
 # Default model: glm-5.3 on provider zai (needs ZAI_API_KEY in the environment). Needs the pi CLI, git, and whatever the
 # scenario's toolchain needs (node 22; java 17 + maven for the Java ones).
 # pi has no permission prompts, so the agent runs shell commands and edits files without asking: run it only in a
@@ -17,10 +18,23 @@ set -u
 runs="${1:?usage: run-pi.sh <runs-dir> <scenario> [model]}"; scenario="${2:?scenario}"; model="${3:-glm-5.3}"
 provider="${TRIAL_PI_PROVIDER:-zai}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-sd="$runs/$scenario"; mkdir -p "$sd/evidence"; repo="$(cd "$sd" && pwd)/repo"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$here/trial-lib.sh"
+limit="$(trial_limit)" || exit 2   # the agent's time limit in seconds, refused before anything is made
+mkdir -p "$runs/$scenario/evidence"; runs="$(cd "$runs" && pwd)"; sd="$runs/$scenario"
+# The scratch project is not in the scenario's folder: its path is the working folder the prompt gives the agent, and that
+# must not name the scenario. It is <runs>/w-<random>/repo, a new one for every invocation, and project.txt in the evidence
+# folder points to it (relative to <runs>); score.sh follows that. TRIAL_REUSE=1 continues the project of this scenario's
+# newest invocation instead (or <runs>/<scenario>/repo of the old layout).
+proj="$(trial_project "$runs" "$scenario")" || exit 2
+repo="$runs/$proj"
 id="$(date -u +%Y%m%dT%H%M%SZ)-$$${TRIAL_LABEL:+-$TRIAL_LABEL}"
-ev="$(cd "$sd" && pwd)/evidence/$id"   # absolute: pi runs after a cd into the repo and gets --session-dir "$ev/session"
+ev="$sd/evidence/$id"
 mkdir "$ev" 2>/dev/null || { echo "evidence folder $ev already exists; refusing to overwrite"; exit 2; }
+printf '%s\n' "$proj" > "$ev/project.txt"
+# pi gets its session folder as an argument, and the agent may see its own arguments: the folder is next to the project
+# while pi runs, under a name that says nothing, and is moved into the evidence afterwards.
+sess="$(dirname "$repo")/session-$$"
 if [ -d "$repo" ] && [ -n "$(ls -A "$repo" 2>/dev/null)" ]; then
   echo "reused the existing repo $repo (setup not run)" > "$ev/setup.log"
 elif ! bash "$here/setup.sh" "$repo" "$scenario" >"$ev/setup.log" 2>&1; then
@@ -30,13 +44,17 @@ bash "$here/prompt.sh" "$repo" "$scenario" > "$ev/prompt.txt" || { printf 'INFRA
 prompt="$(cat "$ev/prompt.txt")"
 case "$(uname -s 2>/dev/null)" in MINGW*|MSYS*|CYGWIN*) deftools="read,powershell,edit,write" ;; *) deftools="read,bash,edit,write" ;; esac
 tools="${TRIAL_PI_TOOLS:-$deftools}"
-args=(-p --provider "$provider" --model "$model" --tools "$tools" --session-dir "$ev/session"
+args=(-p --provider "$provider" --model "$model" --tools "$tools" --session-dir "$sess"
       --no-extensions --no-skills --no-context-files --no-prompt-templates --no-themes)
 # TRIAL_PI_ARGS adds pi flags, for example "--thinking high".
 # shellcheck disable=SC2206
 [ -z "${TRIAL_PI_ARGS:-}" ] || args+=(${TRIAL_PI_ARGS})
-printf 'cd %s && timeout 1500 pi -p --provider %s --model %s --tools %s --session-dir <evidence>/session --no-extensions --no-skills --no-context-files --no-prompt-templates --no-themes %s<prompt.txt>\n' \
-  "$repo" "$provider" "$model" "$tools" "${TRIAL_PI_ARGS:+$TRIAL_PI_ARGS }" > "$ev/command.txt"
+# The limit is applied by the timeout program; where there is none (stock macOS) nothing limits the run, and command.txt
+# says so instead of naming a limit that was not applied.
+tmo=(); tpre=""; tnote="   # no timeout program on this host: the limit of $limit seconds was not applied"
+if command -v timeout >/dev/null 2>&1; then tmo=(timeout "$limit"); tpre="timeout $limit "; tnote=""; fi
+printf 'cd %s && %spi -p --provider %s --model %s --tools %s --session-dir <session, moved to <evidence>/session afterwards> --no-extensions --no-skills --no-context-files --no-prompt-templates --no-themes %s<prompt.txt>%s\n' \
+  "$repo" "$tpre" "$provider" "$model" "$tools" "${TRIAL_PI_ARGS:+$TRIAL_PI_ARGS }" "$tnote" > "$ev/command.txt"
 # Pin what ran: the repo's evidence always names the agent version. verifier.txt says whether assert.sh ran isolated.
 { printf 'pi %s
 provider %s
@@ -48,10 +66,11 @@ node %s
 case "$(uname -s 2>/dev/null)" in MINGW*|MSYS*|CYGWIN*) [ "${TRIAL_WINDOWS_ISOLATION:-1}" = 1 ] && v=isolated || v="UNISOLATED (TRIAL_WINDOWS_ISOLATION=0): not equal to the isolated Windows batches" ;; *) [ "${TRIAL_LINUX_ISOLATION:-0}" = 1 ] && v=isolated || v="unisolated (controller permissions)" ;; esac
 printf 'verifier: %s
 ' "$v" > "$ev/verifier.txt"
-tmo=(); command -v timeout >/dev/null 2>&1 && tmo=(timeout 1500)
-( cd "$repo" && ${tmo[@]+"${tmo[@]}"} pi "${args[@]}" -- "$prompt" ) >"$ev/agent.log" 2>&1
+# The agent's environment must not name the run either: no TRIAL_LABEL, and OLDPWD is the project (the second cd).
+( cd "$repo" && cd "$repo" && unset TRIAL_LABEL && ${tmo[@]+"${tmo[@]}"} pi "${args[@]}" -- "$prompt" ) >"$ev/agent.log" 2>&1
 code=$?
 printf '%s\n' "$code" > "$ev/agent-exit.txt"
+[ ! -d "$sess" ] || mv "$sess" "$ev/session"
 cp "$ev/agent.log" "$ev/report.txt"
 bash "$here/snapshot-git.sh" "$repo" > "$ev/git-state.txt" 2>&1   # before assert.sh, which may check out branches
 TRIAL_REPORT="$ev/report.txt" bash "$here/assert-exec.sh" "$repo" "$scenario" >"$ev/assert.log" 2>&1

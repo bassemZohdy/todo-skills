@@ -8,9 +8,9 @@ case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ;; *) echo 'INFRA_ERROR: native Wind
 command -v cygpath >/dev/null 2>&1 && command -v codex >/dev/null 2>&1 || { echo 'INFRA_ERROR: cygpath and Codex are required' >&2; exit 2; }
 repo="$(cd "$repo" && pwd -P)" || exit 2
 runs="$(cd "$repo/../.." && pwd -P)" || exit 2
-# The standard layout is <runs>/<scenario>/repo. Never sandbox the controller
-# inside a path writable to the evaluated repository.
-[ "$(basename "$repo")" = repo ] || { echo 'INFRA_ERROR: expected <runs>/<scenario>/repo' >&2; exit 2; }
+# The standard layouts are <runs>/w-<random>/repo and <runs>/<scenario>/repo: a folder named repo, two levels
+# below the runs folder. Never sandbox the controller inside a path writable to the evaluated repository.
+[ "$(basename "$repo")" = repo ] || { echo 'INFRA_ERROR: expected <runs>/w-<random>/repo or <runs>/<scenario>/repo' >&2; exit 2; }
 case "$here/" in "$runs/"*) echo 'INFRA_ERROR: controller must be outside the runs directory' >&2; exit 2 ;; esac
 case "$here/" in "$repo/"*) echo 'INFRA_ERROR: controller must be outside the repository' >&2; exit 2 ;; esac
 repo_w="$(cygpath -m "$repo")"; runs_w="$(cygpath -m "$runs")"; here_w="$(cygpath -m "$here")"

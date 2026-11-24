@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Tests the trial harness itself (no agent needed): every scenario must set up, and an agent that does
 # nothing must FAIL every scenario except the read-only ones, where doing nothing is the right answer.
-# This keeps assert.sh from drifting into checks that pass by default.
+# This keeps assert.sh from drifting into checks that pass by default. Every scratch project is also
+# scanned for what would tell an agent which scenario it is in (trial_names in trial-lib.sh).
 # Usage: bash tests/trials/selftest.sh    Works in a temporary directory that it removes at the end.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=tests/trials/trial-lib.sh
+. "$here/trial-lib.sh"
 readonly_ok=" release-ask status-readonly "   # baseline-red also needs a report that names the red baseline (assert.sh, TRIAL_REPORT)
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 pass=0; fail=0
@@ -14,6 +17,8 @@ for s in $scenarios; do
   if ! bash "$here/setup.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1; then fail=$((fail+1)); echo "FAIL  $s: setup failed"; continue; fi
   bash "$here/prompt.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1 || { fail=$((fail+1)); echo "FAIL  $s: no prompt"; continue; }
   if [ -d "$tmp/$s/repo/.git" ] && [ "$(git -C "$tmp/$s/repo" config --local core.autocrlf)" != false ]; then fail=$((fail+1)); echo "FAIL  $s: setup left core.autocrlf on (CRLF working copies on Windows)"; continue; fi
+  # nothing an agent reads in the project may tell it which scenario it is in (FEAT-138.6; trial_names says what is read)
+  if ! told="$(trial_names "$tmp/$s/repo" "$s")"; then fail=$((fail+1)); echo "FAIL  $s: the scratch project tells its scenario: $(printf '%s' "$told" | tr '\n' ' ')"; continue; fi
   if bash "$here/assert.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1; then got=pass; else got=fail; fi
   case "$readonly_ok" in *" $s "*) want=pass ;; *) want=fail ;; esac
   if [ "$got" = "$want" ]; then pass=$((pass+1)); echo "PASS  $s: untouched setup gives $want, as expected"

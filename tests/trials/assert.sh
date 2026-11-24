@@ -83,7 +83,9 @@ claimed-elsewhere)
   chk "no code written (stopped after the claim)" '! git grep -q "def multiply" $(git for-each-ref --format="%(refname)" refs/heads)'
   ;;
 team-claim)
-  chk "the pull was merged: the peer's claim of FEAT-001 is on main" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-peer-work"'
+  # The peer's branch is todo/FEAT-001-add-subtract-function-calc; runs made before FEAT-138.6 hold todo/FEAT-001-peer-work,
+  # a name that told the agent what the setup was. Both are accepted, so that finished batches keep their verdicts.
+  chk "the pull was merged: the peer's claim of FEAT-001 is on main" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -Eq "State: branch todo/FEAT-001-(add-subtract-function-calc|peer-work)"'
   chk "no conflict markers are left in TODO.md" '! at main TODO.md | grep -Eq "^(<<<<<<<|=======|>>>>>>>)"'
   chk "FEAT-003 stays the peer's divide root, once" '[ "$(at main TODO.md | grep -c "\*\*FEAT-003\*\*")" = 1 ] && at main TODO.md | grep "\*\*FEAT-003\*\*" | grep -q divide'
   chk "the local power root was renumbered to FEAT-004 and keeps its Depends" 'at main TODO.md | grep -A3 "\*\*FEAT-004\*\*" | grep -q power && at main TODO.md | grep -A3 "\*\*FEAT-004\*\*" | grep -q "Depends: FEAT-002"'
@@ -94,19 +96,23 @@ team-claim)
   chk "no code written (stopped after the start commit)" '! git grep -q "def multiply" $(git for-each-ref --format="%(refname)" refs/heads)'
   ;;
 race-claim-conflict)
-  chk "the rival's claim is on main" 'at main TODO.md | grep -q "State: branch todo/FEAT-001-rival"'
-  chk "main's tip is still the rival's claim (not overwritten)" '[ "$(git log -1 --format=%s main)" = "chore(backlog): claim FEAT-001 on todo/FEAT-001-rival" ]'
-  chk "the agent deleted its own root branch" '! git branch --list "todo/FEAT-001-*" | grep -v rival | grep -q .'
+  # The second session's branch is todo/FEAT-001-subtraction-support, a name that does not say what it is; runs made
+  # before FEAT-138.6 hold todo/FEAT-001-rival. Both are accepted, so that finished batches keep their verdicts.
+  chk "the rival's claim is on main" 'at main TODO.md | grep -Eq "State: branch todo/FEAT-001-(subtraction-support|rival)"'
+  chk "main's tip is still the rival's claim (not overwritten)" 'git log -1 --format=%s main | grep -Eqx "chore\(backlog\): claim FEAT-001 on todo/FEAT-001-(subtraction-support|rival)"'
+  chk "the agent deleted its own root branch" '! git branch --list "todo/FEAT-001-*" | tr -d "* " | grep -Evx "todo/FEAT-001-(subtraction-support|rival)" | grep -q .'
   chk "no subtract anywhere" '! git grep -q "def subtract" $(git for-each-ref --format="%(refname)" refs/heads)'
-  chk "rival branch untouched" '[ "$(git log --oneline main..todo/FEAT-001-rival | wc -l)" = 0 ]'
+  chk "rival branch untouched" '[ "$( { git log --oneline main..todo/FEAT-001-subtraction-support; git log --oneline main..todo/FEAT-001-rival; } 2>/dev/null | wc -l | tr -d " ")" = 0 ]'
   chk "ends on the base with a clean tree" '[ "$(git branch --show-current)" = main ] && clean'
   ;;
 race-claim-benign)
-  chk "the rival docs commit is kept on main" 'git log --format=%s main | grep -q "docs: touch readme (race)"'
+  # The other session's commit is "docs: add a note to the readme"; runs made before FEAT-138.6 hold "docs: touch readme
+  # (race)". Both are accepted, so that finished batches keep their verdicts.
+  chk "the rival docs commit is kept on main" 'git log --format=%s main | grep -Eqx "docs: add a note to the readme|docs: touch readme \(race\)"'
   chk "main shows FEAT-001 claimed with the agent's branch" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-"'
   chk "agent's branch exists" 'git branch --list "todo/FEAT-001-*" | grep -q .'
   chk "main is an ancestor of the agent's branch" 'git merge-base --is-ancestor main $(git branch --list "todo/FEAT-001-*" | head -1 | tr -d "* ")'
-  chk "claim is the only extra commit on main" '[ "$(git log --oneline $(git log --format=%H --grep="docs: touch readme" -1)..main | wc -l)" = 1 ]'
+  chk "claim is the only extra commit on main" '[ "$(git log --oneline $(git log --format=%H -E --grep="^docs: (add a note to the readme|touch readme)" -1)..main | wc -l)" = 1 ]'
   chk "FEAT-001 is [/] on the agent's branch" 'at "$(git branch --list "todo/FEAT-001-*" | head -1 | tr -d "* ")" TODO.md | grep -q "\[/\] \*\*FEAT-001"'
   ;;
 release-ask)
@@ -392,7 +398,8 @@ stale-claim)
   # shellcheck disable=SC2034
   switch_cmd='git switch todo/FEAT-001-add-subtract-calc-py($|[^A-Za-z0-9_/-])'   # the branch name ends there
   first_is_stale() {
-    tr -d '\r' < "$rep" | awk -v no="$not_stale" '
+    # LC_ALL=C: the lines hold bytes outside ASCII (" · ", "×", "✗"), and tolower must leave them alone in every locale.
+    tr -d '\r' < "$rep" | LC_ALL=C awk -v no="$not_stale" '
       function says(s,   c, n, i) {   # a clause of the line has a "stale" that is neither denied nor a definition
         if (s ~ /no longer exists|does not exist|missing branch|branch is (gone|missing)/) return 0
         gsub(/; |, |\. | \(| · | — | - | \| | but | while | whereas /, "\n", s); n = split(s, c, "\n")

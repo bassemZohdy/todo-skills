@@ -16,7 +16,7 @@
 #       after the last gate, on the root branch: the CHANGELOG entry (type: feat or fix by prefix; give -t for a TASK),
 #       the subtree removed from TODO.md, the drain commit; with --merge the merge into the base, else its commands.
 # TODO_BASE names the base when it is not the README "Base:" line or main, master, trunk, develop. Needs bash, git, awk, sed, grep. No network, tag, push or forced delete.
-todo_skills_version="0.6.3"
+todo_skills_version="0.6.4"
 if [ "${1:-}" = "--version" ]; then echo "todo-flow.sh $todo_skills_version"; exit 0; fi
 set -u; nl="$(printf '\n.')"; nl="${nl%.}"
 refuse() { echo "todo-flow: refused, nothing changed: $*" >&2; exit 2; }; stop() { echo "todo-flow: stopped: $*" >&2; exit 1; }

@@ -9,7 +9,7 @@
 #   R3 the same Req ID appears in more than one row (a duplicate mapping)
 # Exit codes: 0 no RTM or no problems, 1 problems found. Needs bash, awk, grep, sed and tr.
 # --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
-todo_skills_version="0.6.3"
+todo_skills_version="0.6.4"
 if [ "${1:-}" = "--version" ]; then echo "todo-rtm.sh $todo_skills_version"; exit 0; fi
 root="${1:-.}"
 if [ -f "$root/docs/RTM.md" ]; then src="$root/docs/RTM.md"; loc="docs/RTM.md"; sect=0

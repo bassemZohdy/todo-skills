@@ -1,6 +1,6 @@
 {
   "name": "td-cl",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
   "author": {
     "name": "Bassem Zohdy"

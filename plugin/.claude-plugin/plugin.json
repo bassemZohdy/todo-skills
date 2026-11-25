@@ -1,11 +1,13 @@
 {
-  "name": "todo-skills",
-  "displayName": "Todo Skills",
-  "version": "0.6.2",
+  "name": "td-cl",
+  "displayName": "TD-CL",
+  "version": "0.6.4",
   "description": "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md.",
   "author": { "name": "Bassem Zohdy" },
   "homepage": "https://github.com/bassemZohdy/todo-skills",
   "repository": "https://github.com/bassemZohdy/todo-skills",
   "license": "MIT",
+  "privacyPolicyUrl": "https://github.com/bassemZohdy/todo-skills/blob/main/PRIVACY.md",
+  "supportUrl": "https://github.com/bassemZohdy/todo-skills/issues",
   "keywords": ["backlog", "todo", "agent-skills", "changelog"]
 }

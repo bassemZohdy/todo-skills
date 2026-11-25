@@ -1,6 +1,6 @@
 # todo-skills
 
-[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.2 (early, see [Status](#status))
+[![test](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml/badge.svg)](https://github.com/bassemZohdy/todo-skills/actions/workflows/test.yml) MIT licensed · version 0.6.4 (early, see [Status](#status))
 
 Skills that let a coding agent run a software backlog inside the repository it works on. There is no tracker, database or framework: the repository is the state machine.
 
@@ -81,8 +81,8 @@ The complete map, with which files are committed when and what is never touched,
 ## Install
 
 - **Claude Code skills:** copy `plugin/skills/*` to `~/.claude/skills/` (all projects) or `.claude/skills/` (one project), as above. A running session may pick up a project-level install without a restart, depending on the client version.
-- **Claude Code plugin:** `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills`. Commands are namespaced, for example `/todo-skills:todo-add`.
-- **Codex plugin:** `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add todo-skills@todo-skills`. Verified on codex-cli 0.167.0: the marketplace is read from `.agents/plugins/marketplace.json` and all nine skills install from `plugin/.codex-plugin/plugin.json`.
+- **Claude Code plugin** (named td-cl, for TODO to CHANGELOG): `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install td-cl@todo-skills`. Commands are namespaced, for example `/td-cl:todo-add`.
+- **Codex plugin:** `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add td-cl@todo-skills`. Verified on codex-cli 0.167.0: the marketplace is read from `.agents/plugins/marketplace.json` and all nine skills install from `plugin/.codex-plugin/plugin.json`.
 - **Codex without the plugin:** copy `plugin/skills/*` to `<project>/.agents/skills/` (or `.codex/skills/`). Codex does not read `.claude/skills`. Start a skill with `$todo-status` or in plain language; a literal `/todo-status` is not handled by `codex exec`.
 - **Any agent via the skills CLI:** `npx skills add bassemZohdy/todo-skills` lists and installs the nine skills for the agents it supports. `--skill <name>` installs one, but install all nine together: the command skills load the `todo` core skill.
 - **ClawHub (OpenClaw):** `openclaw skills install @bassemzohdy/todo-core` and the same for the other eight skills (`todo-add`, `todo-continue`, `todo-init`, `todo-plan`, `todo-release`, `todo-report`, `todo-status`, `todo-update`); listed at https://clawhub.ai/bassemZohdy under MIT-0. The core skill's slug is `todo-core`, not `todo`. Listed, not tested: no OpenClaw trial exists ([distribution](docs/distribution.md#clawhub-openclaw)).
@@ -123,7 +123,7 @@ The plugin sends no data and has no network access, MCP server or shipped hook. 
 
 ## Status
 
-Version 0.6.2 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
+Version 0.6.4 is early. Fresh agents have run the skills on scratch projects; the table lists what was recorded, with the evidence for each row.
 
 | Agent | Platform | What ran | Result | Evidence |
 |---|---|---|---|---|

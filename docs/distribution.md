@@ -62,13 +62,15 @@ Refused by the automatic check: 2026-11-23, version 0.6.2 at `main @ 0096a42`. T
 
 The finding gives three instructions: for a live plugin, set `name`, `displayName` and `author` back to the live version's; if they already match, set `displayName` to the name on the listing; for a plugin that has never been live, withdraw the submission under Settings, push a new commit that fixes what validation shows, and submit again (withdrawing closes any open appeal). FIX-141 is that commit: it sets `displayName` to "Todo Skills", the one thing among the three fields that differed from the listing. It does not clear the finding by itself: by the finding's wording the owner still has to withdraw and submit again, and whether the next check then accepts the name is not known. The Review page of the portal also offers one appeal of the refused version, which a new commit replaces.
 
+Cause found: 2026-11-25. Withdrawing the submission and starting a new one showed the validation step of the form, which the old page never did. It reports "Name may be confused with an existing listing" as a finding that refuses the plugin (`NAME_CONFUSABLE`): `todo-skills` is one or two characters from the connector publishers Nodo and Topo and from the plugin Todo4 (`panitw/todo4-claude-plugin`). `RUNTIME_FETCH_EXEC` is only a warning there, so FIX-144 was not needed, and FIX-141 (`displayName`) did not touch the cause. Version 0.6.4 (FIX-145) renames the plugin to `td-cl` (TODO to CHANGELOG) with the display name "TD-CL"; the repository, the marketplace name and the skill names keep `todo`. Whether `td-cl` passes shows only in the validation step of the form.
+
 ### Checklist (owner action)
 
 Prepared from the repository; the portal's own fields may differ, so check them as you fill the form.
 
 - [ ] Sign in at claude.ai/directory/manage and accept the directory terms.
-- [ ] Plugin: `todo-skills`, manifest `plugin/.claude-plugin/plugin.json`, license MIT, author Bassem Zohdy, homepage https://github.com/bassemZohdy/todo-skills.
-- [ ] Version: the newest release in CHANGELOG.md (0.6.2 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
+- [ ] Plugin: `td-cl`, manifest `plugin/.claude-plugin/plugin.json`, license MIT, author Bassem Zohdy, homepage https://github.com/bassemZohdy/todo-skills.
+- [ ] Version: the newest release in CHANGELOG.md (0.6.4 today). `[Unreleased]` holds unreleased work, so run `/todo-release` first if the submission should include it, then keep both manifests on that version.
 - [ ] `bash tests/run.sh` passes on the commit you submit.
 - [ ] Short description: "A lean, file-native backlog for coding agents: a task tree in TODO.md, a branch per task, tests plus regression before anything merges, and an append-only CHANGELOG.md."
 - [ ] Install check from a clean client: `/plugin marketplace add bassemZohdy/todo-skills`, then confirm the nine skills (todo, todo-add, todo-continue, todo-init, todo-plan, todo-release, todo-report, todo-status, todo-update) are listed.
@@ -113,7 +115,7 @@ archive that already holds a `.codex-plugin/plugin.json`, so the `--claude` arch
 
 | Field | Ours | Limit |
 |---|---|---|
-| `displayName` | Todo Skills | 30 characters |
+| `displayName` | TD-CL | 30 characters |
 | `shortDescription` | File-native backlog for agents | 30 characters |
 | `longDescription` | the nine skills, who they are for, and their limits | 4000 characters |
 | `developerName` | Bassem Zohdy | 80 characters; must match the verified identity |

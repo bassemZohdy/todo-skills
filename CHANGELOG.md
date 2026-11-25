@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **TASK-146** (task): Set `privacyPolicyUrl` (the PRIVACY.md page) and `supportUrl` (the GitHub issues page) in the Claude manifest, so the directory listing shows a privacy policy and a support link; the submission form read both as "Not set", and those fields can be changed only by withdrawing and submitting again. Validated: `bash tests/run.sh`.
+
+## [0.6.4] - 2026-11-25
+
+### Fixed
+
+- **FIX-145** (fix): Rename the plugin from `todo-skills` to `td-cl` (TODO to CHANGELOG) and set its display name to "TD-CL". The directory's validation step names the cause of every refusal since 2026-11-23: `todo-skills` is "very close" (one or two characters) to the connector publishers Nodo and Topo and to the plugin Todo4, a finding that refuses the plugin (`NAME_CONFUSABLE`). The old submission page showed only a generic refusal, so FIX-141 and FIX-144 were guesses that did not touch it. The repository, the marketplace name and the nine skill names are unchanged; the install lines are now `/plugin install td-cl@todo-skills` and `codex plugin add td-cl@todo-skills`, and Claude Code commands are namespaced `/td-cl:todo-add`. Whether `td-cl` passes is shown only by the next validation. Validated: `bash tests/run.sh`.
+
+## [0.6.3] - 2026-11-25
+
 ### Added
 
 - **FEAT-143** (feat): Close the gaps that fresh Codex and Claude Code runs showed in the stuck-worker text: an impossible test at the red phase, a node left [/] with no verdict, and no bound on an agent's own scripts and total time. Ref: docs/evals/codex-linux-2026-11-25/summary.md. Validated: `bash tests/run.sh`. Docs: updated docs/VERIFICATION.md, docs/agent-compatibility.md, docs/evals/stuck-worker-text-2026-11-25/runs.csv, docs/evals/stuck-worker-text-2026-11-25/summary.md, docs/trials.md. Includes: FEAT-143.1, FEAT-143.2.
@@ -20,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FIX-144** (fix): Reword the three sentences of the core skill (`plugin/skills/todo/SKILL.md`) that name a download, to clear the directory's `RUNTIME_FETCH_EXEC` warning: the directory page says an organization that is not Verified can have a version refused for it, and the automatic check refused every version since 2026-11-23. Invariant I10 now forbids "a script from the network piped into a shell" where it said "a download whose output goes straight to a shell", the note that the plugin ships Markdown only now says the skills "fetch nothing", and "A test command may fetch dependencies". What each sentence requires and the lint are unchanged, and the core is 10 bytes smaller. It is a guess at the text that matched: the page names the file, not a line, and the warning was already on versions that passed, so only the next check shows whether it was the cause. Validated: `bash tests/run.sh`.
 - **FIX-142** (fix): Make the checks that FEAT-138 added pass on Linux and macOS, where the CI test job of `main` failed on 2026-11-24 (the Windows job passed). Four failures: the scripted `resume-stopped` ending on Linux ran a stale Python bytecode cache (a same-size edit of `calc.py` within the second the cache was written), so the copies of the start state no longer carry a `__pycache__` and the suite sets `PYTHONDONTWRITEBYTECODE=1`; `tools/todo-limit.sh` let bash 3.2 on macOS print a job-termination notice for its watchdog, so the kill and the waits now run in groups with their stderr discarded; the pi and Claude Code trial runners relied on `OLDPWD` being exported by `cd`, which bash 3.2 does not do, so they export it explicitly; and the `race-claim-benign` assertions compared the unpadded output of `wc -l`, which BSD pads with spaces, as ten more assertions of `tests/trials/assert.sh` and two of the test scripts did, all now through `tr -d ' '` and pinned by a check that finds any new one. Each fix has a pin that fails without it where the host can show it, and a comment where only macOS can. The Linux cause is the one that reproduces the failure signature only by forcing the second boundary, so it is likely, not proven. The CI test job's `timeout-minutes` is now 30: the Windows job took 16 minutes of its 20 after FEAT-138. Validated: `bash tests/run.sh`. Docs: updated docs/DEVELOPMENT.md. From: FEAT-138.
 - **FIX-141** (fix): Set `displayName` in the Claude manifest (`plugin/.claude-plugin/plugin.json`) to "Todo Skills", the name on the plugin's listing in Anthropic's directory. The directory's automatic check of 2026-11-23 refused version 0.6.2 with the finding "A name or listing text that can't be accepted automatically", which asks for `displayName` to be the listing's name when `name` and `author` already match; the manifest never had the field, while the Codex manifest carried the same name. `tests/run.sh` now fails when the Claude manifest lacks the field or differs from the Codex manifest. The change does not clear the finding by itself: for a plugin that has never been live the finding also asks the owner to withdraw the submission and submit again, and `docs/distribution.md` records the refusal, its other findings and what is left to the owner. Validated: `bash tests/run.sh`. Docs: updated docs/distribution.md.
 
@@ -290,7 +303,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.4...HEAD
+[0.6.4]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bassemZohdy/todo-skills/compare/v0.5.1...v0.6.0

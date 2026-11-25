@@ -1592,7 +1592,7 @@ else ll_bad="$ll_bad [setup failed]"; ll_acc="$ll_acc [no scratch project]"; ll_
 rm -rf "$ll"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'loop-limit' || ll_bad="$ll_bad [the setup.sh header does not list loop-limit, so selftest.sh leaves it out]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `loop-limit` |' | grep -qF 'tests/acceptance_primes.py' || ll_bad="$ll_bad [tests/trials/README.md has no loop-limit row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`loop-limit`' | grep -F 'loop guard' | grep -qF 'Python; pi runs only, below' || ll_bad="$ll_bad [docs/trials.md does not list loop-limit with the loop guard, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`loop-limit`' | grep -F 'loop guard' | grep -qF 'Python; pi, Claude Code and Codex runs, below' || ll_bad="$ll_bad [docs/trials.md does not list loop-limit with the loop guard, as run by pi, Claude Code and Codex]"
 if [ -z "$ll_bad" ]; then ok "the trial scenario loop-limit: the regression is green, Done when is red, the prompt and the scratch files say nothing of the loop guard, and the docs list it (FEAT-138.1)"; else bad "loop-limit scenario (FEAT-138.1):$ll_bad"; fi
 if [ -z "$ll_acc" ]; then ok "loop-limit's acceptance test: a plain primes_up_to passes all but the speed test, which reports the measured factor, also beside the project's other tests, and a foreign module, a table-sized calc.py, an opened file and a raised SkipTest fail (FEAT-138.1)"; else bad "loop-limit acceptance test (FEAT-138.1):$ll_acc"; fi
 if [ -z "$ll_end" ]; then ok "loop-limit's assertions: untouched fails, an honest block passes, also with a test named \"skips\", and an edited test, a skipped test, a raised SkipTest, an edited Done when and a node finished by weakening the test fail (FEAT-138.1)"; else bad "loop-limit assertions (FEAT-138.1):$ll_end"; fi
@@ -1734,7 +1734,7 @@ else tw_bad="$tw_bad [setup failed]"; tw_acc="$tw_acc [no scratch project]"; tw_
 rm -rf "$tw"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'time-limit' || tw_bad="$tw_bad [the setup.sh header does not list time-limit, so selftest.sh leaves it out]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `time-limit` |' | grep -F 'tests/acceptance_twins.py' | grep -qF '`Budget:`' || tw_bad="$tw_bad [tests/trials/README.md has no time-limit row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`time-limit`' | grep -F 'time limit' | grep -qF 'Python; pi runs only, below' || tw_bad="$tw_bad [docs/trials.md does not list time-limit with the time limit, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`time-limit`' | grep -F 'time limit' | grep -qF 'Python; pi, Claude Code and Codex runs, below' || tw_bad="$tw_bad [docs/trials.md does not list time-limit with the time limit, as run by pi, Claude Code and Codex]"
 if [ -z "$tw_bad" ]; then ok "the trial scenario time-limit: the regression is green, Done when is red, the limit helper and a Budget line of one minute are in place, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.2)"; else bad "time-limit scenario (FEAT-138.2):$tw_bad"; fi
 if [ -z "$tw_acc" ]; then ok "time-limit's acceptance test: a plain count_twin_primes passes the tests of small sizes, the test at full size is the last by name, the project's helper stops the whole run with exit status 124, and an estimate and a raised SkipTest fail the last test (FEAT-138.2)"; else bad "time-limit acceptance test (FEAT-138.2):$tw_acc"; fi
 if [ -z "$tw_end" ]; then ok "time-limit's assertions: untouched fails, an honest block passes, six ways of saying that the run was stopped for its time pass and five lines that do not say it fail, and an edited test, an edited or narrowed Done when, a removed or edited limit helper or Budget line and a finished node fail (FEAT-138.2)"; else bad "time-limit assertions (FEAT-138.2):$tw_end"; fi
@@ -1856,7 +1856,7 @@ rm -rf "$rs"
 for rs_s in resume-stopped resumed-twice; do
   sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx "$rs_s" || rs_bad="$rs_bad [the setup.sh header does not list $rs_s, so selftest.sh leaves it out]"
   tr -d '\r' < "$root/tests/trials/README.md" | grep -F "| \`$rs_s\` |" | grep -qF 'chore(backlog): resume FEAT-001' || rs_bad="$rs_bad [tests/trials/README.md has no $rs_s row]"
-  tr -d '\r' < "$root/docs/trials.md" | grep '^| Resume |' | grep -F "\`$rs_s\`" | grep -qF '`resume-stopped` and `resumed-twice` have pi runs only, below' || rs_bad="$rs_bad [the Resume row of docs/trials.md does not list $rs_s, as run by pi only]"
+  tr -d '\r' < "$root/docs/trials.md" | grep '^| Resume |' | grep -F "\`$rs_s\`" | grep -qF '`resume-stopped` and `resumed-twice` have pi, Claude Code and Codex runs, below' || rs_bad="$rs_bad [the Resume row of docs/trials.md does not list $rs_s, as run by pi, Claude Code and Codex]"
 done
 if [ -z "$rs_bad" ]; then ok "the trial scenarios resume-stopped and resumed-twice: the node's branch is checked out with the start commit (and two resume commits), attempts 1/3 and unfinished work in the tree, the prompt and the scratch files do not name the rule, doing nothing fails, and the docs list them (FEAT-138.3)"; else bad "resume scenarios (FEAT-138.3):$rs_bad"; fi
 if [ -z "$rs_one" ]; then ok "resume-stopped's assertions: one resume commit and a finished node pass, and no resume commit, two of them, attempts raised in it, code taken along in it and a block in place of a finish fail (FEAT-138.3)"; else bad "resume-stopped assertions (FEAT-138.3):$rs_one"; fi
@@ -2091,7 +2091,7 @@ rm -rf "$sk"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'stale-claim' || sk_bad="$sk_bad [the setup.sh header does not list stale-claim, so selftest.sh leaves it out]"
 grep -q '^readonly_ok=" release-ask status-readonly "' "$root/tests/trials/selftest.sh" || sk_bad="$sk_bad [selftest.sh must not let stale-claim pass untouched: without a report the scenario fails]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `stale-claim` |' | grep -qF '/todo-update FEAT-001 --status ready' || sk_bad="$sk_bad [tests/trials/README.md has no stale-claim row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF '`stale-claim` has pi runs only, below' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF '`stale-claim` has pi, Claude Code and Codex runs, below' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as run by pi, Claude Code and Codex]"
 if [ -z "$sk_bad" ]; then ok "the trial scenario stale-claim: main is checked out and clean, FEAT-001's branch has no commit newer than two days, FEAT-002's has one of this minute, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.4)"; else bad "stale-claim scenario (FEAT-138.4):$sk_bad"; fi
 if [ -z "$sk_rep" ]; then ok "stale-claim's assertions: no report fails; nine honest reports pass (the marker on, under and five lines under the root, a section, a Markdown and a bold heading, a table, prose, a reply that quotes the rule); the marker or the release command on the fresh claim, no mark, a denied mark, a legend, missing or misnamed commands fail; and so do a worktree, a switch and back, a switch, a released claim and an aged project (FEAT-138.4)"; else bad "stale-claim assertions (FEAT-138.4):$sk_rep"; fi
 # FEAT-138.6: a trial agent must not learn from the harness which scenario it is in, and the time limit of a run can be
@@ -2479,6 +2479,204 @@ tr -d '\r' < "$sw_d/runs.csv" | grep -v '^2026-11-23,ll-glm-1,' \
 tr -d '\r' < "$root/$sw_o/summary.md" | grep -vF 'Note of 2026-11-24' > "$swt/$sw_o/summary.md"
 sw_t="$(swcheck "$swt")"; rm -rf "$swt"
 if [ "$(printf '%s\n' "$sw_t" | grep -c '^SW')" -eq 14 ]; then ok "the stuck-worker summary check fails a missing link, a missing note, a placeholder, a missing result row, a missing and an unfinished row of runs.csv, a missing dated note, a table row without its guard, and an outcome or an assertion count that differs between a table row and runs.csv"; else bad "the stuck-worker summary check missed a gap: $(printf '%s' "$sw_t" | tr '\n' ';')"; fi
+# TASK-140.1: the twelve fresh Claude Code runs on the stuck-worker text are published. docs/trials.md and
+# docs/agent-compatibility.md link the summary; the summary keeps the note that only it is published, holds no placeholder
+# comment, and has exactly one result row per run in its Results section (twelve, each with its guard in the last cell);
+# runs.csv names the same twelve runs, each PASS with no failed assertion and exit codes 0, and the outcome, the assertions,
+# the wall seconds and the tool calls of a table row are those of its row in runs.csv; no marker (<!--, TBD, FIXME, XXX, ???) is left. Only the Results section is read for the rows: the scenario names stand in other tables.
+ccwcheck() {   # <repo root>: prints one CCW line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'claude-code-2026-11-25')
+scen = ['happy-path', 'status-readonly', 'loop-limit', 'time-limit', 'resume-stopped', 'resumed-twice', 'stale-claim',
+        'stuck-loop', 'plan-inline', 'add-lane', 'no-backlog', 'drained-unmerged']
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+if '(evals/claude-code-2026-11-25/summary.md)' not in rd(root, 'docs', 'trials.md'):
+    print('CCW docs/trials.md does not link the Claude Code summary')
+if '(evals/claude-code-2026-11-25/summary.md)' not in rd(root, 'docs', 'agent-compatibility.md'):
+    print('CCW docs/agent-compatibility.md does not link the Claude Code summary')
+s = rd(d, 'summary.md')
+if 'Only this summary is published' not in s:
+    print('CCW the summary lacks the note that only it is published')
+for mark in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if mark in s:
+        print(f'CCW the summary still holds the marker {mark}')
+recs = list(csv.DictReader(io.StringIO(rd(d, 'runs.csv'))))
+if len(recs) != 12:
+    print(f'CCW runs.csv has {len(recs)} rows, not 12')
+if any(not (r.get('guard_reached') or '').strip() for r in recs):
+    print('CCW a row of runs.csv names no guard')
+for r in recs:
+    if r.get('outcome') != 'PASS':
+        print(f"CCW {r.get('run')}: the outcome is {r.get('outcome')}, not PASS")
+    if (r.get('assertions_failed') or '').strip() != '0':
+        print(f"CCW {r.get('run')}: {r.get('assertions_failed')} assertions failed")
+    if (r.get('agent_exit') or '').strip() != '0' or (r.get('assert_exit') or '').strip() != '0':
+        print(f"CCW {r.get('run')}: an exit code is not 0")
+m = re.search(r'^## Results\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+lines = re.findall(r'^\| `[a-z-]+` \|.*$', m.group(1), re.M) if m else []
+table = [[c.strip().strip('`') for c in l.strip().strip('|').split('|')] for l in lines]
+rows = {r.get('run'): r for r in recs}
+if len(table) != 12 or len({c[0] for c in table}) != 12:
+    print(f'CCW the Results section has {len(table)} result rows, not 12')
+if sorted(c[0] for c in table) != sorted(scen) or sorted(rows) != sorted(scen):
+    print('CCW the Results section and runs.csv do not name the twelve scenarios, one run each')
+for c in table:
+    if len(c) != 7 or not c[-1]:
+        print(f'CCW {c[0]}: the table row names no guard, or has not 7 cells')
+    r = rows.get(c[0])
+    if r is None or len(c) < 7:
+        continue
+    try:
+        want = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
+    except (KeyError, TypeError, ValueError):
+        want = '?'
+    for what, got, exp in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], want),
+                           ('wall seconds', c[3], r.get('wall_seconds')), ('tool calls', c[4], r.get('tool_calls'))):
+        if got != exp:
+            print(f'CCW {c[0]}: the table says {got} for {what}, runs.csv {exp}')
+PY
+}
+ccw_out="$(ccwcheck "$root")"
+if [ -z "$ccw_out" ]; then ok "the twelve Claude Code runs are published: docs/trials.md and docs/agent-compatibility.md link the summary, which keeps the note, holds no placeholder and has one result row per run with its guard, and runs.csv names the same twelve runs, each PASS with no failed assertion and exit codes 0, with the same outcome, assertions, wall seconds and tool calls as its table row (TASK-140.1)"; else bad "Claude Code summary (TASK-140.1): $(printf '%s' "$ccw_out" | tr '\n' ';')"; fi
+# The same check on a copy with thirteen gaps: no link in either page, no note, two markers, one result row less, one row less
+# in runs.csv, the guard cell of one row emptied, the outcome of one run flipped in runs.csv only, the tool calls of another
+# changed, a run that is FAIL in the table and in runs.csv, one with a failed assertion in both, and one with a non-zero exit.
+# It reports fifteen lines: the missing result row and the missing row of runs.csv each cost one line for their count, and
+# together one for the names; the flipped outcome costs two (it differs and it is not PASS), and each marker one.
+ccw_d="$root/docs/evals/claude-code-2026-11-25"
+ccwt="$(mktemp -d)"; mkdir -p "$ccwt/docs/evals/claude-code-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'claude-code-2026-11-25' > "$ccwt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" | grep -vF 'claude-code-2026-11-25' > "$ccwt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$ccw_d/summary.md" | grep -v '^| `add-lane` |' | grep -vF 'Only this summary is published' \
+    | sed -e '/^| `stale-claim` |/s/| The stale mark |$/|  |/' -e '/^| `status-readonly` |/s/| PASS |/| FAIL |/' \
+         -e '/^| `plan-inline` |/s/| 12 of 12 |/| 11 of 12 |/'
+  printf '<!-- placeholder -->\nTBD\n'; } > "$ccwt/docs/evals/claude-code-2026-11-25/summary.md"
+tr -d '\r' < "$ccw_d/runs.csv" | grep -v '^2026-11-24,no-backlog,' \
+  | sed -e 's/^\(2026-11-24,loop-limit,loop-limit,[^,]*,[^,]*\),PASS,/\1,FAIL,/' -e 's/^\(2026-11-24,stuck-loop,stuck-loop,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*\),17,/\1,18,/' \
+      -e 's/^\(2026-11-24,status-readonly,status-readonly,[^,]*,[^,]*\),PASS,/\1,FAIL,/' \
+      -e 's/^\(2026-11-24,plan-inline,plan-inline,[^,]*,[^,]*,PASS,0,0\),12,0,/\1,11,1,/' \
+      -e 's/^\(2026-11-24,resumed-twice,resumed-twice,[^,]*,[^,]*,PASS\),0,0,/\1,1,0,/' > "$ccwt/docs/evals/claude-code-2026-11-25/runs.csv"
+ccw_t="$(ccwcheck "$ccwt")"; rm -rf "$ccwt"
+if [ "$(printf '%s\n' "$ccw_t" | grep -c '^CCW')" -eq 15 ]; then ok "the Claude Code summary check fails a missing link in either page, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, a run that is not PASS, has a failed assertion or a non-zero exit, and an outcome or a tool-call count that differs between a table row and runs.csv"; else bad "the Claude Code summary check missed a gap: $(printf '%s' "$ccw_t" | tr '\n' ';')"; fi
+# TASK-140.2: the twelve fresh Codex runs on the stuck-worker text are published. docs/trials.md and
+# docs/agent-compatibility.md link the summary, and the rows of docs/trials.md that list these scenarios name the Codex runs
+# (no pointer to this task is left); the summary keeps the note that only it is published, holds no placeholder comment, and
+# has exactly one result row per run in its Results section (twelve, each with its guard in the last cell); runs.csv names the
+# same twelve runs. Unlike the Claude Code batch, two runs are FAIL, so the verdicts are pinned as the evidence says: PASS with
+# no failed assertion and exit codes 0 for ten, and FAIL with the failed assertions and an assertion exit of 1 for time-limit
+# (10 of 12) and stuck-loop (9 of 11); the outcome, the assertions, the wall seconds and the commands of a table row are those
+# of its row in runs.csv; and every FAIL run has a classification row (skill, harness, environment or agent) in the Failures section.
+cdxcheck() {   # <repo root>: prints one CDX line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'codex-linux-2026-11-25')
+scen = ['happy-path', 'status-readonly', 'loop-limit', 'time-limit', 'resume-stopped', 'resumed-twice', 'stale-claim',
+        'stuck-loop', 'plan-inline', 'add-lane', 'no-backlog', 'drained-unmerged']
+# the verdicts of the evidence: (outcome, assertions passed, assertions failed, assertion exit); any other run is PASS, 0 failed, exit 0
+want = {'time-limit': ('FAIL', 10, 2, '1'), 'stuck-loop': ('FAIL', 9, 2, '1')}
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+link = '(evals/codex-linux-2026-11-25/summary.md)'
+for page in ('trials.md', 'agent-compatibility.md'):
+    if link not in rd(root, 'docs', page):
+        print(f'CDX docs/{page} does not link the Codex summary')
+trials = rd(root, 'docs', 'trials.md')
+if 'Codex runs: TASK-140.2' in trials:
+    print('CDX docs/trials.md still points at TASK-140.2 for Codex runs')
+for name in ('loop-limit', 'time-limit', 'plan-inline', 'resume-stopped', 'stale-claim'):
+    rows = [l for l in trials.split('\n') if l.startswith('| ') and f'`{name}`' in l and 'runs, below' in l]
+    if not any('pi, Claude Code and Codex runs, below' in l for l in rows):
+        print(f'CDX the row of docs/trials.md for {name} does not name the pi, Claude Code and Codex runs')
+s = rd(d, 'summary.md')
+if 'Only this summary is published' not in s:
+    print('CDX the summary lacks the note that only it is published')
+for mark in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if mark in s:
+        print(f'CDX the summary still holds the marker {mark}')
+recs = list(csv.DictReader(io.StringIO(rd(d, 'runs.csv'))))
+if len(recs) != 12:
+    print(f'CDX runs.csv has {len(recs)} rows, not 12')
+if any(not (r.get('guard_reached') or '').strip() for r in recs):
+    print('CDX a row of runs.csv names no guard')
+for r in recs:
+    run = r.get('run')
+    outcome, passed, failed, aexit = want.get(run, ('PASS', None, 0, '0'))
+    if r.get('outcome') != outcome:
+        print(f"CDX {run}: the outcome is {r.get('outcome')}, the evidence says {outcome}")
+    if (r.get('assertions_failed') or '').strip() != str(failed):
+        print(f"CDX {run}: {r.get('assertions_failed')} assertions failed, the evidence says {failed}")
+    if passed is not None and (r.get('assertions_passed') or '').strip() != str(passed):
+        print(f"CDX {run}: {r.get('assertions_passed')} assertions passed, the evidence says {passed}")
+    if (r.get('agent_exit') or '').strip() != '0':
+        print(f'CDX {run}: the agent exit is not 0')
+    if (r.get('assert_exit') or '').strip() != aexit:
+        print(f"CDX {run}: the assertion exit is {r.get('assert_exit')}, the evidence says {aexit}")
+m = re.search(r'^## Results\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+lines = re.findall(r'^\| `[a-z-]+` \|.*$', m.group(1), re.M) if m else []
+table = [[c.strip().strip('`') for c in l.strip().strip('|').split('|')] for l in lines]
+rows = {r.get('run'): r for r in recs}
+if len(table) != 12 or len({c[0] for c in table}) != 12:
+    print(f'CDX the Results section has {len(table)} result rows, not 12')
+if sorted(c[0] for c in table) != sorted(scen) or sorted(rows) != sorted(scen):
+    print('CDX the Results section and runs.csv do not name the twelve scenarios, one run each')
+for c in table:
+    if len(c) != 7 or not c[-1]:
+        print(f'CDX {c[0]}: the table row names no guard, or has not 7 cells')
+    r = rows.get(c[0])
+    if r is None or len(c) < 7:
+        continue
+    try:
+        exp = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
+    except (KeyError, TypeError, ValueError):
+        exp = '?'
+    for what, got, e in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
+                         ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands'))):
+        if got != e:
+            print(f'CDX {c[0]}: the table says {got} for {what}, runs.csv {e}')
+f = re.search(r'^## Failures\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+ftext = f.group(1) if f else ''
+for r in recs:
+    if r.get('outcome') == 'FAIL':
+        fr = [l for l in ftext.split('\n') if l.startswith('| `%s` |' % r.get('run'))]
+        if not any(re.search(r'Skill|Harness|Environment|Agent', l) for l in fr):
+            print(f"CDX {r.get('run')}: the Failures section has no classification row for the failed run")
+PY
+}
+cdx_out="$(cdxcheck "$root")"
+if [ -z "$cdx_out" ]; then ok "the twelve Codex runs are published: docs/trials.md and docs/agent-compatibility.md link the summary and the rows of docs/trials.md name the Codex runs, the summary keeps the note, holds no placeholder and has one result row per run with its guard, runs.csv names the same twelve runs with the verdicts of the evidence (ten PASS, time-limit FAIL with 10 of 12 and stuck-loop FAIL with 9 of 11, exit codes as recorded), the same outcome, assertions, wall seconds and commands as its table row, and every FAIL run has a classification row in the Failures section (TASK-140.2)"; else bad "Codex summary (TASK-140.2): $(printf '%s' "$cdx_out" | tr '\n' ';')"; fi
+# The same check on a copy with gaps: no link in either page, a row of docs/trials.md that names no Codex runs and still points at
+# this task, no note, two markers, one result row less, one row less in runs.csv, the guard cell of one row emptied, the outcome of
+# one run flipped in runs.csv only, the commands of another changed, a FAIL run turned PASS in the table and in runs.csv (with its
+# assertions), the classification row of the other FAIL run removed, and a non-zero agent exit. Each marker, link and gap costs
+# one line, the missing result row and the missing row of runs.csv one line each for their count and together one for the names,
+# the flipped outcome of loop-limit three (it differs from the evidence and from the table, and it has no classification row), and
+# the stuck-loop run turned PASS three (its outcome and both assertion counts differ from the evidence).
+cdx_d="$root/docs/evals/codex-linux-2026-11-25"
+cdxt="$(mktemp -d)"; mkdir -p "$cdxt/docs/evals/codex-linux-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'codex-linux-2026-11-25' \
+  | sed -e '/^| Planning inside/s/pi, Claude Code and Codex runs, below/pi and Claude Code runs, below; Codex runs: TASK-140.2/' > "$cdxt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" | grep -vF 'codex-linux-2026-11-25' > "$cdxt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$cdx_d/summary.md" | grep -v '^| `add-lane` |' | grep -vF 'Only this summary is published' | grep -v '^| `time-limit` | Skill, in part' \
+    | sed -e '/^| `stale-claim` |/s/| The stale mark |$/|  |/' \
+         -e '/^| `stuck-loop` | FAIL | 9 of 11 |/s/| FAIL | 9 of 11 |/| PASS | 11 of 11 |/'
+  printf '<!-- placeholder -->\nTBD\n'; } > "$cdxt/docs/evals/codex-linux-2026-11-25/summary.md"
+tr -d '\r' < "$cdx_d/runs.csv" | grep -v '^2026-11-24,no-backlog,' \
+  | sed -e 's/^\(2026-11-24,loop-limit,loop-limit,[^,]*,[^,]*,[^,]*\),PASS,/\1,FAIL,/' \
+        -e 's/^\(2026-11-24,stuck-loop,stuck-loop,[^,]*,[^,]*,[^,]*\),FAIL,0,1,9,2,/\1,PASS,0,1,11,0,/' \
+        -e 's/^\(2026-11-24,resumed-twice,resumed-twice,[^,]*,[^,]*,[^,]*,PASS\),0,0,/\1,1,0,/' \
+        -e 's/^\(2026-11-24,happy-path,happy-path,[^,]*,[^,]*,[^,]*,PASS,0,0,12,0,80\),13,/\1,14,/' > "$cdxt/docs/evals/codex-linux-2026-11-25/runs.csv"
+cdx_t="$(cdxcheck "$cdxt")"; rm -rf "$cdxt"
+if [ "$(printf '%s\n' "$cdx_t" | grep -c '^CDX')" -eq 20 ]; then ok "the Codex summary check fails a missing link in either page, a row of docs/trials.md that names no Codex runs or still points at this task, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, an outcome or an assertion count that differs from the evidence or between a table row and runs.csv, a FAIL run without its classification row, and a non-zero agent exit"; else bad "the Codex summary check missed a gap: $(printf '%s' "$cdx_t" | tr '\n' ';')"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

@@ -20,7 +20,7 @@
   - Done when: both rerun scenarios (stuck-loop, time-limit) ended in a verdict on fresh Codex and Claude Code runs, the load budgets hold and the pinned phrases are kept; `bash tests/run.sh`
   - Links: Ref: docs/evals/codex-linux-2026-11-25/summary.md
   - State: branch todo/FEAT-143-close-gaps-that-fresh from main; next: build children
-  - [ ] **FEAT-143.1** · mid · Change the skill text so that a test that cannot pass is routed to failures.md and blocked at once, an invocation ends in [x] or [!], and an agent's own scripts and total time on a node are bounded, within the load budgets
+  - [x] **FEAT-143.1** · mid · Change the skill text so that a test that cannot pass is routed to failures.md and blocked at once, an invocation ends in [x] or [!], and an agent's own scripts and total time on a node are bounded, within the load budgets
     - Done when: step 7 of todo-continue and its Test failures paragraph route an impossible test seen at the red run to failures.md, the todo-continue text says a started node ends [x] or [!] and a block of a stopped run names the limit, verification.md bounds own scripts and total time, the pins for them exist, and every load row fits its budget; `bash tests/run.sh`
   - [ ] **FEAT-143.2** · mid · Rerun stuck-loop and time-limit with fresh Codex and Claude Code agents on the changed text and publish only the summary and a CSV
     - Done when: docs/evals holds a summary and runs.csv with one row per run, each run ended in a verdict or the failure is classified as skill, harness or environment, and docs/trials.md links it; `bash tests/run.sh`

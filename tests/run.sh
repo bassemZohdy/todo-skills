@@ -1501,6 +1501,29 @@ mkdir "$wd/repo"
   [ "$(git log -2 --format=%s | grep -cx 'chore(backlog): resume FEAT-001')" = 2 ] ) >/dev/null 2>&1 || wd_bad="$wd_bad [the git commands of the rule: a path-limited empty resume commit must leave staged work alone, and two newest subjects must show two resumes]"
 rm -rf "$wd"
 if [ -z "$wd_bad" ]; then ok "a worker that stopped without a verdict is resumable, costs no attempt or tier, and a node resumed twice with no commit is broken down or blocked (FEAT-134.5)"; else bad "worker that stopped (FEAT-134.5):$wd_bad"; fi
+# FEAT-143: three gaps that fresh Codex and Claude Code runs of 2026-11-25 showed. A test that no change can pass is outside the
+# node and is routed to failures.md before any change; a node that step 5 started ends [x] or [!], and giving up is a block, not a
+# question or a stopped worker; an agent's own scripts and its whole work on a node are bounded by the time limit.
+f143=""
+chk143() {   # <file> <phrase>: the file holds the phrase
+  tr -d '\r' < "$1" | grep -qF -- "$2" || f143="$f143 [${1#"$root"/} lacks: $2]"
+}
+tc143="$root/plugin/skills/todo-continue/SKILL.md"; fl143="$root/plugin/skills/todo/reference/failures.md"; vf143="$root/plugin/skills/todo/reference/verification.md"
+chk143 "$tc143" 'ends the run as `[x]` or `[!]`'
+chk143 "$tc143" 'giving up (third attempt, time cap) is a block, never a question'
+chk143 "$tc143" 'A test no change can pass'
+chk143 "$tc143" 'block at once, before any change'
+chk143 "$tc143" 'a test cannot pass'
+chk143 "$fl143" 'a test cannot pass'
+chk143 "$fl143" 'also at the red run, before any change'
+chk143 "$fl143" 'ends its own run by choice'
+chk143 "$fl143" 'A block for time names the limit'
+chk143 "$vf143" 'Scripts of your own run under it too'
+chk143 "$vf143" 'at most 3 times its limit'
+chk143 "$root/docs/VERIFICATION.md" 'a test that cannot pass'
+chk143 "$root/docs/VERIFICATION.md" 'ends its own run by choice'
+chk143 "$root/docs/VERIFICATION.md" 'Scripts of your own run under the limit too'
+if [ -z "$f143" ]; then ok "a test that cannot pass blocks at once before any change, a started node ends [x] or [!], and an agent's own scripts and its work on a node are bounded by the time limit (FEAT-143)"; else bad "stuck-worker gaps (FEAT-143):$f143"; fi
 # FEAT-134: the README describes the three guards against a stuck worker, in one section
 gd_bad=""
 gd_sec=$(tr -d '\r' < "$root/README.md" | awk '/^## Guards against a stuck worker$/ {f=1; next} /^## / {f=0} f')

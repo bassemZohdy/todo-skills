@@ -1524,6 +1524,54 @@ chk143 "$root/docs/VERIFICATION.md" 'a test that cannot pass'
 chk143 "$root/docs/VERIFICATION.md" 'ends its own run by choice'
 chk143 "$root/docs/VERIFICATION.md" 'Scripts of your own run under the limit too'
 if [ -z "$f143" ]; then ok "a test that cannot pass blocks at once before any change, a started node ends [x] or [!], and an agent's own scripts and its work on a node are bounded by the time limit (FEAT-143)"; else bad "stuck-worker gaps (FEAT-143):$f143"; fi
+# FEAT-143.2: the rerun of stuck-loop and time-limit on the changed text is published as a summary and runs.csv. Both docs link the
+# summary; the summary keeps the note that only it and runs.csv are published, holds no placeholder marker, has one result row per
+# run of runs.csv (eight), each row names the same outcome and assertions as its row, and neither file holds a local path or an
+# e-mail address. The same check on a damaged copy reports each kind of gap.
+pub143() {   # <repo root>: prints one PUB line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'stuck-worker-text-2026-11-25')
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+s, c = rd(d, 'summary.md'), rd(d, 'runs.csv')
+out = []
+for f in ('docs/trials.md', 'docs/agent-compatibility.md'):
+    if 'stuck-worker-text-2026-11-25/summary.md' not in rd(root, f): out.append('PUB %s does not link the summary' % f)
+if 'Only this summary is published' not in s: out.append('PUB the summary lacks the note that only it and runs.csv are published')
+for m in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if m in s: out.append('PUB the summary holds a marker: ' + m)
+rows = list(csv.DictReader(io.StringIO(c)))
+if len(rows) != 8 or sorted(r['scenario'] for r in rows) != ['stuck-loop'] * 4 + ['time-limit'] * 4: out.append('PUB runs.csv does not hold two runs of each scenario for each of two agents')
+sec = s.split('## Results', 1)[-1].split('\n## ', 1)[0]
+for r in rows:
+    line = [l for l in sec.split('\n') if l.startswith('| `%s` |' % r['run'])]
+    if len(line) != 1: out.append('PUB no single result row for ' + r['run']); continue
+    cells = [x.strip() for x in line[0].strip('|').split('|')]
+    if cells[2] != r['outcome'] or cells[3] != '%s of %d' % (r['assertions_passed'], int(r['assertions_passed']) + int(r['assertions_failed'])):
+        out.append('PUB the row of %s differs from runs.csv in outcome or assertions' % r['run'])
+    if r['outcome'] != 'PASS' or r['ended'].find('Blocked') != 0: out.append('PUB %s is not a PASS that ended blocked' % r['run'])
+for name, t in (('summary', s), ('runs.csv', c)):
+    if re.search('[A-Za-z]:' + chr(92) + chr(92), t) or re.search(r'/Users/|/home/|@[A-Za-z0-9.-]+\.[a-z]{2,}', t): out.append('PUB %s holds a local path or an e-mail address' % name)
+print('\n'.join(out))
+PY
+}
+pb_out="$(pub143 "$root")"
+if [ -z "$pb_out" ]; then ok "the rerun of stuck-loop and time-limit on the changed text is published as a summary and runs.csv, linked from both docs, with one row per run and no local path (FEAT-143.2)"; else bad "published rerun (FEAT-143.2): $(printf '%s' "$pb_out" | tr '\n' ';')"; fi
+pbt="$(mktemp -d)"; mkdir -p "$pbt/docs/evals/stuck-worker-text-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'stuck-worker-text-2026-11-25' > "$pbt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" > "$pbt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$root/docs/evals/stuck-worker-text-2026-11-25/summary.md" | grep -vF 'Only this summary is published' | grep -v '^| `claude-time-limit-2` |'
+  printf 'see TBD at C:%sUsers\n' "$(printf '\134')"; } > "$pbt/docs/evals/stuck-worker-text-2026-11-25/summary.md"
+tr -d '\r' < "$root/docs/evals/stuck-worker-text-2026-11-25/runs.csv" | awk 'NR == 3 { sub(/,PASS,/, ",FAIL,") } { print }' > "$pbt/docs/evals/stuck-worker-text-2026-11-25/runs.csv"
+pb_t="$(pub143 "$pbt")"; rm -rf "$pbt"
+pb_bad=""
+for pb_m in 'does not link the summary' 'lacks the note' 'holds a marker' 'no single result row' 'is not a PASS that ended blocked' 'differs from runs.csv' 'holds a local path'; do printf '%s\n' "$pb_t" | grep -qF -- "$pb_m" || pb_bad="$pb_bad [$pb_m]"; done
+if [ -z "$pb_bad" ]; then ok "the published-rerun check fails a missing link, a missing note, a marker, a missing result row, a failed run, a changed row and a local path (FEAT-143.2)"; else bad "the published-rerun check missed:$pb_bad"; fi
 # FEAT-134: the README describes the three guards against a stuck worker, in one section
 gd_bad=""
 gd_sec=$(tr -d '\r' < "$root/README.md" | awk '/^## Guards against a stuck worker$/ {f=1; next} /^## / {f=0} f')

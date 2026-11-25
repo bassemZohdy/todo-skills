@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **TASK-146** (task): Set `privacyPolicyUrl` (the PRIVACY.md page) and `supportUrl` (the GitHub issues page) in the Claude manifest, so the directory listing shows a privacy policy and a support link; the submission form read both as "Not set", and those fields can be changed only by withdrawing and submitting again. Validated: `bash tests/run.sh`.
+
 ## [0.6.4] - 2026-11-25
 
 ### Fixed

@@ -7,5 +7,7 @@
   "homepage": "https://github.com/bassemZohdy/todo-skills",
   "repository": "https://github.com/bassemZohdy/todo-skills",
   "license": "MIT",
+  "privacyPolicyUrl": "https://github.com/bassemZohdy/todo-skills/blob/main/PRIVACY.md",
+  "supportUrl": "https://github.com/bassemZohdy/todo-skills/issues",
   "keywords": ["backlog", "todo", "agent-skills", "changelog"]
 }

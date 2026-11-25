@@ -14,7 +14,7 @@
 # On Windows (Git Bash) a program that is not a Git Bash program cannot take TERM, so it and the Windows processes below
 # it are ended at once with taskkill.
 # --version prints the release this copy comes from (FEAT-088); tests/run.sh checks it against the manifests.
-todo_skills_version="0.6.2"
+todo_skills_version="0.6.3"
 if [ "${1:-}" = "--version" ]; then echo "todo-limit.sh $todo_skills_version"; exit 0; fi
 usage() { echo "usage: bash todo-limit.sh <seconds> '<command line>'" >&2; exit 2; }
 [ "$#" -eq 2 ] || usage

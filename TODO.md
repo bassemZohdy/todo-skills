@@ -22,5 +22,5 @@
   - State: branch todo/TASK-140-rerun-on-claude-code from main; next: build children
   - [x] **TASK-140.1** · mid · Run fresh Claude Code agents on the scenarios added or changed since 2026-11-13 and publish the summary
     - Done when: docs/evals holds a summary with one row per run and every failure classified as skill, harness or environment, and docs/trials.md links it; `bash tests/run.sh`
-  - [ ] **TASK-140.2** · mid · Run fresh Codex agents in Linux containers on the scenarios added or changed since 2026-11-14 and publish the summary
+  - [x] **TASK-140.2** · mid · Run fresh Codex agents in Linux containers on the scenarios added or changed since 2026-11-14 and publish the summary
     - Done when: docs/evals holds a summary with one row per run and every failure classified as skill, harness or environment, and docs/trials.md links it; `bash tests/run.sh`

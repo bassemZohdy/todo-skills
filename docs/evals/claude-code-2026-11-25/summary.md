@@ -224,7 +224,7 @@ What a later task would settle:
 - **The loop guard's count.** It has still never been reached by an agent: 0 of 12 here and none in the pi batches. The suite is the only check of what an agent does at its 2nd, 4th or 8th run.
 - **The points that two or more reports name**, listed above.
 - **The other 32 scenarios of 2026-11-13** have not been run by Claude Code on the current text or harness.
-- **Codex on the current text** is the work of TASK-140.2.
+- **Codex on the current text** is in [its own summary](../codex-linux-2026-11-25/summary.md).
 
 ## Limits
 

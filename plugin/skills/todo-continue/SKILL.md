@@ -1,6 +1,6 @@
 ---
 name: todo-continue
-description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue [--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]. Creates the node's git branch first, then marks it in progress, builds with red-green-refactor, runs Done when plus regression, completes it in the branch, merges it into its parent, and drains a finished root to CHANGELOG.md as one entry. Works without git, with a warning. Completes at most one node per invocation, except with --all-lanes, where one subagent per lane works one root of that lane.
+description: Execute the next workable node of the TODO.md task tree end to end, driven by each task's status. Use for /todo-continue and its flags. Merges each finished node into its parent and drains a finished root to CHANGELOG.md; works without git. Completes at most one node per invocation, except with --all-lanes, where one subagent per lane works one root of that lane.
 argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--delegate] [--merge]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[--plan] [--lane <name> | --all-lanes [--seq]] [--worktree] [--d
 
 First load the `todo` core skill and read `reference/git-flow.md` and `reference/verification.md` from its folder (`reference/lanes.md` too with a lane flag). If you cannot load a skill by name, read `../todo/SKILL.md` and those files from `../todo/reference/`.
 
-Complete at most one node per invocation (`--all-lanes` excepted). Flags, all optional; an invalid combination is reported and nothing runs:
+Complete at most one node per invocation (`--all-lanes` excepted). A node marked `[/]` ends the run as `[x]` or `[!]`, or at a stop named here or in its references; giving up (third attempt, time cap) is a block, never a question. Flags, all optional; an invalid combination is reported and nothing runs:
 - `--plan`: after reading, propose a plan and stop before any code is written; the next run asks for the approval (step 6). Not with a lane flag.
 - `--lane <name>`: only roots of that lane, in order. `--all-lanes [--seq]`: one subagent per lane, in parallel (`--seq`: one after another); see `reference/lanes.md`. Not together, and not with `--worktree`.
 - `--worktree`: work in a separate worktree; the main checkout is never switched (`reference/git-flow.md`, "--worktree").
@@ -21,7 +21,7 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
 
 1. **Git mode and invariants.** Check git and run the invariant check (core). If it fails only on a `[/]` node's `State:` line, show the corrected line and ask; on I5, apply the core's repair; otherwise report and stop.
 2. **Select by status.**
-   - **Interrupted merge** (on a `todo/` branch, for that branch's tree; core "Interrupted work comes first"): do step 10 item 3 for the `[x]` node that core "Interrupted work comes first" found (nothing else of step 10), lint the merged `TODO.md`, then report once (step 11) and stop. No tests here; the parent's integration step runs them.
+   - **Interrupted merge** (on a `todo/` branch, for that branch's tree; core "Interrupted work comes first"): do step 10 item 3 for the `[x]` node that core "Interrupted work comes first" found (nothing else of step 10), lint the merged `TODO.md`, then report once (step 11) and stop.
    - **Interrupted drain** (a root branch whose uncommitted `CHANGELOG.md` holds its entry): make the drain commit (10.4.3 d), go on at 10.4.4, report and stop.
    - **Drained root branch not yet merged into the base:** with `--merge` go to 10.4.4, report and stop; without it, put the merge commands of 10.4.4 in the report and go on selecting.
    - **A `[/]` node:** read `reference/failures.md`, "A worker that stopped" first; unless it says not to, resume it on its branch (or worktree); check `git status` and `git diff --stat`. Uncommitted changes that fit its task line are its earlier work, committed at step 10; anything else: stop and ask, never revert or commit it. Skip steps 3-5 and go on where `next:` says: `read docs` or `plan proposed` → 6, `build` → 7, `drain` → 10.4, other or missing → 6. Without a baseline in `State:`, the regression must be fully green.
@@ -39,14 +39,14 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
    - **Plan** (`--plan`, or `next: plan proposed`): read `reference/plan-step.md`, "Plan", and follow it before any code is written; it ends in a stop, or in `next: build` once the user approved.
 7. **Build.**
    - **Resume:** code and tests already exist: skip red and go to review (its findings are fixed like any others).
-   - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. If the test `Done when` names exists already, write none for it: its first run is the red run. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`).
+   - **Red** (new `FIX`/`FEAT` leaf): write the tests and see them fail for the expected reason; quote the first failing assertion or missing-symbol error. If the test `Done when` names exists already, write none for it: its first run is the red run. Already passing: stop and ask (offer `/todo-update <ID> --status drop` or a tighter `Done when`). A test no change can pass (contradicting tests, an arithmetic bound) is outside the node: read `reference/failures.md`, block at once, before any change.
    - **Green:** implement only the task line. No new `TODO`/`FIXME`. No git: list touched files in `State: files:`.
    - **Refactor** with tests green. **Integration step** (a parent): `reference/verification.md`, protocol step 8.
 8. **Review** the whole change (`git diff`; no git: each file in `State: files:`), spec compliance first, then quality:
    - **Spec:** every hunk traces to the task line and nothing it asks for is missing; the tests assert the `Done when` criteria (not vacuous, nothing weakened) and carry the ID: in a docstring or comment when `Done when` already names the test (a test id, class or file), otherwise in the test name. Never add it to a test the node did not write.
    - **Quality:** no debug output, commented-out code, new `TODO`/`FIXME`, unrelated reformatting, generated files, secrets or `.env` in the diff or in backlog text you wrote.
    - With a subagent tool, a fresh-context reviewer does both in one call (at the node's tier or higher with a `Models:` line), given only the task lines, the `Ref` path and the diff, and returns a verdict for each, `ok` or `fail`, with its findings; it never edits files or runs tests. Fix what is valid (at most 2 rounds; findings still valid then block the node, "Test failures"). Without one, review yourself.
-9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression (one run counts for both when they are the same command); update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`; without git also `files:`); a run with no failed cycle need not advance `next:`, which only tells a later session where to resume. All gates must pass:
+9. **Verify** in full and unnarrowed: the `Done when` commands, then the regression (one run counts for both when they are the same command); update `State:` whenever a cycle changes one of its items (`attempts`, `hyp:`, `baseline`, `next:`; without git also `files:`); a run with no failed cycle need not advance `next:`. All gates must pass:
    - Done when exited 0 **and** ran tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN" fail) and breaks no "No cheating" rule (`reference/verification.md`, step 7). Regression green against the baseline (step 6 there).
    - Each item of the project's Definition of Done, if any.
    - RTM (only if one exists; `reference/rtm.md`): when the node proves a requirement row, record its `Done when` test paths or ids in that row's Verification cell. It is committed with the node (step 10.2); no RTM, no step.
@@ -61,14 +61,14 @@ The order of every node is the core's "Lifecycle by status". If `.todo/todo-flow
        3. Drain: (a) insert one entry as the core's "CHANGELOG entry" says; (b) delete the subtree from TODO.md; (c) lint; (d) commit both files as `chore(backlog): drain <ID>`, body `Refs: <ID>` (and `Includes: <IDs>` with descendants).
        4. With `--merge`, merge into the base as git-flow "Root" says; otherwise print those commands. Never push.
        No git: 4.1's review offer, then 4.2 and 4.3 (a)-(c).
-11. **Report**, short (on an early stop: which step and why, and only the items that apply): ID and title, commands and results (regression against the baseline; after a red-baseline stop the failing run itself; "not run" when the path ran no tests), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"; after a red-baseline stop, none until the fix lands), and a suggestion to clear context. If the host has a goal command (Claude Code: `/goal`), also suggest it for the rest, only while a workable node remains, for example `/goal keep running /todo-continue until the backlog is empty`; never start it.
+11. **Report**, short (on an early stop: which step and why, and only the items that apply): ID and title, commands and results (regression against the baseline; after a red-baseline stop the failing run itself; "not run" when the path ran no tests), files changed, branch and commit, `children done/total` for a parent root, the checked-out branch, and the merge commands for a root without `--merge`. Then adjacent problems as `/todo-add "<description>" --from <ID>` commands to run on the base (never add them yourself), the next workable node (or "none"; after a red-baseline stop, none until the fix lands), and a suggestion to clear context. If the host has a goal command (Claude Code: `/goal`), also suggest it for the rest, only while a workable node remains; never start it.
 
 ## Test failures
 
-When the whole `Done when` or the regression fails after a change, Green fails twice on one test, or a `Done when` cannot run, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when` or weaken, skip or delete a test.
+When the whole `Done when` or the regression fails after a change, Green fails twice on one test, or a `Done when` cannot run, or a test cannot pass, read `reference/failures.md` before the next change and follow it. Its limits hold from the first run: at most **3** attempts, then the node is blocked (`[!]`), at once when the failure is outside the node; never edit `Done when` or weaken, skip or delete a test.
 
 ## Documentation drift
 
 - If the implementation must deviate from the `Ref` doc, stop and let the user choose: change the code, or update the doc in this node.
 - Only when the node changed a public interface (a command, flag, endpoint, config key or exported symbol, added, renamed, removed or with a changed meaning), read `reference/doc-drift.md` and follow it. A node that changed no interface skips this, and drift that already existed for other reasons never blocks it.
-- Report README setup or test instructions that disagree with the commands that passed.
+- Report README commands that disagree with the ones that passed.

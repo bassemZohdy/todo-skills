@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-25
+
+### Fixed
+
+- **FIX-145** (fix): Rename the plugin from `todo-skills` to `td-cl` (TODO to CHANGELOG) and set its display name to "TD-CL". The directory's validation step names the cause of every refusal since 2026-11-23: `todo-skills` is "very close" (one or two characters) to the connector publishers Nodo and Topo and to the plugin Todo4, a finding that refuses the plugin (`NAME_CONFUSABLE`). The old submission page showed only a generic refusal, so FIX-141 and FIX-144 were guesses that did not touch it. The repository, the marketplace name and the nine skill names are unchanged; the install lines are now `/plugin install td-cl@todo-skills` and `codex plugin add td-cl@todo-skills`, and Claude Code commands are namespaced `/td-cl:todo-add`. Whether `td-cl` passes is shown only by the next validation. Validated: `bash tests/run.sh`.
+
 ## [0.6.3] - 2026-11-25
 
 ### Added
@@ -292,7 +298,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/run.sh` (fixtures for every invariant and warning, the hook) and `tests/trials/` (scenarios built with plain git and checked by `assert.sh`): interrupted merge, refresh from base, claimed elsewhere, racing claims, release, monorepo.
 - `docs/COMPARISON.md`, scored by an independent reviewer from primary sources, and `docs/LIFECYCLE.md` with the SDLC practices applied.
 
-[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.4...HEAD
+[0.6.4]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/bassemZohdy/todo-skills/compare/v0.6.0...v0.6.1

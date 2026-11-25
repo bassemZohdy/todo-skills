@@ -10,9 +10,9 @@ mkdir -p ~/.claude/skills
 cp -r todo-skills/plugin/skills/* ~/.claude/skills/
 ```
 
-Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills` (commands are then namespaced, for example `/todo-skills:todo-add`). Copy all nine folders: the command skills load the `todo` core skill and its `reference/` files.
+Or, in Claude Code: `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install td-cl@todo-skills` (commands are then namespaced, for example `/td-cl:todo-add`). Copy all nine folders: the command skills load the `todo` core skill and its `reference/` files.
 
-Codex: `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add todo-skills@todo-skills`, or copy the folders to `<project>/.agents/skills/` (Codex does not read `.claude/skills`). Start a skill with `$todo-add …` or plain language.
+Codex: `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add td-cl@todo-skills`, or copy the folders to `<project>/.agents/skills/` (Codex does not read `.claude/skills`). Start a skill with `$todo-add …` or plain language.
 
 ## 2. Set up the backlog
 

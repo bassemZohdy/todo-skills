@@ -916,7 +916,7 @@ python3 - "$1" <<'PY'
 import json, os, sys
 d = sys.argv[1]
 readme = open(os.path.join(d, 'README.md'), encoding='utf-8').read()
-for line in ('/plugin marketplace add bassemZohdy/todo-skills', '/plugin install todo-skills@todo-skills', 'codex plugin marketplace add bassemZohdy/todo-skills'):
+for line in ('/plugin marketplace add bassemZohdy/todo-skills', '/plugin install td-cl@todo-skills', 'codex plugin marketplace add bassemZohdy/todo-skills'):
     if line not in readme: print(f'LIST plugin/README.md lacks the install line: {line}')
 cl = json.load(open(os.path.join(d, '.claude-plugin', 'plugin.json'), encoding='utf-8'))
 cx = json.load(open(os.path.join(d, '.codex-plugin', 'plugin.json'), encoding='utf-8'))

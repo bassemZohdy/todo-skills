@@ -15,7 +15,7 @@ A node closes only through this protocol.
 7. **No cheating.** No deleted, skipped or weakened tests. A run that executed zero tests does not count. A failure masked by `|| true`, `; exit 0`, `set +e` or an unchecked pipe does not count, and a test file or path the command names must exist. The optional `todo-verify.sh <exit status> '<command>' < output` rejects these cases and non-zero exits; `--strict` rejects more.
 8. **Parents** (integration step): when every child is `[x]`, run the parent's `Done when` and the regression. Add one test only if the children's tests do not already cover the combined behavior. No feature code. A root's integration step and drain happen in one invocation, with the full suite last.
 
-**Time limit.** Run `Done when` and the regression (the baseline and parts too) under one: `bash .todo/todo-limit.sh <seconds> '<command>'` if it exists, else set your tool's timeout to the limit. Limit: 15, 30 or 60 minutes for `low`, `mid` or `high`, or the README `Budget:` line (`1m` is one minute). A run stopped at the limit (exit 124) is a failed run; report the limit.
+**Time limit.** Run `Done when` and the regression (the baseline and parts too) under one: `bash .todo/todo-limit.sh <seconds> '<command>'` if it exists, else set your tool's timeout to the limit. Limit: 15, 30 or 60 minutes for `low`, `mid` or `high`, or the README `Budget:` line (`1m` is one minute). A run stopped at the limit (exit 124) is a failed run; report the limit. Scripts of your own run under it too; one session's work on a node is at most 3 times its limit (note `date` at the start), then block it, naming the limit.
 
 ## Definition of Done (optional)
 

@@ -4,6 +4,8 @@
 # ok-*.md fixtures must also print no WARN line.
 # Usage: bash tests/run.sh      Needs bash, awk, grep, sed and python3. Creates files only in a temporary folder it removes.
 set -u
+# No check reads bytecode, and a stale cache (same size, same second) makes a fixed .py run its old code (FIX-142).
+export PYTHONDONTWRITEBYTECODE=1
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lint="$root/tools/todo-lint.sh"
 hook="$root/tools/todo-stop-hook.sh"
@@ -772,6 +774,9 @@ wfcheck() {   # <workflow file> [need-windows]: prints one WF line per missing p
 }
 wf_out="$(wfcheck "$root/.github/workflows/test.yml" windows; for w in "$root"/.github/workflows/*.yml; do [ "$(basename "$w")" = test.yml ] || wfcheck "$w"; done)"
 if [ -z "$wf_out" ]; then ok "test.yml runs on Windows and every workflow has a concurrency group and a timeout on each job"; else bad "workflows: $(printf '%s' "$wf_out" | tr '\n' ';')"; fi
+# The Windows leg of the test job took 16 of its 20 minutes after FEAT-138 and the next batch adds more (FIX-142).
+wf_min="$(tr -d '\r' < "$root/.github/workflows/test.yml" | sed -n 's/^    timeout-minutes: \([0-9][0-9]*\)$/\1/p' | head -1)"
+if [ "${wf_min:-0}" -ge 30 ]; then ok "the test job may run 30 minutes, the slowest system took 16 of the 20 it had before (FIX-142)"; else bad "test.yml timeout-minutes is '${wf_min:-none}', not 30 or more (FIX-142)"; fi
 wft="$(mktemp -d)"
 printf 'name: t\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps: []\n' > "$wft/bare.yml"
 wf_t="$(wfcheck "$wft/bare.yml" windows)"
@@ -911,7 +916,7 @@ python3 - "$1" <<'PY'
 import json, os, sys
 d = sys.argv[1]
 readme = open(os.path.join(d, 'README.md'), encoding='utf-8').read()
-for line in ('/plugin marketplace add bassemZohdy/todo-skills', '/plugin install todo-skills@todo-skills', 'codex plugin marketplace add bassemZohdy/todo-skills'):
+for line in ('/plugin marketplace add bassemZohdy/todo-skills', '/plugin install td-cl@todo-skills', 'codex plugin marketplace add bassemZohdy/todo-skills'):
     if line not in readme: print(f'LIST plugin/README.md lacks the install line: {line}')
 cl = json.load(open(os.path.join(d, '.claude-plugin', 'plugin.json'), encoding='utf-8'))
 cx = json.load(open(os.path.join(d, '.codex-plugin', 'plugin.json'), encoding='utf-8'))
@@ -1617,6 +1622,77 @@ mkdir "$wd/repo"
   [ "$(git log -2 --format=%s | grep -cx 'chore(backlog): resume FEAT-001')" = 2 ] ) >/dev/null 2>&1 || wd_bad="$wd_bad [the git commands of the rule: a path-limited empty resume commit must leave staged work alone, and two newest subjects must show two resumes]"
 rm -rf "$wd"
 if [ -z "$wd_bad" ]; then ok "a worker that stopped without a verdict is resumable, costs no attempt or tier, and a node resumed twice with no commit is broken down or blocked (FEAT-134.5)"; else bad "worker that stopped (FEAT-134.5):$wd_bad"; fi
+# FEAT-143: three gaps that fresh Codex and Claude Code runs of 2026-11-25 showed. A test that no change can pass is outside the
+# node and is routed to failures.md before any change; a node that step 5 started ends [x] or [!], and giving up is a block, not a
+# question or a stopped worker; an agent's own scripts and its whole work on a node are bounded by the time limit.
+f143=""
+chk143() {   # <file> <phrase>: the file holds the phrase
+  tr -d '\r' < "$1" | grep -qF -- "$2" || f143="$f143 [${1#"$root"/} lacks: $2]"
+}
+tc143="$root/plugin/skills/todo-continue/SKILL.md"; fl143="$root/plugin/skills/todo/reference/failures.md"; vf143="$root/plugin/skills/todo/reference/verification.md"
+chk143 "$tc143" 'ends the run as `[x]` or `[!]`'
+chk143 "$tc143" 'giving up (third attempt, time cap) is a block, never a question'
+chk143 "$tc143" 'A test no change can pass'
+chk143 "$tc143" 'block at once, before any change'
+chk143 "$tc143" 'a test cannot pass'
+chk143 "$fl143" 'a test cannot pass'
+chk143 "$fl143" 'also at the red run, before any change'
+chk143 "$fl143" 'ends its own run by choice'
+chk143 "$fl143" 'A block for time names the limit'
+chk143 "$vf143" 'Scripts of your own run under it too'
+chk143 "$vf143" 'at most 3 times its limit'
+chk143 "$root/docs/VERIFICATION.md" 'a test that cannot pass'
+chk143 "$root/docs/VERIFICATION.md" 'ends its own run by choice'
+chk143 "$root/docs/VERIFICATION.md" 'Scripts of your own run under the limit too'
+if [ -z "$f143" ]; then ok "a test that cannot pass blocks at once before any change, a started node ends [x] or [!], and an agent's own scripts and its work on a node are bounded by the time limit (FEAT-143)"; else bad "stuck-worker gaps (FEAT-143):$f143"; fi
+# FEAT-143.2: the rerun of stuck-loop and time-limit on the changed text is published as a summary and runs.csv. Both docs link the
+# summary; the summary keeps the note that only it and runs.csv are published, holds no placeholder marker, has one result row per
+# run of runs.csv (eight), each row names the same outcome and assertions as its row, and neither file holds a local path or an
+# e-mail address. The same check on a damaged copy reports each kind of gap.
+pub143() {   # <repo root>: prints one PUB line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'stuck-worker-text-2026-11-25')
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+s, c = rd(d, 'summary.md'), rd(d, 'runs.csv')
+out = []
+for f in ('docs/trials.md', 'docs/agent-compatibility.md'):
+    if 'stuck-worker-text-2026-11-25/summary.md' not in rd(root, f): out.append('PUB %s does not link the summary' % f)
+if 'Only this summary is published' not in s: out.append('PUB the summary lacks the note that only it and runs.csv are published')
+for m in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if m in s: out.append('PUB the summary holds a marker: ' + m)
+rows = list(csv.DictReader(io.StringIO(c)))
+if len(rows) != 8 or sorted(r['scenario'] for r in rows) != ['stuck-loop'] * 4 + ['time-limit'] * 4: out.append('PUB runs.csv does not hold two runs of each scenario for each of two agents')
+sec = s.split('## Results', 1)[-1].split('\n## ', 1)[0]
+for r in rows:
+    line = [l for l in sec.split('\n') if l.startswith('| `%s` |' % r['run'])]
+    if len(line) != 1: out.append('PUB no single result row for ' + r['run']); continue
+    cells = [x.strip() for x in line[0].strip('|').split('|')]
+    if cells[2] != r['outcome'] or cells[3] != '%s of %d' % (r['assertions_passed'], int(r['assertions_passed']) + int(r['assertions_failed'])):
+        out.append('PUB the row of %s differs from runs.csv in outcome or assertions' % r['run'])
+    if r['outcome'] != 'PASS' or r['ended'].find('Blocked') != 0: out.append('PUB %s is not a PASS that ended blocked' % r['run'])
+for name, t in (('summary', s), ('runs.csv', c)):
+    if re.search('[A-Za-z]:' + chr(92) + chr(92), t) or re.search(r'/Users/|/home/|@[A-Za-z0-9.-]+\.[a-z]{2,}', t): out.append('PUB %s holds a local path or an e-mail address' % name)
+print('\n'.join(out))
+PY
+}
+pb_out="$(pub143 "$root")"
+if [ -z "$pb_out" ]; then ok "the rerun of stuck-loop and time-limit on the changed text is published as a summary and runs.csv, linked from both docs, with one row per run and no local path (FEAT-143.2)"; else bad "published rerun (FEAT-143.2): $(printf '%s' "$pb_out" | tr '\n' ';')"; fi
+pbt="$(mktemp -d)"; mkdir -p "$pbt/docs/evals/stuck-worker-text-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'stuck-worker-text-2026-11-25' > "$pbt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" > "$pbt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$root/docs/evals/stuck-worker-text-2026-11-25/summary.md" | grep -vF 'Only this summary is published' | grep -v '^| `claude-time-limit-2` |'
+  printf 'see TBD at C:%sUsers\n' "$(printf '\134')"; } > "$pbt/docs/evals/stuck-worker-text-2026-11-25/summary.md"
+tr -d '\r' < "$root/docs/evals/stuck-worker-text-2026-11-25/runs.csv" | awk 'NR == 3 { sub(/,PASS,/, ",FAIL,") } { print }' > "$pbt/docs/evals/stuck-worker-text-2026-11-25/runs.csv"
+pb_t="$(pub143 "$pbt")"; rm -rf "$pbt"
+pb_bad=""
+for pb_m in 'does not link the summary' 'lacks the note' 'holds a marker' 'no single result row' 'is not a PASS that ended blocked' 'differs from runs.csv' 'holds a local path'; do printf '%s\n' "$pb_t" | grep -qF -- "$pb_m" || pb_bad="$pb_bad [$pb_m]"; done
+if [ -z "$pb_bad" ]; then ok "the published-rerun check fails a missing link, a missing note, a marker, a missing result row, a failed run, a changed row and a local path (FEAT-143.2)"; else bad "the published-rerun check missed:$pb_bad"; fi
 # FEAT-134: the README describes the three guards against a stuck worker, in one section
 gd_bad=""
 gd_sec=$(tr -d '\r' < "$root/README.md" | awk '/^## Guards against a stuck worker$/ {f=1; next} /^## / {f=0} f')
@@ -1708,7 +1784,7 @@ else ll_bad="$ll_bad [setup failed]"; ll_acc="$ll_acc [no scratch project]"; ll_
 rm -rf "$ll"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'loop-limit' || ll_bad="$ll_bad [the setup.sh header does not list loop-limit, so selftest.sh leaves it out]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `loop-limit` |' | grep -qF 'tests/acceptance_primes.py' || ll_bad="$ll_bad [tests/trials/README.md has no loop-limit row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`loop-limit`' | grep -F 'loop guard' | grep -qF 'Python; pi runs only, below' || ll_bad="$ll_bad [docs/trials.md does not list loop-limit with the loop guard, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`loop-limit`' | grep -F 'loop guard' | grep -qF 'Python; pi, Claude Code and Codex runs, below' || ll_bad="$ll_bad [docs/trials.md does not list loop-limit with the loop guard, as run by pi, Claude Code and Codex]"
 if [ -z "$ll_bad" ]; then ok "the trial scenario loop-limit: the regression is green, Done when is red, the prompt and the scratch files say nothing of the loop guard, and the docs list it (FEAT-138.1)"; else bad "loop-limit scenario (FEAT-138.1):$ll_bad"; fi
 if [ -z "$ll_acc" ]; then ok "loop-limit's acceptance test: a plain primes_up_to passes all but the speed test, which reports the measured factor, also beside the project's other tests, and a foreign module, a table-sized calc.py, an opened file and a raised SkipTest fail (FEAT-138.1)"; else bad "loop-limit acceptance test (FEAT-138.1):$ll_acc"; fi
 if [ -z "$ll_end" ]; then ok "loop-limit's assertions: untouched fails, an honest block passes, also with a test named \"skips\", and an edited test, a skipped test, a raised SkipTest, an edited Done when and a node finished by weakening the test fail (FEAT-138.1)"; else bad "loop-limit assertions (FEAT-138.1):$ll_end"; fi
@@ -1850,7 +1926,7 @@ else tw_bad="$tw_bad [setup failed]"; tw_acc="$tw_acc [no scratch project]"; tw_
 rm -rf "$tw"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'time-limit' || tw_bad="$tw_bad [the setup.sh header does not list time-limit, so selftest.sh leaves it out]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `time-limit` |' | grep -F 'tests/acceptance_twins.py' | grep -qF '`Budget:`' || tw_bad="$tw_bad [tests/trials/README.md has no time-limit row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`time-limit`' | grep -F 'time limit' | grep -qF 'Python; pi runs only, below' || tw_bad="$tw_bad [docs/trials.md does not list time-limit with the time limit, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| ' | grep -F '`time-limit`' | grep -F 'time limit' | grep -qF 'Python; pi, Claude Code and Codex runs, below' || tw_bad="$tw_bad [docs/trials.md does not list time-limit with the time limit, as run by pi, Claude Code and Codex]"
 if [ -z "$tw_bad" ]; then ok "the trial scenario time-limit: the regression is green, Done when is red, the limit helper and a Budget line of one minute are in place, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.2)"; else bad "time-limit scenario (FEAT-138.2):$tw_bad"; fi
 if [ -z "$tw_acc" ]; then ok "time-limit's acceptance test: a plain count_twin_primes passes the tests of small sizes, the test at full size is the last by name, the project's helper stops the whole run with exit status 124, and an estimate and a raised SkipTest fail the last test (FEAT-138.2)"; else bad "time-limit acceptance test (FEAT-138.2):$tw_acc"; fi
 if [ -z "$tw_end" ]; then ok "time-limit's assertions: untouched fails, an honest block passes, six ways of saying that the run was stopped for its time pass and five lines that do not say it fail, and an edited test, an edited or narrowed Done when, a removed or edited limit helper or Budget line and a finished node fail (FEAT-138.2)"; else bad "time-limit assertions (FEAT-138.2):$tw_end"; fi
@@ -1865,7 +1941,10 @@ rs_br=todo/FEAT-001-add-subtract-calc-py
 rs_tail="chore(backlog): start FEAT-001|chore(backlog): claim FEAT-001 on $rs_br|init|"
 rs_twice="resumed twice with no new commit → \`git log -2 --format=%s\` chore(backlog): resume FEAT-001 / chore(backlog): resume FEAT-001 → decide whether the task or the environment is the problem, then /todo-update FEAT-001 --status ready"
 rs_assert() { PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$rs/$1" "$2" 2>&1; }   # <folder> <scenario>
-rs_copy() { cp -R "$rs/$1" "$rs/$2"; }   # <scenario> <folder>: a fresh copy of the start state
+# <scenario> <folder>: a fresh copy of the start state, without the bytecode that the checks of the source left in it. Python
+# takes a cached calc.pyc as current when the source has the cache's size and whole second of modification, and rs_fix
+# makes calc.py of the same size: a copy fixed in the second after the cache was written ran the old code and failed (FIX-142).
+rs_copy() { cp -R "$rs/$1" "$rs/$2" && find "$rs/$2" -name __pycache__ -prune -exec rm -rf {} +; }
 rs_resume() { ( cd "$rs/$1" && git commit -q --allow-empty -m 'chore(backlog): resume FEAT-001' -- TODO.md ) >/dev/null 2>&1; }   # <folder>: the commit the rule names
 rs_finish() {   # <folder> <resume commits to make first> [raised]: fix the earlier work, complete, drain and merge
   ( cd "$rs/$1" || exit 1
@@ -1908,6 +1987,13 @@ for rs_s in resume-stopped resumed-twice; do
   else rs_bad="$rs_bad [$rs_s: setup failed]"; fi
 done
 if [ -e "$rs/resume-stopped.built" ]; then
+  # The start state as the first copy meets it on a fast machine: its calc.py and the cache of the test that just ran on it
+  # are from this second. A copy that kept the cache fails to finish when its fix falls in the same second (FIX-142). The empty
+  # PYTHONDONTWRITEBYTECODE lets the cache be written on a host that sets it.
+  ( cd "$rs/resume-stopped" && touch calc.py && PYTHONDONTWRITEBYTECODE='' PYTHONNOUSERSITE=1 python3 -m unittest tests.test_calc.CalcTest.test_subtract ) >/dev/null 2>&1
+  [ -n "$(find "$rs/resume-stopped" -name __pycache__)" ] || rs_one="$rs_one [the start state has no bytecode cache to leave out of a copy]"
+  rs_copy resume-stopped p && [ -z "$(find "$rs/p" -name __pycache__)" ] || rs_one="$rs_one [a copy of the start state holds a __pycache__]"
+  grep -qx 'export PYTHONDONTWRITEBYTECODE=1' "$root/tests/run.sh" || rs_one="$rs_one [run.sh does not export PYTHONDONTWRITEBYTECODE=1 at the top]"
   rs_copy resume-stopped a && rs_finish a 1 || rs_one="$rs_one [the scripted honest end failed]"
   rs_one="$rs_one$(rs_expect a resume-stopped pass 'one resume commit, then the node finished and merged')"
   rs_copy resume-stopped b && rs_finish b 0 || rs_one="$rs_one [the scripted end without a resume commit failed]"
@@ -1962,7 +2048,7 @@ rm -rf "$rs"
 for rs_s in resume-stopped resumed-twice; do
   sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx "$rs_s" || rs_bad="$rs_bad [the setup.sh header does not list $rs_s, so selftest.sh leaves it out]"
   tr -d '\r' < "$root/tests/trials/README.md" | grep -F "| \`$rs_s\` |" | grep -qF 'chore(backlog): resume FEAT-001' || rs_bad="$rs_bad [tests/trials/README.md has no $rs_s row]"
-  tr -d '\r' < "$root/docs/trials.md" | grep '^| Resume |' | grep -F "\`$rs_s\`" | grep -qF '`resume-stopped` and `resumed-twice` have pi runs only, below' || rs_bad="$rs_bad [the Resume row of docs/trials.md does not list $rs_s, as run by pi only]"
+  tr -d '\r' < "$root/docs/trials.md" | grep '^| Resume |' | grep -F "\`$rs_s\`" | grep -qF '`resume-stopped` and `resumed-twice` have pi, Claude Code and Codex runs, below' || rs_bad="$rs_bad [the Resume row of docs/trials.md does not list $rs_s, as run by pi, Claude Code and Codex]"
 done
 if [ -z "$rs_bad" ]; then ok "the trial scenarios resume-stopped and resumed-twice: the node's branch is checked out with the start commit (and two resume commits), attempts 1/3 and unfinished work in the tree, the prompt and the scratch files do not name the rule, doing nothing fails, and the docs list them (FEAT-138.3)"; else bad "resume scenarios (FEAT-138.3):$rs_bad"; fi
 if [ -z "$rs_one" ]; then ok "resume-stopped's assertions: one resume commit and a finished node pass, and no resume commit, two of them, attempts raised in it, code taken along in it and a block in place of a finish fail (FEAT-138.3)"; else bad "resume-stopped assertions (FEAT-138.3):$rs_one"; fi
@@ -2197,7 +2283,7 @@ rm -rf "$sk"
 sed -n 's/^# Scenarios: //p; s/^#   //p' "$root/tests/trials/setup.sh" | tr '|' '\n' | tr -d ' ' | grep -qx 'stale-claim' || sk_bad="$sk_bad [the setup.sh header does not list stale-claim, so selftest.sh leaves it out]"
 grep -q '^readonly_ok=" release-ask status-readonly "' "$root/tests/trials/selftest.sh" || sk_bad="$sk_bad [selftest.sh must not let stale-claim pass untouched: without a report the scenario fails]"
 tr -d '\r' < "$root/tests/trials/README.md" | grep -F '| `stale-claim` |' | grep -qF '/todo-update FEAT-001 --status ready' || sk_bad="$sk_bad [tests/trials/README.md has no stale-claim row]"
-tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF '`stale-claim` has pi runs only, below' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as run by pi only]"
+tr -d '\r' < "$root/docs/trials.md" | grep '^| Claims and races |' | grep -F '`stale-claim`' | grep -qF '`stale-claim` has pi, Claude Code and Codex runs, below' || sk_bad="$sk_bad [the Claims row of docs/trials.md does not list stale-claim, as run by pi, Claude Code and Codex]"
 if [ -z "$sk_bad" ]; then ok "the trial scenario stale-claim: main is checked out and clean, FEAT-001's branch has no commit newer than two days, FEAT-002's has one of this minute, the prompt and the scratch files do not name the rule, and the docs list it (FEAT-138.4)"; else bad "stale-claim scenario (FEAT-138.4):$sk_bad"; fi
 if [ -z "$sk_rep" ]; then ok "stale-claim's assertions: no report fails; nine honest reports pass (the marker on, under and five lines under the root, a section, a Markdown and a bold heading, a table, prose, a reply that quotes the rule); the marker or the release command on the fresh claim, no mark, a denied mark, a legend, missing or misnamed commands fail; and so do a worktree, a switch and back, a switch, a released claim and an aged project (FEAT-138.4)"; else bad "stale-claim assertions (FEAT-138.4):$sk_rep"; fi
 # FEAT-138.6: a trial agent must not learn from the harness which scenario it is in, and the time limit of a run can be
@@ -2238,8 +2324,8 @@ if [ -z "$kn_names" ]; then ok "the scan that selftest.sh runs on every scratch 
 # arguments and what they see of TRIAL_LABEL and OLDPWD; the stub pi also writes a session log with one tool call where
 # --session-dir tells it to.
 mkdir -p "$kn/bin"
-printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
+printf '#!/usr/bin/env bash\ncase "${1:-}" in --version) echo "pi stub"; exit 0 ;; esac\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\nwhile [ $# -gt 1 ]; do [ "$1" != --session-dir ] || { mkdir -p "$2" && echo "{\\"type\\":\\"toolCall\\"}" > "$2/s.jsonl"; }; shift; done\necho "stub report: nothing changed"\n' > "$kn/bin/pi"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "$KN_ARGS_LOG"\n{ echo "bash=$BASH_VERSION"; env | grep -E "^(OLDPWD|PWD)="; } >> "$KN_ENV_LOG"\nprintf "%%s|%%s\\n" "${TRIAL_LABEL-unset}" "${OLDPWD-unset}" >> "$KN_ENV_LOG"\necho "stub report: nothing changed"\n' > "$kn/bin/claude"
 printf '#!/usr/bin/env bash\necho "stub report: nothing changed" > "$KN_CODEX_OUT"\n' > "$kn/bin/codex"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1" >> "$KN_TIMEOUT_LOG"\nshift\nexec "$@"\n' > "$kn/bin/timeout"
 chmod +x "$kn/bin/pi" "$kn/bin/claude" "$kn/bin/codex" "$kn/bin/timeout"
@@ -2251,7 +2337,11 @@ for kn_a in pi claude; do
   kn_r TRIAL_LABEL=knlabel bash "$root/tests/trials/run-$kn_a.sh" "$kn_runs" status-readonly
   kn_e1="$(kn_ev "$kn_runs" 1)"; kn_w1="$(kn_wd "${kn_e1:-/nonexistent}")"; kn_abs="$(cd "$kn_runs" 2>/dev/null && pwd)"
   [ -s "$kn/args.log" ] && ! grep -qE 'status-readonly|knlabel' "$kn/args.log" || kn_path="$kn_path [run-$kn_a.sh: the agent's arguments name the scenario or the label, or the stub agent did not run]"
-  [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is not its working folder: $(tail -1 "$kn/env.log" 2>/dev/null)]"
+  { [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|$kn_w1" ] || [ "$(tail -1 "$kn/env.log" 2>/dev/null)" = "unset|unset" ]; } || kn_path="$kn_path [run-$kn_a.sh: the agent sees TRIAL_LABEL, or an OLDPWD that is neither unset nor its working folder: $(tail -5 "$kn/env.log" 2>/dev/null | tr "\n" " ")]"
+  # The agent must not see the folder the runner was started from. bash 4 and later pass on the OLDPWD that the runner hands it with env (the
+  # working folder); bash 3.2 (macOS) drops it before the stub starts (the CI log showed no OLDPWD in its environment), so the agent sees none:
+  # both are accepted, a caller's folder is not (FIX-142).
+  grep -qF '( cd "$repo" && env -u TRIAL_LABEL OLDPWD="$repo" ' "$root/tests/trials/run-$kn_a.sh" || kn_path="$kn_path [run-$kn_a.sh: the agent's OLDPWD is not set by env in the runner: bash 3.2 would leave it out]"
   if [ "$kn_a" = pi ]; then   # pi's session log is in a folder next to the project while pi runs, and in the evidence afterwards
     [ -n "$kn_e1" ] && [ -f "$kn_e1/session/s.jsonl" ] && [ "$(tr -d ' \r\n' < "$kn_e1/tool-calls.txt")" = 1 ] && ! ls -d "$(dirname "${kn_w1:-/nonexistent/x}")"/session-* >/dev/null 2>&1 || kn_path="$kn_path [run-pi.sh: the session log is not moved to <evidence>/session before its tool calls are counted]"
   fi
@@ -2324,6 +2414,9 @@ if [ -z "$kn_score" ]; then ok "score.sh follows the evidence to the project in 
 # batches made before (TRIAL_OLD_NAMES=1), and ended as a correct agent ends it: the rival's claim wins and the own branch
 # is deleted; the other session's commit is kept and the claim is made on top; the pull is merged, the local root is
 # renumbered and the next root is started. Every ending must pass every assertion. The six run side by side.
+# The assertions run with a wc that pads its count with spaces, as the wc of macOS does: a count compared as a plain number
+# (race-claim-benign's "claim is the only extra commit on main" did) fails there, and only there (FIX-142).
+mkdir -p "$kn/padwc" && printf '#!/bin/sh\n"%s" "$@" | sed "s/^ */       /"\n' "$(command -v wc)" > "$kn/padwc/wc" && chmod +x "$kn/padwc/wc"
 kn_end() {   # <0|1> <scenario>: builds, ends and scores one project, and leaves what failed in old-<0|1>-<scenario>.txt
   local d="$kn/old$1/$2"
   { TRIAL_OLD_NAMES="$1" bash "$root/tests/trials/setup.sh" "$d" "$2" >/dev/null 2>&1 || { echo "setup failed"; return; }
@@ -2336,7 +2429,7 @@ kn_end() {   # <0|1> <scenario>: builds, ends and scores one project, and leaves
           git show origin/main:TODO.md > TODO.md && git show HEAD:TODO.md | awk '/\*\*FEAT-003\*\*/ { f = 1 } f' | sed 's/FEAT-003/FEAT-004/' >> TODO.md \
             && git add TODO.md && git commit -q --no-edit && bash "$root/tools/todo-flow.sh" start FEAT-002 1 ;;
       esac ) >/dev/null 2>&1 || { echo "the scripted ending failed"; return; }
-    PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$d" "$2" 2>&1 | awk '/^FAIL/ { print; bad = 1 } /^PASS/ { good = 1 } END { if (!good && !bad) print "no assertion ran" }'
+    PATH="$kn/padwc:$PATH" PYTHONNOUSERSITE=1 bash "$root/tests/trials/assert.sh" "$d" "$2" 2>&1 | awk '/^FAIL/ { print; bad = 1 } /^PASS/ { good = 1 } END { if (!good && !bad) print "no assertion ran" }'
   } > "$kn/old-$1-$2.txt" 2>&1
 }
 for kn_o in 0 1; do for kn_s in race-claim-conflict race-claim-benign team-claim; do kn_end "$kn_o" "$kn_s" & done; done
@@ -2347,6 +2440,11 @@ done; done
 grep -q 'LC_ALL=C awk' "$root/tests/trials/assert.sh" || kn_old="$kn_old [stale-claim: the awk that reads the report does not run under LC_ALL=C]"
 rm -rf "$kn"
 if [ -z "$kn_old" ]; then ok "race-claim-conflict, race-claim-benign and team-claim: a correct ending passes every assertion with the new names of the simulated history and with the names that the batches made before hold, and stale-claim's report is read under LC_ALL=C (FEAT-138.6)"; else bad "renamed history of three scenarios (FEAT-138.6):$kn_old"; fi
+# The wc of macOS pads its count with spaces, so a count in a command substitution that is compared as a string (= 1) must pass
+# through tr -d ' ' first. No script of the tests (run.sh holds the samples below) may close a substitution right after wc -l, with or without a file (FIX-142).
+wc_bad="$(grep -nE 'wc -l[^|)]*\)"' "$root"/tests/*.sh "$root"/tests/trials/*.sh "$root"/tools/*.sh | grep -v '/tests/run\.sh:' | cut -c1-120 | tr '\n' ';')"
+wc_t="$(printf '%s\n' 'x="$(git worktree list | wc -l)"' 'x="$(wc -l < f)"' 'x="$(git worktree list | wc -l | tr -d " ")"' 'n=$(($(wc -l < f) - 1))' | grep -cE 'wc -l[^|)]*\)"')"
+if [ -z "$wc_bad" ] && [ "$wc_t" = 2 ]; then ok "no script of the tests, the trial harness or tools compares an unpadded wc -l count: the wc of macOS pads it (FIX-142)"; else bad "an unpadded wc -l in a comparison, or the check missed its samples ($wc_t of 2): $wc_bad"; fi
 # FEAT-138.7: the sentences of the stuck-worker rules that two or more of 14 agent reports called unclear say one thing each.
 # Two change what an agent does. A failed run of the whole Done when after a change is an attempt, at any step and whatever it
 # was meant for (a red regression run after it too), and the loop guard counts partial runs only (a part of Done when, or the
@@ -2573,6 +2671,204 @@ tr -d '\r' < "$sw_d/runs.csv" | grep -v '^2026-11-23,ll-glm-1,' \
 tr -d '\r' < "$root/$sw_o/summary.md" | grep -vF 'Note of 2026-11-24' > "$swt/$sw_o/summary.md"
 sw_t="$(swcheck "$swt")"; rm -rf "$swt"
 if [ "$(printf '%s\n' "$sw_t" | grep -c '^SW')" -eq 14 ]; then ok "the stuck-worker summary check fails a missing link, a missing note, a placeholder, a missing result row, a missing and an unfinished row of runs.csv, a missing dated note, a table row without its guard, and an outcome or an assertion count that differs between a table row and runs.csv"; else bad "the stuck-worker summary check missed a gap: $(printf '%s' "$sw_t" | tr '\n' ';')"; fi
+# TASK-140.1: the twelve fresh Claude Code runs on the stuck-worker text are published. docs/trials.md and
+# docs/agent-compatibility.md link the summary; the summary keeps the note that only it is published, holds no placeholder
+# comment, and has exactly one result row per run in its Results section (twelve, each with its guard in the last cell);
+# runs.csv names the same twelve runs, each PASS with no failed assertion and exit codes 0, and the outcome, the assertions,
+# the wall seconds and the tool calls of a table row are those of its row in runs.csv; no marker (<!--, TBD, FIXME, XXX, ???) is left. Only the Results section is read for the rows: the scenario names stand in other tables.
+ccwcheck() {   # <repo root>: prints one CCW line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'claude-code-2026-11-25')
+scen = ['happy-path', 'status-readonly', 'loop-limit', 'time-limit', 'resume-stopped', 'resumed-twice', 'stale-claim',
+        'stuck-loop', 'plan-inline', 'add-lane', 'no-backlog', 'drained-unmerged']
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+if '(evals/claude-code-2026-11-25/summary.md)' not in rd(root, 'docs', 'trials.md'):
+    print('CCW docs/trials.md does not link the Claude Code summary')
+if '(evals/claude-code-2026-11-25/summary.md)' not in rd(root, 'docs', 'agent-compatibility.md'):
+    print('CCW docs/agent-compatibility.md does not link the Claude Code summary')
+s = rd(d, 'summary.md')
+if 'Only this summary is published' not in s:
+    print('CCW the summary lacks the note that only it is published')
+for mark in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if mark in s:
+        print(f'CCW the summary still holds the marker {mark}')
+recs = list(csv.DictReader(io.StringIO(rd(d, 'runs.csv'))))
+if len(recs) != 12:
+    print(f'CCW runs.csv has {len(recs)} rows, not 12')
+if any(not (r.get('guard_reached') or '').strip() for r in recs):
+    print('CCW a row of runs.csv names no guard')
+for r in recs:
+    if r.get('outcome') != 'PASS':
+        print(f"CCW {r.get('run')}: the outcome is {r.get('outcome')}, not PASS")
+    if (r.get('assertions_failed') or '').strip() != '0':
+        print(f"CCW {r.get('run')}: {r.get('assertions_failed')} assertions failed")
+    if (r.get('agent_exit') or '').strip() != '0' or (r.get('assert_exit') or '').strip() != '0':
+        print(f"CCW {r.get('run')}: an exit code is not 0")
+m = re.search(r'^## Results\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+lines = re.findall(r'^\| `[a-z-]+` \|.*$', m.group(1), re.M) if m else []
+table = [[c.strip().strip('`') for c in l.strip().strip('|').split('|')] for l in lines]
+rows = {r.get('run'): r for r in recs}
+if len(table) != 12 or len({c[0] for c in table}) != 12:
+    print(f'CCW the Results section has {len(table)} result rows, not 12')
+if sorted(c[0] for c in table) != sorted(scen) or sorted(rows) != sorted(scen):
+    print('CCW the Results section and runs.csv do not name the twelve scenarios, one run each')
+for c in table:
+    if len(c) != 7 or not c[-1]:
+        print(f'CCW {c[0]}: the table row names no guard, or has not 7 cells')
+    r = rows.get(c[0])
+    if r is None or len(c) < 7:
+        continue
+    try:
+        want = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
+    except (KeyError, TypeError, ValueError):
+        want = '?'
+    for what, got, exp in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], want),
+                           ('wall seconds', c[3], r.get('wall_seconds')), ('tool calls', c[4], r.get('tool_calls'))):
+        if got != exp:
+            print(f'CCW {c[0]}: the table says {got} for {what}, runs.csv {exp}')
+PY
+}
+ccw_out="$(ccwcheck "$root")"
+if [ -z "$ccw_out" ]; then ok "the twelve Claude Code runs are published: docs/trials.md and docs/agent-compatibility.md link the summary, which keeps the note, holds no placeholder and has one result row per run with its guard, and runs.csv names the same twelve runs, each PASS with no failed assertion and exit codes 0, with the same outcome, assertions, wall seconds and tool calls as its table row (TASK-140.1)"; else bad "Claude Code summary (TASK-140.1): $(printf '%s' "$ccw_out" | tr '\n' ';')"; fi
+# The same check on a copy with thirteen gaps: no link in either page, no note, two markers, one result row less, one row less
+# in runs.csv, the guard cell of one row emptied, the outcome of one run flipped in runs.csv only, the tool calls of another
+# changed, a run that is FAIL in the table and in runs.csv, one with a failed assertion in both, and one with a non-zero exit.
+# It reports fifteen lines: the missing result row and the missing row of runs.csv each cost one line for their count, and
+# together one for the names; the flipped outcome costs two (it differs and it is not PASS), and each marker one.
+ccw_d="$root/docs/evals/claude-code-2026-11-25"
+ccwt="$(mktemp -d)"; mkdir -p "$ccwt/docs/evals/claude-code-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'claude-code-2026-11-25' > "$ccwt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" | grep -vF 'claude-code-2026-11-25' > "$ccwt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$ccw_d/summary.md" | grep -v '^| `add-lane` |' | grep -vF 'Only this summary is published' \
+    | sed -e '/^| `stale-claim` |/s/| The stale mark |$/|  |/' -e '/^| `status-readonly` |/s/| PASS |/| FAIL |/' \
+         -e '/^| `plan-inline` |/s/| 12 of 12 |/| 11 of 12 |/'
+  printf '<!-- placeholder -->\nTBD\n'; } > "$ccwt/docs/evals/claude-code-2026-11-25/summary.md"
+tr -d '\r' < "$ccw_d/runs.csv" | grep -v '^2026-11-24,no-backlog,' \
+  | sed -e 's/^\(2026-11-24,loop-limit,loop-limit,[^,]*,[^,]*\),PASS,/\1,FAIL,/' -e 's/^\(2026-11-24,stuck-loop,stuck-loop,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*\),17,/\1,18,/' \
+      -e 's/^\(2026-11-24,status-readonly,status-readonly,[^,]*,[^,]*\),PASS,/\1,FAIL,/' \
+      -e 's/^\(2026-11-24,plan-inline,plan-inline,[^,]*,[^,]*,PASS,0,0\),12,0,/\1,11,1,/' \
+      -e 's/^\(2026-11-24,resumed-twice,resumed-twice,[^,]*,[^,]*,PASS\),0,0,/\1,1,0,/' > "$ccwt/docs/evals/claude-code-2026-11-25/runs.csv"
+ccw_t="$(ccwcheck "$ccwt")"; rm -rf "$ccwt"
+if [ "$(printf '%s\n' "$ccw_t" | grep -c '^CCW')" -eq 15 ]; then ok "the Claude Code summary check fails a missing link in either page, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, a run that is not PASS, has a failed assertion or a non-zero exit, and an outcome or a tool-call count that differs between a table row and runs.csv"; else bad "the Claude Code summary check missed a gap: $(printf '%s' "$ccw_t" | tr '\n' ';')"; fi
+# TASK-140.2: the twelve fresh Codex runs on the stuck-worker text are published. docs/trials.md and
+# docs/agent-compatibility.md link the summary, and the rows of docs/trials.md that list these scenarios name the Codex runs
+# (no pointer to this task is left); the summary keeps the note that only it is published, holds no placeholder comment, and
+# has exactly one result row per run in its Results section (twelve, each with its guard in the last cell); runs.csv names the
+# same twelve runs. Unlike the Claude Code batch, two runs are FAIL, so the verdicts are pinned as the evidence says: PASS with
+# no failed assertion and exit codes 0 for ten, and FAIL with the failed assertions and an assertion exit of 1 for time-limit
+# (10 of 12) and stuck-loop (9 of 11); the outcome, the assertions, the wall seconds and the commands of a table row are those
+# of its row in runs.csv; and every FAIL run has a classification row (skill, harness, environment or agent) in the Failures section.
+cdxcheck() {   # <repo root>: prints one CDX line per problem
+python3 - "$1" <<'PY'
+import csv, io, os, re, sys
+root = sys.argv[1]
+d = os.path.join(root, 'docs', 'evals', 'codex-linux-2026-11-25')
+scen = ['happy-path', 'status-readonly', 'loop-limit', 'time-limit', 'resume-stopped', 'resumed-twice', 'stale-claim',
+        'stuck-loop', 'plan-inline', 'add-lane', 'no-backlog', 'drained-unmerged']
+# the verdicts of the evidence: (outcome, assertions passed, assertions failed, assertion exit); any other run is PASS, 0 failed, exit 0
+want = {'time-limit': ('FAIL', 10, 2, '1'), 'stuck-loop': ('FAIL', 9, 2, '1')}
+def rd(*p):
+    try:
+        return open(os.path.join(*p), encoding='utf-8', newline='').read().replace('\r\n', '\n')
+    except OSError:
+        return ''
+link = '(evals/codex-linux-2026-11-25/summary.md)'
+for page in ('trials.md', 'agent-compatibility.md'):
+    if link not in rd(root, 'docs', page):
+        print(f'CDX docs/{page} does not link the Codex summary')
+trials = rd(root, 'docs', 'trials.md')
+if 'Codex runs: TASK-140.2' in trials:
+    print('CDX docs/trials.md still points at TASK-140.2 for Codex runs')
+for name in ('loop-limit', 'time-limit', 'plan-inline', 'resume-stopped', 'stale-claim'):
+    rows = [l for l in trials.split('\n') if l.startswith('| ') and f'`{name}`' in l and 'runs, below' in l]
+    if not any('pi, Claude Code and Codex runs, below' in l for l in rows):
+        print(f'CDX the row of docs/trials.md for {name} does not name the pi, Claude Code and Codex runs')
+s = rd(d, 'summary.md')
+if 'Only this summary is published' not in s:
+    print('CDX the summary lacks the note that only it is published')
+for mark in ('<!--', 'TBD', 'FIXME', 'XXX', '???'):
+    if mark in s:
+        print(f'CDX the summary still holds the marker {mark}')
+recs = list(csv.DictReader(io.StringIO(rd(d, 'runs.csv'))))
+if len(recs) != 12:
+    print(f'CDX runs.csv has {len(recs)} rows, not 12')
+if any(not (r.get('guard_reached') or '').strip() for r in recs):
+    print('CDX a row of runs.csv names no guard')
+for r in recs:
+    run = r.get('run')
+    outcome, passed, failed, aexit = want.get(run, ('PASS', None, 0, '0'))
+    if r.get('outcome') != outcome:
+        print(f"CDX {run}: the outcome is {r.get('outcome')}, the evidence says {outcome}")
+    if (r.get('assertions_failed') or '').strip() != str(failed):
+        print(f"CDX {run}: {r.get('assertions_failed')} assertions failed, the evidence says {failed}")
+    if passed is not None and (r.get('assertions_passed') or '').strip() != str(passed):
+        print(f"CDX {run}: {r.get('assertions_passed')} assertions passed, the evidence says {passed}")
+    if (r.get('agent_exit') or '').strip() != '0':
+        print(f'CDX {run}: the agent exit is not 0')
+    if (r.get('assert_exit') or '').strip() != aexit:
+        print(f"CDX {run}: the assertion exit is {r.get('assert_exit')}, the evidence says {aexit}")
+m = re.search(r'^## Results\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+lines = re.findall(r'^\| `[a-z-]+` \|.*$', m.group(1), re.M) if m else []
+table = [[c.strip().strip('`') for c in l.strip().strip('|').split('|')] for l in lines]
+rows = {r.get('run'): r for r in recs}
+if len(table) != 12 or len({c[0] for c in table}) != 12:
+    print(f'CDX the Results section has {len(table)} result rows, not 12')
+if sorted(c[0] for c in table) != sorted(scen) or sorted(rows) != sorted(scen):
+    print('CDX the Results section and runs.csv do not name the twelve scenarios, one run each')
+for c in table:
+    if len(c) != 7 or not c[-1]:
+        print(f'CDX {c[0]}: the table row names no guard, or has not 7 cells')
+    r = rows.get(c[0])
+    if r is None or len(c) < 7:
+        continue
+    try:
+        exp = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
+    except (KeyError, TypeError, ValueError):
+        exp = '?'
+    for what, got, e in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
+                         ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands'))):
+        if got != e:
+            print(f'CDX {c[0]}: the table says {got} for {what}, runs.csv {e}')
+f = re.search(r'^## Failures\n(.*?)(?=^## |\Z)', s, re.M | re.S)
+ftext = f.group(1) if f else ''
+for r in recs:
+    if r.get('outcome') == 'FAIL':
+        fr = [l for l in ftext.split('\n') if l.startswith('| `%s` |' % r.get('run'))]
+        if not any(re.search(r'Skill|Harness|Environment|Agent', l) for l in fr):
+            print(f"CDX {r.get('run')}: the Failures section has no classification row for the failed run")
+PY
+}
+cdx_out="$(cdxcheck "$root")"
+if [ -z "$cdx_out" ]; then ok "the twelve Codex runs are published: docs/trials.md and docs/agent-compatibility.md link the summary and the rows of docs/trials.md name the Codex runs, the summary keeps the note, holds no placeholder and has one result row per run with its guard, runs.csv names the same twelve runs with the verdicts of the evidence (ten PASS, time-limit FAIL with 10 of 12 and stuck-loop FAIL with 9 of 11, exit codes as recorded), the same outcome, assertions, wall seconds and commands as its table row, and every FAIL run has a classification row in the Failures section (TASK-140.2)"; else bad "Codex summary (TASK-140.2): $(printf '%s' "$cdx_out" | tr '\n' ';')"; fi
+# The same check on a copy with gaps: no link in either page, a row of docs/trials.md that names no Codex runs and still points at
+# this task, no note, two markers, one result row less, one row less in runs.csv, the guard cell of one row emptied, the outcome of
+# one run flipped in runs.csv only, the commands of another changed, a FAIL run turned PASS in the table and in runs.csv (with its
+# assertions), the classification row of the other FAIL run removed, and a non-zero agent exit. Each marker, link and gap costs
+# one line, the missing result row and the missing row of runs.csv one line each for their count and together one for the names,
+# the flipped outcome of loop-limit three (it differs from the evidence and from the table, and it has no classification row), and
+# the stuck-loop run turned PASS three (its outcome and both assertion counts differ from the evidence).
+cdx_d="$root/docs/evals/codex-linux-2026-11-25"
+cdxt="$(mktemp -d)"; mkdir -p "$cdxt/docs/evals/codex-linux-2026-11-25"
+tr -d '\r' < "$root/docs/trials.md" | grep -vF 'codex-linux-2026-11-25' \
+  | sed -e '/^| Planning inside/s/pi, Claude Code and Codex runs, below/pi and Claude Code runs, below; Codex runs: TASK-140.2/' > "$cdxt/docs/trials.md"
+tr -d '\r' < "$root/docs/agent-compatibility.md" | grep -vF 'codex-linux-2026-11-25' > "$cdxt/docs/agent-compatibility.md"
+{ tr -d '\r' < "$cdx_d/summary.md" | grep -v '^| `add-lane` |' | grep -vF 'Only this summary is published' | grep -v '^| `time-limit` | Skill, in part' \
+    | sed -e '/^| `stale-claim` |/s/| The stale mark |$/|  |/' \
+         -e '/^| `stuck-loop` | FAIL | 9 of 11 |/s/| FAIL | 9 of 11 |/| PASS | 11 of 11 |/'
+  printf '<!-- placeholder -->\nTBD\n'; } > "$cdxt/docs/evals/codex-linux-2026-11-25/summary.md"
+tr -d '\r' < "$cdx_d/runs.csv" | grep -v '^2026-11-24,no-backlog,' \
+  | sed -e 's/^\(2026-11-24,loop-limit,loop-limit,[^,]*,[^,]*,[^,]*\),PASS,/\1,FAIL,/' \
+        -e 's/^\(2026-11-24,stuck-loop,stuck-loop,[^,]*,[^,]*,[^,]*\),FAIL,0,1,9,2,/\1,PASS,0,1,11,0,/' \
+        -e 's/^\(2026-11-24,resumed-twice,resumed-twice,[^,]*,[^,]*,[^,]*,PASS\),0,0,/\1,1,0,/' \
+        -e 's/^\(2026-11-24,happy-path,happy-path,[^,]*,[^,]*,[^,]*,PASS,0,0,12,0,80\),13,/\1,14,/' > "$cdxt/docs/evals/codex-linux-2026-11-25/runs.csv"
+cdx_t="$(cdxcheck "$cdxt")"; rm -rf "$cdxt"
+if [ "$(printf '%s\n' "$cdx_t" | grep -c '^CDX')" -eq 20 ]; then ok "the Codex summary check fails a missing link in either page, a row of docs/trials.md that names no Codex runs or still points at this task, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, an outcome or an assertion count that differs from the evidence or between a table row and runs.csv, a FAIL run without its classification row, and a non-zero agent exit"; else bad "the Codex summary check missed a gap: $(printf '%s' "$cdx_t" | tr '\n' ';')"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

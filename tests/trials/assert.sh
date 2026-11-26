@@ -48,7 +48,7 @@ fi
 case "$scenario" in
 interrupted-merge)
   r=todo/FEAT-001-add-subtract-multiply-calc
-  chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l)" = 0 ]'
+  chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l | tr -d " ")" = 0 ]'
   chk "merged child branch deleted" '! git branch --list "todo/FEAT-001.1-*" | grep -q .'
   chk "root branch has subtract" 'at $r calc.py | grep -q "def subtract"'
   chk "FEAT-001.1 is [x] on the root branch" 'at $r TODO.md | grep -q "\[x\] \*\*FEAT-001.1\*\*"'
@@ -56,7 +56,7 @@ interrupted-merge)
   chk "main untouched (no merge, no work)" '! at main calc.py | grep -q "def subtract"'
   chk "merge commit is --no-ff with the skill message" '[ "$(git log --merges --format=%s $r -1)" = "Merge FEAT-001.1 into FEAT-001" ]'
   chk "still on the root branch, tree clean" '[ "$(git branch --show-current)" = $r ] && clean'
-  chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l)" = 1 ]'
+  chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l | tr -d " ")" = 1 ]'
   ;;
 refresh-from-base)
   r=todo/FEAT-001-add-subtract-function-calc
@@ -112,7 +112,7 @@ race-claim-benign)
   chk "main shows FEAT-001 claimed with the agent's branch" 'at main TODO.md | grep -A3 "FEAT-001\*\*" | grep -q "State: branch todo/FEAT-001-"'
   chk "agent's branch exists" 'git branch --list "todo/FEAT-001-*" | grep -q .'
   chk "main is an ancestor of the agent's branch" 'git merge-base --is-ancestor main $(git branch --list "todo/FEAT-001-*" | head -1 | tr -d "* ")'
-  chk "claim is the only extra commit on main" '[ "$(git log --oneline $(git log --format=%H -E --grep="^docs: (add a note to the readme|touch readme)" -1)..main | wc -l)" = 1 ]'
+  chk "claim is the only extra commit on main" '[ "$(git log --oneline $(git log --format=%H -E --grep="^docs: (add a note to the readme|touch readme)" -1)..main | wc -l | tr -d " ")" = 1 ]'
   chk "FEAT-001 is [/] on the agent's branch" 'at "$(git branch --list "todo/FEAT-001-*" | head -1 | tr -d "* ")" TODO.md | grep -q "\[/\] \*\*FEAT-001"'
   ;;
 release-ask)
@@ -125,7 +125,7 @@ release)
   chk "0.1.0 section untouched" 'at HEAD CHANGELOG.md | sed -n "/^## \[0\.1\.0\]/,/^\[Unreleased\]/p" | grep -q "Initial calculator with add"'
   chk "compare links updated" 'at HEAD CHANGELOG.md | grep -q "^\[Unreleased\]: .*compare/v0.2.0...HEAD" && at HEAD CHANGELOG.md | grep -q "^\[0.2.0\]:"'
   chk "release commit touches only CHANGELOG.md" '[ "$(git diff --name-only HEAD~1 HEAD)" = "CHANGELOG.md" ] && [ "$(git log -1 --format=%s)" = "chore(release): 0.2.0" ]'
-  chk "exactly one new commit" '[ "$(new_commits | wc -l)" = 1 ] && clean'
+  chk "exactly one new commit" '[ "$(new_commits | wc -l | tr -d " ")" = 1 ] && clean'
   ;;
 monorepo)
   chk "TODO.md exists with the task tree heading" '[ -f TODO.md ] && grep -q "^## .*Task Tree" TODO.md'
@@ -145,7 +145,7 @@ lanes)
   chk "subtract and shout both on main" 'at main calc.py | grep -q subtract && at main text.py | grep -q shout'
   chk "tests for both exist on main" 'at main tests/test_calc.py | grep -q test_subtract && at main tests/test_text.py | grep -q test_shout'
   chk "no todo branches left" '[ -z "$(git branch --list "todo/*")" ]'
-  chk "no extra worktrees left" '[ "$(git worktree list | wc -l)" = 1 ]'
+  chk "no extra worktrees left" '[ "$(git worktree list | wc -l | tr -d " ")" = 1 ]'
   chk "both entries have the core format" 'at main CHANGELOG.md | entry FEAT-001 && at main CHANGELOG.md | entry FEAT-002'
   chk "main checked out and tests pass" '[ "$(git branch --show-current)" = main ] && python3 -m unittest discover -s tests'
   chk "lane work ran in separate worktrees" 'lane_worktrees'
@@ -153,7 +153,7 @@ lanes)
   ;;
 replan)
   chk "FEAT-003 is gone from the tree" '! grep -q "FEAT-003" TODO.md'
-  chk "FEAT-003 id is not reused" '[ "$(grep -o "FEAT-003" TODO.md | wc -l)" = 0 ]'
+  chk "FEAT-003 id is not reused" '[ "$(grep -o "FEAT-003" TODO.md | wc -l | tr -d " ")" = 0 ]'
   chk "FEAT-001 untouched" 'grep -q "\*\*FEAT-001\*\* · P1 · low · Add subtract to calc.py" TODO.md'
   chk "plan doc has a dated revision line naming FEAT-003" 'sed -n "/^## Revisions/,\$p" docs/plans/PROJECT.md | grep -E "^- [0-9]{4}-[0-9]{2}-[0-9]{2} · " | grep -q FEAT-003'
   chk "FEAT-002 untouched" 'grep -q "\*\*FEAT-002\*\* · P1 · low · Add a command line interface to the calculator" TODO.md'
@@ -485,7 +485,7 @@ ts-baseline-red|java-baseline-red)
 ts-interrupted|java-interrupted)
 # shellcheck disable=SC2034
   if [ "$scenario" = ts-interrupted ]; then r=todo/FEAT-001-add-subtract-multiply-src; src=src/calc.ts; else r=todo/FEAT-001-add-subtract-multiply-calc; src=src/main/java/mini/Calc.java; fi
-  chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l)" = 0 ]'
+  chk "child branch merged into the root branch" '[ "$(git branch --no-merged $r --list "todo/FEAT-001.1-*" | wc -l | tr -d " ")" = 0 ]'
   chk "merged child branch deleted" '! git branch --list "todo/FEAT-001.1-*" | grep -q .'
   chk "root branch has subtract" 'at $r $src | grep -q subtract'
   chk "FEAT-001.1 is [x] on the root branch" 'at $r TODO.md | grep -q "\[x\] \*\*FEAT-001.1\*\*"'
@@ -493,14 +493,14 @@ ts-interrupted|java-interrupted)
   chk "main untouched (no merge, no work)" '! at main $src | grep -q subtract'
   chk "merge commit is --no-ff with the skill message" '[ "$(git log --merges --format=%s $r -1)" = "Merge FEAT-001.1 into FEAT-001" ]'
   chk "still on the root branch, tree clean" '[ "$(git branch --show-current)" = $r ] && clean'
-  chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l)" = 1 ]'
+  chk "exactly one new commit (the merge)" '[ "$(new_commits | wc -l | tr -d " ")" = 1 ]'
   ;;
 ts-lifecycle)
   chk "FEAT-001 drained into the changelog on main with the core format" 'at main CHANGELOG.md | entry FEAT-001'
   chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
   chk "subtract and multiply exist on main" 'at main src/calc.ts | grep -q subtract && at main src/calc.ts | grep -q multiply'
   chk "a test file per child exists on main" 'git cat-file -e main:tests/subtract.test.ts && git cat-file -e main:tests/multiply.test.ts'
-  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l)" = 1 ]'
+  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l | tr -d " ")" = 1 ]'
   chk "main checked out, tree clean, node_modules not tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "^node_modules/")" = 0 ]'
   ;;
 java-lifecycle)
@@ -508,7 +508,7 @@ java-lifecycle)
   chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
   chk "subtract and multiply exist on main" 'at main src/main/java/mini/Calc.java | grep -q subtract && at main src/main/java/mini/Calc.java | grep -q multiply'
   chk "SubtractTest and MultiplyTest exist on main" 'git cat-file -e main:src/test/java/mini/SubtractTest.java && git cat-file -e main:src/test/java/mini/MultiplyTest.java'
-  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l)" = 1 ]'
+  chk "no todo branches or extra worktrees left" '[ -z "$(git branch --list "todo/*")" ] && [ "$(git worktree list | wc -l | tr -d " ")" = 1 ]'
   chk "main checked out, tree clean, target/ not tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "/target/\\|^target/")" = 0 ]'
   ;;
 multi-module)
@@ -516,7 +516,7 @@ multi-module)
   chk "main TODO.md has no roots left" '! at main TODO.md | grep -q "^- \["'
   chk "subtract is in core and shout in text, each only in its own module" 'at main core/src/main/java/mini/core/Calc.java | grep -q subtract && at main text/src/main/java/mini/text/Text.java | grep -q shout && ! at main text/src/main/java/mini/text/Text.java | grep -q subtract'
   chk "SubtractTest and ShoutTest exist on main" 'git cat-file -e main:core/src/test/java/mini/core/SubtractTest.java && git cat-file -e main:text/src/test/java/mini/text/ShoutTest.java'
-  chk "each lane ran in its own worktree and none is left" '[ "$(git worktree list | wc -l)" = 1 ] && [ -z "$(git branch --list "todo/*")" ]'
+  chk "each lane ran in its own worktree and none is left" '[ "$(git worktree list | wc -l | tr -d " ")" = 1 ] && [ -z "$(git branch --list "todo/*")" ]'
   chk "main checked out, tree clean, no build output tracked" '[ "$(git branch --show-current)" = main ] && clean && [ "$(git ls-files | grep -c "target/")" = 0 ]'
   chk "the whole reactor build passes on main" 'mvn -q -B test'
   chk "lane work ran in separate worktrees" 'lane_worktrees'

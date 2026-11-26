@@ -9,7 +9,7 @@ Common to all commands:
 - Without a `TODO.md`, every command but `/todo` and `/todo-init` says so, suggests `/todo-init` and stops.
 - On an invariant violation a command reports it, changes nothing and asks. The one repair: a writing command (`/todo-continue`, `/todo-add`, `/todo-update`, `/todo-plan`) deletes a subtree from `TODO.md` when its IDs are exactly the root and `Includes:` IDs of one CHANGELOG entry (a drain that was interrupted), and says so.
 - When a rule conflicts with an explicit instruction from you, the agent states the conflict and asks.
-- In Claude Code with the plugin, commands are namespaced (`/todo-skills:todo-add`). In Codex, start them with `$todo-add` or plain language.
+- In Claude Code with the plugin, commands are namespaced (`/td-cl:todo-add`). In Codex, start them with `$todo-add` or plain language.
 
 ## `/todo`
 

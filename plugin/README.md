@@ -1,8 +1,8 @@
-# todo-skills (plugin)
+# td-cl (plugin)
 
-A lean, file-native backlog for coding agents. Nine skills (`/todo-init`, `/todo-plan`, `/todo-add`, `/todo-continue`, `/todo-update`, `/todo-status`, `/todo-report`, `/todo-release`, and the `todo` core rules) keep a task tree in `TODO.md`, work each task on its own git branch, require tests plus a regression run before anything merges, and archive finished work in an append-only `CHANGELOG.md`.
+td-cl (TODO to CHANGELOG): a lean, file-native backlog for coding agents. Nine skills (`/todo-init`, `/todo-plan`, `/todo-add`, `/todo-continue`, `/todo-update`, `/todo-status`, `/todo-report`, `/todo-release`, and the `todo` core rules) keep a task tree in `TODO.md`, work each task on its own git branch, require tests plus a regression run before anything merges, and archive finished work in an append-only `CHANGELOG.md`.
 
-Install in Claude Code with `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install todo-skills@todo-skills`; in Codex with `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add todo-skills@todo-skills`.
+Install in Claude Code with `/plugin marketplace add bassemZohdy/todo-skills`, then `/plugin install td-cl@todo-skills`; in Codex with `codex plugin marketplace add bassemZohdy/todo-skills`, then `codex plugin add td-cl@todo-skills`.
 
 Besides those two files, the skills read the project's README, CONTRIBUTING and `docs/` (test command, base branch, Definition of Done, the docs a task links), and, when you agree, write plan docs in `docs/plans/`, the README `Tests:` line, an optional requirements matrix, `docs/status.html`, and a check script with a CI job or pre-push hook under `.todo/`. Code changes stay within the task at hand.
 

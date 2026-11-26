@@ -2,7 +2,7 @@
 
 Last updated 2026-11-22.
 
-todo-skills is a set of Markdown instructions (skills) that a coding agent follows to keep a backlog in your repository. The plugin has no server, account, MCP server or hook, and its maintainer operates no service that receives your data.
+td-cl (the plugin of the todo-skills repository) is a set of Markdown instructions (skills) that a coding agent follows to keep a backlog in your repository. The plugin has no server, account, MCP server or hook, and its maintainer operates no service that receives your data.
 
 ## What the plugin collects
 

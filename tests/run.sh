@@ -1173,6 +1173,127 @@ co_stale="$(costcheck "$cot" | tr -d '\r')"
 printf 'Costs $5.\n<!-- cost:begin -->\n%s\n<!-- cost:end -->\n' "$co_plain" > "$co_page"
 co_unl="$(costcheck "$cot" | tr -d '\r')"; rm -rf "$cot" "$cof"
 if [ -z "$co_fresh" ] && [ "$(printf '%s\n' "$co_stale" | grep -c '^COST')" -eq 2 ] && printf '%s\n' "$co_stale" | grep -q 'mail address' && printf '%s\n' "$co_stale" | grep -q 'not the output' && [ "$co_unl" = 'COST a money figure is not labelled as computed from published pricing' ]; then ok "the cost page check passes a fresh copy and fails a mail address, a stale table and an unlabelled figure (TASK-137)"; else bad "the cost page check missed a gap (TASK-137): fresh [$co_fresh] stale [$co_stale] unlabelled [$co_unl]"; fi
+# TASK-139.3: the benchmark README links the dated summary of the initialised-project batch (setup cost, cost per task, cost per node).
+# Its tables are the output of tests/benchmark/setup_cost.py on the published results with the options its begin marker records, so a
+# reader can recompute them; it keeps the note that only it is published, is ASCII, holds no mail address and labels its money figures
+# as computed from published pricing and its node counts as a local measurement. coverage-pending.txt lists exactly the cells of the
+# batch that have fewer than 3 scored rows (setup_cost.py --pending), and the PENDING-5-6 mark stands in the hand-written text if and
+# only if that list is not empty: with the list empty no mark may be left, so the last runs cannot be published and the summary
+# forgotten, and a list that still names a cell cannot hide the missing mark.
+setupcheck() {   # <repo root>: prints one SET line per problem
+python3 - "$1" <<'PY'
+import os, re, subprocess, sys
+root = sys.argv[1]
+MARK = '[[PENDING-5-6]]'
+readme = open(os.path.join(root, 'tests', 'benchmark', 'README.md'), encoding='utf-8').read()
+m = re.search(r'\]\((\.\./\.\./docs/evals/benchmark-initialised-project-\d{4}-\d{2}-\d{2}/summary\.md)\)', readme)
+if not m:
+    print('SET tests/benchmark/README.md links no dated summary of the initialised-project batch'); sys.exit()
+doc = os.path.normpath(os.path.join(root, 'tests', 'benchmark', m.group(1)))
+if not os.path.exists(doc):
+    print('SET the linked summary does not exist'); sys.exit()
+raw = open(doc, 'rb').read()
+if re.search(rb'[^\x00-\x7f]', raw): print('SET the summary holds a character that is not ASCII')
+t = raw.decode('utf-8', 'replace').replace('\r\n', '\n')
+if 'Only this summary is published' not in t: print('SET the summary lacks the note that only it is published')
+if re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', t): print('SET the summary holds a mail address')
+if re.search(r'[$]\s?\d|\bUSD\b', t) and 'computed from published pricing' not in t: print('SET a money figure is not labelled as computed from published pricing')
+if 'local measurement' not in t: print('SET the node counts are not marked as a local measurement')
+b = re.search(r'<!-- setup-cost:begin((?: --[a-z-]+ [A-Za-z0-9=.,:_-]+)*) -->\n(.*?)<!-- setup-cost:end -->', t, re.S)
+if not b:
+    print('SET the summary has no generated block'); sys.exit()
+script = os.path.join(root, 'tests', 'benchmark', 'setup_cost.py')
+results = os.path.join(root, 'docs', 'evals', 'benchmark', 'results', 'results.csv')
+args = b.group(1).split()
+run = subprocess.run([sys.executable, script, results] + args, capture_output=True, text=True)
+if run.returncode != 0 or run.stdout.strip() != b.group(2).strip():
+    print('SET the generated block is not the output of tests/benchmark/setup_cost.py on results.csv with the options of its marker')
+since = args[args.index('--since') + 1] if '--since' in args else ''
+pend = subprocess.run([sys.executable, script, results, '--since', since, '--pending'], capture_output=True, text=True).stdout.split()
+try:
+    lines = open(os.path.join(root, 'tests', 'benchmark', 'coverage-pending.txt'), encoding='utf-8').read().replace('\r\n', '\n').split('\n')
+except OSError:
+    lines = []
+listed = [l.strip() for l in lines if l.strip() and not l.startswith('#')]
+if sorted(listed) != sorted(pend):
+    print('SET coverage-pending.txt lists [%s], but the cells with fewer than 3 scored rows are [%s]' % (' '.join(listed), ' '.join(pend)))
+outside = t[:b.start()] + t[b.end():]
+if listed and MARK not in outside:
+    print('SET coverage-pending.txt is not empty but the summary has no pending mark outside its generated block')
+if not listed and MARK in t:
+    print('SET coverage-pending.txt is empty but the summary still holds a pending mark')
+PY
+}
+set_out="$(setupcheck "$root")"
+if [ -z "$set_out" ]; then ok "the initialised-project summary is linked, its tables are the output of setup_cost.py on results.csv, coverage-pending.txt lists exactly the cells with fewer than 3 scored rows and the pending mark stands in the text if and only if the list is not empty (TASK-139.3)"; else bad "initialised-project summary (TASK-139.3): $(printf '%s' "$set_out" | tr '\n' ';')"; fi
+# The same check on fixtures, so that it does not depend on the state of the real table: a private tree with its own results (three runs
+# per cell of the batch, or two cells short), a summary built from setup_cost.py, and the list. A fresh tree reports nothing; one copy
+# with six gaps (a mail address, a stale table, a non-ASCII character, no note, an empty list while two cells are short, which costs two
+# lines), one with the hand-written marks removed while two cells are short, one with a mark left and nothing short, and one that
+# lists a cell although nothing is short (two lines) are each reported with an exact count.
+mkfix() {   # <dir> <short|full>: a tree with the files the check reads
+  local d="$1" mode="$2" a s k n i=0 args
+  mkdir -p "$d/tests/benchmark" "$d/docs/evals/benchmark/results" "$d/docs/evals/benchmark-initialised-project-2026-01-01"
+  cp "$root/tests/benchmark/setup_cost.py" "$root/tests/benchmark/cost.py" "$root/tests/benchmark/tokens.py" "$d/tests/benchmark/"
+  printf '[s](../../docs/evals/benchmark-initialised-project-2026-01-01/summary.md)\n' > "$d/tests/benchmark/README.md"
+  echo "run_id,date_utc,arm,scenario,agent,agent_version,model,isolation,first_outcome,final_outcome,attempts,agent_exit,verifier_exit,duration_s,input_tokens,output_tokens,cached_tokens,llm_calls,subagent_calls,evidence_sha256" > "$d/docs/evals/benchmark/results/results.csv"
+  for s in 1-bugfix 2-api-feature 3-security-token 4-multi-module 5-interrupted 6-ambiguous 7-text-helpers; do
+    for a in todo-skills todo-skills-existing todo-skills-flow lean-baseline no-methodology; do
+      case "$s:$a" in *:todo-skills-flow|*:lean-baseline|*:no-methodology) [ "$s" = 7-text-helpers ] || continue ;; esac
+      n=3
+      if [ "$mode" = short ]; then case "$s:$a" in 5-interrupted:todo-skills-existing) n=2 ;; 6-ambiguous:todo-skills-existing) n=0 ;; esac; fi
+      k=1   # not seq: with n=0 BSD seq (macOS) counts down and prints 1 and 0
+      while [ "$k" -le "$n" ]; do
+        i=$((i + 1))
+        echo "r-$a-$s-$k,2026-01-0$((k + 1))T10:00:00Z,$a,$s,pi,1,m,provisional,PASS,PASS,1,0,0,$((100 + i * 7 % 50)),$((1000000 + i * 31337)),$((10000 + i * 211)),$((900000 + i * 977)),$((20 + i % 9)),unavailable,x"
+        k=$((k + 1))
+      done
+    done
+  done >> "$d/docs/evals/benchmark/results/results.csv"
+  args="--since 2026-01-01 --price input=1.40,cached=0.26,output=4.40 --price-date 2026-01-01 --nodes r-todo-skills-existing-7-text-helpers-1=4,r-todo-skills-existing-7-text-helpers-2=4,r-todo-skills-existing-7-text-helpers-3=3"
+  {
+    printf '# Summary\n\n> Only this summary is published.\n\n'
+    [ "$mode" = short ] && printf 'The setup cost is not separable from the spread. %s\n\n' '[[PENDING-5-6]]'
+    printf 'Node counts are a local measurement; the USD figures are computed from published pricing.\n\n<!-- setup-cost:begin %s -->\n' "$args"
+    # shellcheck disable=SC2086  # $args is a list of options
+    python3 "$d/tests/benchmark/setup_cost.py" "$d/docs/evals/benchmark/results/results.csv" $args
+    printf '<!-- setup-cost:end -->\n'
+  } > "$d/docs/evals/benchmark-initialised-project-2026-01-01/summary.md"
+  if [ "$mode" = short ]; then printf '# cells\ntodo-skills-existing/5-interrupted\ntodo-skills-existing/6-ambiguous\n' > "$d/tests/benchmark/coverage-pending.txt"
+  else printf '# cells\n' > "$d/tests/benchmark/coverage-pending.txt"; fi
+}
+set_sum() { printf '%s' "$1/docs/evals/benchmark-initialised-project-2026-01-01/summary.md"; }
+setd="$(mktemp -d)"; mkfix "$setd/short" short; mkfix "$setd/full" full
+set_fresh="$(setupcheck "$setd/short")$(setupcheck "$setd/full")"
+# a published INFRA_ERROR row enters no median and no run count: the output of setup_cost.py and its --pending list do not change
+cp -R "$setd/full" "$setd/i"
+set_i1="$(python3 "$setd/full/tests/benchmark/setup_cost.py" "$setd/full/docs/evals/benchmark/results/results.csv" --since 2026-01-01 --price input=1.40,cached=0.26,output=4.40 --price-date 2026-01-01 --nodes r-todo-skills-existing-7-text-helpers-1=4,r-todo-skills-existing-7-text-helpers-2=4,r-todo-skills-existing-7-text-helpers-3=3)"
+echo "r-todo-skills-1-bugfix-9,2026-01-09T10:00:00Z,todo-skills,1-bugfix,pi,1,m,provisional,INFRA_ERROR,INFRA_ERROR,1,0,0,5000,9000000,90000,10,99,unavailable,x" >> "$setd/i/docs/evals/benchmark/results/results.csv"
+echo "r-todo-skills-existing-5-interrupted-9,2026-01-09T10:00:00Z,todo-skills-existing,5-interrupted,pi,1,m,provisional,INFRA_ERROR,INFRA_ERROR,1,0,0,5000,9000000,90000,10,99,unavailable,x" >> "$setd/i/docs/evals/benchmark/results/results.csv"
+set_i2="$(python3 "$setd/i/tests/benchmark/setup_cost.py" "$setd/i/docs/evals/benchmark/results/results.csv" --since 2026-01-01 --price input=1.40,cached=0.26,output=4.40 --price-date 2026-01-01 --nodes r-todo-skills-existing-7-text-helpers-1=4,r-todo-skills-existing-7-text-helpers-2=4,r-todo-skills-existing-7-text-helpers-3=3)"
+set_i3="$(python3 "$setd/i/tests/benchmark/setup_cost.py" "$setd/i/docs/evals/benchmark/results/results.csv" --since 2026-01-01 --pending)"
+# six gaps in a copy of the short tree
+cp -R "$setd/short" "$setd/a"; sa="$(set_sum "$setd/a")"
+printf 'mail me at someone@example.com.\n\303\251\n' >> "$sa"
+awk '/^\| `1-bugfix` \|/ && !d { d = 1; next } { print }' "$sa" | grep -vF 'Only this summary is published' > "$sa.new" && mv "$sa.new" "$sa"
+printf '# cells\n' > "$setd/a/tests/benchmark/coverage-pending.txt"
+set_a="$(setupcheck "$setd/a")"
+# the hand-written marks removed while two cells are short
+cp -R "$setd/short" "$setd/b"; sb="$(set_sum "$setd/b")"
+awk '/<!-- setup-cost:begin/ { inb = 1 } /<!-- setup-cost:end/ { inb = 0; print; next } inb { print; next } { gsub(/\[\[PENDING-5-6\]\]/, ""); print }' "$sb" > "$sb.new" && mv "$sb.new" "$sb"
+set_b="$(setupcheck "$setd/b")"
+# a mark left while nothing is short
+cp -R "$setd/full" "$setd/c"; printf 'Left over. %s\n' '[[PENDING-5-6]]' >> "$(set_sum "$setd/c")"
+set_c="$(setupcheck "$setd/c")"
+# a cell listed while nothing is short
+cp -R "$setd/full" "$setd/d"; printf 'todo-skills-existing/6-ambiguous\n' >> "$setd/d/tests/benchmark/coverage-pending.txt"
+set_d="$(setupcheck "$setd/d")"
+rm -rf "$setd"
+if [ -n "$set_i1" ] && [ "$set_i1" = "$set_i2" ] && [ -z "$set_i3" ]; then ok "an INFRA_ERROR row in the published table enters no median, run count or pending cell of setup_cost.py (TASK-139.3)"; else bad "setup_cost.py counted an INFRA_ERROR row (TASK-139.3): same output [$([ "$set_i1" = "$set_i2" ] && echo yes || echo no)], pending [$set_i3]"; fi
+if [ -z "$set_fresh" ] && [ "$(printf '%s\n' "$set_a" | grep -c '^SET')" -eq 6 ] && [ "$(printf '%s\n' "$set_b" | grep -c '^SET')" -eq 1 ] && printf '%s\n' "$set_b" | grep -q 'no pending mark' \
+   && [ "$(printf '%s\n' "$set_c" | grep -c '^SET')" -eq 1 ] && printf '%s\n' "$set_c" | grep -q 'still holds a pending mark' \
+   && [ "$(printf '%s\n' "$set_d" | grep -c '^SET')" -eq 2 ]; then ok "the initialised-project summary check passes a fresh tree and reports a mail address, a stale table, a character that is not ASCII, a missing note, a list that differs from the short cells, a mark with an empty list and a missing mark with a listed cell (TASK-139.3)"
+else bad "the initialised-project summary check (TASK-139.3): fresh '$set_fresh', a $(printf '%s\n' "$set_a" | grep -c '^SET'), b $(printf '%s\n' "$set_b" | grep -c '^SET'), c $(printf '%s\n' "$set_c" | grep -c '^SET'), d $(printf '%s\n' "$set_d" | grep -c '^SET')"; fi
 # TASK-124: three trial assertions accept what Codex agents did while following the skill (2026-11-14): a Done when run from tests/, a test named with its ID, a report that says "working tree".
 ta="$root/tests/trials/assert.sh"
 if grep -qF '(cd tests && )?python3 -m unittest (tests\.)?test_calc' "$ta" && grep -qF 'def test_[a-z0-9_]*power' "$ta" && grep -qF 'clean|uncommitted|working.tree' "$ta"; then ok "assert.sh accepts a Done when run from tests/, a test named with its ID and a report that says working tree (TASK-124)"; else bad "assert.sh still rejects one of the three forms Codex used (TASK-124)"; fi

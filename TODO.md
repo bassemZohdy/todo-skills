@@ -6,7 +6,7 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-139** · P1 · mid · Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task
+- [/] **TASK-139** · P1 · mid · Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task
   - Done when: the published rows cover the variant and the scenario, and a dated summary states the setup cost, the cost per task and the cost per node with their limits; `bash tests/trials/test-benchmark-harness.sh`
   - Links: Depends: TASK-137
   - State: branch todo/TASK-139-benchmark-initialised-project-multi from main; next: build children

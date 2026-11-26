@@ -12,6 +12,9 @@
 # exactly their function's check line and the line about the agent's tests failing, tests of one function only fail that line and one
 # data-driven test of all four passes it, and publish.sh check --coverage prints the scenarios of coverage-pending.txt as PENDING
 # and fails when a listed one is complete or does not exist.
+# TASK-139.3: a line <arm>/<scenario> of coverage-pending.txt lists one cell, the arm a folder under arms/ or variants/ (the cells of
+# the variant todo-skills-existing, which the scenario rule never asks for): PENDING with its count of scored rows while it has
+# fewer than 3, a failure with 3 or more, and a failure when the arm or the scenario is not a folder.
 # Usage: bash tests/trials/test-benchmark-harness.sh
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -261,13 +264,35 @@ out="$(pl_check)"; rc=$?
 out="$(pl_check)"; rc=$?
 [ "$rc" -ne 0 ] && [ "$(printf '%s\n' "$out" | grep -c '^FAIL  no scored row for arm army on scenario s1$')" = 1 ] && ! printf '%s\n' "$out" | grep -q '^PENDING' \
   && ok "a scenario that is not listed still fails on a missing row" || bad "unlisted scenario: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
-# The repository's own list: every id in it is a scenario folder, and the real check prints each as PENDING. TASK-139.3 publishes the
-# rows of 7-text-helpers and empties the list; it then changes this pin to "the list is empty and no PENDING line is printed".
+# TASK-139.3: a line <arm>/<scenario> lists one cell, the arm a folder under arms/ or variants/. The cells of a variant are never asked
+# for by the scenario rule (it reads arms/ only), so this is the one way to list them. A cell with fewer than 3 scored rows (PASS or
+# FAIL: an INFRA_ERROR row does not count) is PENDING with its count; with 3 or more it fails and says to remove it; an arm or a
+# scenario that is not a folder fails. A private tree with an arm, a variant and a scenario, and its own table.
+pc="$tmp/pc"; mkdir -p "$pc/arms/armx" "$pc/variants/varz" "$pc/scenarios/s1"; cp "$pubsh" "$pc/"
+pc_check() { BENCH_RESULTS="$pc/results.csv" bash "$pc/publish.sh" check --coverage 2>&1; }
+head -1 "$pubdir/results/results.csv" > "$pc/results.csv"
+{ plrow armx s1 PASS; plrow varz s1 PASS; plrow varz s1 FAIL; plrow varz s1 INFRA_ERROR; } >> "$pc/results.csv"
+printf '# cells\r\n\r\nvarz/s1\r\n' > "$pc/coverage-pending.txt"
+out="$(pc_check)"; rc=$?
+[ "$rc" = 0 ] && printf '%s\n' "$out" | grep -qx 'PENDING  cell varz/s1: 2 of 3 scored rows' && ! printf '%s\n' "$out" | grep -q '^FAIL' \
+  && ok "a listed cell of a variant with two scored rows is PENDING with its count (an INFRA_ERROR row is not counted) and does not fail the check" || bad "pending cell: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+plrow varz s1 PASS >> "$pc/results.csv"
+out="$(pc_check)"; rc=$?
+[ "$rc" -ne 0 ] && printf '%s\n' "$out" | grep -qx 'FAIL  cell varz/s1 is complete (3 scored rows): remove it from coverage-pending.txt' && ! printf '%s\n' "$out" | grep -q '^PENDING' \
+  && ok "a listed cell with three scored rows fails the check and says to remove it from coverage-pending.txt" || bad "complete cell: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+head -1 "$pubdir/results/results.csv" > "$pc/results.csv"; { plrow armx s1 PASS; plrow varz s1 PASS; } >> "$pc/results.csv"
+printf 'nosuch/s1\r\nvarz/nosuch\r\narmx/s1\r\n' > "$pc/coverage-pending.txt"
+out="$(pc_check)"; rc=$?
+[ "$rc" -ne 0 ] && [ "$(printf '%s\n' "$out" | grep -c '^FAIL')" = 2 ] && printf '%s\n' "$out" | grep -qx 'FAIL  coverage-pending.txt lists the cell nosuch/s1, but nosuch is not a folder under arms/ or variants/' \
+  && printf '%s\n' "$out" | grep -qx 'FAIL  coverage-pending.txt lists the cell varz/nosuch, but nosuch is not a folder under scenarios/' && printf '%s\n' "$out" | grep -qx 'PENDING  cell armx/s1: 1 of 3 scored rows' \
+  && ok "a listed cell whose arm or scenario is not a folder fails, and an arm under arms/ can be listed too" || bad "unknown cells: rc=$rc $(printf '%s\n' "$out" | tr '\n' ' ')"
+# The repository's own list: empty, because every cell of the batch has its 3 scored rows, and the real coverage check prints no PENDING
+# line. (While a cell was still being run the list named it and the check printed it as PENDING with its count.)
 pendfile="$bench/coverage-pending.txt"
 listed="$(tr -d '\r' < "$pendfile" 2>/dev/null | grep -v '^#' | grep -v '^$' | tr '\n' ' ')"
-seen="$(grep -c '^PENDING  scenario ' "$tmp/pub-repo.txt")"
-[ "$listed" = "7-text-helpers " ] && [ "$seen" = 1 ] && grep -q '^PENDING  scenario 7-text-helpers: no scored row yet for ' "$tmp/pub-repo.txt" \
-  && ok "the repository's coverage-pending.txt lists 7-text-helpers, and the real coverage check prints it as PENDING and passes" || bad "coverage-pending.txt: '$listed', PENDING lines: $seen"
+seen="$(grep -c '^PENDING  ' "$tmp/pub-repo.txt")"
+[ -z "$listed" ] && [ "$seen" = 0 ] \
+  && ok "the repository's coverage-pending.txt is empty and the real coverage check prints no PENDING line and passes" || bad "coverage-pending.txt: '$listed', PENDING lines: $seen"
 
 # TASK-139.1: the variant todo-skills-existing (outside arms/, like todo-skills-flow) is the todo-skills arm in a project whose backlog
 # is set up: its start commit holds what /todo-init leaves and nothing else, so the agent starts at todo-add. existing_problems runs a

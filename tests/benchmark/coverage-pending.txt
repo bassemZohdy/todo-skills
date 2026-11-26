@@ -1,3 +1,4 @@
-# Scenarios that exist but have no published rows yet, one id per line. `publish.sh check --coverage` prints PENDING for them instead of failing on their missing rows.
-# It fails when a listed scenario is already covered by every arm: TASK-139.3 publishes the rows of 7-text-helpers and empties this list.
-7-text-helpers
+# Scenarios and cells that exist but are not yet complete in the published table, one per line. `publish.sh check --coverage` prints PENDING for them instead of failing on their missing rows.
+# A line with a scenario id lists a scenario that no arm under arms/ has a scored row for. A line <arm>/<scenario> lists one cell, the arm being a folder under arms/ or variants/, and stays until the cell has 3 scored rows.
+# It fails when a listed scenario or cell is already complete. TASK-139.3 published the whole batch, every cell has its 3 scored rows, and the list is empty.
+# `python3 tests/benchmark/setup_cost.py <results.csv> --since 2026-11-24 --pending` prints the cells of that batch with fewer than 3 scored rows, and prints nothing now.

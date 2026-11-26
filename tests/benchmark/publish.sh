@@ -13,6 +13,13 @@
 # scenarios listed in coverage-pending.txt next to this script (one scenario id per line, # starts a comment): a listed scenario
 # that lacks rows is printed as PENDING and does not fail. It is never a silent pass: a listed scenario that every arm already
 # covers fails (remove it from the list), and so does a listed id that is not a folder under scenarios/.
+# A line with a slash, <arm>/<scenario>, names one cell instead of a scenario (TASK-139.3): the arm is a folder under arms/ or
+# variants/, which is how the cells of a variant, outside arms/ and so never asked for by the scenario rule, are listed. A listed
+# cell with fewer than 3 scored rows is printed as PENDING with its count and does not fail; with 3 or more it fails (remove it
+# from the list), and so does a cell whose arm or scenario is not a folder. The count is over the whole published table, while
+# setup_cost.py --pending and the setupcheck pin in tests/run.sh count only the rows since 2026-11-24 (the batch of TASK-139). So only a
+# cell without older rows can be listed: todo-skills-existing/* and the 7-text-helpers cells. A short cell of todo-skills on 1-bugfix to
+# 6-ambiguous also has rows of 2026-11-12 to 14, so this check counts it complete and fails a line that lists it.
 # Environment: BENCH_RESULTS, the published table (default: docs/evals/benchmark/results/results.csv).
 # Needs bash and awk. Runs no agent and no command from the tables.
 set -u
@@ -56,6 +63,7 @@ check)
   [ -z "$dups" ] || { echo "FAIL  run id published twice: $dups"; fail=1; }
   if [ "$coverage" -eq 1 ]; then
     pending=""; [ -f "$here/coverage-pending.txt" ] && pending="$(tr -d '\r' < "$here/coverage-pending.txt" | sed 's/[[:space:]]*$//' | grep -v '^#' | grep -v '^$')"
+    pcells="$(printf '%s\n' "$pending" | grep '/')"; pending="$(printf '%s\n' "$pending" | grep -v '/')"
     for s in "$here"/scenarios/*/; do
       s1="$(basename "$s")"; miss=""
       for a in "$here"/arms/*/; do
@@ -72,6 +80,16 @@ check)
     while IFS= read -r id; do
       [ -n "$id" ] && [ ! -d "$here/scenarios/$id" ] && { echo "FAIL  coverage-pending.txt lists $id, which is not a folder under scenarios/"; fail=1; }
     done < <(printf '%s\n' "$pending")
+    while IFS= read -r cell; do
+      [ -n "$cell" ] || continue
+      carm="${cell%%/*}"; cscen="${cell#*/}"; cok=1
+      [ -d "$here/arms/$carm" ] || [ -d "$here/variants/$carm" ] || { echo "FAIL  coverage-pending.txt lists the cell $cell, but $carm is not a folder under arms/ or variants/"; fail=1; cok=0; }
+      [ -d "$here/scenarios/$cscen" ] || { echo "FAIL  coverage-pending.txt lists the cell $cell, but $cscen is not a folder under scenarios/"; fail=1; cok=0; }
+      [ "$cok" -eq 1 ] || continue
+      cn="$(rows "$pub" | awk -F, -v a="$carm" -v s="$cscen" '$3 == a && $4 == s && ($10 == "PASS" || $10 == "FAIL") { n++ } END { print n + 0 }')"
+      if [ "$cn" -ge 3 ]; then echo "FAIL  cell $cell is complete ($cn scored rows): remove it from coverage-pending.txt"; fail=1
+      else echo "PENDING  cell $cell: $cn of 3 scored rows"; fi
+    done < <(printf '%s\n' "$pcells")
   fi
   [ "$fail" -eq 0 ] || exit 1
   echo "OK: $n published row(s), each with the published columns and an evidence hash"

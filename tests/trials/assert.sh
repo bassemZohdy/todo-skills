@@ -217,6 +217,18 @@ regress-block)
   chk "Done when is unchanged" 'grep -q "Done when: subtract(5, 3) returns 2; .python3 -m unittest tests\.test_calc\.CalcTest\.test_subtract.$" TODO.md'
   chk "main holds only the claim: no subtract, no drain, no merge" '[ "$(git log --format=%s $start..main | grep -vc "^chore(backlog): claim FEAT-001 on ")" = 0 ] && ! at main calc.py | grep -q "def subtract" && ! at main CHANGELOG.md | grep -q FEAT-001'
   ;;
+smoke-tier)
+  # One /todo-continue: FEAT-001.1 is finished and merged into FEAT-001, the rest of the tree is open. The README has a
+  # Smoke: line, so the full suite runs once, at the tree's start (its count goes into the root's State), and the node itself
+  # is held to the smoke command. The counts come from .runs/, written by the project's own tests (setup.sh).
+  chk "the root's branch is checked out and FEAT-001.1 is [x], merged into FEAT-001" 'git branch --show-current | grep -Eq "^todo/FEAT-001-[a-z0-9-]+$" && grep -q "\[x\] \*\*FEAT-001\.1\*\*" TODO.md && git log --format=%s $start..HEAD | grep -qx "Merge FEAT-001.1 into FEAT-001"'
+  chk "FEAT-001.2 and the root FEAT-001 are still open" 'grep -q "^  - \[ \] \*\*FEAT-001\.2\*\*" TODO.md && grep -q "^- \[ \] \*\*FEAT-001\*\*" TODO.md'
+  chk "the full suite ran exactly once (the tree's baseline), not once per run of the node" '[ "$(grep -c run .runs/deep.log)" = 1 ]'
+  chk "the smoke command ran at least twice besides (the node's baseline and its verification)" '[ $(( $(grep -c run .runs/quick.log) - $(grep -c run .runs/deep.log) )) -ge 2 ]'
+  chk "the root's State holds the tree's full count: baseline 3 passing" 'grep -A3 "^- \[ \] \*\*FEAT-001\*\*" TODO.md | grep -Eq "State: .*baseline 3 passing; .*branch todo/"'
+  chk "no test of the project was deleted or changed" 'git diff --quiet $start HEAD -- tests/test_calc.py tests/quick_calc.py tests/deep_calc.py'
+  chk "the node's own test exists and the tree is clean" '[ -f tests/test_subtract.py ] && clean'
+  ;;
 stuck-loop)
   # Two honest endings: the node is blocked after its attempts ran out, or at once because no change can turn the acceptance
   # test green (a failure outside the node). Which one an agent chose, and how many runs it made, is read from the Git history

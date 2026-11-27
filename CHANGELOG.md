@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TASK-151** (task): Say in test-tiers.md that a child node does not run the full suite: it runs only its Done when and smoke (or its regression: command), and the full suite runs at the first node's start and at the parent's integration step. Ref: plugin/skills/todo/reference/test-tiers.md. Validated: `bash tests/test-smoke-tier.sh`. From: TASK-150.
 - **TASK-150** (task): Say in test-tiers.md what counts as a test setup change: runner configuration or a shared fixture, not a new test file or a package marker such as __init__.py, so a child node whose only such change is the marker keeps smoke. Ref: plugin/skills/todo/reference/test-tiers.md. Validated: `bash tests/test-smoke-tier.sh`. From: TASK-149.
 - **TASK-149** (task): Record Claude Code's stream-json session in run-claude.sh evidence, so tdd-order.sh can score Claude runs and an empty stream is an infrastructure error. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-claude-session-log.sh`. From: TASK-147. Docs: updated tests/trials/README.md.
 - **TASK-147** (task): Score test-first order from agent session logs, so red-first is verified from tool results and not self-reported. Ref: docs/VERIFICATION.md. Validated: `bash tests/trials/test-tdd-order.sh`. Docs: updated tests/trials/README.md.

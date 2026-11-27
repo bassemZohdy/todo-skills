@@ -2831,10 +2831,24 @@ for c in table:
         exp = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
     except (KeyError, TypeError, ValueError):
         exp = '?'
-    for what, got, e in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
-                         ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands'))):
+    pins = [('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
+            ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands')),
+            ('how it ended', c[5], r.get('ended'))]
+    if c[6]:
+        pins.append(('guard reached', c[6], r.get('guard_reached')))
+    for what, got, e in pins:
         if got != e:
             print(f'CDX {c[0]}: the table says {got} for {what}, runs.csv {e}')
+# the totals the prose states must be the sums of runs.csv
+try:
+    sums = {k: sum(int(r[k]) for r in recs) for k in ('commands', 'file_changes', 'input_tokens', 'cached_input_tokens', 'output_tokens')}
+except (KeyError, TypeError, ValueError):
+    sums = {}
+for what, text in (('commands', '%s commands' % sums.get('commands')), ('file changes', '%s file changes' % sums.get('file_changes')),
+                   ('input tokens', '{:,}'.format(sums.get('input_tokens', 0))), ('cached input tokens', '{:,}'.format(sums.get('cached_input_tokens', 0))),
+                   ('output tokens', '{:,}'.format(sums.get('output_tokens', 0)))):
+    if sums and text not in s:
+        print(f'CDX the summary does not state the total of {what} that runs.csv adds up to ({text})')
 f = re.search(r'^## Failures\n(.*?)(?=^## |\Z)', s, re.M | re.S)
 ftext = f.group(1) if f else ''
 for r in recs:

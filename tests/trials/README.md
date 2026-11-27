@@ -101,6 +101,7 @@ Scripts that test the harness. The scripts not marked **By hand** run without an
 | `test-baseline-red-report.sh` | `baseline-red` cannot pass on an unchanged repository without the agent's report |
 | `test-score-outcomes.sh` | `score.sh` never passes a scenario without a recorded agent run and keeps every scenario in the totals |
 | `test-score-layout.sh` | `score.sh` counts only scenario names from `setup.sh` and ignores batch metadata folders (FIX-037) |
+| `test-tdd-order.sh` | `tdd-order.sh <session log>` scores test-first order from the agent's own log (pi session, Claude Code stream-json, Codex `exec --json`): PASS when a test run failed before the first source edit, FAIL when the edit came first, N/A without a source edit (TASK-147) |
 | `test-evidence-retention.sh` | Repeated `run-claude.sh` runs keep separate, checksummed evidence (stub `claude`) |
 | `test-infra-signature.sh` | `infra-signature.sh` recognises sandbox and permission blocks and nothing else |
 | `test-lane-evidence.sh`, `test-lane-concurrency.sh` | Worktree events are recorded without inferring concurrency; `concurrent` needs controller-owned activity records (FIX-036) |

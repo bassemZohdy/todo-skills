@@ -1,6 +1,6 @@
 # Test classes (optional)
 
-Read from `reference/verification.md` only when the README has a `Smoke:` line: a test command, like `Tests:`, that runs the smoke class. With no `Smoke:` line nothing changes: the regression is the whole suite for every node. Part of the `todo` core skill.
+Read from `reference/verification.md` only when the README has a `Smoke:` line: a test command, like `Tests:`, that runs the smoke class (and from `/todo-init`, "Detecting a smoke command", when it has none). With no `Smoke:` line nothing changes: the regression is the whole suite for every node. Part of the `todo` core skill.
 
 ## Classes
 
@@ -30,3 +30,14 @@ A full suite that is red at a parent's integration step although every child's s
 3. The first merge where they run and fail names the node. A count that falls with no failing test is a deleted or skipped test: compare the test counts of the merges instead.
 
 Block the root (`[!]`) with ``Blocked: full suite red at the integration step, <ID> broke it → `<test command>` <failing ids> → fix <ID>``, and suggest `/todo-add "<what failed>" --type fix --from <ID>`.
+
+## Detecting a smoke command
+
+Read by `/todo-init` when the README has no `Smoke:` line. Look for a command the project already has; the first match wins, and nothing is run:
+
+- a pytest marker `smoke` that at least one test uses (`grep -rl mark.smoke` over the tests; a name only registered in `pytest.ini`, `pyproject.toml` or `setup.cfg` selects nothing): `pytest -m smoke`, with the `Tests:` prefix (`uv run pytest -m smoke` when `uv.lock` exists);
+- a Maven profile `smoke` in `pom.xml`: `./mvnw test -Psmoke` when the wrapper exists, else `mvn test -Psmoke`;
+- a `package.json` script `test:smoke` or `smoke`: `<package manager> run <name>`, the package manager chosen by lockfile as for `Tests:`;
+- a `Makefile` target `smoke`: `make smoke`.
+
+Name the source. Read the script or target it runs first ("Command safety" in `reference/verification.md`) and offer it only if it passes. The offer, its place in README and the yes follow the `Tests:` line. The `Smoke:` line is a backlog file (core). Never invent a command and never tag a test for the user.

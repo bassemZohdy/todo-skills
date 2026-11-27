@@ -1482,6 +1482,16 @@ tl_out="$(bash "$root/tests/limit.sh" 2>&1)"
 printf '%s\n' "$tl_out" | grep -E '^(PASS|FAIL)  '
 pass=$((pass + $(printf '%s\n' "$tl_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$tl_out" | grep -c '^FAIL  ')))
 printf '%s\n' "$tl_out" | grep -q '^PASS  ' || bad "tests/limit.sh ran no check: $(printf '%s' "$tl_out" | tail -3 | tr '\n' ' ')"
+# The optional test classes (FEAT-148.1): tests/test-smoke-tier.sh checks reference/test-tiers.md and the pointers to it, and its PASS and FAIL lines count here.
+st_out="$(bash "$root/tests/test-smoke-tier.sh" 2>&1)"
+printf '%s\n' "$st_out" | grep -E '^(PASS|FAIL)  '
+pass=$((pass + $(printf '%s\n' "$st_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$st_out" | grep -c '^FAIL  ')))
+printf '%s\n' "$st_out" | grep -q '^PASS  ' || bad "tests/test-smoke-tier.sh ran no check: $(printf '%s' "$st_out" | tail -3 | tr '\n' ' ')"
+# FEAT-148.2: tests/test-smoke-detect.sh checks the Smoke: detection in /todo-init, and its PASS and FAIL lines count here.
+sd_out="$(bash "$root/tests/test-smoke-detect.sh" 2>&1)"
+printf '%s\n' "$sd_out" | grep -E '^(PASS|FAIL)  '
+pass=$((pass + $(printf '%s\n' "$sd_out" | grep -c '^PASS  '))); fail=$((fail + $(printf '%s\n' "$sd_out" | grep -c '^FAIL  ')))
+printf '%s\n' "$sd_out" | grep -q '^PASS  ' || bad "tests/test-smoke-detect.sh ran no check: $(printf '%s' "$sd_out" | tail -3 | tr '\n' ' ')"
 # FEAT-134.1: the loop guard. Failed partial runs (a part of Done when, or the regression alone) count as attempts at the
 # 2nd, 4th and 8th run without progress, so edit, run, fail cannot repeat without limit. The always-loaded /todo-continue text
 # sends the agent to failures.md, which holds the rule in one item (which runs count, when the count goes up, when it

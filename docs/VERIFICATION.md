@@ -19,6 +19,8 @@ A node closes only through these steps.
 
 **Last gate before a root lands:** when `.todo/check.sh` exists, the agent reads it (only a shebang, comments, `set -eu`, `cd`, the lint line and test commands that pass command safety are accepted; anything else is shown and asked about) and runs it after the refresh from the base. Red blocks the root.
 
+**Test classes (optional).** With a `Smoke:` line in the README (a test command, like `Tests:`), [`reference/test-tiers.md`](../plugin/skills/todo/reference/test-tiers.md) splits the tests into three classes: sanity (the tests a node's `Done when` names), smoke (broad, shallow, fast, run by `Smoke:`) and regression (broad, deep, the full suite). Every new test carries one class tag in the project's own runner. A child node runs its `Done when` and smoke; the root's start and its integration step run the full suite, and a failure that only the full suite shows is traced to the node that broke it. Without a `Smoke:` line nothing changes.
+
 ## What does not count
 
 - A run that executed zero tests ("0 tests", "no tests found", "collected 0 items", "NO TESTS RAN").

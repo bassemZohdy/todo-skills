@@ -6,7 +6,7 @@
 #   status-readonly | report | blocked-sibling | ts-lifecycle | java-lifecycle | multi-module | team-claim |
 #   ts-baseline-red | ts-interrupted | java-baseline-red | java-interrupted | leftover-work | dirty-tree |
 #   plan-stop | decompose | regress-block | plan-inline | add-lane | no-backlog | drained-unmerged | stuck-loop | loop-limit |
-#   time-limit | resume-stopped | resumed-twice | stale-claim
+#   time-limit | resume-stopped | resumed-twice | stale-claim | smoke-tier
 # Environment: TRIAL_FLOW_HELPER=1 adds .todo/todo-flow.sh, the optional lifecycle helper, to the start state.
 # Needs bash and git. Creates files only inside <new-dir>; deletes nothing.
 set -eu
@@ -321,6 +321,54 @@ class ContractTest(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 PY
+  g add -A && g commit -q -m "init"
+  ;;
+smoke-tier)
+  # A project with a Smoke: line and a tree of one parent with two children (FEAT-148.3). The full suite is every file of tests/
+  # (-p "*.py"), the smoke class only the quick_*.py files, and the deep_*.py file is the slow, deep one. Each class counts its
+  # runs in .runs/ (ignored by Git, so the tree stays clean), which is how assert.sh sees how many times the node ran the full
+  # suite and how many times the smoke command. One /todo-continue claims the tree and finishes FEAT-001.1: the full suite once
+  # at the tree's start (its count goes into the root's State), the smoke command for the node's baseline and verification.
+  printf '# minical\nA tiny calculator library.\n\nTests: `python3 -m unittest discover -s tests -p "*.py"`\nSmoke: `python3 -m unittest discover -s tests -p "quick_*.py"`\n' > README.md
+  printf '__pycache__/\n.runs/\n' > .gitignore
+  cat > tests/quick_calc.py <<'PY'
+import unittest, sys, os
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+import calc
+def setUpModule():
+    os.makedirs(os.path.join(ROOT, ".runs"), exist_ok=True)
+    with open(os.path.join(ROOT, ".runs", "quick.log"), "a") as f:
+        f.write("run\n")
+class QuickCalc(unittest.TestCase):
+    def test_add_small(self):
+        self.assertEqual(calc.add(1, 1), 2)
+if __name__ == "__main__":
+    unittest.main()
+PY
+  cat > tests/deep_calc.py <<'PY'
+import unittest, sys, os
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+import calc
+def setUpModule():
+    os.makedirs(os.path.join(ROOT, ".runs"), exist_ok=True)
+    with open(os.path.join(ROOT, ".runs", "deep.log"), "a") as f:
+        f.write("run\n")
+class DeepCalc(unittest.TestCase):
+    def test_add_is_commutative(self):
+        for a in range(-50, 50):
+            for b in range(-50, 50):
+                self.assertEqual(calc.add(a, b), calc.add(b, a))
+if __name__ == "__main__":
+    unittest.main()
+PY
+  printf '%s\n%s\n' "$head" '- [ ] **FEAT-001** · P1 · mid · Add subtract and multiply to calc.py
+  - Done when: subtract(5, 3) is 2 and multiply(3, 4) is 12; `python3 -m unittest discover -s tests -p "*.py"`
+  - [ ] **FEAT-001.1** · low · Add subtract to calc.py
+    - Done when: subtract(5, 3) returns 2; `python3 -m unittest tests.test_subtract`
+  - [ ] **FEAT-001.2** · low · Add multiply to calc.py
+    - Done when: multiply(3, 4) returns 12; `python3 -m unittest tests.test_multiply`' > TODO.md
   g add -A && g commit -q -m "init"
   ;;
 stuck-loop)

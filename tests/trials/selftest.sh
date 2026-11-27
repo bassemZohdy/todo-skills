@@ -12,6 +12,9 @@ readonly_ok=" release-ask status-readonly "   # baseline-red also needs a report
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 pass=0; fail=0
 scenarios="$(sed -n 's/^# Scenarios: //p; s/^#   //p' "$here/setup.sh" | tr '|' '\n' | tr -d ' ' | grep .)"
+# FEAT-148.3: the scenario for the test classes must be listed; its own checks follow in the loop below.
+if printf '%s
+' "$scenarios" | grep -qx smoke-tier; then pass=$((pass+1)); echo "PASS  smoke-tier is a listed scenario"; else fail=$((fail+1)); echo "FAIL  smoke-tier is not a listed scenario"; fi
 for s in $scenarios; do
   mkdir -p "$tmp/$s"
   if ! bash "$here/setup.sh" "$tmp/$s/repo" "$s" >/dev/null 2>&1; then fail=$((fail+1)); echo "FAIL  $s: setup failed"; continue; fi

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FEAT-148** (feat): Classify tests as sanity, smoke and regression: an optional `Smoke:` README line makes a child node run its Done when and the smoke command, while the full suite runs at the tree's start and at the integration step, and `/todo-init` offers the line for a smoke command the project already has. Ref: docs/VERIFICATION.md. Validated: `bash tests/run.sh`. Docs: updated README.md, docs/COMMANDS.md, docs/DEVELOPMENT.md, docs/FILES.md, docs/VERIFICATION.md, tests/trials/README.md. Includes: FEAT-148.1, FEAT-148.2, FEAT-148.3.
+
 ### Changed
 
 - **TASK-147** (task): Score test-first order from agent session logs, so red-first is verified from tool results and not self-reported. Ref: docs/VERIFICATION.md. Validated: `bash tests/trials/test-tdd-order.sh`. Docs: updated tests/trials/README.md.

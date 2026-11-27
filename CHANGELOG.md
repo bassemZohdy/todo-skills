@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TASK-149** (task): Record Claude Code's stream-json session in run-claude.sh evidence, so tdd-order.sh can score Claude runs and an empty stream is an infrastructure error. Ref: tests/trials/README.md. Validated: `bash tests/trials/test-claude-session-log.sh`. From: TASK-147. Docs: updated tests/trials/README.md.
 - **TASK-147** (task): Score test-first order from agent session logs, so red-first is verified from tool results and not self-reported. Ref: docs/VERIFICATION.md. Validated: `bash tests/trials/test-tdd-order.sh`. Docs: updated tests/trials/README.md.
 - **TASK-139** (task): Benchmark an initialised project and a multi-node requirement, so the setup cost is separated from the cost per task. Validated: `bash tests/trials/test-benchmark-harness.sh`. Docs: updated docs/evals/benchmark-initialised-project-2026-11-26/summary.md, docs/evals/benchmark/results/results.csv, docs/evals/cost-per-success-2026-11-23.md, docs/evals/token-cost-2026-11-14.md. Includes: TASK-139.1, TASK-139.2, TASK-139.3.
 - **TASK-146** (task): Set `privacyPolicyUrl` (the PRIVACY.md page) and `supportUrl` (the GitHub issues page) in the Claude manifest, so the directory listing shows a privacy policy and a support link; the submission form read both as "Not set", and those fields can be changed only by withdrawing and submitting again. Validated: `bash tests/run.sh`.

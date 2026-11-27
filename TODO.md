@@ -6,10 +6,10 @@
 
 ## 🌳 Task Tree
 
-- [ ] **TASK-147** · P2 · mid · Score TDD order from agent logs: a failing test run before the first source edit
+- [/] **TASK-147** · P2 · mid · Score TDD order from agent logs: a failing test run before the first source edit
   - Done when: tdd-order.sh reports PASS for a log with a failing test run before the first source edit and FAIL when the source is edited first or no test fails first, for the pi, Claude Code and Codex log formats; `bash tests/trials/test-tdd-order.sh`
   - Links: Ref: docs/VERIFICATION.md
-  - State: branch todo/TASK-147-score-tdd-order-from from main; next: start TASK-147
+  - State: attempts 0/3; baseline 400 passing; branch todo/TASK-147-score-tdd-order-from from main; next: read docs
 - [ ] **FEAT-148** · P2 · mid · Classify tests as sanity, smoke and regression: the fast classes per node, the full regression at the root
   - Done when: a project with a Smoke: line runs its Done when and smoke per node and the full regression at the root, and one without it behaves as before; `bash tests/run.sh`
   - Links: Ref: docs/VERIFICATION.md

@@ -29,6 +29,7 @@ has "$ref" 'baseline red:' "leaves out the ids of a known red baseline when it f
 has "$ref" 'detached worktree' "walks the merges in a temporary detached worktree"
 has "$ref" 'Blocked: .*→ `<test command>`.* → ' "gives the Blocked line in the format of the core"
 has "$ref" 'takes its baseline and verification from the full suite' "a node that changes the test setup uses the full suite as its baseline"
+has "$ref" 'a new test file or a package marker such as `__init__\.py` does not change the test setup' "TASK-150: a new test file or a package marker is not a test setup change (the node keeps smoke)"
 has "$ver" 'reference/test-tiers\.md' "verification.md points to reference/test-tiers.md"
 has "$ver" '`Smoke:`' "verification.md names the Smoke: line"
 has "$doc" 'test-tiers' "docs/VERIFICATION.md describes the classes"

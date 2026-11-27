@@ -30,6 +30,7 @@ has "$ref" 'detached worktree' "walks the merges in a temporary detached worktre
 has "$ref" 'Blocked: .*→ `<test command>`.* → ' "gives the Blocked line in the format of the core"
 has "$ref" 'takes its baseline and verification from the full suite' "a node that changes the test setup uses the full suite as its baseline"
 has "$ref" 'a new test file or a package marker such as `__init__\.py` does not change the test setup' "TASK-150: a new test file or a package marker is not a test setup change (the node keeps smoke)"
+has "$ref" 'child node does not run the full suite: it runs only its `Done when` and smoke.*first node.s start.*integration step' "TASK-151: a child node does not run the full suite (the first node's start and the integration step do)"
 has "$ver" 'reference/test-tiers\.md' "verification.md points to reference/test-tiers.md"
 has "$ver" '`Smoke:`' "verification.md names the Smoke: line"
 has "$doc" 'test-tiers' "docs/VERIFICATION.md describes the classes"

@@ -10,15 +10,15 @@ The trials in `tests/trials/` give a fresh agent a scratch project in a known st
 | Execution and merges | `happy-path`, `ts-lifecycle`, `java-lifecycle` | Python; Node 22; Java 17 + Maven |
 | Resume | `interrupted-merge`, `refresh-from-base`, `blocked-sibling`, `drained-unmerged` (a drained root left unmerged: the run goes on), `resume-stopped` and `resumed-twice` (a node left active by a worker that is gone, resumable or already resumed twice) | Python; `resume-stopped` and `resumed-twice` have pi, Claude Code and Codex runs, below |
 | Parallel lanes | `lanes`, `multi-module` | Python; Maven multi-module |
-| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript and Java ones have pi runs only, below) |
+| Regression failure | `baseline-red`, `ts-baseline-red`, `java-baseline-red` | Python; Node 22; Java 17 + Maven (the TypeScript ones have pi, Claude Code and Codex runs, the Java ones pi and Claude Code runs, below) |
 | Interrupted run | `interrupted-merge`, `ts-interrupted`, `java-interrupted` | Python; Node 22; Java 17 + Maven (same note) |
 | Uncommitted work on the base | `leftover-work`, `dirty-tree` | Python |
-| Plan stop, breakdown, and a node blocked by a regression it cannot fix | `plan-stop`, `decompose`, `regress-block` | Python; pi runs only, below |
+| Plan stop, breakdown, and a node blocked by a regression it cannot fix | `plan-stop`, `decompose`, `regress-block` | Python; pi, Claude Code and Codex runs, below |
 | A task that cannot turn green (the limit of three attempts, and the loop guard for partial runs) | `stuck-loop`, `loop-limit` (a speed target out of reach that no single run rules out) | Python; pi, Claude Code and Codex runs, below |
 | A `Done when` that does not end (the time limit) | `time-limit` | Python; pi, Claude Code and Codex runs, below |
 | Planning inside `TODO.md` | `plan-inline` | Python; pi, Claude Code and Codex runs, below |
 | Claims and races | `claimed-elsewhere`, `race-claim-conflict`, `race-claim-benign`, `stale-claim` (a claim with no commit for four times its budget, which `/todo-status` marks stale) | Python; `stale-claim` has pi, Claude Code and Codex runs, below |
-| Team use (two clones, one bare remote) | `team-claim` | Python; pi runs only, below |
+| Team use (two clones, one bare remote) | `team-claim` | Python; pi and Claude Code runs, below (the Codex container cannot read its bare remote) |
 | Project setup | `monorepo`, `no-git`, `ci-github`, `ci-local` | Python (`make test` in `monorepo`); no repository; GitHub remote or none |
 | Backlog commands | `add-fix`, `add-lane`, `update-block`, `update-drop`, `no-backlog` (no `TODO.md`: the command stops) | Python |
 | Release and read-only views | `release`, `release-ask`, `status-readonly`, `report` | Python |

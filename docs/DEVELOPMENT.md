@@ -13,7 +13,7 @@ plugin/                          The installable plugin: Markdown, JSON and the 
   README.md                      The plugin's own short README
   skills/
     todo/SKILL.md                Core rules: layers, task format, IDs, git mode, invariants, guardrails
-    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md, review.md, clarify.md, git-flow-edge.md, deliverables.md, doc-drift.md, failures.md, done-when.md, plan-step.md, routing.md
+    todo/reference/              Loaded on demand: git-flow.md, verification.md, lanes.md, rtm.md, ci.md, review.md, clarify.md, git-flow-edge.md, deliverables.md, doc-drift.md, failures.md, done-when.md, plan-step.md, routing.md, test-tiers.md
     todo-init/ todo-plan/ todo-add/ todo-continue/ todo-update/ todo-status/ todo-release/
     todo-report/SKILL.md         …and template.md, the status page inside a fenced block
 .claude-plugin/marketplace.json  Claude Code marketplace, source ./plugin

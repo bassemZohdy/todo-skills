@@ -10,7 +10,7 @@
   - Done when: a project with a Smoke: line runs its Done when and smoke per node and the full regression at the root, and one without it behaves as before; `bash tests/run.sh`
   - Links: Ref: docs/VERIFICATION.md
   - State: branch todo/FEAT-148-classify-tests-as-sanity from main; next: build children
-  - [ ] **FEAT-148.1** · mid · Test classes in reference/test-tiers.md, read only when Smoke: exists
+  - [x] **FEAT-148.1** · mid · Test classes in reference/test-tiers.md, read only when Smoke: exists
     - Done when: the rule defines sanity (the Done when), smoke (broad, shallow, fast) and regression (broad, deep, full suite), requires one class tag per new test from the project's own runner, and covers per-class pass counts and finding the node that broke a failure seen at the root; `bash tests/test-smoke-tier.sh`
   - [ ] **FEAT-148.2** · mid · /todo-init detects a smoke command and offers a Smoke: README line
     - Done when: init offers the line only for a detected command (pytest marker, Maven profile, npm script) and writes it on a yes; `bash tests/test-smoke-detect.sh`

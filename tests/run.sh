@@ -2841,10 +2841,24 @@ for c in table:
         exp = '%d of %d' % (int(r['assertions_passed']), int(r['assertions_passed']) + int(r['assertions_failed']))
     except (KeyError, TypeError, ValueError):
         exp = '?'
-    for what, got, e in (('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
-                         ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands'))):
-        if got != e:
+    pins = [('outcome', c[1], r.get('outcome')), ('assertions', c[2], exp),
+            ('wall seconds', c[3], r.get('wall_seconds')), ('commands', c[4], r.get('commands')),
+            ('how it ended', c[5], r.get('ended'))]
+    if c[6]:
+        pins.append(('guard reached', c[6], r.get('guard_reached')))
+    for what, got, e in pins:
+        if got.replace('`', '') != (e or '').replace('`', ''):   # a backtick of the page is markup, not text
             print(f'CDX {c[0]}: the table says {got} for {what}, runs.csv {e}')
+# the totals the prose states must be the sums of runs.csv
+try:
+    sums = {k: sum(int(r[k]) for r in recs) for k in ('commands', 'file_changes', 'input_tokens', 'cached_input_tokens', 'output_tokens')}
+except (KeyError, TypeError, ValueError):
+    sums = {}
+for what, text in (('commands', '%s commands' % sums.get('commands')), ('file changes', '%s file changes' % sums.get('file_changes')),
+                   ('input tokens', '{:,}'.format(sums.get('input_tokens', 0))), ('cached input tokens', '{:,}'.format(sums.get('cached_input_tokens', 0))),
+                   ('output tokens', '{:,}'.format(sums.get('output_tokens', 0)))):
+    if sums and text not in s:
+        print(f'CDX the summary does not state the total of {what} that runs.csv adds up to ({text})')
 f = re.search(r'^## Failures\n(.*?)(?=^## |\Z)', s, re.M | re.S)
 ftext = f.group(1) if f else ''
 for r in recs:
@@ -2863,6 +2877,7 @@ if [ -z "$cdx_out" ]; then ok "the twelve Codex runs are published: docs/trials.
 # one line, the missing result row and the missing row of runs.csv one line each for their count and together one for the names,
 # the flipped outcome of loop-limit three (it differs from the evidence and from the table, and it has no classification row), and
 # the stuck-loop run turned PASS three (its outcome and both assertion counts differ from the evidence).
+# The row of runs.csv that is gone also changes the sums of commands and of the three token counts, which the summary states: four more lines.
 cdx_d="$root/docs/evals/codex-linux-2026-11-25"
 cdxt="$(mktemp -d)"; mkdir -p "$cdxt/docs/evals/codex-linux-2026-11-25"
 tr -d '\r' < "$root/docs/trials.md" | grep -vF 'codex-linux-2026-11-25' \
@@ -2878,7 +2893,7 @@ tr -d '\r' < "$cdx_d/runs.csv" | grep -v '^2026-11-24,no-backlog,' \
         -e 's/^\(2026-11-24,resumed-twice,resumed-twice,[^,]*,[^,]*,[^,]*,PASS\),0,0,/\1,1,0,/' \
         -e 's/^\(2026-11-24,happy-path,happy-path,[^,]*,[^,]*,[^,]*,PASS,0,0,12,0,80\),13,/\1,14,/' > "$cdxt/docs/evals/codex-linux-2026-11-25/runs.csv"
 cdx_t="$(cdxcheck "$cdxt")"; rm -rf "$cdxt"
-if [ "$(printf '%s\n' "$cdx_t" | grep -c '^CDX')" -eq 20 ]; then ok "the Codex summary check fails a missing link in either page, a row of docs/trials.md that names no Codex runs or still points at this task, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, an outcome or an assertion count that differs from the evidence or between a table row and runs.csv, a FAIL run without its classification row, and a non-zero agent exit"; else bad "the Codex summary check missed a gap: $(printf '%s' "$cdx_t" | tr '\n' ';')"; fi
+if [ "$(printf '%s\n' "$cdx_t" | grep -c '^CDX')" -eq 24 ]; then ok "the Codex summary check fails a missing link in either page, a row of docs/trials.md that names no Codex runs or still points at this task, a missing note, a placeholder or another marker, a missing result row, a missing row of runs.csv, a table row without its guard, an outcome or an assertion count that differs from the evidence or between a table row and runs.csv, a FAIL run without its classification row, and a non-zero agent exit"; else bad "the Codex summary check missed a gap: $(printf '%s' "$cdx_t" | tr '\n' ';')"; fi
 if ! skipgate "$skipped"; then bad "CI must not skip checks: $skipped skipped (install PyYAML and node)"; fi
 printf '\n%d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
 [ "$fail" -eq 0 ]

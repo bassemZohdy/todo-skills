@@ -11,12 +11,14 @@ todo-skills-existing, which starts in a project whose backlog is already set up 
 writes). Every figure is a median over the runs of a cell, rounded half away from zero (Decimal ROUND_HALF_UP, so the tie
 -421.5 is printed as -422); no mean and no total is printed. A median of an odd number of values (the 3 runs of a cell) is one
 of them, so only the USD figures change by rounding (four decimals); a median of an even number of values (the 6 scenarios) is
-the mean of the two middle values, which are already rounded, and that mean is rounded again. Only the scored rows (PASS or
+the mean of the two middle values. USD figures are rounded once, when they are printed: a median, a difference and a share are
+computed from the unrounded values, so a printed difference can differ in the fourth decimal from the difference of the two
+printed medians. Only the scored rows (PASS or
 FAIL) of a cell enter its median, its run count and its dates; an INFRA_ERROR or UNVERIFIED row is not counted.
 
 - Cost per task: the medians of todo-skills-existing per scenario 1 to 6, and the median of those six medians.
-- Setup cost: the median of todo-skills minus the median of todo-skills-existing, same scenario (the difference of the rounded
-  medians), for scenarios 1 to 6 and for 7 on its own line, with the lowest and highest USD of each cell so that the reader can
+- Setup cost: the median of todo-skills minus the median of todo-skills-existing, same scenario (the difference of the unrounded
+  medians, rounded once for printing), for scenarios 1 to 6 and for 7 on its own line, with the lowest and highest USD of each cell so that the reader can
   see whether the cells overlap. One line is the median of the per-scenario differences and of the per-scenario shares (the
   share is the USD difference over the USD median of todo-skills). The dates of the first and last run of each cell are
   printed, because the cells were not run on one day.
@@ -68,7 +70,8 @@ def money(x):
 
 
 def med_usd(values):
-    return Decimal(str(statistics.median(values))).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+    """The median of USD values, not rounded: money() rounds it once, when it is printed."""
+    return Decimal(str(statistics.median(values)))
 
 
 def one_decimal(x):
@@ -166,7 +169,7 @@ def main():
     out.append("")
 
     # 2. setup cost
-    out += ["Setup cost: the median of `todo-skills` minus the median of `todo-skills-existing`, same scenario (difference of the rounded medians).", "",
+    out += ["Setup cost: the median of `todo-skills` minus the median of `todo-skills-existing`, same scenario (difference of the unrounded medians, rounded once for printing).", "",
             "| Scenario | Runs, todo-skills / todo-skills-existing | Input tokens | Uncached input | Output tokens | Model calls | Seconds | USD per run | Share of the todo-skills USD median | USD per run of todo-skills, lowest to highest | USD per run of todo-skills-existing, lowest to highest |",
             "|---|---|---|---|---|---|---|---|---|---|---|"]
     diffs = []

@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FIX-152** (fix): Copy the Python helpers into the sandbox of test-verifier-failures.sh, so its stubbed run-claude.sh case is PASS and not INFRA_ERROR; the helper claude-result.py from TASK-149 was missing there and the test was red on CI. Ref: tests/trials/test-verifier-failures.sh. Validated: `bash tests/trials/test-verifier-failures.sh`. From: TASK-149.
 - **FIX-145** (fix): Rename the plugin from `todo-skills` to `td-cl` (TODO to CHANGELOG) and set its display name to "TD-CL". The directory's validation step names the cause of every refusal since 2026-11-23: `todo-skills` is "very close" (one or two characters) to the connector publishers Nodo and Topo and to the plugin Todo4, a finding that refuses the plugin (`NAME_CONFUSABLE`). The old submission page showed only a generic refusal, so FIX-141 and FIX-144 were guesses that did not touch it. The repository, the marketplace name and the nine skill names are unchanged; the install lines are now `/plugin install td-cl@todo-skills` and `codex plugin add td-cl@todo-skills`, and Claude Code commands are namespaced `/td-cl:todo-add`. Whether `td-cl` passes is shown only by the next validation. Validated: `bash tests/run.sh`.
 
 ## [0.6.3] - 2026-11-25

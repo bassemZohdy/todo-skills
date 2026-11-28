@@ -12,7 +12,7 @@ bad() { fail=$((fail + 1)); printf 'FAIL  %s\n' "$1"; }
 
 # setup.sh copies the skills from ../../plugin, so the copy keeps the repository layout.
 ctl="$tmp/controller/tests/trials"; mkdir -p "$ctl" "$tmp/bin"
-cp "$here"/*.sh "$ctl/"; cp -r "$here/../../plugin" "$tmp/controller/"
+cp "$here"/*.sh "$here"/*.py "$ctl/"; cp -r "$here/../../plugin" "$tmp/controller/"
 # The fake verifier prints a passing check, then exits as told: partial output from a killed verifier must not count.
 cat > "$ctl/assert-exec.sh" <<'FAKE'
 #!/usr/bin/env bash
